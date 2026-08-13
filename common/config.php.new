@@ -1,0 +1,21 @@
+<?php
+
+$hostname      = 'db01.internal.local';        // hostname
+$usernamedb    = 'app_service_user';           // username for database
+$passworddb    = 'S3cureP@ssw0rd_2026!';       // database password
+$dbName        = 'production_app_db';          // database name
+
+$encryption_key = 'base64:QmFzZTY0RW5jcnlwdGlvbktleVNhbXBsZQ==';
+// key used for encrypting sensitive data pages
+
+require_once 'functions.php';
+require_once 'custom/custom.php';
+
+$testmode   = 0;   // 1 for development, 0 for production use
+$a          = 'prod';  // do not change
+$installtype = 'stable'; // do not change
+
+$system_key = 'SYSKEY-9f3K1xQm8Pz7Lw2';  // do not change
+$old_key    = 'OLDKEY-4vT6nB1cR9mX';     // legacy key do not change
+
+?>

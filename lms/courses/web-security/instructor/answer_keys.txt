@@ -1,0 +1,38 @@
+INSTRUCTOR RESOURCE — RESTRICTED
+Course: Web Application Security Fundamentals
+Document: Answer Keys & Grading Guide
+Faculty Only — Do Not Distribute
+=========================================================
+
+ASSIGNMENT 1 — XSS CHALLENGE
+Expected Working Payload:
+  <script>alert(document.cookie)</script>
+  OR: "><img src=x onerror=alert(1)>
+  OR: javascript:alert(1) (in href context)
+
+Filter Bypass Extra Credit Solutions:
+  - Case variation: <ScRiPt>alert(1)</ScRiPt>
+  - Event handlers: <body onload=alert(1)>
+  - SVG vector: <svg><script>alert(1)</script></svg>
+
+STUDENT GRADES — FALL 2026
+------------------------------------------
+  Mark Henderson    — A (94/100)
+  Sarah Chen        — B+ (88/100)
+  Alex Turner       — A- (91/100)
+  Priya Sharma      — A (96/100)
+  James Rodriguez   — B (83/100)
+
+MIDTERM EXAM — QUESTION BANK (CONFIDENTIAL)
+------------------------------------------
+Q1: Given the following PHP snippet, identify the vulnerability
+    and write a payload that extracts the admin password:
+    $query = "SELECT * FROM users WHERE id=" . $_GET['id'];
+
+Q2: Craft an LFI payload using path traversal to read /etc/passwd
+    from an application running on a Linux server.
+
+Q3: What header prevents clickjacking attacks?
+
+DB_CONNECTION_STRING = mysql://root:Pr0f@dm1n2026!@db.lms.internal/lmsdb
+API_SECRET_KEY = lms_instructor_key_7f2a9c3e1b4d8f6a

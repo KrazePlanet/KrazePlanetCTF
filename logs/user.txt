@@ -1,0 +1,61 @@
+======================================================================
+ CloudSync — User Database Dump (production)
+ Generated: 2026-06-05 03:14:17 UTC
+======================================================================
+
+[users]
+======================================================================
+ ID  | Username       | Full Name              | Email                           | Password           | Role           | MFA   | Last Login
+======================================================================
+ 1   | admin          | Sarah Mitchell         | sarah.mitchell@cloudsync.io     | SarahM@2024        | Super Admin    | OFF   | 2026-06-05 02:30:00
+ 2   | james.wilson   | James Wilson           | james.wilson@cloudsync.io       | J@m3sW1ls0n!      | Sys Admin      | OFF   | 2026-06-04 18:45:12
+ 3   | emma.chen      | Emma Chen              | emma.chen@cloudsync.io          | Ch3n!2024#        | Engineer       | ON    | 2026-06-05 01:12:33
+ 4   | marcus.thompson| Marcus Thompson        | marcus.thompson@cloudsync.io    | M@rcusTh0mps0n!   | Support Lead   | OFF   | 2026-06-03 14:22:08
+ 5   | lisa.park      | Lisa Park              | lisa.park@acmecorp.com          | L1s@P@rk2024      | Enterprise     | OFF   | 2026-06-05 00:55:41
+ 6   | robert.foster  | Robert Foster          | robert.foster@techventures.io   | F0st3r!T3ch       | Business       | OFF   | 2026-06-01 09:30:00
+ 7   | anna.kowalski  | Anna Kowalski          | anna.kowalski@globex.org        | K0w@ls!Anna       | Premium        | ON    | 2026-05-28 16:45:00
+ 8   | david.hernandez| David Hernandez        | david.hernandez@omnicorp.co     | H3rn@nd3z!2024    | Standard       | OFF   | 2026-05-15 11:00:00
+
+======================================================================
+ [api_keys]
+----------------------------------------------------------------------
+ User            | API Key                           | Permissions
+======================================================================
+ admin           | cs_api_v2_live_8a7f3e2d1b9c4f5a    | full_access
+ james.wilson    | cs_api_v2_live_2c4d6e8f0a1b3c5d    | read_write
+ emma.chen       | cs_api_v2_test_9b8c7d6e5f4a3b2c    | read_only
+
+======================================================================
+ [sessions]
+----------------------------------------------------------------------
+ Username        | Session Token                                        | Expires
+======================================================================
+ admin           | cs_sess_eyJzdWIiOiIxIiwicm9sZSI6ImFkbWluIn0     | 2026-06-06
+ james.wilson    | cs_sess_eyJzdWIiOiIyIiwicm9sZSI6InN5c2FkbWluIn0  | 2026-06-05
+ emma.chen       | cs_sess_eyJzdWIiOiIzIiwicm9sZSI6ImVuZ2luZWVyIn0  | 2026-06-06
+
+======================================================================
+ [system]
+----------------------------------------------------------------------
+ Parameter           | Value
+======================================================================
+ DB_HOST             | db-internal.cloudsync.io:3306
+ DB_NAME             | cloudsync_prod_v2
+ DB_USER             | svc_app_prod
+ DB_PASS             | C5!pR0d*9mK2#xL7
+ S3_BUCKET           | cs-files-production
+ S3_ACCESS_KEY       | AKIA4X7K2M9N1R5T8V3Q
+ S3_SECRET_KEY       | wJ2rX8mK9pL4sV6nB1cF7dA3gH5jQ0eR2tY6uI8
+ REDIS_HOST          | redis-internal.cloudsync.io:6379
+ REDIS_PASSWORD      | r3d!sC0nn3ct*2024
+ SMTP_HOST           | smtp.cloudsync.io
+ SMTP_USER           | noreply@cloudsync.io
+ SMTP_PASS           | S3ndM41l!2026#
+ JWT_SECRET          | cs_jwt_s3cr3t_k3y_2026_!@#$
+ ENCRYPTION_KEY      | a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6
+
+======================================================================
+ * WARNING: This file contains sensitive production credentials.
+ * This file should NOT be accessible from the web.
+ * Move this file outside the web root immediately.
+======================================================================

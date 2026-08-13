@@ -1,0 +1,48 @@
+CLOUDHOST PANEL — BACKUP MANIFEST
+Account: client_example_com
+Generated: 2026-08-04 03:00:01 UTC
+Server: srv-42.cloudhost.internal
+================================================================
+
+BACKUP SCHEDULE:
+  Daily   backups: retained 7 days
+  Weekly  backups: retained 4 weeks
+  Monthly backups: retained 3 months
+
+LATEST BACKUP SET — 2026-08-04 03:00:01 UTC
+================================================================
+File:      backup_example_com_20260804_030001.tar.gz
+Size:      2.31 GB
+Checksum:  sha256:9f3a2c1b4d8e7f6a0b5c2d1e3f4a8b9c7d6e5f4a3b2c1d0e9f8a7b6c5d4e3f2
+Location:  /backups/daily/backup_example_com_20260804_030001.tar.gz
+Contains:
+  - /var/www/html/           (web root, 1.84 GB)
+  - Database dump:           (example_db, 447 MB)
+
+DATABASE DUMP DETAILS:
+  Host:      localhost
+  Database:  example_db
+  User:      db_backup_user
+  Password:  Bkp@DB#2026!Secure
+  Dump file: mysql_example_db_20260804.sql.gz
+
+PREVIOUS BACKUPS:
+  backup_example_com_20260803_030001.tar.gz  (2.29 GB)  OK
+  backup_example_com_20260802_030001.tar.gz  (2.28 GB)  OK
+  backup_example_com_20260801_030001.tar.gz  (2.27 GB)  OK
+
+FTP BACKUP DESTINATION (off-site):
+  Host:      ftp.backup.cloudhost.internal
+  User:      example_com_bkp
+  Password:  FTP@Bk2026#CloudH
+
+CONTROL PANEL CREDENTIALS (stored for automation):
+  Panel URL:      http://172.21.173.2/hosting-panel
+  Admin User:     hostadmin
+  Admin Password: H0stPan3l@dmin!26
+  API Token:      chp_api_tok_9f3a2c1b4d8e7f6a0b5c2d1e
+
+================================================================
+This file is generated automatically by CloudHost Backup Service.
+Treat all credentials with care — rotate on a 90-day cycle.
+================================================================

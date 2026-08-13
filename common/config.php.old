@@ -1,0 +1,9 @@
+<?php
+// OLD VERSION - MIGRATED CONFIG
+
+$host = 'old-db.internal';
+$user = 'old_user';
+$pass = 'OldP@ss_123';
+$db   = 'legacy_db';
+
+?>

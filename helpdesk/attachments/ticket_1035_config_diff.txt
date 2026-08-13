@@ -1,0 +1,54 @@
+TICKET: #1035
+DATE: 2026-08-01 16:48:02
+SUBMITTED BY: devops-bot@acmecorp.internal
+SUBJECT: Deployment config diff — staging vs production mismatch
+
+AUTOMATED CONFIG SNAPSHOT — ATTACHED BY CI PIPELINE
+=====================================================
+
+FILE: /etc/app/config.ini [STAGING]
+------------------------------------------
+[database]
+host     = db-staging.internal
+port     = 5432
+name     = acmedb_stg
+user     = app_stg_user
+password = Stg@Passw0rd!2026
+
+[cache]
+driver   = redis
+host     = redis-staging.internal
+port     = 6379
+ttl      = 300
+
+[app]
+debug    = true
+env      = staging
+log_level = debug
+secret_key = stg_secret_9a7c2e1f4b8d3a6e
+
+FILE: /etc/app/config.ini [PRODUCTION — REDACTED]
+------------------------------------------
+[database]
+host     = db-prod.internal
+port     = 5432
+name     = acmedb_prod
+user     = app_prod_user
+password = [REDACTED]
+
+[cache]
+driver   = redis
+host     = redis-prod.internal
+port     = 6379
+ttl      = 600
+
+[app]
+debug    = false
+env      = production
+log_level = error
+secret_key = [REDACTED]
+
+DIFF DETECTED:
+  - cache.ttl: staging=300 vs prod=600 (MISMATCH)
+  - app.debug: staging=true vs prod=false (EXPECTED)
+  - app.log_level: staging=debug vs prod=error (EXPECTED)

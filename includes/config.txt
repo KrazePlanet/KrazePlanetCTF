@@ -1,0 +1,1 @@
+Database configuration: localhost:3306

