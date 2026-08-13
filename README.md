@@ -81,4 +81,5 @@ mysql -u root --socket=/opt/lampp/var/mysql/mysql.sock KrazePlanetLabs_DB < <(ca
 ---
 
 ## ??? Website UI
-<img width="1861" height="909" alt="image" src="https://github.com/user-attachments/assets/3e035dcb-f7e1-4b46-904a-3aeb74b49456" />
+<img width="1912" height="922" alt="image" src="https://github.com/user-attachments/assets/56495b07-ff4e-45f5-afc3-fe296956f257" />
+
