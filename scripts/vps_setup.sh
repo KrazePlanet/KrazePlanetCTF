@@ -32,3 +32,4 @@ ifconfig
 
 
 # zip -r htdocs.zip /opt/lampp/htdocs/
+# cp -af /opt/lampp/htdocs/. /mnt/d/Github/KrazePlanetCTF/

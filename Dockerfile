@@ -89,4 +89,4 @@ RUN chmod +x /opt/lampp/htdocs/docker-entrypoint.sh \
 # Expose HTTP (80) and MySQL (3306)
 EXPOSE 80 443 3306
 
-ENTRYPOINT ["/opt/lampp/htdocs/docker-entrypoint.sh"]
+ENTRYPOINT ["/bin/bash", "/opt/lampp/htdocs/docker-entrypoint.sh"]
