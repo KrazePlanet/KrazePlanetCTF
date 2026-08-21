@@ -1,6 +1,0 @@
-Options -Indexes
-RewriteEngine On
-
-RewriteCond %{REQUEST_FILENAME} !-f
-RewriteCond %{REQUEST_FILENAME} !-d
-RewriteRule ^(.+\.php)$ index.php?__file=$1 [L,QSA]
