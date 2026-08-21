@@ -1,0 +1,177 @@
+{
+  "_meta": {
+    "lang": "no",
+    "name": "Norsk"
+  },
+  "app": {
+    "title": "Filer",
+    "title_full": "Filer og mapper"
+  },
+  "nav": {
+    "root": "Rot",
+    "show": "Vis:",
+    "show_all": "Alle",
+    "search_placeholder": "Søk...",
+    "search_btn": "Søk",
+    "displayed": "Viser {from} til {to} av {total}",
+    "prev": "Forrige",
+    "next": "Neste"
+  },
+  "toolbar": {
+    "listen": "Lytt",
+    "upload": "Last opp",
+    "create_folder": "Opprett mappe",
+    "download_selected": "Last ned valgte",
+    "delete_selected": "Slett valgte"
+  },
+  "table": {
+    "col_name": "NAVN",
+    "col_path": "STI",
+    "col_size": "STØRRELSE",
+    "col_date": "DATO",
+    "sort_name": "Sorter etter navn",
+    "sort_size": "Sorter etter størrelse",
+    "sort_date": "Sorter etter dato",
+    "no_files": "Ingen filer funnet",
+    "go_to_folder": "Gå til mappe",
+    "rename_file": "Gi nytt navn til fil",
+    "rename_folder": "Gi nytt navn til mappe",
+    "delete_file": "Slett fil"
+  },
+  "theme": {
+    "dark": "Mørkt tema",
+    "light": "Lyst tema"
+  },
+  "upload_modal": {
+    "title": "Last opp fil",
+    "label": "Velg en fil å laste opp til gjeldende mappe:",
+    "max_size": "Maks størrelse:",
+    "btn_upload": "Last opp",
+    "btn_cancel": "Avbryt",
+    "no_file": "Velg en fil.",
+    "too_large": "Filen er for stor. Maks tillatt størrelse: <b>{size}</b>.",
+    "server_error": "Serverfeil.",
+    "network_error": "Nettverksfeil.",
+    "drop_label": "Klikk eller dra en fil hit"
+  },
+  "folder_modal": {
+    "title": "Opprett mappe",
+    "label": "Navn på ny mappe:",
+    "placeholder": "F.eks.: Ny mappe",
+    "btn_create": "Opprett",
+    "btn_cancel": "Avbryt",
+    "empty": "Angi et mappenavn.",
+    "invalid_chars": "Navnet inneholder ugyldige tegn."
+  },
+  "delete_modal": {
+    "title_many": "Slette {n} fil(er)?",
+    "title_one": "Slette fil?",
+    "file_label": "Fil:",
+    "irreversible": "Denne handlingen kan ikke angres.",
+    "btn_delete": "Slett",
+    "btn_cancel": "Avbryt",
+    "error_title": "Slettingsfeil",
+    "error_many": "Kunne ikke slette {n} fil(er).",
+    "network_error": "Nettverksfeil under sletting."
+  },
+  "rename_modal": {
+    "title_file": "Gi nytt navn til fil",
+    "title_folder": "Gi nytt navn til mappe",
+    "label_old_file": "Gjeldende filnavn:",
+    "label_old_folder": "Gjeldende mappenavn:",
+    "label_new": "Nytt navn:",
+    "btn_rename": "Gi nytt navn",
+    "btn_cancel": "Avbryt",
+    "unchanged": "Navnet er ikke endret.",
+    "invalid": "Ugyldig navn.",
+    "invalid_chars": "Ugyldige tegn: \\ / : * ? \" < > |",
+    "not_specified": "Objekt ikke angitt."
+  },
+  "messages": {
+    "attention": "Merk",
+    "ok": "Forstått"
+  },
+  "pdf_viewer": {
+    "fullscreen": "Fullskjerm",
+    "collapse": "Minimer",
+    "download": "Last ned",
+    "close": "Lukk visning",
+    "rename": "Gi nytt navn",
+    "no_support": "Nettleseren støtter ikke innebygd PDF-visning.",
+    "download_instead": "Last ned fil for å vise den",
+    "network_error": "Nettverksfeil"
+  },
+  "txt_viewer": {
+    "fullscreen": "Fullskjerm",
+    "collapse": "Minimer",
+    "font_smaller": "Mindre skrift",
+    "font_larger": "Større skrift",
+    "print": "Skriv ut",
+    "download_full": "Last ned hele filen",
+    "close": "Lukk",
+    "truncated": "Filen er for stor ({size} MB) — viser de første 2 MB.",
+    "lines": "linjer",
+    "not_found": "Fil ikke funnet."
+  },
+  "csv_viewer": {
+    "fullscreen": "Fullskjerm",
+    "collapse": "Minimer",
+    "font_smaller": "Mindre skrift",
+    "font_larger": "Større skrift",
+    "download_full": "Last ned hele filen",
+    "close_viewer": "Lukk visning",
+    "close": "Lukk",
+    "truncated": "Filen er for stor ({size} MB) — viser de første 2 MB.",
+    "lines": "rader",
+    "not_found": "Fil ikke funnet."
+  },
+  "img_viewer": {
+    "fullscreen": "Fullskjerm",
+    "collapse": "Minimer",
+    "rotate": "Roter",
+    "reset": "Tilbakestill",
+    "download": "Last ned",
+    "close": "Lukk",
+    "prev": "Forrige (←)",
+    "next": "Neste (→)",
+    "hint": "Hjul: Zoom  |  LMB: Dra  |  ← →: Naviger",
+    "load_error": "Innlastingsfeil"
+  },
+  "video_viewer": {
+    "format": "Format:",
+    "download": "Last ned",
+    "close": "Lukk",
+    "no_support": "Nettleseren støtter ikke innebygd videoavspilling.",
+    "not_found": "Videofil ikke angitt."
+  },
+  "code_viewer": {
+    "fullscreen": "Fullskjerm",
+    "collapse": "Minimer",
+    "font_smaller": "Mindre skrift",
+    "font_larger": "Større skrift",
+    "copy": "Kopier",
+    "copied": "Kopiert",
+    "download": "Last ned",
+    "download_full": "Last ned hele filen",
+    "close": "Lukk",
+    "truncated": "Filen er for stor ({size} MB) — viser de første 2 MB.",
+    "lines": "linjer",
+    "highlight_unavailable": "utheving ikke tilgjengelig",
+    "not_found": "Fil ikke funnet."
+  },
+  "audio_single": {
+    "close": "Lukk",
+    "error_format": "Avspillingsfeil (format ikke støttet).",
+    "error_fileinfo": "Kritisk PHP-modul <b>fileinfo</b> er ikke aktivert.<br>Fjern kommentar fra <code>extension=fileinfo</code> i php.ini og start på nytt.",
+    "error_fileinfo_short": "Feil: fileinfo-modul ikke aktivert."
+  },
+  "audio_player": {
+    "playlist": "Spilleliste",
+    "loading": "Laster...",
+    "empty": "Spillelisten er tom.",
+    "close": "Lukk",
+    "repeat_all": "Gjenta liste",
+    "repeat_one": "Gjenta spor",
+    "shuffle": "Tilfeldig"
+  }
+}

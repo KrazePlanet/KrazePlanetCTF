@@ -1,0 +1,19 @@
+Subject: Order Confirmed! Order #{{ORDER_ID}} — ApexMart
+
+Hello {{CUSTOMER_NAME}},
+
+Thank you for your order with ApexMart! We have received your purchase and our fulfillment team is preparing it for shipment.
+
+ORDER SUMMARY:
+--------------------------------------------------
+Order Number: {{ORDER_ID}}
+Order Date:   {{ORDER_DATE}}
+Total Amount: ${{TOTAL_AMOUNT}}
+Shipping to:  {{SHIPPING_ADDRESS}}
+
+Track your order anytime by visiting your customer dashboard:
+{{DASHBOARD_URL}}
+
+Best regards,
+The ApexMart Customer Experience Team
+support@apexmart.shop

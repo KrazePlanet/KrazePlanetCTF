@@ -1,0 +1,177 @@
+{
+  "_meta": {
+    "lang": "it",
+    "name": "Italiano"
+  },
+  "app": {
+    "title": "File",
+    "title_full": "File e cartelle"
+  },
+  "nav": {
+    "root": "Radice",
+    "show": "Mostra:",
+    "show_all": "Tutti",
+    "search_placeholder": "Cerca...",
+    "search_btn": "Cerca",
+    "displayed": "Visualizzazione da {from} a {to} di {total}",
+    "prev": "Precedente",
+    "next": "Successivo"
+  },
+  "toolbar": {
+    "listen": "Ascolta",
+    "upload": "Carica",
+    "create_folder": "Crea cartella",
+    "download_selected": "Scarica selezionati",
+    "delete_selected": "Elimina selezionati"
+  },
+  "table": {
+    "col_name": "NOME",
+    "col_path": "PERCORSO",
+    "col_size": "DIMENSIONE",
+    "col_date": "DATA",
+    "sort_name": "Ordina per nome",
+    "sort_size": "Ordina per dimensione",
+    "sort_date": "Ordina per data",
+    "no_files": "Nessun file trovato",
+    "go_to_folder": "Vai alla cartella",
+    "rename_file": "Rinomina file",
+    "rename_folder": "Rinomina cartella",
+    "delete_file": "Elimina file"
+  },
+  "theme": {
+    "dark": "Tema scuro",
+    "light": "Tema chiaro"
+  },
+  "upload_modal": {
+    "title": "Carica file",
+    "label": "Seleziona un file da caricare nella cartella corrente:",
+    "max_size": "Dimensione massima:",
+    "btn_upload": "Carica",
+    "btn_cancel": "Annulla",
+    "no_file": "Seleziona un file.",
+    "too_large": "Il file è troppo grande. Dimensione massima consentita: <b>{size}</b>.",
+    "server_error": "Errore del server.",
+    "network_error": "Errore di rete.",
+    "drop_label": "Clicca o trascina un file qui"
+  },
+  "folder_modal": {
+    "title": "Crea cartella",
+    "label": "Nome della nuova cartella:",
+    "placeholder": "Es.: Nuova cartella",
+    "btn_create": "Crea",
+    "btn_cancel": "Annulla",
+    "empty": "Inserisci un nome per la cartella.",
+    "invalid_chars": "Il nome contiene caratteri non validi."
+  },
+  "delete_modal": {
+    "title_many": "Eliminare {n} file?",
+    "title_one": "Eliminare il file?",
+    "file_label": "File:",
+    "irreversible": "Questa azione non può essere annullata.",
+    "btn_delete": "Elimina",
+    "btn_cancel": "Annulla",
+    "error_title": "Errore eliminazione",
+    "error_many": "Impossibile eliminare {n} file.",
+    "network_error": "Errore di rete durante l'eliminazione."
+  },
+  "rename_modal": {
+    "title_file": "Rinomina file",
+    "title_folder": "Rinomina cartella",
+    "label_old_file": "Nome file corrente:",
+    "label_old_folder": "Nome cartella corrente:",
+    "label_new": "Nuovo nome:",
+    "btn_rename": "Rinomina",
+    "btn_cancel": "Annulla",
+    "unchanged": "Il nome non è cambiato.",
+    "invalid": "Nome non valido.",
+    "invalid_chars": "Caratteri non validi: \\ / : * ? \" < > |",
+    "not_specified": "Oggetto non specificato."
+  },
+  "messages": {
+    "attention": "Attenzione",
+    "ok": "Capito"
+  },
+  "pdf_viewer": {
+    "fullscreen": "Schermo intero",
+    "collapse": "Riduci",
+    "download": "Scarica",
+    "close": "Chiudi visualizzatore",
+    "rename": "Rinomina",
+    "no_support": "Il browser non supporta la visualizzazione PDF integrata.",
+    "download_instead": "Scarica file per visualizzarlo",
+    "network_error": "Errore di rete"
+  },
+  "txt_viewer": {
+    "fullscreen": "Schermo intero",
+    "collapse": "Riduci",
+    "font_smaller": "Riduci carattere",
+    "font_larger": "Ingrandisci carattere",
+    "print": "Stampa",
+    "download_full": "Scarica file completo",
+    "close": "Chiudi",
+    "truncated": "File troppo grande ({size} MB) — mostrati i primi 2 MB.",
+    "lines": "righe",
+    "not_found": "File non trovato."
+  },
+  "csv_viewer": {
+    "fullscreen": "Schermo intero",
+    "collapse": "Riduci",
+    "font_smaller": "Riduci carattere",
+    "font_larger": "Ingrandisci carattere",
+    "download_full": "Scarica file completo",
+    "close_viewer": "Chiudi visualizzatore",
+    "close": "Chiudi",
+    "truncated": "File troppo grande ({size} MB) — mostrati i primi 2 MB.",
+    "lines": "righe",
+    "not_found": "File non trovato."
+  },
+  "img_viewer": {
+    "fullscreen": "Schermo intero",
+    "collapse": "Riduci",
+    "rotate": "Ruota",
+    "reset": "Reimposta",
+    "download": "Scarica",
+    "close": "Chiudi",
+    "prev": "Precedente (←)",
+    "next": "Successivo (→)",
+    "hint": "Rotella: Zoom  |  LMB: Trascina  |  ← →: Naviga",
+    "load_error": "Errore di caricamento"
+  },
+  "video_viewer": {
+    "format": "Formato:",
+    "download": "Scarica",
+    "close": "Chiudi",
+    "no_support": "Il browser non supporta la riproduzione video integrata.",
+    "not_found": "File video non specificato."
+  },
+  "code_viewer": {
+    "fullscreen": "Schermo intero",
+    "collapse": "Riduci",
+    "font_smaller": "Riduci carattere",
+    "font_larger": "Ingrandisci carattere",
+    "copy": "Copia",
+    "copied": "Copiato",
+    "download": "Scarica",
+    "download_full": "Scarica file completo",
+    "close": "Chiudi",
+    "truncated": "File troppo grande ({size} MB) — mostrati i primi 2 MB.",
+    "lines": "righe",
+    "highlight_unavailable": "evidenziazione non disponibile",
+    "not_found": "File non trovato."
+  },
+  "audio_single": {
+    "close": "Chiudi",
+    "error_format": "Errore di riproduzione (formato non supportato).",
+    "error_fileinfo": "Il modulo PHP critico <b>fileinfo</b> non è abilitato.<br>Decommenta <code>extension=fileinfo</code> in php.ini e riavvia.",
+    "error_fileinfo_short": "Errore: modulo fileinfo non abilitato."
+  },
+  "audio_player": {
+    "playlist": "Playlist",
+    "loading": "Caricamento...",
+    "empty": "La playlist è vuota.",
+    "close": "Chiudi",
+    "repeat_all": "Ripeti lista",
+    "repeat_one": "Ripeti traccia",
+    "shuffle": "Casuale"
+  }
+}

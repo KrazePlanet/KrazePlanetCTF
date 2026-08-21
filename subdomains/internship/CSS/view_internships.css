@@ -1,0 +1,119 @@
+/* Page background */
+body {
+  min-height: 100vh;
+  margin: 0;
+  font-family: 'Segoe UI', Arial, sans-serif;
+  background: linear-gradient(135deg, #0f172a, #1e293b);
+  color: #f3f4f6;
+}
+
+/* Container card */
+.container {
+  max-width: 1100px;
+  margin: 40px auto;
+  background: rgba(17, 24, 39, 0.95);
+  padding: 25px;
+  border-radius: 12px;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.5);
+}
+
+/* Heading */
+h2 {
+  text-align: center;
+  font-weight: 600;
+  color: #f9fafb;
+  margin-bottom: 25px;
+}
+
+/* Alerts */
+.alert {
+  border-radius: 8px;
+  padding: 12px;
+  font-weight: 500;
+}
+
+/* Table styling */
+.table {
+  border-radius: 10px;
+  overflow: hidden;
+  background: #1f2937;
+  color: #f3f4f6;
+}
+
+.table th {
+  background: #374151;
+  color: #f9fafb;
+  font-weight: 600;
+  text-align: center;
+  vertical-align: middle;
+}
+
+.table td {
+  vertical-align: middle;
+  text-align: center;
+  padding: 12px;
+}
+
+/* Buttons */
+.btn {
+  border-radius: 6px;
+  padding: 6px 14px;
+  font-size: 0.9rem;
+  transition: all 0.2s ease;
+}
+
+.btn-primary {
+  background-color: #2563eb;
+  border: none;
+}
+
+.btn-primary:hover {
+  background-color: #1d4ed8;
+  transform: translateY(-2px);
+}
+
+.btn-secondary {
+  background-color: #6b7280;
+  border: none;
+}
+
+.btn-secondary:hover {
+  background-color: #4b5563;
+  transform: translateY(-2px);
+}
+
+/* Disabled button */
+button[disabled] {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .table thead {
+    display: none;
+  }
+  .table, .table tbody, .table tr, .table td {
+    display: block;
+    width: 100%;
+  }
+  .table tr {
+    margin-bottom: 15px;
+    border: 1px solid #374151;
+    border-radius: 8px;
+    padding: 10px;
+    background: #111827;
+  }
+  .table td {
+    text-align: left;
+    padding: 8px;
+    position: relative;
+  }
+  .table td::before {
+    content: attr(data-label);
+    font-weight: bold;
+    display: block;
+    margin-bottom: 4px;
+    color: #9ca3af;
+  }
+}

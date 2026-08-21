@@ -1,0 +1,121 @@
+*{
+  margin: 0;
+  padding: 0;
+
+}
+
+body {
+  font-family: poppins, sans-serif;
+  background-color: #feead4;
+  margin: 0;
+  padding-top: 100px;
+ 
+}
+
+.wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 70px;
+  
+}
+
+.form-container {
+  background-color: rgba(253, 108, 77, 0.1);
+  border-color: rgba(253, 108, 77, 0.5);
+  box-shadow: 2px 2px 5px rgba(253, 108, 77, 0.7);
+  padding: 10px 20px 20px 20px;
+  border-radius: 8px;
+  border: 1px solid rgba(253, 108, 77, 0.5);
+  width: 600px;
+}
+
+.form-row {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.form-group {
+  position: relative;
+  flex: 1;
+  margin-right: 10px;
+}
+
+.form-group:last-child {
+  margin-right: 0;
+}
+
+.form-group label {
+  position: absolute;
+  top: 12px;
+  left: 5px;
+  padding: 0 5px;
+  font-weight: bold;
+  color: #333;
+  transition: 0.2s;
+  pointer-events: none;
+  /* Allow clicking through the label */
+}
+
+.form-group input[type="text"],
+.form-group input[type="email"],
+.form-group input[type="file"] {
+  width: 100%;
+  padding: 15px 15px 15px 15px;
+  /* Extra padding to accommodate label */
+  margin-bottom: 10px;
+  border: 1px solid rgba(253, 108, 77, 0.8);
+  background-color: rgba(253, 108, 77, 0.2);
+  border-radius: 4px;
+  box-sizing: border-box;
+  position: relative;
+  text-align: right;
+  font-size: 15px;
+}
+
+.form-group input[type="file"] {
+  padding: 13px 15px 13px 15px;
+}
+
+form button {
+  width: 100%;
+  padding: 10px;
+  background-color: #fb4a36;
+  color: white;
+  border: 2px solid #fb4a36;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 16px;
+  transition: all 0.3s ease;
+}
+
+form button:hover {
+  background-color: #fbdac7;
+  color: #fb4a36;
+  border: 2px solid #fb4a36;
+}
+
+.profile-image {
+  display: block;
+  margin: 15px auto 20px auto;
+  width: 150px;
+  height: 150px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+h2{
+  text-align: center;
+  
+}
+@media screen and (max-width: 700px) {
+  .form-row{
+    display: flex;
+    flex-direction: column !important;
+  }
+  .form-container{
+    margin: 40px 30px 40px 30px !important;
+   
+  }
+}

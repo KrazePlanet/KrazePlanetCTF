@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Get In Touch 📞</title>
+    <!-- fav-icon -->
+    <link rel="icon" type="image/png" href="media/images/Review/fav-icon.ico" />
+    <!-- Font Awesome Icon Library -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" />
+    <!-- loading scrren css -->
+    <link rel="stylesheet" href="css/Loader.css" />
+    <!-- mouse trail css -->
+    <link rel="stylesheet" href="css/MouseTrailer.css" />
+    <!-- home page css -->
+    <link rel="stylesheet" href="css/contact.css" />
+    <!-- loading screen js -->
+    <script src="js/PreLoader.js" defer></script>
+</head>
+
+<body>
+    <h1 style="text-align:center;margin-top:2rem;">Picture Perfect</h1>
+    <!-- loader html -->
+    <div class="loader"></div>
+    <!-- nav bar for mobile devices -->
+    <div class="container">
+        <a class="toogleBox">
+            <span class="icon"></span>
+        </a>
+        <ul class="navItems">
+            <li>
+                <a href="index.php">
+                    <i class="fa fa-home" style="--i: 1"></i>
+                    <span style="--g: 1">home</span>
+                </a>
+            </li>
+            <li>
+                <a href="php/Gallery/view.php">
+                    <i class="fa fa-image" style="--i: 2"></i>
+                    <span style="--g: 2">Gallery</span>
+                </a>
+            </li>
+            <li>
+                <a href="php/review/review.php">
+                    <i class="fa fa-heart" style="--i: 5"></i>
+                    <span style="--g: 4">Review</span>
+                </a>
+            </li>
+            <li>
+                <a href="php/bookMe/bookMe.php">
+                    <i class="fa fa-money" style="--i: 6"></i>
+                    <span style="--g: 5">bookMe</span>
+                </a>
+            </li>
+        </ul>
+    </div>
+    <!-- Whatsapp  -->
+    <div class="whatsappMain">
+        <a href="https://wa.me/918560058348?text=Hello!PicturePerfect.." target="_blank"><img
+                src="media/images/Review/whatsappLogo.png" width="3.5%" class="whatsapp_img"></a>
+    </div>
+
+
+    <!-- Contact  -->
+    <section class="contact">
+        <div class="content">
+            <h1>Contact Us</h1>
+            <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Asperiores, praesentium accusamus tempora sequi
+                nostrum expedita autem fugit.</p>
+        </div>
+
+        <div class="container-contact">
+            <div class="contactInfo">
+                <div class="box">
+
+                    <div class="icon">
+                        <i class="fa fa-map-marker" aria-hidden="true"></i>
+                    </div>
+                    <div class="text">
+                        <h3>Address</h3>
+                        <p>SardarPura Jodhpur 342001</p>
+                    </div>
+                </div>
+                <div class="box">
+                    <div class="icon">
+                        <i class="fa fa-phone" aria-hidden="true"></i>
+                    </div>
+                    <div class="text">
+                        <h3>Phone</h3>
+                        <p>+91 8XXXX XXXXX</p>
+                    </div>
+                </div>
+                <div class="box">
+                    <div class="icon">
+                        <i class="fa fa-envelope-o" aria-hidden="true"></i>
+                    </div>
+                    <div class="text">
+                        <h3>Email</h3>
+                        <p>Pictureperfectcor@gmail.com</p>
+                    </div>
+                </div>
+                <div class="box">
+                    <div class="icon3">
+                        <i class="fa fa-instagram" aria-hidden="true"></i>
+                    </div>
+                    <div class="icon3">
+                        <i class="fa fa-facebook" aria-hidden="true"></i>
+                    </div>
+                    <div class="icon3">
+                        <i class="fa fa-youtube-play" aria-hidden="true"></i>
+                    </div>
+                </div>
+            </div>
+
+            <div class="contactForm">
+                <h2>Send Message</h2>
+                <form action="https://formsubmit.co/Pictureperfectcor@gmail.com" method="POST">
+                    <div class="inputBox">
+                        <input type="text" name="Full_Name" required="required">
+                        <span>Full Name</span>
+                    </div>
+
+                    <div class="inputBox">
+                        <input type="text" name="Email" required="required">
+                        <span>Email</span>
+                    </div>
+
+                    <div class="inputBox">
+                        <textarea name="message`" required="required"></textarea>
+                        <span>Your Message..</span>
+                    </div>
+                    <div class="inputBox">
+                        <input type="submit" name="submit" value="send">
+                    </div>
+                </form>
+            </div>
+        </div>
+    </section>
+
+
+    <!-- <script src="https://smtpjs.com/v3/smtp.js"></script> -->
+    <script>
+        // function sendEmail() {
+        //     Email.send({
+        //         Host: "smtp.gmail.com",
+        //         Username: "takpiyush2000@gmail.com",
+        //         Password: "Piyush11",
+        //         To: 'piyushtak2000@gmail.com',
+        //         From: document.getElementById("email").value,
+        //         Subject: "Contact Form Enquiry",
+        //         Body: "And this is the body"
+        //     }).then(
+        //         message => alert(message)
+        //     );
+        // }
+        let toogleClick = document.querySelector(".toogleBox");
+        let container = document.querySelector(".container");
+        toogleClick.addEventListener("click", () => {
+            if (toogleClick.classList.contains("active")) {
+                toogleClick.classList.remove("active");
+                container.classList.remove("active");
+            } else {
+                toogleClick.classList.add("active");
+                container.classList.add("active");
+            }
+        });
+    </script>
+    <!-- footer section of home page -->
+    <footer>
+        <div>
+            <img class="logo" src="media/images/Header/Logo.png" alt="picture perfect logo" />
+        </div>
+        <div>
+            <a class="footer-href-design blog" href="./html/All-Blog.html"><i class="fa fa-question"></i> Faq's</a>
+        </div>
+        <div class="footer-content">
+            &copy; Copyright 2022-2023 by Refsnes Data. All Rights Reserved. Picture
+            Perfect is Powered by Perfect.corp.
+        </div>
+    </footer>
+
+</body>
+
+</html>
+</body>
+
+</html>

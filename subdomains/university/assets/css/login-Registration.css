@@ -1,0 +1,214 @@
+/* =====================================================
+   UNIVERSITY PORTAL — AUTH UI
+   Login & Registration (Final Polished Version)
+   ===================================================== */
+
+/* RESET */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+/* ROOT THEME */
+:root {
+    --primary: #0a4da2;
+    --primary-dark: #073a7a;
+    --bg: #eef3fb;
+    --card: #ffffff;
+    --border: #d6e0f0;
+    --text: #1f2937;
+    --muted: #6b7280;
+    --success: #15803d;
+    --danger: #b91c1c;
+
+    --radius: 14px;
+    --shadow: 0 18px 40px rgba(0, 0, 0, 0.15);
+
+    font-family: "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+
+/* BODY */
+body {
+    min-height: 100vh;
+    background: linear-gradient(135deg, #e8effa, #f4f7fc);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 30px;
+    color: var(--text);
+}
+
+/* CONTAINER CARD */
+.container {
+    width: 100%;
+    max-width: 460px;
+    background: var(--card);
+    border-radius: var(--radius);
+    padding: 42px 38px;
+    box-shadow: var(--shadow);
+    animation: slideFade 0.45s ease;
+}
+
+/* ENTRY ANIMATION */
+@keyframes slideFade {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* UNIVERSITY HEADER (OPTIONAL) */
+.container::before {
+    content: "University Portal";
+    display: block;
+    text-align: center;
+    font-size: 0.9rem;
+    font-weight: 600;
+    letter-spacing: 1px;
+    color: var(--primary);
+    margin-bottom: 10px;
+    text-transform: uppercase;
+}
+
+/* PAGE TITLE */
+h1 {
+    text-align: center;
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--primary-dark);
+    margin-bottom: 22px;
+}
+
+/* FORM GROUP */
+.form-group {
+    margin-bottom: 20px;
+}
+
+/* LABEL */
+.form-group label {
+    display: block;
+    font-size: 0.9rem;
+    font-weight: 600;
+    margin-bottom: 6px;
+    color: var(--text);
+}
+
+/* INPUT */
+.form-group input {
+    width: 100%;
+    padding: 13px 14px;
+    font-size: 0.95rem;
+    border: 1.6px solid var(--border);
+    border-radius: 9px;
+    background: #ffffff;
+    transition: border-color 0.25s ease, box-shadow 0.25s ease;
+}
+
+/* INPUT FOCUS */
+.form-group input:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 4px rgba(10, 77, 162, 0.15);
+}
+
+/* PLACEHOLDER */
+.form-group input::placeholder {
+    color: #9aa4b2;
+}
+
+/* PASSWORD HINT */
+.hint {
+    display: block;
+    margin-top: 6px;
+    font-size: 0.8rem;
+    color: var(--muted);
+}
+
+/* BUTTON AREA */
+.form-btn {
+    margin-top: 28px;
+}
+
+/* BUTTON */
+.btn {
+    width: 100%;
+    padding: 13px;
+    font-size: 1rem;
+    font-weight: 600;
+    border-radius: 10px;
+    border: none;
+    cursor: pointer;
+    color: #ffffff;
+    background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+/* BUTTON HOVER */
+.btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 22px rgba(10, 77, 162, 0.4);
+}
+
+/* BUTTON ACTIVE */
+.btn:active {
+    transform: translateY(0);
+    box-shadow: none;
+}
+
+/* ALERTS */
+.alert {
+    padding: 12px 14px;
+    border-radius: 9px;
+    margin-bottom: 14px;
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+/* ERROR */
+.alert-danger {
+    background: #fdecec;
+    color: var(--danger);
+    border-left: 4px solid var(--danger);
+}
+
+/* SUCCESS */
+.alert-success {
+    background: #ecfdf3;
+    color: var(--success);
+    border-left: 4px solid var(--success);
+}
+
+/* BOTTOM TEXT */
+.container p {
+    margin-top: 24px;
+    text-align: center;
+    font-size: 0.9rem;
+    color: var(--muted);
+}
+
+/* LINKS */
+.container a {
+    color: var(--primary);
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.container a:hover {
+    text-decoration: underline;
+}
+
+/* RESPONSIVE */
+@media (max-width: 520px) {
+    .container {
+        padding: 32px 24px;
+    }
+
+    h1 {
+        font-size: 1.7rem;
+    }
+}

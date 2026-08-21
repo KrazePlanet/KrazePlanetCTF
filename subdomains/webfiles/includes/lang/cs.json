@@ -1,0 +1,177 @@
+{
+  "_meta": {
+    "lang": "cs",
+    "name": "Čeština"
+  },
+  "app": {
+    "title": "Soubory",
+    "title_full": "Soubory a složky"
+  },
+  "nav": {
+    "root": "Kořen",
+    "show": "Zobrazit:",
+    "show_all": "Vše",
+    "search_placeholder": "Hledat...",
+    "search_btn": "Hledat",
+    "displayed": "Zobrazeno {from} až {to} z {total}",
+    "prev": "Předchozí",
+    "next": "Další"
+  },
+  "toolbar": {
+    "listen": "Poslouchat",
+    "upload": "Nahrát",
+    "create_folder": "Vytvořit složku",
+    "download_selected": "Stáhnout vybrané",
+    "delete_selected": "Smazat vybrané"
+  },
+  "table": {
+    "col_name": "NÁZEV",
+    "col_path": "CESTA",
+    "col_size": "VELIKOST",
+    "col_date": "DATUM",
+    "sort_name": "Seřadit podle názvu",
+    "sort_size": "Seřadit podle velikosti",
+    "sort_date": "Seřadit podle data",
+    "no_files": "Žádné soubory nenalezeny",
+    "go_to_folder": "Přejít do složky",
+    "rename_file": "Přejmenovat soubor",
+    "rename_folder": "Přejmenovat složku",
+    "delete_file": "Smazat soubor"
+  },
+  "theme": {
+    "dark": "Tmavý motiv",
+    "light": "Světlý motiv"
+  },
+  "upload_modal": {
+    "title": "Nahrát soubor",
+    "label": "Vyberte soubor k nahrání do aktuální složky:",
+    "max_size": "Max. velikost:",
+    "btn_upload": "Nahrát",
+    "btn_cancel": "Zrušit",
+    "no_file": "Vyberte soubor.",
+    "too_large": "Soubor je příliš velký. Max. povolená velikost: <b>{size}</b>.",
+    "server_error": "Chyba serveru.",
+    "network_error": "Chyba sítě.",
+    "drop_label": "Klikněte nebo přetáhněte soubor sem"
+  },
+  "folder_modal": {
+    "title": "Vytvořit složku",
+    "label": "Název nové složky:",
+    "placeholder": "Např.: Nová složka",
+    "btn_create": "Vytvořit",
+    "btn_cancel": "Zrušit",
+    "empty": "Zadejte název složky.",
+    "invalid_chars": "Název obsahuje neplatné znaky."
+  },
+  "delete_modal": {
+    "title_many": "Smazat {n} soubor(ů)?",
+    "title_one": "Smazat soubor?",
+    "file_label": "Soubor:",
+    "irreversible": "Tuto akci nelze vrátit zpět.",
+    "btn_delete": "Smazat",
+    "btn_cancel": "Zrušit",
+    "error_title": "Chyba mazání",
+    "error_many": "Nepodařilo se smazat {n} soubor(ů).",
+    "network_error": "Chyba sítě při mazání."
+  },
+  "rename_modal": {
+    "title_file": "Přejmenovat soubor",
+    "title_folder": "Přejmenovat složku",
+    "label_old_file": "Aktuální název souboru:",
+    "label_old_folder": "Aktuální název složky:",
+    "label_new": "Nový název:",
+    "btn_rename": "Přejmenovat",
+    "btn_cancel": "Zrušit",
+    "unchanged": "Název se nezměnil.",
+    "invalid": "Neplatný název.",
+    "invalid_chars": "Neplatné znaky: \\ / : * ? \" < > |",
+    "not_specified": "Objekt není zadán."
+  },
+  "messages": {
+    "attention": "Pozor",
+    "ok": "Rozumím"
+  },
+  "pdf_viewer": {
+    "fullscreen": "Celá obrazovka",
+    "collapse": "Minimalizovat",
+    "download": "Stáhnout",
+    "close": "Zavřít prohlížeč",
+    "rename": "Přejmenovat",
+    "no_support": "Váš prohlížeč nepodporuje vestavěné zobrazení PDF.",
+    "download_instead": "Stáhnout soubor pro zobrazení",
+    "network_error": "Chyba sítě"
+  },
+  "txt_viewer": {
+    "fullscreen": "Celá obrazovka",
+    "collapse": "Minimalizovat",
+    "font_smaller": "Menší písmo",
+    "font_larger": "Větší písmo",
+    "print": "Tisk",
+    "download_full": "Stáhnout celý soubor",
+    "close": "Zavřít",
+    "truncated": "Soubor je příliš velký ({size} MB) — zobrazeno prvních 2 MB.",
+    "lines": "řádků",
+    "not_found": "Soubor nenalezen."
+  },
+  "csv_viewer": {
+    "fullscreen": "Celá obrazovka",
+    "collapse": "Minimalizovat",
+    "font_smaller": "Menší písmo",
+    "font_larger": "Větší písmo",
+    "download_full": "Stáhnout celý soubor",
+    "close_viewer": "Zavřít prohlížeč",
+    "close": "Zavřít",
+    "truncated": "Soubor je příliš velký ({size} MB) — zobrazeno prvních 2 MB.",
+    "lines": "řádků",
+    "not_found": "Soubor nenalezen."
+  },
+  "img_viewer": {
+    "fullscreen": "Celá obrazovka",
+    "collapse": "Minimalizovat",
+    "rotate": "Otočit",
+    "reset": "Resetovat",
+    "download": "Stáhnout",
+    "close": "Zavřít",
+    "prev": "Předchozí (←)",
+    "next": "Další (→)",
+    "hint": "Kolečko: Zoom  |  LMB: Táhnout  |  ← →: Navigace",
+    "load_error": "Chyba načítání"
+  },
+  "video_viewer": {
+    "format": "Formát:",
+    "download": "Stáhnout",
+    "close": "Zavřít",
+    "no_support": "Váš prohlížeč nepodporuje vestavěné přehrávání videa.",
+    "not_found": "Videosoubor není zadán."
+  },
+  "code_viewer": {
+    "fullscreen": "Celá obrazovka",
+    "collapse": "Minimalizovat",
+    "font_smaller": "Menší písmo",
+    "font_larger": "Větší písmo",
+    "copy": "Kopírovat",
+    "copied": "Zkopírováno",
+    "download": "Stáhnout",
+    "download_full": "Stáhnout celý soubor",
+    "close": "Zavřít",
+    "truncated": "Soubor je příliš velký ({size} MB) — zobrazeno prvních 2 MB.",
+    "lines": "řádků",
+    "highlight_unavailable": "zvýraznění nedostupné",
+    "not_found": "Soubor nenalezen."
+  },
+  "audio_single": {
+    "close": "Zavřít",
+    "error_format": "Chyba přehrávání (formát není podporován).",
+    "error_fileinfo": "Kritický PHP modul <b>fileinfo</b> není aktivován.<br>Odkomentujte <code>extension=fileinfo</code> v php.ini a restartujte.",
+    "error_fileinfo_short": "Chyba: modul fileinfo není aktivován."
+  },
+  "audio_player": {
+    "playlist": "Seznam skladeb",
+    "loading": "Načítání...",
+    "empty": "Seznam skladeb je prázdný.",
+    "close": "Zavřít",
+    "repeat_all": "Opakovat seznam",
+    "repeat_one": "Opakovat skladbu",
+    "shuffle": "Náhodně"
+  }
+}

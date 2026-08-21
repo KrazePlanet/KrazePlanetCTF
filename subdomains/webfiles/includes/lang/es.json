@@ -1,0 +1,177 @@
+{
+  "_meta": {
+    "lang": "es",
+    "name": "Español"
+  },
+  "app": {
+    "title": "Archivos",
+    "title_full": "Archivos y carpetas"
+  },
+  "nav": {
+    "root": "Raíz",
+    "show": "Mostrar:",
+    "show_all": "Todos",
+    "search_placeholder": "Buscar...",
+    "search_btn": "Buscar",
+    "displayed": "Mostrando {from} a {to} de {total}",
+    "prev": "Anterior",
+    "next": "Siguiente"
+  },
+  "toolbar": {
+    "listen": "Escuchar",
+    "upload": "Subir",
+    "create_folder": "Crear carpeta",
+    "download_selected": "Descargar seleccionados",
+    "delete_selected": "Eliminar seleccionados"
+  },
+  "table": {
+    "col_name": "NOMBRE",
+    "col_path": "RUTA",
+    "col_size": "TAMAÑO",
+    "col_date": "FECHA",
+    "sort_name": "Ordenar por nombre",
+    "sort_size": "Ordenar por tamaño",
+    "sort_date": "Ordenar por fecha",
+    "no_files": "No se encontraron archivos",
+    "go_to_folder": "Ir a la carpeta",
+    "rename_file": "Renombrar archivo",
+    "rename_folder": "Renombrar carpeta",
+    "delete_file": "Eliminar archivo"
+  },
+  "theme": {
+    "dark": "Tema oscuro",
+    "light": "Tema claro"
+  },
+  "upload_modal": {
+    "title": "Subir archivo",
+    "label": "Seleccione un archivo para subir a la carpeta actual:",
+    "max_size": "Tamaño máximo:",
+    "btn_upload": "Subir",
+    "btn_cancel": "Cancelar",
+    "no_file": "Por favor seleccione un archivo.",
+    "too_large": "El archivo es demasiado grande. Tamaño máximo permitido: <b>{size}</b>.",
+    "server_error": "Error del servidor.",
+    "network_error": "Error de red.",
+    "drop_label": "Haga clic o arrastre un archivo aquí"
+  },
+  "folder_modal": {
+    "title": "Crear carpeta",
+    "label": "Nombre de la nueva carpeta:",
+    "placeholder": "Ej.: Nueva carpeta",
+    "btn_create": "Crear",
+    "btn_cancel": "Cancelar",
+    "empty": "Por favor ingrese un nombre de carpeta.",
+    "invalid_chars": "El nombre contiene caracteres no válidos."
+  },
+  "delete_modal": {
+    "title_many": "¿Eliminar {n} archivo(s)?",
+    "title_one": "¿Eliminar archivo?",
+    "file_label": "Archivo:",
+    "irreversible": "Esta acción no se puede deshacer.",
+    "btn_delete": "Eliminar",
+    "btn_cancel": "Cancelar",
+    "error_title": "Error al eliminar",
+    "error_many": "No se pudieron eliminar {n} archivo(s).",
+    "network_error": "Error de red al eliminar."
+  },
+  "rename_modal": {
+    "title_file": "Renombrar archivo",
+    "title_folder": "Renombrar carpeta",
+    "label_old_file": "Nombre actual del archivo:",
+    "label_old_folder": "Nombre actual de la carpeta:",
+    "label_new": "Nuevo nombre:",
+    "btn_rename": "Renombrar",
+    "btn_cancel": "Cancelar",
+    "unchanged": "El nombre no ha cambiado.",
+    "invalid": "Nombre no válido.",
+    "invalid_chars": "Caracteres no válidos: \\ / : * ? \" < > |",
+    "not_specified": "Objeto no especificado."
+  },
+  "messages": {
+    "attention": "Atención",
+    "ok": "Entendido"
+  },
+  "pdf_viewer": {
+    "fullscreen": "Pantalla completa",
+    "collapse": "Reducir",
+    "download": "Descargar",
+    "close": "Cerrar visor",
+    "rename": "Renombrar",
+    "no_support": "Su navegador no admite la visualización de PDF en línea.",
+    "download_instead": "Descargar archivo para ver",
+    "network_error": "Error de red"
+  },
+  "txt_viewer": {
+    "fullscreen": "Pantalla completa",
+    "collapse": "Reducir",
+    "font_smaller": "Reducir fuente",
+    "font_larger": "Ampliar fuente",
+    "print": "Imprimir",
+    "download_full": "Descargar archivo completo",
+    "close": "Cerrar",
+    "truncated": "El archivo es demasiado grande ({size} MB) — mostrando los primeros 2 MB.",
+    "lines": "líneas",
+    "not_found": "Archivo no encontrado."
+  },
+  "csv_viewer": {
+    "fullscreen": "Pantalla completa",
+    "collapse": "Reducir",
+    "font_smaller": "Reducir fuente",
+    "font_larger": "Ampliar fuente",
+    "download_full": "Descargar archivo completo",
+    "close_viewer": "Cerrar visor",
+    "close": "Cerrar",
+    "truncated": "El archivo es demasiado grande ({size} MB) — mostrando los primeros 2 MB.",
+    "lines": "filas",
+    "not_found": "Archivo no encontrado."
+  },
+  "img_viewer": {
+    "fullscreen": "Pantalla completa",
+    "collapse": "Reducir",
+    "rotate": "Rotar",
+    "reset": "Restablecer",
+    "download": "Descargar",
+    "close": "Cerrar",
+    "prev": "Anterior (←)",
+    "next": "Siguiente (→)",
+    "hint": "Rueda: Zoom  |  LMB: Arrastrar  |  ← →: Navegar",
+    "load_error": "Error al cargar"
+  },
+  "video_viewer": {
+    "format": "Formato:",
+    "download": "Descargar",
+    "close": "Cerrar",
+    "no_support": "Su navegador no admite la reproducción de video en línea.",
+    "not_found": "Archivo de video no especificado."
+  },
+  "code_viewer": {
+    "fullscreen": "Pantalla completa",
+    "collapse": "Reducir",
+    "font_smaller": "Reducir fuente",
+    "font_larger": "Ampliar fuente",
+    "copy": "Copiar",
+    "copied": "Copiado",
+    "download": "Descargar",
+    "download_full": "Descargar archivo completo",
+    "close": "Cerrar",
+    "truncated": "El archivo es demasiado grande ({size} MB) — mostrando los primeros 2 MB.",
+    "lines": "líneas",
+    "highlight_unavailable": "resaltado no disponible",
+    "not_found": "Archivo no encontrado."
+  },
+  "audio_single": {
+    "close": "Cerrar",
+    "error_format": "Error de reproducción (formato no compatible).",
+    "error_fileinfo": "El módulo PHP crítico <b>fileinfo</b> no está habilitado.<br>Descomente <code>extension=fileinfo</code> en php.ini y reinicie.",
+    "error_fileinfo_short": "Error: módulo fileinfo no habilitado."
+  },
+  "audio_player": {
+    "playlist": "Lista de reproducción",
+    "loading": "Cargando...",
+    "empty": "La lista de reproducción está vacía.",
+    "close": "Cerrar",
+    "repeat_all": "Repetir lista",
+    "repeat_one": "Repetir pista",
+    "shuffle": "Aleatorio"
+  }
+}

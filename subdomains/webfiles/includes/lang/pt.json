@@ -1,0 +1,177 @@
+{
+  "_meta": {
+    "lang": "pt",
+    "name": "Português"
+  },
+  "app": {
+    "title": "Arquivos",
+    "title_full": "Arquivos e pastas"
+  },
+  "nav": {
+    "root": "Raiz",
+    "show": "Mostrar:",
+    "show_all": "Todos",
+    "search_placeholder": "Pesquisar...",
+    "search_btn": "Pesquisar",
+    "displayed": "Exibindo {from} a {to} de {total}",
+    "prev": "Anterior",
+    "next": "Próximo"
+  },
+  "toolbar": {
+    "listen": "Ouvir",
+    "upload": "Enviar",
+    "create_folder": "Criar pasta",
+    "download_selected": "Baixar selecionados",
+    "delete_selected": "Excluir selecionados"
+  },
+  "table": {
+    "col_name": "NOME",
+    "col_path": "CAMINHO",
+    "col_size": "TAMANHO",
+    "col_date": "DATA",
+    "sort_name": "Ordenar por nome",
+    "sort_size": "Ordenar por tamanho",
+    "sort_date": "Ordenar por data",
+    "no_files": "Nenhum arquivo encontrado",
+    "go_to_folder": "Ir para pasta",
+    "rename_file": "Renomear arquivo",
+    "rename_folder": "Renomear pasta",
+    "delete_file": "Excluir arquivo"
+  },
+  "theme": {
+    "dark": "Tema escuro",
+    "light": "Tema claro"
+  },
+  "upload_modal": {
+    "title": "Enviar arquivo",
+    "label": "Selecione um arquivo para enviar à pasta atual:",
+    "max_size": "Tamanho máximo:",
+    "btn_upload": "Enviar",
+    "btn_cancel": "Cancelar",
+    "no_file": "Selecione um arquivo.",
+    "too_large": "Arquivo muito grande. Tamanho máximo permitido: <b>{size}</b>.",
+    "server_error": "Erro do servidor.",
+    "network_error": "Erro de rede.",
+    "drop_label": "Clique ou arraste um arquivo aqui"
+  },
+  "folder_modal": {
+    "title": "Criar pasta",
+    "label": "Nome da nova pasta:",
+    "placeholder": "Ex.: Nova pasta",
+    "btn_create": "Criar",
+    "btn_cancel": "Cancelar",
+    "empty": "Insira um nome para a pasta.",
+    "invalid_chars": "O nome contém caracteres inválidos."
+  },
+  "delete_modal": {
+    "title_many": "Excluir {n} arquivo(s)?",
+    "title_one": "Excluir arquivo?",
+    "file_label": "Arquivo:",
+    "irreversible": "Esta ação não pode ser desfeita.",
+    "btn_delete": "Excluir",
+    "btn_cancel": "Cancelar",
+    "error_title": "Erro ao excluir",
+    "error_many": "Não foi possível excluir {n} arquivo(s).",
+    "network_error": "Erro de rede ao excluir."
+  },
+  "rename_modal": {
+    "title_file": "Renomear arquivo",
+    "title_folder": "Renomear pasta",
+    "label_old_file": "Nome atual do arquivo:",
+    "label_old_folder": "Nome atual da pasta:",
+    "label_new": "Novo nome:",
+    "btn_rename": "Renomear",
+    "btn_cancel": "Cancelar",
+    "unchanged": "O nome não foi alterado.",
+    "invalid": "Nome inválido.",
+    "invalid_chars": "Caracteres inválidos: \\ / : * ? \" < > |",
+    "not_specified": "Objeto não especificado."
+  },
+  "messages": {
+    "attention": "Atenção",
+    "ok": "Entendido"
+  },
+  "pdf_viewer": {
+    "fullscreen": "Tela cheia",
+    "collapse": "Minimizar",
+    "download": "Baixar",
+    "close": "Fechar visualizador",
+    "rename": "Renomear",
+    "no_support": "Seu navegador não suporta visualização de PDF integrada.",
+    "download_instead": "Baixar arquivo para visualizar",
+    "network_error": "Erro de rede"
+  },
+  "txt_viewer": {
+    "fullscreen": "Tela cheia",
+    "collapse": "Minimizar",
+    "font_smaller": "Diminuir fonte",
+    "font_larger": "Aumentar fonte",
+    "print": "Imprimir",
+    "download_full": "Baixar arquivo completo",
+    "close": "Fechar",
+    "truncated": "Arquivo muito grande ({size} MB) — exibindo os primeiros 2 MB.",
+    "lines": "linhas",
+    "not_found": "Arquivo não encontrado."
+  },
+  "csv_viewer": {
+    "fullscreen": "Tela cheia",
+    "collapse": "Minimizar",
+    "font_smaller": "Diminuir fonte",
+    "font_larger": "Aumentar fonte",
+    "download_full": "Baixar arquivo completo",
+    "close_viewer": "Fechar visualizador",
+    "close": "Fechar",
+    "truncated": "Arquivo muito grande ({size} MB) — exibindo os primeiros 2 MB.",
+    "lines": "linhas",
+    "not_found": "Arquivo não encontrado."
+  },
+  "img_viewer": {
+    "fullscreen": "Tela cheia",
+    "collapse": "Minimizar",
+    "rotate": "Girar",
+    "reset": "Redefinir",
+    "download": "Baixar",
+    "close": "Fechar",
+    "prev": "Anterior (←)",
+    "next": "Próximo (→)",
+    "hint": "Roda: Zoom  |  LMB: Arrastar  |  ← →: Navegar",
+    "load_error": "Erro ao carregar"
+  },
+  "video_viewer": {
+    "format": "Formato:",
+    "download": "Baixar",
+    "close": "Fechar",
+    "no_support": "Seu navegador não suporta reprodução de vídeo integrada.",
+    "not_found": "Arquivo de vídeo não especificado."
+  },
+  "code_viewer": {
+    "fullscreen": "Tela cheia",
+    "collapse": "Minimizar",
+    "font_smaller": "Diminuir fonte",
+    "font_larger": "Aumentar fonte",
+    "copy": "Copiar",
+    "copied": "Copiado",
+    "download": "Baixar",
+    "download_full": "Baixar arquivo completo",
+    "close": "Fechar",
+    "truncated": "Arquivo muito grande ({size} MB) — exibindo os primeiros 2 MB.",
+    "lines": "linhas",
+    "highlight_unavailable": "realce indisponível",
+    "not_found": "Arquivo não encontrado."
+  },
+  "audio_single": {
+    "close": "Fechar",
+    "error_format": "Erro de reprodução (formato não suportado).",
+    "error_fileinfo": "Módulo PHP crítico <b>fileinfo</b> não está ativado.<br>Descomente <code>extension=fileinfo</code> no php.ini e reinicie.",
+    "error_fileinfo_short": "Erro: módulo fileinfo não ativado."
+  },
+  "audio_player": {
+    "playlist": "Lista de reprodução",
+    "loading": "Carregando...",
+    "empty": "A lista de reprodução está vazia.",
+    "close": "Fechar",
+    "repeat_all": "Repetir lista",
+    "repeat_one": "Repetir faixa",
+    "shuffle": "Aleatório"
+  }
+}

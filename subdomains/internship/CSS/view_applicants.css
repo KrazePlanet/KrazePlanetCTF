@@ -1,0 +1,89 @@
+/* Page background */
+body {
+  min-height: 100vh;
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: linear-gradient(135deg, #1e293b, #0f172a);
+  color: #f3f4f6;
+}
+
+/* Container */
+.container {
+  max-width: 1000px;
+  margin: 40px auto;
+  background: rgba(17, 24, 39, 0.95);
+  padding: 25px;
+  border-radius: 12px;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.5);
+}
+
+/* Heading */
+h2 {
+  text-align: center;
+  margin-bottom: 20px;
+  font-weight: 600;
+  color: #f9fafb;
+}
+
+/* Alerts */
+.alert {
+  border-radius: 8px;
+  padding: 12px;
+  margin-bottom: 15px;
+}
+
+/* Table */
+.table {
+  border-radius: 10px;
+  overflow: hidden;
+  background: #1f2937;
+  color: #f3f4f6;
+}
+
+.table th {
+  background: #374151;
+  color: #f9fafb;
+  font-weight: 600;
+  text-align: center;
+}
+
+.table td {
+  vertical-align: middle;
+  text-align: center;
+}
+
+/* Resume link */
+.table a {
+  color: #60a5fa;
+  text-decoration: none;
+  font-weight: 500;
+}
+.table a:hover {
+  text-decoration: underline;
+  color: #93c5fd;
+}
+
+/* Status badges */
+.badge {
+  font-size: 0.9rem;
+  padding: 6px 10px;
+  border-radius: 6px;
+}
+
+/* Buttons */
+.btn {
+  border-radius: 6px;
+  padding: 6px 12px;
+  font-size: 0.9rem;
+  transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+.btn:hover {
+  transform: translateY(-2px);
+  opacity: 0.9;
+}
+
+/* Back button */
+.btn-secondary {
+  margin-bottom: 15px;
+}

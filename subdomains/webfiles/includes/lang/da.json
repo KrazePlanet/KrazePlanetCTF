@@ -1,0 +1,177 @@
+{
+  "_meta": {
+    "lang": "da",
+    "name": "Dansk"
+  },
+  "app": {
+    "title": "Filer",
+    "title_full": "Filer og mapper"
+  },
+  "nav": {
+    "root": "Rod",
+    "show": "Vis:",
+    "show_all": "Alle",
+    "search_placeholder": "Søg...",
+    "search_btn": "Søg",
+    "displayed": "Viser {from} til {to} af {total}",
+    "prev": "Forrige",
+    "next": "Næste"
+  },
+  "toolbar": {
+    "listen": "Lyt",
+    "upload": "Upload",
+    "create_folder": "Opret mappe",
+    "download_selected": "Download valgte",
+    "delete_selected": "Slet valgte"
+  },
+  "table": {
+    "col_name": "NAVN",
+    "col_path": "STI",
+    "col_size": "STØRRELSE",
+    "col_date": "DATO",
+    "sort_name": "Sorter efter navn",
+    "sort_size": "Sorter efter størrelse",
+    "sort_date": "Sorter efter dato",
+    "no_files": "Ingen filer fundet",
+    "go_to_folder": "Gå til mappe",
+    "rename_file": "Omdøb fil",
+    "rename_folder": "Omdøb mappe",
+    "delete_file": "Slet fil"
+  },
+  "theme": {
+    "dark": "Mørkt tema",
+    "light": "Lyst tema"
+  },
+  "upload_modal": {
+    "title": "Upload fil",
+    "label": "Vælg en fil til upload i den aktuelle mappe:",
+    "max_size": "Maks størrelse:",
+    "btn_upload": "Upload",
+    "btn_cancel": "Annuller",
+    "no_file": "Vælg venligst en fil.",
+    "too_large": "Filen er for stor. Maks tilladt størrelse: <b>{size}</b>.",
+    "server_error": "Serverfejl.",
+    "network_error": "Netværksfejl.",
+    "drop_label": "Klik eller træk en fil hertil"
+  },
+  "folder_modal": {
+    "title": "Opret mappe",
+    "label": "Navn på ny mappe:",
+    "placeholder": "F.eks.: Ny mappe",
+    "btn_create": "Opret",
+    "btn_cancel": "Annuller",
+    "empty": "Angiv venligst et mappenavn.",
+    "invalid_chars": "Navnet indeholder ugyldige tegn."
+  },
+  "delete_modal": {
+    "title_many": "Slet {n} fil(er)?",
+    "title_one": "Slet fil?",
+    "file_label": "Fil:",
+    "irreversible": "Denne handling kan ikke fortrydes.",
+    "btn_delete": "Slet",
+    "btn_cancel": "Annuller",
+    "error_title": "Sletningsfejl",
+    "error_many": "Kunne ikke slette {n} fil(er).",
+    "network_error": "Netværksfejl under sletning."
+  },
+  "rename_modal": {
+    "title_file": "Omdøb fil",
+    "title_folder": "Omdøb mappe",
+    "label_old_file": "Nuværende filnavn:",
+    "label_old_folder": "Nuværende mappenavn:",
+    "label_new": "Nyt navn:",
+    "btn_rename": "Omdøb",
+    "btn_cancel": "Annuller",
+    "unchanged": "Navnet er ikke ændret.",
+    "invalid": "Ugyldigt navn.",
+    "invalid_chars": "Ugyldige tegn: \\ / : * ? \" < > |",
+    "not_specified": "Objekt ikke angivet."
+  },
+  "messages": {
+    "attention": "Bemærk",
+    "ok": "Forstået"
+  },
+  "pdf_viewer": {
+    "fullscreen": "Fuldskærm",
+    "collapse": "Minimer",
+    "download": "Download",
+    "close": "Luk fremviser",
+    "rename": "Omdøb",
+    "no_support": "Din browser understøtter ikke indbygget PDF-visning.",
+    "download_instead": "Download fil for at se den",
+    "network_error": "Netværksfejl"
+  },
+  "txt_viewer": {
+    "fullscreen": "Fuldskærm",
+    "collapse": "Minimer",
+    "font_smaller": "Mindste skrifttype",
+    "font_larger": "Større skrifttype",
+    "print": "Udskriv",
+    "download_full": "Download hele filen",
+    "close": "Luk",
+    "truncated": "Filen er for stor ({size} MB) — viser de første 2 MB.",
+    "lines": "linjer",
+    "not_found": "Fil ikke fundet."
+  },
+  "csv_viewer": {
+    "fullscreen": "Fuldskærm",
+    "collapse": "Minimer",
+    "font_smaller": "Mindste skrifttype",
+    "font_larger": "Større skrifttype",
+    "download_full": "Download hele filen",
+    "close_viewer": "Luk fremviser",
+    "close": "Luk",
+    "truncated": "Filen er for stor ({size} MB) — viser de første 2 MB.",
+    "lines": "rækker",
+    "not_found": "Fil ikke fundet."
+  },
+  "img_viewer": {
+    "fullscreen": "Fuldskærm",
+    "collapse": "Minimer",
+    "rotate": "Roter",
+    "reset": "Nulstil",
+    "download": "Download",
+    "close": "Luk",
+    "prev": "Forrige (←)",
+    "next": "Næste (→)",
+    "hint": "Hjul: Zoom  |  LMB: Træk  |  ← →: Naviger",
+    "load_error": "Indlæsningsfejl"
+  },
+  "video_viewer": {
+    "format": "Format:",
+    "download": "Download",
+    "close": "Luk",
+    "no_support": "Din browser understøtter ikke indbygget videoafspilning.",
+    "not_found": "Videofil ikke angivet."
+  },
+  "code_viewer": {
+    "fullscreen": "Fuldskærm",
+    "collapse": "Minimer",
+    "font_smaller": "Mindste skrifttype",
+    "font_larger": "Større skrifttype",
+    "copy": "Kopiér",
+    "copied": "Kopieret",
+    "download": "Download",
+    "download_full": "Download hele filen",
+    "close": "Luk",
+    "truncated": "Filen er for stor ({size} MB) — viser de første 2 MB.",
+    "lines": "linjer",
+    "highlight_unavailable": "fremhævning ikke tilgængelig",
+    "not_found": "Fil ikke fundet."
+  },
+  "audio_single": {
+    "close": "Luk",
+    "error_format": "Afspilningsfejl (format ikke understøttet).",
+    "error_fileinfo": "Kritisk PHP-modul <b>fileinfo</b> er ikke aktiveret.<br>Fjern kommentar fra <code>extension=fileinfo</code> i php.ini og genstart.",
+    "error_fileinfo_short": "Fejl: fileinfo-modul ikke aktiveret."
+  },
+  "audio_player": {
+    "playlist": "Afspilningsliste",
+    "loading": "Indlæser...",
+    "empty": "Afspilningslisten er tom.",
+    "close": "Luk",
+    "repeat_all": "Gentag liste",
+    "repeat_one": "Gentag nummer",
+    "shuffle": "Bland"
+  }
+}

@@ -1,0 +1,177 @@
+{
+  "_meta": {
+    "lang": "sk",
+    "name": "Slovenčina"
+  },
+  "app": {
+    "title": "Súbory",
+    "title_full": "Súbory a priečinky"
+  },
+  "nav": {
+    "root": "Koreň",
+    "show": "Zobraziť:",
+    "show_all": "Všetky",
+    "search_placeholder": "Hľadať...",
+    "search_btn": "Hľadať",
+    "displayed": "Zobrazené {from} až {to} z {total}",
+    "prev": "Predchádzajúca",
+    "next": "Ďalšia"
+  },
+  "toolbar": {
+    "listen": "Počúvať",
+    "upload": "Nahrať",
+    "create_folder": "Vytvoriť priečinok",
+    "download_selected": "Stiahnuť vybrané",
+    "delete_selected": "Odstrániť vybrané"
+  },
+  "table": {
+    "col_name": "NÁZOV",
+    "col_path": "CESTA",
+    "col_size": "VEĽKOSŤ",
+    "col_date": "DÁTUM",
+    "sort_name": "Zoradiť podľa názvu",
+    "sort_size": "Zoradiť podľa veľkosti",
+    "sort_date": "Zoradiť podľa dátumu",
+    "no_files": "Nenašli sa žiadne súbory",
+    "go_to_folder": "Prejsť do priečinka",
+    "rename_file": "Premenovať súbor",
+    "rename_folder": "Premenovať priečinok",
+    "delete_file": "Odstrániť súbor"
+  },
+  "theme": {
+    "dark": "Tmavý motív",
+    "light": "Svetlý motív"
+  },
+  "upload_modal": {
+    "title": "Nahrať súbor",
+    "label": "Vyberte súbor na nahranie do aktuálneho priečinka:",
+    "max_size": "Max. veľkosť:",
+    "btn_upload": "Nahrať",
+    "btn_cancel": "Zrušiť",
+    "no_file": "Vyberte súbor.",
+    "too_large": "Súbor je príliš veľký. Max. povolená veľkosť: <b>{size}</b>.",
+    "server_error": "Chyba servera.",
+    "network_error": "Chyba siete.",
+    "drop_label": "Kliknite alebo presuňte súbor sem"
+  },
+  "folder_modal": {
+    "title": "Vytvoriť priečinok",
+    "label": "Názov nového priečinka:",
+    "placeholder": "Napr.: Nový priečinok",
+    "btn_create": "Vytvoriť",
+    "btn_cancel": "Zrušiť",
+    "empty": "Zadajte názov priečinka.",
+    "invalid_chars": "Názov obsahuje neplatné znaky."
+  },
+  "delete_modal": {
+    "title_many": "Odstrániť {n} súbor(ov)?",
+    "title_one": "Odstrániť súbor?",
+    "file_label": "Súbor:",
+    "irreversible": "Túto akciu nie je možné vrátiť späť.",
+    "btn_delete": "Odstrániť",
+    "btn_cancel": "Zrušiť",
+    "error_title": "Chyba odstránenia",
+    "error_many": "Nepodarilo sa odstrániť {n} súbor(ov).",
+    "network_error": "Chyba siete pri odstraňovaní."
+  },
+  "rename_modal": {
+    "title_file": "Premenovať súbor",
+    "title_folder": "Premenovať priečinok",
+    "label_old_file": "Aktuálny názov súboru:",
+    "label_old_folder": "Aktuálny názov priečinka:",
+    "label_new": "Nový názov:",
+    "btn_rename": "Premenovať",
+    "btn_cancel": "Zrušiť",
+    "unchanged": "Názov sa nezmenil.",
+    "invalid": "Neplatný názov.",
+    "invalid_chars": "Neplatné znaky: \\ / : * ? \" < > |",
+    "not_specified": "Objekt nie je zadaný."
+  },
+  "messages": {
+    "attention": "Pozor",
+    "ok": "Rozumiem"
+  },
+  "pdf_viewer": {
+    "fullscreen": "Celá obrazovka",
+    "collapse": "Minimalizovať",
+    "download": "Stiahnuť",
+    "close": "Zavrieť prehliadač",
+    "rename": "Premenovať",
+    "no_support": "Váš prehliadač nepodporuje vstavané zobrazenie PDF.",
+    "download_instead": "Stiahnuť súbor na zobrazenie",
+    "network_error": "Chyba siete"
+  },
+  "txt_viewer": {
+    "fullscreen": "Celá obrazovka",
+    "collapse": "Minimalizovať",
+    "font_smaller": "Menšie písmo",
+    "font_larger": "Väčšie písmo",
+    "print": "Tlač",
+    "download_full": "Stiahnuť celý súbor",
+    "close": "Zavrieť",
+    "truncated": "Súbor je príliš veľký ({size} MB) — zobrazených prvých 2 MB.",
+    "lines": "riadkov",
+    "not_found": "Súbor nenájdený."
+  },
+  "csv_viewer": {
+    "fullscreen": "Celá obrazovka",
+    "collapse": "Minimalizovať",
+    "font_smaller": "Menšie písmo",
+    "font_larger": "Väčšie písmo",
+    "download_full": "Stiahnuť celý súbor",
+    "close_viewer": "Zavrieť prehliadač",
+    "close": "Zavrieť",
+    "truncated": "Súbor je príliš veľký ({size} MB) — zobrazených prvých 2 MB.",
+    "lines": "riadkov",
+    "not_found": "Súbor nenájdený."
+  },
+  "img_viewer": {
+    "fullscreen": "Celá obrazovka",
+    "collapse": "Minimalizovať",
+    "rotate": "Otočiť",
+    "reset": "Resetovať",
+    "download": "Stiahnuť",
+    "close": "Zavrieť",
+    "prev": "Predchádzajúci (←)",
+    "next": "Ďalší (→)",
+    "hint": "Koliesko: Zoom  |  LMB: Ťahať  |  ← →: Navigácia",
+    "load_error": "Chyba načítania"
+  },
+  "video_viewer": {
+    "format": "Formát:",
+    "download": "Stiahnuť",
+    "close": "Zavrieť",
+    "no_support": "Váš prehliadač nepodporuje vstavané prehrávanie videa.",
+    "not_found": "Videosúbor nie je zadaný."
+  },
+  "code_viewer": {
+    "fullscreen": "Celá obrazovka",
+    "collapse": "Minimalizovať",
+    "font_smaller": "Menšie písmo",
+    "font_larger": "Väčšie písmo",
+    "copy": "Kopírovať",
+    "copied": "Skopírované",
+    "download": "Stiahnuť",
+    "download_full": "Stiahnuť celý súbor",
+    "close": "Zavrieť",
+    "truncated": "Súbor je príliš veľký ({size} MB) — zobrazených prvých 2 MB.",
+    "lines": "riadkov",
+    "highlight_unavailable": "zvýraznenie nedostupné",
+    "not_found": "Súbor nenájdený."
+  },
+  "audio_single": {
+    "close": "Zavrieť",
+    "error_format": "Chyba prehrávania (formát nie je podporovaný).",
+    "error_fileinfo": "Kritický PHP modul <b>fileinfo</b> nie je aktivovaný.<br>Odkomentujte <code>extension=fileinfo</code> v php.ini a reštartujte.",
+    "error_fileinfo_short": "Chyba: modul fileinfo nie je aktivovaný."
+  },
+  "audio_player": {
+    "playlist": "Zoznam skladieb",
+    "loading": "Načítavanie...",
+    "empty": "Zoznam skladieb je prázdny.",
+    "close": "Zavrieť",
+    "repeat_all": "Opakovať zoznam",
+    "repeat_one": "Opakovať skladbu",
+    "shuffle": "Náhodne"
+  }
+}

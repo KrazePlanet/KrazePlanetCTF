@@ -1,0 +1,11 @@
+2026/08/04 00:00:02 [notice] 1#1: nginx/1.24.0 started
+2026/08/04 00:00:02 [notice] 1#1: using the "epoll" event method
+2026/08/04 01:03:11 [warn] 214#214: *1042 "return" directive is not allowed here in /etc/nginx/sites-enabled/example.com:12
+2026/08/04 02:14:55 [error] 301#301: *2211 connect() failed (111: Connection refused) while connecting to upstream, client: 172.68.14.22, server: example.com, request: "GET /api/health HTTP/1.1", upstream: "fastcgi://127.0.0.1:9000"
+2026/08/04 02:44:22 [error] 301#301: *2288 open() "/var/www/html/etc/passwd" failed (2: No such file or directory), client: 91.108.56.14, server: example.com, request: "GET /?page=../etc/passwd HTTP/1.1", host: "example.com"
+2026/08/04 04:15:09 [warn] 302#302: *3001 upstream server temporarily disabled while reading response header from upstream, client: 203.0.113.55, server: example.com, request: "POST /contact HTTP/1.1"
+2026/08/04 06:01:12 [error] 303#303: *3112 SSL_do_handshake() failed (SSL: error:0A000086:SSL routines::certificate verify failed) while SSL handshaking, client: 198.51.100.9, server: 0.0.0.0:443
+2026/08/04 09:00:00 [notice] 1#1: signal 28 (SIGWINCH) received
+2026/08/04 09:00:04 [notice] 1#1: nginx/1.24.0 restarted
+2026/08/04 11:22:41 [error] 305#305: *4001 "/var/www/html/phpmyadmin/index.html" is not found (2: No such file or directory), client: 45.33.32.156, server: example.com, request: "GET /phpmyadmin/ HTTP/1.1"
+2026/08/04 13:45:01 [warn] 306#306: *4512 conflicting server name "www.example.com" on 0.0.0.0:80, ignored

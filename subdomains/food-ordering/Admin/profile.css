@@ -1,0 +1,139 @@
+body {
+  font-family: poppins, sans-serif;
+  background-color: #fef0e8;
+  margin: 0;
+  padding: 0;
+}
+
+.wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 60px;
+}
+
+.container {
+  background-color: rgba(253, 108, 77, 0.1);
+  border-color: rgba(253, 108, 77, 0.5);
+  box-shadow: 2px 2px 5px rgba(253, 108, 77, 0.7);
+  padding: 20px;
+  border-radius: 8px;
+  border: 1px solid rgba(253, 108, 77, 0.5);
+  width: 600px;
+}
+
+.form-row {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.form-group {
+  position: relative;
+  flex: 1;
+  margin-right: 10px;
+}
+
+.form-group:last-child {
+  margin-right: 0;
+}
+
+.form-group label {
+  position: absolute;
+  top: 12px;
+  left: 5px;
+  padding: 0 5px;
+  font-weight: bold;
+  color: #333;
+  transition: 0.2s;
+  pointer-events: none;
+  /* Allow clicking through the label */
+}
+
+.form-group input[type="text"],
+.form-group input[type="email"],
+.form-group input[type="file"] {
+  width: 100%;
+  padding: 15px 15px 15px 15px;
+  /* Extra padding to accommodate label */
+  margin-bottom: 10px;
+  border: 1px solid rgba(253, 108, 77, 0.8);
+  background-color: rgba(253, 108, 77, 0.2);
+  border-radius: 4px;
+  box-sizing: border-box;
+  position: relative;
+  text-align: right;
+  font-size: 15px;
+}
+
+.form-group input[type="file"] {
+  padding: 13px 15px 13px 15px;
+}
+
+form button {
+  width: 100%;
+  padding: 10px;
+  background-color: #fb4a36;
+  color: white;
+  border: 2px solid #fb4a36;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 16px;
+  transition: all 0.3s ease;
+}
+
+form button:hover {
+  background-color: #fbdac7;
+  color: #fb4a36;
+  border: 2px solid #fb4a36;
+}
+
+.profile-image {
+  display: block;
+  margin: 0 auto 20px auto;
+  width: 150px;
+  height: 150px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+/* Include styles directly for demonstration, adjust as needed */
+.profile-section {
+  padding: 20px 5px 20px 5px;
+  display: flex;
+  align-items: center;
+  border-bottom: 2px solid rgba(253, 108, 77, 0.5);
+
+ 
+}
+
+.profile-section img {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  margin-right: 15px;
+}
+
+.profile-section .info {
+  flex-grow: 1;
+}
+
+.profile-section .info h3 {
+  margin: 0;
+  font-size: 17px;
+  font-weight: 500;
+}
+
+.profile-section .info p {
+  margin: 5px 0 0;
+  font-size: 15px;
+  color: #666;
+}
+
+.sidebar ul li a i {
+  margin-right: 10px;
+}
+
+.sidebar ul li a.active {
+  font-weight: bold;
+}

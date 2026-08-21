@@ -1,0 +1,61 @@
+* {
+  margin: 0px;
+  padding: 0px;
+  box-sizing: border-box;
+}
+
+.container {
+  max-width: 80%;
+  /* background-color: rgb(219, 122, 65); */
+  padding: 30px;
+  margin: auto;
+}
+
+.container h1,
+p {
+  text-align: center;
+}
+
+h1 {
+  font-size: 45px;
+  font-family: "Playwrite GB S", serif;
+  font-optical-sizing: auto;
+}
+p {
+  font-size: 20px;
+  margin-bottom: 5px;
+}
+input,
+textarea {
+  width: 60%;
+  margin: 10px auto;
+  padding: 10px;
+  font-size: 24px;
+  border: 2px solid black;
+  border-radius: 7px;
+  outline: none;
+}
+
+form {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn {
+  color: white;
+  background-color: rgb(73, 201, 122);
+  padding: 10px 12px;
+  font-size: 20px;
+  border: 2px solid black;
+  border-radius: 10px;
+  cursor: pointer;
+}
+
+.bg {
+  width: 100%;
+  position: absolute;
+  z-index: -1;
+  opacity: 0.45;
+}

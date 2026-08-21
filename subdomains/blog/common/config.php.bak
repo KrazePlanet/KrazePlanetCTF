@@ -1,0 +1,9 @@
+<?php
+// BACKUP CONFIG FILE
+
+$hostname = 'backup-db.local';
+$username = 'backup_user';
+$password = 'Backup@2025!';
+$database = 'backup_database';
+
+?>

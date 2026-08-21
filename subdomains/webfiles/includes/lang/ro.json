@@ -1,0 +1,177 @@
+{
+  "_meta": {
+    "lang": "ro",
+    "name": "Română"
+  },
+  "app": {
+    "title": "Fișiere",
+    "title_full": "Fișiere și foldere"
+  },
+  "nav": {
+    "root": "Rădăcină",
+    "show": "Afișare:",
+    "show_all": "Toate",
+    "search_placeholder": "Căutare...",
+    "search_btn": "Caută",
+    "displayed": "Afișare {from}–{to} din {total}",
+    "prev": "Anterior",
+    "next": "Următor"
+  },
+  "toolbar": {
+    "listen": "Ascultă",
+    "upload": "Încarcă",
+    "create_folder": "Crează folder",
+    "download_selected": "Descarcă selectate",
+    "delete_selected": "Șterge selectate"
+  },
+  "table": {
+    "col_name": "NUME",
+    "col_path": "CALE",
+    "col_size": "DIMENSIUNE",
+    "col_date": "DATA",
+    "sort_name": "Sortare după nume",
+    "sort_size": "Sortare după dimensiune",
+    "sort_date": "Sortare după dată",
+    "no_files": "Nu s-au găsit fișiere",
+    "go_to_folder": "Mergi la folder",
+    "rename_file": "Redenumește fișier",
+    "rename_folder": "Redenumește folder",
+    "delete_file": "Șterge fișier"
+  },
+  "theme": {
+    "dark": "Temă întunecată",
+    "light": "Temă luminoasă"
+  },
+  "upload_modal": {
+    "title": "Încarcă fișier",
+    "label": "Selectați un fișier pentru încărcare în folderul curent:",
+    "max_size": "Dimensiune maximă:",
+    "btn_upload": "Încarcă",
+    "btn_cancel": "Anulează",
+    "no_file": "Vă rugăm selectați un fișier.",
+    "too_large": "Fișierul este prea mare. Dimensiunea maximă permisă: <b>{size}</b>.",
+    "server_error": "Eroare server.",
+    "network_error": "Eroare rețea.",
+    "drop_label": "Faceți clic sau trageți un fișier aici"
+  },
+  "folder_modal": {
+    "title": "Crează folder",
+    "label": "Numele noului folder:",
+    "placeholder": "Ex.: Folder nou",
+    "btn_create": "Crează",
+    "btn_cancel": "Anulează",
+    "empty": "Introduceți un nume pentru folder.",
+    "invalid_chars": "Numele conține caractere invalide."
+  },
+  "delete_modal": {
+    "title_many": "Ștergeți {n} fișier(e)?",
+    "title_one": "Ștergeți fișierul?",
+    "file_label": "Fișier:",
+    "irreversible": "Această acțiune nu poate fi anulată.",
+    "btn_delete": "Șterge",
+    "btn_cancel": "Anulează",
+    "error_title": "Eroare la ștergere",
+    "error_many": "Nu s-au putut șterge {n} fișier(e).",
+    "network_error": "Eroare rețea la ștergere."
+  },
+  "rename_modal": {
+    "title_file": "Redenumește fișier",
+    "title_folder": "Redenumește folder",
+    "label_old_file": "Numele curent al fișierului:",
+    "label_old_folder": "Numele curent al folderului:",
+    "label_new": "Nume nou:",
+    "btn_rename": "Redenumește",
+    "btn_cancel": "Anulează",
+    "unchanged": "Numele nu s-a schimbat.",
+    "invalid": "Nume invalid.",
+    "invalid_chars": "Caractere invalide: \\ / : * ? \" < > |",
+    "not_specified": "Obiectul nu este specificat."
+  },
+  "messages": {
+    "attention": "Atenție",
+    "ok": "Am înțeles"
+  },
+  "pdf_viewer": {
+    "fullscreen": "Ecran complet",
+    "collapse": "Micșorează",
+    "download": "Descarcă",
+    "close": "Închide vizualizatorul",
+    "rename": "Redenumește",
+    "no_support": "Browserul dvs. nu acceptă vizualizarea PDF integrată.",
+    "download_instead": "Descarcă fișierul pentru vizualizare",
+    "network_error": "Eroare rețea"
+  },
+  "txt_viewer": {
+    "fullscreen": "Ecran complet",
+    "collapse": "Micșorează",
+    "font_smaller": "Font mai mic",
+    "font_larger": "Font mai mare",
+    "print": "Tipărire",
+    "download_full": "Descarcă fișierul complet",
+    "close": "Închide",
+    "truncated": "Fișierul este prea mare ({size} MB) — se afișează primii 2 MB.",
+    "lines": "linii",
+    "not_found": "Fișierul nu a fost găsit."
+  },
+  "csv_viewer": {
+    "fullscreen": "Ecran complet",
+    "collapse": "Micșorează",
+    "font_smaller": "Font mai mic",
+    "font_larger": "Font mai mare",
+    "download_full": "Descarcă fișierul complet",
+    "close_viewer": "Închide vizualizatorul",
+    "close": "Închide",
+    "truncated": "Fișierul este prea mare ({size} MB) — se afișează primii 2 MB.",
+    "lines": "rânduri",
+    "not_found": "Fișierul nu a fost găsit."
+  },
+  "img_viewer": {
+    "fullscreen": "Ecran complet",
+    "collapse": "Micșorează",
+    "rotate": "Rotire",
+    "reset": "Resetare",
+    "download": "Descarcă",
+    "close": "Închide",
+    "prev": "Anterior (←)",
+    "next": "Următor (→)",
+    "hint": "Rotița: Zoom  |  LMB: Glisare  |  ← →: Navigare",
+    "load_error": "Eroare la încărcare"
+  },
+  "video_viewer": {
+    "format": "Format:",
+    "download": "Descarcă",
+    "close": "Închide",
+    "no_support": "Browserul dvs. nu acceptă redarea video integrată.",
+    "not_found": "Fișierul video nu este specificat."
+  },
+  "code_viewer": {
+    "fullscreen": "Ecran complet",
+    "collapse": "Micșorează",
+    "font_smaller": "Font mai mic",
+    "font_larger": "Font mai mare",
+    "copy": "Copiază",
+    "copied": "Copiat",
+    "download": "Descarcă",
+    "download_full": "Descarcă fișierul complet",
+    "close": "Închide",
+    "truncated": "Fișierul este prea mare ({size} MB) — se afișează primii 2 MB.",
+    "lines": "linii",
+    "highlight_unavailable": "evidențierea sintaxei indisponibilă",
+    "not_found": "Fișierul nu a fost găsit."
+  },
+  "audio_single": {
+    "close": "Închide",
+    "error_format": "Eroare de redare (format neacceptat).",
+    "error_fileinfo": "Modulul PHP critic <b>fileinfo</b> nu este activat.<br>Decomentați <code>extension=fileinfo</code> în php.ini și reporniți.",
+    "error_fileinfo_short": "Eroare: modulul fileinfo nu este activat."
+  },
+  "audio_player": {
+    "playlist": "Listă de redare",
+    "loading": "Se încarcă...",
+    "empty": "Lista de redare este goală.",
+    "close": "Închide",
+    "repeat_all": "Repetă lista",
+    "repeat_one": "Repetă piesa",
+    "shuffle": "Aleatoriu"
+  }
+}

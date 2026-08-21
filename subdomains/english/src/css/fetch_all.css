@@ -1,0 +1,267 @@
+.list {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 10px;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    gap: 10px;
+}
+
+.list li {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    cursor: pointer;
+}
+
+.list li.expanded {
+    white-space: normal;
+    overflow: visible;
+    text-overflow: initial;
+}
+
+.list i {
+    font-size: 20px;
+}
+
+.list .buttons {
+    display: flex;
+    gap: 5px;
+}
+
+.list {
+    line-height: 1.7;
+}
+
+.list span.highlight {
+    color: red;
+}
+
+.list:hover {
+    background-color: #f5f5f5;
+}
+
+.fa-heart {
+    color: #ddd;
+    cursor: pointer;
+    transition: color 0.3s, transform 0.3s;
+}
+
+.fa-heart.liked {
+    color: red;
+}
+
+.fa-heart:hover {
+    transform: scale(1.2);
+}
+
+.fa-heart:active {
+    transform: scale(1.1);
+}
+
+.fa-info-circle,
+.fa-volume-up,
+.fa-trash,
+.fa-edit {
+    color: #777;
+    transition: color 0.3s, transform 0.3s;
+}
+
+.fa-info-circle:hover,
+.fa-volume-up:hover,
+.fa-trash:hover,
+.fa-edit:hover {
+    color: #ff6347;
+    transform: scale(1.2);
+}
+
+.fa-info-circle:active,
+.fa-volume-up:active,
+.fa-trash:active,
+.fa-edit:active {
+    color: #ff4000;
+    transform: scale(1.1);
+}
+
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0, 0, 0, 0.5);
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+    visibility: hidden;
+    opacity: 0;
+}
+
+.modal.fade-in {
+    display: block;
+    visibility: visible;
+    opacity: 1;
+}
+
+.modal-content {
+    background-color: #ffffff;
+    margin: 100px auto;
+    padding: 20px;
+    border-radius: 12px;
+    width: 90%;
+    max-width: 600px;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
+    position: relative;
+    box-sizing: border-box;
+    animation: slideIn 0.3s ease;
+}
+
+#modalTitle,
+#modalWord,
+#modalSentence {
+    margin-bottom: 10px;
+    font-size: 16px;
+    line-height: 1.3;
+    color: #2c3e50;
+}
+
+#modalTitle {
+    font-size: 18px;
+    color: #000;
+}
+
+.modal-content hr {
+    border: 0;
+    height: 1px;
+    background: #ddd;
+    margin: 10px 0;
+}
+
+#modalTranslation {
+    margin-bottom: 10px;
+    font-size: 15px;
+    line-height: 1.3;
+    color: #16a085;
+}
+
+#modalDefinition {
+    font-size: 14px;
+    line-height: 1.3;
+    color: #34495e;
+    word-wrap: break-word;
+}
+
+.modal-section {
+    margin-bottom: 10px;
+}
+
+.close {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.close:hover,
+.close:focus {
+    color: #000;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.modal-buttons {
+    display: flex;
+    flex-direction: row;
+    align-content: stretch;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.modal-buttons .btn {
+    display: flex;
+    gap: 15px;
+}
+
+.modal-buttons i {
+    cursor: pointer;
+    font-size: 24px;
+    transition: color 0.3s ease;
+}
+
+.modal-buttons i:hover {
+    color: #ff6347;
+}
+
+.sentences {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 8px 12px;
+    background-color: #fff;
+    color: #ff6347;
+    border: 2px solid #ff6347;
+    border-radius: 8px;
+    text-decoration: none;
+    transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease;
+}
+
+.sentences:hover {
+    background-color: #ff6347;
+    color: #fff;
+}
+
+@keyframes slideIn {
+    from {
+        transform: translateY(-200px);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+.information-not-found {
+    width: calc(100% - 20px);
+    max-width: 600px;
+    margin: 10px auto;
+    padding: 30px;
+    border-radius: 10px;
+    background-color: #f8f9fa;
+    text-align: center;
+    box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.1);
+    color: #343a40;
+    box-sizing: border-box;
+}
+
+.information-not-found i {
+    font-size: 40px;
+    color: #007bff;
+    margin-bottom: 20px;
+}
+
+.information-not-found p {
+    font-size: 18px;
+    color: #6c757d;
+    margin: 10px 0;
+}
+
+.information-not-found a {
+    display: inline-block;
+    margin-top: 20px;
+    padding: 10px 20px;
+    font-size: 16px;
+    color: #fff;
+    background-color: #007bff;
+    border-radius: 5px;
+    text-decoration: none;
+}
+
+.information-not-found a:hover {
+    background-color: #0056b3;
+}

@@ -1,0 +1,177 @@
+{
+  "_meta": {
+    "lang": "de",
+    "name": "Deutsch"
+  },
+  "app": {
+    "title": "Dateien",
+    "title_full": "Dateien und Ordner"
+  },
+  "nav": {
+    "root": "Stammverzeichnis",
+    "show": "Anzeigen:",
+    "show_all": "Alle",
+    "search_placeholder": "Suchen...",
+    "search_btn": "Suchen",
+    "displayed": "{from} bis {to} von {total} angezeigt",
+    "prev": "Zurück",
+    "next": "Weiter"
+  },
+  "toolbar": {
+    "listen": "Anhören",
+    "upload": "Hochladen",
+    "create_folder": "Ordner erstellen",
+    "download_selected": "Ausgewählte herunterladen",
+    "delete_selected": "Ausgewählte löschen"
+  },
+  "table": {
+    "col_name": "NAME",
+    "col_path": "PFAD",
+    "col_size": "GRÖSSE",
+    "col_date": "DATUM",
+    "sort_name": "Nach Name sortieren",
+    "sort_size": "Nach Größe sortieren",
+    "sort_date": "Nach Datum sortieren",
+    "no_files": "Keine Dateien gefunden",
+    "go_to_folder": "Zum Ordner wechseln",
+    "rename_file": "Datei umbenennen",
+    "rename_folder": "Ordner umbenennen",
+    "delete_file": "Datei löschen"
+  },
+  "theme": {
+    "dark": "Dunkles Design",
+    "light": "Helles Design"
+  },
+  "upload_modal": {
+    "title": "Datei hochladen",
+    "label": "Datei zum Hochladen in den aktuellen Ordner auswählen:",
+    "max_size": "Maximale Größe:",
+    "btn_upload": "Hochladen",
+    "btn_cancel": "Abbrechen",
+    "no_file": "Bitte wählen Sie eine Datei aus.",
+    "too_large": "Datei ist zu groß. Maximale Größe: <b>{size}</b>.",
+    "server_error": "Serverfehler.",
+    "network_error": "Netzwerkfehler.",
+    "drop_label": "Klicken oder Datei hier ablegen"
+  },
+  "folder_modal": {
+    "title": "Ordner erstellen",
+    "label": "Name des neuen Ordners:",
+    "placeholder": "z. B.: Neuer Ordner",
+    "btn_create": "Erstellen",
+    "btn_cancel": "Abbrechen",
+    "empty": "Bitte geben Sie einen Ordnernamen ein.",
+    "invalid_chars": "Name enthält ungültige Zeichen."
+  },
+  "delete_modal": {
+    "title_many": "{n} Datei(en) löschen?",
+    "title_one": "Datei löschen?",
+    "file_label": "Datei:",
+    "irreversible": "Diese Aktion kann nicht rückgängig gemacht werden.",
+    "btn_delete": "Löschen",
+    "btn_cancel": "Abbrechen",
+    "error_title": "Fehler beim Löschen",
+    "error_many": "{n} Datei(en) konnten nicht gelöscht werden.",
+    "network_error": "Netzwerkfehler beim Löschen."
+  },
+  "rename_modal": {
+    "title_file": "Datei umbenennen",
+    "title_folder": "Ordner umbenennen",
+    "label_old_file": "Aktueller Dateiname:",
+    "label_old_folder": "Aktueller Ordnername:",
+    "label_new": "Neuer Name:",
+    "btn_rename": "Umbenennen",
+    "btn_cancel": "Abbrechen",
+    "unchanged": "Name wurde nicht geändert.",
+    "invalid": "Ungültiger Name.",
+    "invalid_chars": "Ungültige Zeichen: \\ / : * ? \" < > |",
+    "not_specified": "Objekt nicht angegeben."
+  },
+  "messages": {
+    "attention": "Achtung",
+    "ok": "Verstanden"
+  },
+  "pdf_viewer": {
+    "fullscreen": "Vollbild",
+    "collapse": "Verkleinern",
+    "download": "Herunterladen",
+    "close": "Viewer schließen",
+    "rename": "Umbenennen",
+    "no_support": "Ihr Browser unterstützt keine eingebettete PDF-Vorschau.",
+    "download_instead": "Datei zum Anzeigen herunterladen",
+    "network_error": "Netzwerkfehler"
+  },
+  "txt_viewer": {
+    "fullscreen": "Vollbild",
+    "collapse": "Verkleinern",
+    "font_smaller": "Schrift verkleinern",
+    "font_larger": "Schrift vergrößern",
+    "print": "Drucken",
+    "download_full": "Vollständige Datei herunterladen",
+    "close": "Schließen",
+    "truncated": "Datei zu groß ({size} MB) — zeige erste 2 MB.",
+    "lines": "Zeilen",
+    "not_found": "Datei nicht gefunden."
+  },
+  "csv_viewer": {
+    "fullscreen": "Vollbild",
+    "collapse": "Verkleinern",
+    "font_smaller": "Schrift verkleinern",
+    "font_larger": "Schrift vergrößern",
+    "download_full": "Vollständige Datei herunterladen",
+    "close_viewer": "Viewer schließen",
+    "close": "Schließen",
+    "truncated": "Datei zu groß ({size} MB) — zeige erste 2 MB.",
+    "lines": "Zeilen",
+    "not_found": "Datei nicht gefunden."
+  },
+  "img_viewer": {
+    "fullscreen": "Vollbild",
+    "collapse": "Verkleinern",
+    "rotate": "Drehen",
+    "reset": "Zurücksetzen",
+    "download": "Herunterladen",
+    "close": "Schließen",
+    "prev": "Vorherige (←)",
+    "next": "Nächste (→)",
+    "hint": "Rad: Zoom  |  LMT: Ziehen  |  ← →: Navigieren",
+    "load_error": "Ladefehler"
+  },
+  "video_viewer": {
+    "format": "Format:",
+    "download": "Herunterladen",
+    "close": "Schließen",
+    "no_support": "Ihr Browser unterstützt keine eingebettete Videowiedergabe.",
+    "not_found": "Videodatei nicht angegeben."
+  },
+  "code_viewer": {
+    "fullscreen": "Vollbild",
+    "collapse": "Verkleinern",
+    "font_smaller": "Schrift verkleinern",
+    "font_larger": "Schrift vergrößern",
+    "copy": "Kopieren",
+    "copied": "Kopiert",
+    "download": "Herunterladen",
+    "download_full": "Vollständige Datei herunterladen",
+    "close": "Schließen",
+    "truncated": "Datei zu groß ({size} MB) — zeige erste 2 MB.",
+    "lines": "Zeilen",
+    "highlight_unavailable": "Hervorhebung nicht verfügbar",
+    "not_found": "Datei nicht gefunden."
+  },
+  "audio_single": {
+    "close": "Schließen",
+    "error_format": "Wiedergabefehler (Format nicht unterstützt).",
+    "error_fileinfo": "Kritisches PHP-Modul <b>fileinfo</b> ist nicht aktiviert.<br>Kommentieren Sie <code>extension=fileinfo</code> in php.ini aus und starten Sie neu.",
+    "error_fileinfo_short": "Fehler: fileinfo-Modul nicht aktiviert."
+  },
+  "audio_player": {
+    "playlist": "Wiedergabeliste",
+    "loading": "Laden...",
+    "empty": "Wiedergabeliste ist leer.",
+    "close": "Schließen",
+    "repeat_all": "Liste wiederholen",
+    "repeat_one": "Titel wiederholen",
+    "shuffle": "Zufällig"
+  }
+}

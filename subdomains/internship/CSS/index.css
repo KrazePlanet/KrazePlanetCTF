@@ -1,0 +1,71 @@
+/* Global reset */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+/* Body background */
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, #0f2027, #203a43, #2c5364); /* Deep gradient */
+    color: #ffffff;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* Container */
+.container {
+    background: rgba(255, 255, 255, 0.12); /* Glassmorphism effect */
+    padding: 3rem 2rem;
+    border-radius: 18px;
+    backdrop-filter: blur(12px);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+    max-width: 600px;
+    width: 100%;
+    text-align: center;
+}
+
+/* Title */
+.container h1 {
+    font-size: 2.2rem;
+    font-weight: 600;
+    margin-bottom: 2rem;
+    color: #fff;
+}
+
+/* Buttons */
+.container a.btn {
+    margin: 0.5rem;
+    padding: 0.8rem 2rem;
+    font-size: 1.1rem;
+    font-weight: bold;
+    border-radius: 12px;
+    transition: all 0.3s ease-in-out;
+}
+
+/* Login button (primary) */
+.container a.btn-primary {
+    background: #f7c873;
+    border: none;
+    color: #2c3e50;
+}
+
+.container a.btn-primary:hover {
+    background: #f5b041;
+    color: #fff;
+}
+
+/* Register button (success) */
+.container a.btn-success {
+    background: #2ecc71;
+    border: none;
+    color: #fff;
+}
+
+.container a.btn-success:hover {
+    background: #27ae60;
+    color: #fff;
+}

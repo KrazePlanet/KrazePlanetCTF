@@ -1,0 +1,215 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  padding-top: 100px;
+  background-color: #feead4;
+  font-family: "poppins", sans-serif;
+  overflow-x: hidden;
+}
+
+a {
+  color: white;
+  text-decoration: none;
+}
+
+.card-title,
+.card-text {
+  text-align: center;
+  
+}
+
+section {
+  padding-bottom: 60px;
+  padding-top: 10px;
+  padding-left: 16px;
+  padding-right: 16px;
+}
+
+section:nth-child(odd) {
+  background-color: #ffe4c2;
+
+  /* Set background color for odd sections */
+}
+
+section:nth-child(even) {
+  background-color: #feead4;
+  /* Set background color for even sections */
+}
+
+.button-container p {
+  font-size: 20px;
+  margin-left: 15px;
+  font-weight: 400;
+  color: #d92420;
+}
+
+.addItemBtn {
+  background-color: #fb4a36;
+  border: none;
+  color: white;
+  text-align: center;
+  padding: 10px 15px 10px 15px;
+  font-size: 15px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.disabled-button {
+  background-color: gray;
+  color: white;
+  cursor: not-allowed;
+}
+
+.disabled-button i {
+  color: white;
+}
+
+.card-body {
+  position: relative;
+  /* Ensure that the .button-container is positioned relative to this */
+  height: 300px;
+  /* Fixed height */
+
+  padding-bottom: 20px;
+  /* Space for the button-container */
+  border-top: #fcc1ba 1px solid;
+}
+.card-status {
+  color: red;
+  text-align: center;
+  font-size: 1.3em;
+}
+
+.button-container {
+  position: absolute;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-direction: row;
+  background-color: #fcafa7;
+  padding: 10px 8px 10px 8px;
+  border-radius: 8px;
+  gap: 15px;
+  bottom: 25px;
+  position: absolute;
+  transform: translateX(-50%);
+  /* Offset by half its width to ensure centering */
+  width: 90%;
+  left: 50%;
+}
+
+/* Responsive adjustments for medium to large screens */
+@media (min-width: 768px) and (max-width: 991px) {
+}
+
+section h1 {
+  background-color: #fcc1b1;
+  border-radius: 5px;
+  border: none;
+  padding: 8px;
+  text-align: left;
+  padding-left: 20px;
+}
+
+.toast {
+  visibility: hidden;
+  min-width: 300px;
+  text-align: center;
+  border-radius: 5px;
+  padding: 16px;
+  position: fixed;
+  z-index: 1;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 18px;
+  transition: visibility 0s, opacity 0.5s ease-in-out;
+  opacity: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-right: 50px;
+  /* Space for the close button */
+}
+
+.toast.show {
+  visibility: visible;
+  opacity: 1;
+}
+
+.toast.hide {
+  visibility: hidden;
+  opacity: 0;
+}
+
+.toast-btn {
+  background: none;
+  border: none;
+  color: #fff;
+  font-size: 16px;
+  cursor: pointer;
+  margin-left: 10px;
+  padding: 5px 10px;
+  border-radius: 3px;
+}
+
+.toast-btn.toast-ok {
+  background-color: green;
+  margin-top: 15px;
+}
+
+.toast-btn.toast-close {
+  position: absolute;
+  top: 0px;
+  right: 10px;
+  background-color: none;
+  font-size: 25px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: red;
+  border: none;
+  padding: 0 0;
+}
+
+.toast-btn.toast-close:hover,
+.toast-btn.toast-ok:hover {
+  opacity: 0.8;
+}
+
+/* Media query for screen widths between 990px and 1400px */
+@media screen and (min-width: 990px) and (max-width: 1400px) {
+  .menu-item {
+    flex: 0 0 33.33% !important; /* Each item will take 1/3rd of the row */
+    max-width: 33.33% !important;
+  }
+}
+
+.heading {
+  display: flex;
+  flex-direction: column;
+  align-items: center; /* Center horizontally */
+  text-align: center; /* Center text within the container */
+  background-color: #fcafa7; /* Background color */
+  padding: 20px 40px 30px 40px;
+  border-radius: 8px; /* Optional: Rounded corners */
+  margin: 0 auto; /* Center the container horizontally if it's in a wider container */
+  max-width: fit-content; /* Ensure background only covers content */
+}
+
+.heading-title {
+  font-size: 2.5em;
+  font-weight: 600;
+}
+
+.heading-description {
+  font-size: 1.8em;
+  font-weight: 400;
+  color: #1d1818;
+}

@@ -1,0 +1,177 @@
+{
+  "_meta": {
+    "lang": "pl",
+    "name": "Polski"
+  },
+  "app": {
+    "title": "Pliki",
+    "title_full": "Pliki i foldery"
+  },
+  "nav": {
+    "root": "Katalog główny",
+    "show": "Pokaż:",
+    "show_all": "Wszystkie",
+    "search_placeholder": "Szukaj...",
+    "search_btn": "Szukaj",
+    "displayed": "Wyświetlono {from} do {to} z {total}",
+    "prev": "Poprzednia",
+    "next": "Następna"
+  },
+  "toolbar": {
+    "listen": "Słuchaj",
+    "upload": "Prześlij",
+    "create_folder": "Utwórz folder",
+    "download_selected": "Pobierz zaznaczone",
+    "delete_selected": "Usuń zaznaczone"
+  },
+  "table": {
+    "col_name": "NAZWA",
+    "col_path": "ŚCIEŻKA",
+    "col_size": "ROZMIAR",
+    "col_date": "DATA",
+    "sort_name": "Sortuj według nazwy",
+    "sort_size": "Sortuj według rozmiaru",
+    "sort_date": "Sortuj według daty",
+    "no_files": "Nie znaleziono plików",
+    "go_to_folder": "Przejdź do folderu",
+    "rename_file": "Zmień nazwę pliku",
+    "rename_folder": "Zmień nazwę folderu",
+    "delete_file": "Usuń plik"
+  },
+  "theme": {
+    "dark": "Ciemny motyw",
+    "light": "Jasny motyw"
+  },
+  "upload_modal": {
+    "title": "Prześlij plik",
+    "label": "Wybierz plik do przesłania do bieżącego folderu:",
+    "max_size": "Maksymalny rozmiar:",
+    "btn_upload": "Prześlij",
+    "btn_cancel": "Anuluj",
+    "no_file": "Proszę wybrać plik.",
+    "too_large": "Plik jest za duży. Maksymalny dozwolony rozmiar: <b>{size}</b>.",
+    "server_error": "Błąd serwera.",
+    "network_error": "Błąd sieci.",
+    "drop_label": "Kliknij lub przeciągnij plik tutaj"
+  },
+  "folder_modal": {
+    "title": "Utwórz folder",
+    "label": "Nazwa nowego folderu:",
+    "placeholder": "np.: Nowy folder",
+    "btn_create": "Utwórz",
+    "btn_cancel": "Anuluj",
+    "empty": "Proszę podać nazwę folderu.",
+    "invalid_chars": "Nazwa zawiera niedozwolone znaki."
+  },
+  "delete_modal": {
+    "title_many": "Usunąć {n} plik(ów)?",
+    "title_one": "Usunąć plik?",
+    "file_label": "Plik:",
+    "irreversible": "Tej operacji nie można cofnąć.",
+    "btn_delete": "Usuń",
+    "btn_cancel": "Anuluj",
+    "error_title": "Błąd usuwania",
+    "error_many": "Nie udało się usunąć {n} plik(ów).",
+    "network_error": "Błąd sieci podczas usuwania."
+  },
+  "rename_modal": {
+    "title_file": "Zmień nazwę pliku",
+    "title_folder": "Zmień nazwę folderu",
+    "label_old_file": "Aktualna nazwa pliku:",
+    "label_old_folder": "Aktualna nazwa folderu:",
+    "label_new": "Nowa nazwa:",
+    "btn_rename": "Zmień nazwę",
+    "btn_cancel": "Anuluj",
+    "unchanged": "Nazwa nie została zmieniona.",
+    "invalid": "Nieprawidłowa nazwa.",
+    "invalid_chars": "Niedozwolone znaki: \\ / : * ? \" < > |",
+    "not_specified": "Obiekt nie określony."
+  },
+  "messages": {
+    "attention": "Uwaga",
+    "ok": "Rozumiem"
+  },
+  "pdf_viewer": {
+    "fullscreen": "Pełny ekran",
+    "collapse": "Zwiń",
+    "download": "Pobierz",
+    "close": "Zamknij podgląd",
+    "rename": "Zmień nazwę",
+    "no_support": "Twoja przeglądarka nie obsługuje wbudowanego podglądu PDF.",
+    "download_instead": "Pobierz plik do wyświetlenia",
+    "network_error": "Błąd sieci"
+  },
+  "txt_viewer": {
+    "fullscreen": "Pełny ekran",
+    "collapse": "Zwiń",
+    "font_smaller": "Zmniejsz czcionkę",
+    "font_larger": "Zwiększ czcionkę",
+    "print": "Drukuj",
+    "download_full": "Pobierz cały plik",
+    "close": "Zamknij",
+    "truncated": "Plik za duży ({size} MB) — wyświetlono pierwsze 2 MB.",
+    "lines": "wierszy",
+    "not_found": "Plik nie znaleziony."
+  },
+  "csv_viewer": {
+    "fullscreen": "Pełny ekran",
+    "collapse": "Zwiń",
+    "font_smaller": "Zmniejsz czcionkę",
+    "font_larger": "Zwiększ czcionkę",
+    "download_full": "Pobierz cały plik",
+    "close_viewer": "Zamknij podgląd",
+    "close": "Zamknij",
+    "truncated": "Plik za duży ({size} MB) — wyświetlono pierwsze 2 MB.",
+    "lines": "wierszy",
+    "not_found": "Plik nie znaleziony."
+  },
+  "img_viewer": {
+    "fullscreen": "Pełny ekran",
+    "collapse": "Zwiń",
+    "rotate": "Obróć",
+    "reset": "Resetuj",
+    "download": "Pobierz",
+    "close": "Zamknij",
+    "prev": "Poprzednie (←)",
+    "next": "Następne (→)",
+    "hint": "Kółko: Zoom  |  LPM: Przeciągaj  |  ← →: Nawigacja",
+    "load_error": "Błąd ładowania"
+  },
+  "video_viewer": {
+    "format": "Format:",
+    "download": "Pobierz",
+    "close": "Zamknij",
+    "no_support": "Twoja przeglądarka nie obsługuje wbudowanego odtwarzacza wideo.",
+    "not_found": "Plik wideo nie określony."
+  },
+  "code_viewer": {
+    "fullscreen": "Pełny ekran",
+    "collapse": "Zwiń",
+    "font_smaller": "Zmniejsz czcionkę",
+    "font_larger": "Zwiększ czcionkę",
+    "copy": "Kopiuj",
+    "copied": "Skopiowano",
+    "download": "Pobierz",
+    "download_full": "Pobierz cały plik",
+    "close": "Zamknij",
+    "truncated": "Plik za duży ({size} MB) — wyświetlono pierwsze 2 MB.",
+    "lines": "wierszy",
+    "highlight_unavailable": "podświetlanie niedostępne",
+    "not_found": "Plik nie znaleziony."
+  },
+  "audio_single": {
+    "close": "Zamknij",
+    "error_format": "Błąd odtwarzania (format nieobsługiwany).",
+    "error_fileinfo": "Krytyczny moduł PHP <b>fileinfo</b> nie jest włączony.<br>Odkomentuj <code>extension=fileinfo</code> w php.ini i uruchom ponownie.",
+    "error_fileinfo_short": "Błąd: moduł fileinfo nie włączony."
+  },
+  "audio_player": {
+    "playlist": "Lista odtwarzania",
+    "loading": "Ładowanie...",
+    "empty": "Lista odtwarzania jest pusta.",
+    "close": "Zamknij",
+    "repeat_all": "Powtarzaj listę",
+    "repeat_one": "Powtarzaj utwór",
+    "shuffle": "Losowo"
+  }
+}

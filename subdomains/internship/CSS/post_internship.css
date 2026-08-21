@@ -1,0 +1,93 @@
+/* Page background */
+body {
+  min-height: 100vh;
+  margin: 0;
+  font-family: Arial, sans-serif;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+  color: #f3f4f6;
+}
+
+/* Container */
+form, h2, p, a {
+  display: block;
+  width: 100%;
+  max-width: 500px;
+  margin: 10px auto;
+  text-align: left;
+}
+
+h2 {
+  text-align: center;
+  margin-bottom: 20px;
+  font-weight: 600;
+  color: #f9fafb;
+}
+
+p {
+  text-align: center;
+}
+
+/* Form */
+form {
+  background: rgba(17, 24, 39, 0.95);
+  padding: 25px;
+  border-radius: 12px;
+  box-shadow: 0 6px 15px rgba(0,0,0,0.4);
+}
+
+label {
+  display: block;
+  font-weight: 500;
+  margin-bottom: 6px;
+}
+
+input[type="text"],
+textarea {
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 15px;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  background: #374151;
+  color: #f9fafb;
+}
+input:focus,
+textarea:focus {
+  outline: none;
+  background: #4b5563;
+}
+
+/* Submit button */
+input[type="submit"] {
+  width: 100%;
+  padding: 10px;
+  border: none;
+  border-radius: 8px;
+  background: #2563eb;
+  color: white;
+  font-weight: bold;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background 0.2s ease, transform 0.2s ease;
+}
+input[type="submit"]:hover {
+  background: #1d4ed8;
+  transform: translateY(-2px);
+}
+
+/* Back link */
+a {
+  display: block;
+  text-align: center;
+  margin-top: 15px;
+  color: #93c5fd;
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+a:hover {
+  color: #60a5fa;
+}

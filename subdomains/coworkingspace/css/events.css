@@ -1,0 +1,44 @@
+@import url('https://fonts.googleapis.com/css2?family=Roboto+Condensed');
+/***events section starts***/
+*{
+    font-family:'Roboto Condensed', sans-serif;
+}
+
+section .events-section{
+    width: 100%;
+    height: 100vh;
+    background: url(img/bg.jpg);
+    background-size: cover;
+}
+section .events-section .leftbox{
+    width: 50%;
+    height: 100%;
+    float: left;
+    padding: 50px;
+    box-sizing: border-box;
+}
+section .events-section .leftbox .events-content{
+    color: #fff;
+    background: rgba(0, 0, 0, .5);
+    padding: 40px;
+    transition: .5s;
+}
+section .events-section .leftbox .events-content:hover{
+    background: #e91e63;
+}
+section .events-section .leftbox .events-content{
+    margin: 0;
+    padding: 0;
+    font-size: 50px;
+    text-transform: uppercase;
+}
+section .events-section .leftbox .events-content p{
+    margin: 10px 0 0;
+    padding: 0;
+}
+section .events-section .events{
+    position: relative;
+    width: 50%;
+    height: 100%;
+}
+/***events section ends***/

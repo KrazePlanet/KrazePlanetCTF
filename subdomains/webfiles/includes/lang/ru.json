@@ -1,0 +1,177 @@
+{
+  "_meta": {
+    "lang": "ru",
+    "name": "Русский"
+  },
+  "app": {
+    "title": "Файлы",
+    "title_full": "Файлы и папки"
+  },
+  "nav": {
+    "root": "Корень",
+    "show": "Показать:",
+    "show_all": "Все",
+    "search_placeholder": "Поиск...",
+    "search_btn": "Найти",
+    "displayed": "Показано с {from} до {to} из {total}",
+    "prev": "Предыдущая",
+    "next": "Следующая"
+  },
+  "toolbar": {
+    "listen": "Слушать",
+    "upload": "Загрузить",
+    "create_folder": "Создать папку",
+    "download_selected": "Скачать выбранное",
+    "delete_selected": "Удалить выбранное"
+  },
+  "table": {
+    "col_name": "ИМЯ",
+    "col_path": "ПУТЬ",
+    "col_size": "РАЗМЕР",
+    "col_date": "ДАТА",
+    "sort_name": "Сортировать по имени",
+    "sort_size": "Сортировать по размеру",
+    "sort_date": "Сортировать по дате",
+    "no_files": "Файлы не найдены",
+    "go_to_folder": "Перейти в папку",
+    "rename_file": "Переименовать файл",
+    "rename_folder": "Переименовать папку",
+    "delete_file": "Удалить файл"
+  },
+  "theme": {
+    "dark": "Тёмная тема",
+    "light": "Светлая тема"
+  },
+  "upload_modal": {
+    "title": "Загрузить файл",
+    "label": "Выберите файл для загрузки в текущую папку:",
+    "max_size": "Максимальный размер:",
+    "btn_upload": "Загрузить",
+    "btn_cancel": "Отмена",
+    "no_file": "Выберите файл.",
+    "too_large": "Файл слишком большой. Максимально допустимый размер: <b>{size}</b>.",
+    "server_error": "Ошибка сервера.",
+    "network_error": "Ошибка сети.",
+    "drop_label": "Нажмите или перетащите файл сюда"
+  },
+  "folder_modal": {
+    "title": "Создать папку",
+    "label": "Имя новой папки:",
+    "placeholder": "Например: Новая папка",
+    "btn_create": "Создать",
+    "btn_cancel": "Отмена",
+    "empty": "Введите имя папки.",
+    "invalid_chars": "Имя содержит недопустимые символы."
+  },
+  "delete_modal": {
+    "title_many": "Удалить {n} файл(ов)?",
+    "title_one": "Удалить файл?",
+    "file_label": "Файл:",
+    "irreversible": "Это действие необратимо.",
+    "btn_delete": "Удалить",
+    "btn_cancel": "Отмена",
+    "error_title": "Ошибка удаления",
+    "error_many": "Не удалось удалить {n} файл(ов).",
+    "network_error": "Ошибка сети при удалении."
+  },
+  "rename_modal": {
+    "title_file": "Переименовать файл",
+    "title_folder": "Переименовать папку",
+    "label_old_file": "Текущее имя файла:",
+    "label_old_folder": "Текущее имя папки:",
+    "label_new": "Новое имя:",
+    "btn_rename": "Переименовать",
+    "btn_cancel": "Отмена",
+    "unchanged": "Имя не изменилось.",
+    "invalid": "Недопустимое имя.",
+    "invalid_chars": "Недопустимые символы: \\ / : * ? \" < > |",
+    "not_specified": "Объект не указан."
+  },
+  "messages": {
+    "attention": "Внимание",
+    "ok": "Понятно"
+  },
+  "pdf_viewer": {
+    "fullscreen": "Полный экран",
+    "collapse": "Свернуть",
+    "download": "Скачать",
+    "close": "Закрыть просмотр",
+    "rename": "Переименовать",
+    "no_support": "Ваш браузер не поддерживает встроенный просмотр PDF.",
+    "download_instead": "Скачать файл для просмотра",
+    "network_error": "Ошибка сети"
+  },
+  "txt_viewer": {
+    "fullscreen": "Полный экран",
+    "collapse": "Свернуть",
+    "font_smaller": "Уменьшить шрифт",
+    "font_larger": "Увеличить шрифт",
+    "print": "Печать",
+    "download_full": "Скачать целиком",
+    "close": "Закрыть",
+    "truncated": "Файл слишком большой ({size} МБ) — показаны первые 2 МБ.",
+    "lines": "строк",
+    "not_found": "Файл не найден."
+  },
+  "csv_viewer": {
+    "fullscreen": "Полный экран",
+    "collapse": "Свернуть",
+    "font_smaller": "Уменьшить шрифт",
+    "font_larger": "Увеличить шрифт",
+    "download_full": "Скачать целиком",
+    "close_viewer": "Закрыть просмотр",
+    "close": "Закрыть",
+    "truncated": "Файл слишком большой ({size} МБ) — показаны первые 2 МБ.",
+    "lines": "строк",
+    "not_found": "Файл не найден."
+  },
+  "img_viewer": {
+    "fullscreen": "Полный экран",
+    "collapse": "Свернуть",
+    "rotate": "Повернуть",
+    "reset": "Сбросить",
+    "download": "Скачать",
+    "close": "Закрыть",
+    "prev": "Предыдущее (←)",
+    "next": "Следующее (→)",
+    "hint": "Колесо: Зум  |  ЛКМ: Перетаскивание  |  ← →: Навигация",
+    "load_error": "Ошибка загрузки"
+  },
+  "video_viewer": {
+    "format": "Формат:",
+    "download": "Скачать",
+    "close": "Закрыть",
+    "no_support": "Ваш браузер не поддерживает встроенные видеоплееры.",
+    "not_found": "Видеофайл не указан."
+  },
+  "code_viewer": {
+    "fullscreen": "Полный экран",
+    "collapse": "Свернуть",
+    "font_smaller": "Уменьшить шрифт",
+    "font_larger": "Увеличить шрифт",
+    "copy": "Копировать",
+    "copied": "Скопировано",
+    "download": "Скачать",
+    "download_full": "Скачать целиком",
+    "close": "Закрыть",
+    "truncated": "Файл слишком большой ({size} МБ) — показаны первые 2 МБ.",
+    "lines": "строк",
+    "highlight_unavailable": "подсветка недоступна",
+    "not_found": "Файл не найден."
+  },
+  "audio_single": {
+    "close": "Закрыть",
+    "error_format": "Ошибка воспроизведения (формат не поддерживается).",
+    "error_fileinfo": "Критический модуль PHP <b>fileinfo</b> (определение типов) не подключён.<br>Раскомментируйте <code>extension=fileinfo</code> в php.ini и перезапустите.",
+    "error_fileinfo_short": "Ошибка: модуль fileinfo не подключён."
+  },
+  "audio_player": {
+    "playlist": "Плейлист",
+    "loading": "Загрузка...",
+    "empty": "Плейлист пуст.",
+    "close": "Закрыть",
+    "repeat_all": "Повтор списка",
+    "repeat_one": "Повтор трека",
+    "shuffle": "Перемешать"
+  }
+}

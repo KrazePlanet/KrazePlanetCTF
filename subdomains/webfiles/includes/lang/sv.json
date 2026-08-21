@@ -1,0 +1,177 @@
+{
+  "_meta": {
+    "lang": "sv",
+    "name": "Svenska"
+  },
+  "app": {
+    "title": "Filer",
+    "title_full": "Filer och mappar"
+  },
+  "nav": {
+    "root": "Rot",
+    "show": "Visa:",
+    "show_all": "Alla",
+    "search_placeholder": "Sök...",
+    "search_btn": "Sök",
+    "displayed": "Visar {from} till {to} av {total}",
+    "prev": "Föregående",
+    "next": "Nästa"
+  },
+  "toolbar": {
+    "listen": "Lyssna",
+    "upload": "Ladda upp",
+    "create_folder": "Skapa mapp",
+    "download_selected": "Ladda ned valda",
+    "delete_selected": "Ta bort valda"
+  },
+  "table": {
+    "col_name": "NAMN",
+    "col_path": "SÖKVÄG",
+    "col_size": "STORLEK",
+    "col_date": "DATUM",
+    "sort_name": "Sortera efter namn",
+    "sort_size": "Sortera efter storlek",
+    "sort_date": "Sortera efter datum",
+    "no_files": "Inga filer hittades",
+    "go_to_folder": "Gå till mapp",
+    "rename_file": "Byt namn på fil",
+    "rename_folder": "Byt namn på mapp",
+    "delete_file": "Ta bort fil"
+  },
+  "theme": {
+    "dark": "Mörkt tema",
+    "light": "Ljust tema"
+  },
+  "upload_modal": {
+    "title": "Ladda upp fil",
+    "label": "Välj en fil att ladda upp till aktuell mapp:",
+    "max_size": "Max storlek:",
+    "btn_upload": "Ladda upp",
+    "btn_cancel": "Avbryt",
+    "no_file": "Välj en fil.",
+    "too_large": "Filen är för stor. Max tillåten storlek: <b>{size}</b>.",
+    "server_error": "Serverfel.",
+    "network_error": "Nätverksfel.",
+    "drop_label": "Klicka eller dra en fil hit"
+  },
+  "folder_modal": {
+    "title": "Skapa mapp",
+    "label": "Namn på ny mapp:",
+    "placeholder": "T.ex.: Ny mapp",
+    "btn_create": "Skapa",
+    "btn_cancel": "Avbryt",
+    "empty": "Ange ett mappnamn.",
+    "invalid_chars": "Namnet innehåller ogiltiga tecken."
+  },
+  "delete_modal": {
+    "title_many": "Ta bort {n} fil(er)?",
+    "title_one": "Ta bort fil?",
+    "file_label": "Fil:",
+    "irreversible": "Den här åtgärden kan inte ångras.",
+    "btn_delete": "Ta bort",
+    "btn_cancel": "Avbryt",
+    "error_title": "Borttagningsfel",
+    "error_many": "Kunde inte ta bort {n} fil(er).",
+    "network_error": "Nätverksfel vid borttagning."
+  },
+  "rename_modal": {
+    "title_file": "Byt namn på fil",
+    "title_folder": "Byt namn på mapp",
+    "label_old_file": "Nuvarande filnamn:",
+    "label_old_folder": "Nuvarande mappnamn:",
+    "label_new": "Nytt namn:",
+    "btn_rename": "Byt namn",
+    "btn_cancel": "Avbryt",
+    "unchanged": "Namnet har inte ändrats.",
+    "invalid": "Ogiltigt namn.",
+    "invalid_chars": "Ogiltiga tecken: \\ / : * ? \" < > |",
+    "not_specified": "Objekt inte angivet."
+  },
+  "messages": {
+    "attention": "Observera",
+    "ok": "Förstått"
+  },
+  "pdf_viewer": {
+    "fullscreen": "Helskärm",
+    "collapse": "Minimera",
+    "download": "Ladda ned",
+    "close": "Stäng visaren",
+    "rename": "Byt namn",
+    "no_support": "Din webbläsare stöder inte inbyggd PDF-visning.",
+    "download_instead": "Ladda ned fil för att visa den",
+    "network_error": "Nätverksfel"
+  },
+  "txt_viewer": {
+    "fullscreen": "Helskärm",
+    "collapse": "Minimera",
+    "font_smaller": "Mindre teckensnitt",
+    "font_larger": "Större teckensnitt",
+    "print": "Skriv ut",
+    "download_full": "Ladda ned hela filen",
+    "close": "Stäng",
+    "truncated": "Filen är för stor ({size} MB) — visar de första 2 MB.",
+    "lines": "rader",
+    "not_found": "Fil hittades inte."
+  },
+  "csv_viewer": {
+    "fullscreen": "Helskärm",
+    "collapse": "Minimera",
+    "font_smaller": "Mindre teckensnitt",
+    "font_larger": "Större teckensnitt",
+    "download_full": "Ladda ned hela filen",
+    "close_viewer": "Stäng visaren",
+    "close": "Stäng",
+    "truncated": "Filen är för stor ({size} MB) — visar de första 2 MB.",
+    "lines": "rader",
+    "not_found": "Fil hittades inte."
+  },
+  "img_viewer": {
+    "fullscreen": "Helskärm",
+    "collapse": "Minimera",
+    "rotate": "Rotera",
+    "reset": "Återställ",
+    "download": "Ladda ned",
+    "close": "Stäng",
+    "prev": "Föregående (←)",
+    "next": "Nästa (→)",
+    "hint": "Hjul: Zoom  |  LMB: Dra  |  ← →: Navigera",
+    "load_error": "Laddningsfel"
+  },
+  "video_viewer": {
+    "format": "Format:",
+    "download": "Ladda ned",
+    "close": "Stäng",
+    "no_support": "Webbläsaren stöder inte inbyggd videouppspelning.",
+    "not_found": "Videofil inte angiven."
+  },
+  "code_viewer": {
+    "fullscreen": "Helskärm",
+    "collapse": "Minimera",
+    "font_smaller": "Mindre teckensnitt",
+    "font_larger": "Större teckensnitt",
+    "copy": "Kopiera",
+    "copied": "Kopierat",
+    "download": "Ladda ned",
+    "download_full": "Ladda ned hela filen",
+    "close": "Stäng",
+    "truncated": "Filen är för stor ({size} MB) — visar de första 2 MB.",
+    "lines": "rader",
+    "highlight_unavailable": "markering ej tillgänglig",
+    "not_found": "Fil hittades inte."
+  },
+  "audio_single": {
+    "close": "Stäng",
+    "error_format": "Uppspelningsfel (format stöds inte).",
+    "error_fileinfo": "Kritisk PHP-modul <b>fileinfo</b> är inte aktiverad.<br>Ta bort kommentaren för <code>extension=fileinfo</code> i php.ini och starta om.",
+    "error_fileinfo_short": "Fel: fileinfo-modulen är inte aktiverad."
+  },
+  "audio_player": {
+    "playlist": "Spellista",
+    "loading": "Läser in...",
+    "empty": "Spellistan är tom.",
+    "close": "Stäng",
+    "repeat_all": "Upprepa lista",
+    "repeat_one": "Upprepa spår",
+    "shuffle": "Blanda"
+  }
+}

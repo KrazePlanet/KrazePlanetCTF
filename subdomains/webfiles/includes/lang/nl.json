@@ -1,0 +1,177 @@
+{
+  "_meta": {
+    "lang": "nl",
+    "name": "Nederlands"
+  },
+  "app": {
+    "title": "Bestanden",
+    "title_full": "Bestanden en mappen"
+  },
+  "nav": {
+    "root": "Hoofdmap",
+    "show": "Tonen:",
+    "show_all": "Alle",
+    "search_placeholder": "Zoeken...",
+    "search_btn": "Zoeken",
+    "displayed": "Weergave {from} t/m {to} van {total}",
+    "prev": "Vorige",
+    "next": "Volgende"
+  },
+  "toolbar": {
+    "listen": "Luisteren",
+    "upload": "Uploaden",
+    "create_folder": "Map aanmaken",
+    "download_selected": "Geselecteerde downloaden",
+    "delete_selected": "Geselecteerde verwijderen"
+  },
+  "table": {
+    "col_name": "NAAM",
+    "col_path": "PAD",
+    "col_size": "GROOTTE",
+    "col_date": "DATUM",
+    "sort_name": "Sorteren op naam",
+    "sort_size": "Sorteren op grootte",
+    "sort_date": "Sorteren op datum",
+    "no_files": "Geen bestanden gevonden",
+    "go_to_folder": "Naar map gaan",
+    "rename_file": "Bestand hernoemen",
+    "rename_folder": "Map hernoemen",
+    "delete_file": "Bestand verwijderen"
+  },
+  "theme": {
+    "dark": "Donker thema",
+    "light": "Licht thema"
+  },
+  "upload_modal": {
+    "title": "Bestand uploaden",
+    "label": "Selecteer een bestand om te uploaden naar de huidige map:",
+    "max_size": "Max. grootte:",
+    "btn_upload": "Uploaden",
+    "btn_cancel": "Annuleren",
+    "no_file": "Selecteer een bestand.",
+    "too_large": "Bestand is te groot. Maximale toegestane grootte: <b>{size}</b>.",
+    "server_error": "Serverfout.",
+    "network_error": "Netwerkfout.",
+    "drop_label": "Klik of sleep een bestand hierheen"
+  },
+  "folder_modal": {
+    "title": "Map aanmaken",
+    "label": "Naam van nieuwe map:",
+    "placeholder": "Bijv.: Nieuwe map",
+    "btn_create": "Aanmaken",
+    "btn_cancel": "Annuleren",
+    "empty": "Voer een mapnaam in.",
+    "invalid_chars": "De naam bevat ongeldige tekens."
+  },
+  "delete_modal": {
+    "title_many": "{n} bestand(en) verwijderen?",
+    "title_one": "Bestand verwijderen?",
+    "file_label": "Bestand:",
+    "irreversible": "Deze actie kan niet ongedaan worden gemaakt.",
+    "btn_delete": "Verwijderen",
+    "btn_cancel": "Annuleren",
+    "error_title": "Verwijderfout",
+    "error_many": "{n} bestand(en) konden niet worden verwijderd.",
+    "network_error": "Netwerkfout bij verwijderen."
+  },
+  "rename_modal": {
+    "title_file": "Bestand hernoemen",
+    "title_folder": "Map hernoemen",
+    "label_old_file": "Huidige bestandsnaam:",
+    "label_old_folder": "Huidige mapnaam:",
+    "label_new": "Nieuwe naam:",
+    "btn_rename": "Hernoemen",
+    "btn_cancel": "Annuleren",
+    "unchanged": "Naam is niet gewijzigd.",
+    "invalid": "Ongeldige naam.",
+    "invalid_chars": "Ongeldige tekens: \\ / : * ? \" < > |",
+    "not_specified": "Object niet opgegeven."
+  },
+  "messages": {
+    "attention": "Let op",
+    "ok": "Begrepen"
+  },
+  "pdf_viewer": {
+    "fullscreen": "Volledig scherm",
+    "collapse": "Minimaliseren",
+    "download": "Downloaden",
+    "close": "Viewer sluiten",
+    "rename": "Hernoemen",
+    "no_support": "Uw browser ondersteunt geen ingebedde PDF-weergave.",
+    "download_instead": "Bestand downloaden om te bekijken",
+    "network_error": "Netwerkfout"
+  },
+  "txt_viewer": {
+    "fullscreen": "Volledig scherm",
+    "collapse": "Minimaliseren",
+    "font_smaller": "Lettertype verkleinen",
+    "font_larger": "Lettertype vergroten",
+    "print": "Afdrukken",
+    "download_full": "Volledig bestand downloaden",
+    "close": "Sluiten",
+    "truncated": "Bestand te groot ({size} MB) — eerste 2 MB wordt weergegeven.",
+    "lines": "regels",
+    "not_found": "Bestand niet gevonden."
+  },
+  "csv_viewer": {
+    "fullscreen": "Volledig scherm",
+    "collapse": "Minimaliseren",
+    "font_smaller": "Lettertype verkleinen",
+    "font_larger": "Lettertype vergroten",
+    "download_full": "Volledig bestand downloaden",
+    "close_viewer": "Viewer sluiten",
+    "close": "Sluiten",
+    "truncated": "Bestand te groot ({size} MB) — eerste 2 MB wordt weergegeven.",
+    "lines": "rijen",
+    "not_found": "Bestand niet gevonden."
+  },
+  "img_viewer": {
+    "fullscreen": "Volledig scherm",
+    "collapse": "Minimaliseren",
+    "rotate": "Draaien",
+    "reset": "Resetten",
+    "download": "Downloaden",
+    "close": "Sluiten",
+    "prev": "Vorige (←)",
+    "next": "Volgende (→)",
+    "hint": "Wiel: Zoom  |  LMB: Slepen  |  ← →: Navigeren",
+    "load_error": "Ladfout"
+  },
+  "video_viewer": {
+    "format": "Formaat:",
+    "download": "Downloaden",
+    "close": "Sluiten",
+    "no_support": "Uw browser ondersteunt geen ingebedde videospeler.",
+    "not_found": "Videobestand niet opgegeven."
+  },
+  "code_viewer": {
+    "fullscreen": "Volledig scherm",
+    "collapse": "Minimaliseren",
+    "font_smaller": "Lettertype verkleinen",
+    "font_larger": "Lettertype vergroten",
+    "copy": "Kopiëren",
+    "copied": "Gekopieerd",
+    "download": "Downloaden",
+    "download_full": "Volledig bestand downloaden",
+    "close": "Sluiten",
+    "truncated": "Bestand te groot ({size} MB) — eerste 2 MB wordt weergegeven.",
+    "lines": "regels",
+    "highlight_unavailable": "markering niet beschikbaar",
+    "not_found": "Bestand niet gevonden."
+  },
+  "audio_single": {
+    "close": "Sluiten",
+    "error_format": "Afspeelfout (formaat niet ondersteund).",
+    "error_fileinfo": "Kritieke PHP-module <b>fileinfo</b> is niet ingeschakeld.<br>Verwijder commentaar van <code>extension=fileinfo</code> in php.ini en herstart.",
+    "error_fileinfo_short": "Fout: fileinfo-module niet ingeschakeld."
+  },
+  "audio_player": {
+    "playlist": "Afspeellijst",
+    "loading": "Laden...",
+    "empty": "Afspeellijst is leeg.",
+    "close": "Sluiten",
+    "repeat_all": "Lijst herhalen",
+    "repeat_one": "Nummer herhalen",
+    "shuffle": "Willekeurig"
+  }
+}

@@ -1,0 +1,177 @@
+{
+  "_meta": {
+    "lang": "fi",
+    "name": "Suomi"
+  },
+  "app": {
+    "title": "Tiedostot",
+    "title_full": "Tiedostot ja kansiot"
+  },
+  "nav": {
+    "root": "Juuri",
+    "show": "Näytä:",
+    "show_all": "Kaikki",
+    "search_placeholder": "Hae...",
+    "search_btn": "Hae",
+    "displayed": "Näytetään {from}–{to} / {total}",
+    "prev": "Edellinen",
+    "next": "Seuraava"
+  },
+  "toolbar": {
+    "listen": "Kuuntele",
+    "upload": "Lataa palvelimelle",
+    "create_folder": "Luo kansio",
+    "download_selected": "Lataa valitut",
+    "delete_selected": "Poista valitut"
+  },
+  "table": {
+    "col_name": "NIMI",
+    "col_path": "POLKU",
+    "col_size": "KOKO",
+    "col_date": "PÄIVÄYS",
+    "sort_name": "Lajittele nimen mukaan",
+    "sort_size": "Lajittele koon mukaan",
+    "sort_date": "Lajittele päiväyksen mukaan",
+    "no_files": "Tiedostoja ei löydy",
+    "go_to_folder": "Siirry kansioon",
+    "rename_file": "Nimeä tiedosto uudelleen",
+    "rename_folder": "Nimeä kansio uudelleen",
+    "delete_file": "Poista tiedosto"
+  },
+  "theme": {
+    "dark": "Tumma teema",
+    "light": "Vaalea teema"
+  },
+  "upload_modal": {
+    "title": "Lataa tiedosto",
+    "label": "Valitse tiedosto nykyiseen kansioon:",
+    "max_size": "Enimmäiskoko:",
+    "btn_upload": "Lataa",
+    "btn_cancel": "Peruuta",
+    "no_file": "Valitse tiedosto.",
+    "too_large": "Tiedosto on liian suuri. Suurin sallittu koko: <b>{size}</b>.",
+    "server_error": "Palvelinvirhe.",
+    "network_error": "Verkkovirhe.",
+    "drop_label": "Napsauta tai vedä tiedosto tähän"
+  },
+  "folder_modal": {
+    "title": "Luo kansio",
+    "label": "Uuden kansion nimi:",
+    "placeholder": "Esim.: Uusi kansio",
+    "btn_create": "Luo",
+    "btn_cancel": "Peruuta",
+    "empty": "Anna kansion nimi.",
+    "invalid_chars": "Nimi sisältää virheellisiä merkkejä."
+  },
+  "delete_modal": {
+    "title_many": "Poistetaanko {n} tiedosto(a)?",
+    "title_one": "Poistetaanko tiedosto?",
+    "file_label": "Tiedosto:",
+    "irreversible": "Tätä toimintoa ei voi peruuttaa.",
+    "btn_delete": "Poista",
+    "btn_cancel": "Peruuta",
+    "error_title": "Poistamisvirhe",
+    "error_many": "{n} tiedostoa ei voitu poistaa.",
+    "network_error": "Verkkovirhe poistamisen aikana."
+  },
+  "rename_modal": {
+    "title_file": "Nimeä tiedosto uudelleen",
+    "title_folder": "Nimeä kansio uudelleen",
+    "label_old_file": "Nykyinen tiedostonimi:",
+    "label_old_folder": "Nykyinen kansion nimi:",
+    "label_new": "Uusi nimi:",
+    "btn_rename": "Nimeä uudelleen",
+    "btn_cancel": "Peruuta",
+    "unchanged": "Nimi ei muuttunut.",
+    "invalid": "Virheellinen nimi.",
+    "invalid_chars": "Virheelliset merkit: \\ / : * ? \" < > |",
+    "not_specified": "Kohdetta ei määritetty."
+  },
+  "messages": {
+    "attention": "Huomio",
+    "ok": "Ymmärretty"
+  },
+  "pdf_viewer": {
+    "fullscreen": "Koko näyttö",
+    "collapse": "Pienennä",
+    "download": "Lataa",
+    "close": "Sulje katselin",
+    "rename": "Nimeä uudelleen",
+    "no_support": "Selaimesi ei tue upotettua PDF-katselua.",
+    "download_instead": "Lataa tiedosto katseluun",
+    "network_error": "Verkkovirhe"
+  },
+  "txt_viewer": {
+    "fullscreen": "Koko näyttö",
+    "collapse": "Pienennä",
+    "font_smaller": "Pienempi fontti",
+    "font_larger": "Suurempi fontti",
+    "print": "Tulosta",
+    "download_full": "Lataa koko tiedosto",
+    "close": "Sulje",
+    "truncated": "Tiedosto on liian suuri ({size} Mt) — näytetään ensimmäiset 2 Mt.",
+    "lines": "riviä",
+    "not_found": "Tiedostoa ei löydy."
+  },
+  "csv_viewer": {
+    "fullscreen": "Koko näyttö",
+    "collapse": "Pienennä",
+    "font_smaller": "Pienempi fontti",
+    "font_larger": "Suurempi fontti",
+    "download_full": "Lataa koko tiedosto",
+    "close_viewer": "Sulje katselin",
+    "close": "Sulje",
+    "truncated": "Tiedosto on liian suuri ({size} Mt) — näytetään ensimmäiset 2 Mt.",
+    "lines": "riviä",
+    "not_found": "Tiedostoa ei löydy."
+  },
+  "img_viewer": {
+    "fullscreen": "Koko näyttö",
+    "collapse": "Pienennä",
+    "rotate": "Kierrä",
+    "reset": "Nollaa",
+    "download": "Lataa",
+    "close": "Sulje",
+    "prev": "Edellinen (←)",
+    "next": "Seuraava (→)",
+    "hint": "Pyörä: Zoomaus  |  LMB: Vedä  |  ← →: Navigoi",
+    "load_error": "Latausvirhe"
+  },
+  "video_viewer": {
+    "format": "Muoto:",
+    "download": "Lataa",
+    "close": "Sulje",
+    "no_support": "Selaimesi ei tue upotettua videotoistoa.",
+    "not_found": "Videotiedostoa ei määritetty."
+  },
+  "code_viewer": {
+    "fullscreen": "Koko näyttö",
+    "collapse": "Pienennä",
+    "font_smaller": "Pienempi fontti",
+    "font_larger": "Suurempi fontti",
+    "copy": "Kopioi",
+    "copied": "Kopioitu",
+    "download": "Lataa",
+    "download_full": "Lataa koko tiedosto",
+    "close": "Sulje",
+    "truncated": "Tiedosto on liian suuri ({size} Mt) — näytetään ensimmäiset 2 Mt.",
+    "lines": "riviä",
+    "highlight_unavailable": "korostus ei saatavilla",
+    "not_found": "Tiedostoa ei löydy."
+  },
+  "audio_single": {
+    "close": "Sulje",
+    "error_format": "Toistovirhe (muotoa ei tueta).",
+    "error_fileinfo": "Kriittinen PHP-moduuli <b>fileinfo</b> ei ole käytössä.<br>Poista kommentti <code>extension=fileinfo</code> php.ini-tiedostosta ja käynnistä uudelleen.",
+    "error_fileinfo_short": "Virhe: fileinfo-moduuli ei ole käytössä."
+  },
+  "audio_player": {
+    "playlist": "Soittolista",
+    "loading": "Ladataan...",
+    "empty": "Soittolista on tyhjä.",
+    "close": "Sulje",
+    "repeat_all": "Toista lista",
+    "repeat_one": "Toista kappale",
+    "shuffle": "Sekoita"
+  }
+}

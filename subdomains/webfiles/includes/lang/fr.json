@@ -1,0 +1,177 @@
+{
+  "_meta": {
+    "lang": "fr",
+    "name": "Français"
+  },
+  "app": {
+    "title": "Fichiers",
+    "title_full": "Fichiers et dossiers"
+  },
+  "nav": {
+    "root": "Racine",
+    "show": "Afficher :",
+    "show_all": "Tous",
+    "search_placeholder": "Rechercher...",
+    "search_btn": "Rechercher",
+    "displayed": "Affichage de {from} à {to} sur {total}",
+    "prev": "Précédent",
+    "next": "Suivant"
+  },
+  "toolbar": {
+    "listen": "Écouter",
+    "upload": "Téléverser",
+    "create_folder": "Créer un dossier",
+    "download_selected": "Télécharger la sélection",
+    "delete_selected": "Supprimer la sélection"
+  },
+  "table": {
+    "col_name": "NOM",
+    "col_path": "CHEMIN",
+    "col_size": "TAILLE",
+    "col_date": "DATE",
+    "sort_name": "Trier par nom",
+    "sort_size": "Trier par taille",
+    "sort_date": "Trier par date",
+    "no_files": "Aucun fichier trouvé",
+    "go_to_folder": "Aller au dossier",
+    "rename_file": "Renommer le fichier",
+    "rename_folder": "Renommer le dossier",
+    "delete_file": "Supprimer le fichier"
+  },
+  "theme": {
+    "dark": "Thème sombre",
+    "light": "Thème clair"
+  },
+  "upload_modal": {
+    "title": "Téléverser un fichier",
+    "label": "Sélectionnez un fichier à téléverser dans le dossier actuel :",
+    "max_size": "Taille maximale :",
+    "btn_upload": "Téléverser",
+    "btn_cancel": "Annuler",
+    "no_file": "Veuillez sélectionner un fichier.",
+    "too_large": "Fichier trop volumineux. Taille maximale autorisée : <b>{size}</b>.",
+    "server_error": "Erreur serveur.",
+    "network_error": "Erreur réseau.",
+    "drop_label": "Cliquez ou déposez un fichier ici"
+  },
+  "folder_modal": {
+    "title": "Créer un dossier",
+    "label": "Nom du nouveau dossier :",
+    "placeholder": "Ex. : Nouveau dossier",
+    "btn_create": "Créer",
+    "btn_cancel": "Annuler",
+    "empty": "Veuillez saisir un nom de dossier.",
+    "invalid_chars": "Le nom contient des caractères non valides."
+  },
+  "delete_modal": {
+    "title_many": "Supprimer {n} fichier(s) ?",
+    "title_one": "Supprimer le fichier ?",
+    "file_label": "Fichier :",
+    "irreversible": "Cette action est irréversible.",
+    "btn_delete": "Supprimer",
+    "btn_cancel": "Annuler",
+    "error_title": "Erreur de suppression",
+    "error_many": "Impossible de supprimer {n} fichier(s).",
+    "network_error": "Erreur réseau lors de la suppression."
+  },
+  "rename_modal": {
+    "title_file": "Renommer le fichier",
+    "title_folder": "Renommer le dossier",
+    "label_old_file": "Nom actuel du fichier :",
+    "label_old_folder": "Nom actuel du dossier :",
+    "label_new": "Nouveau nom :",
+    "btn_rename": "Renommer",
+    "btn_cancel": "Annuler",
+    "unchanged": "Le nom n'a pas changé.",
+    "invalid": "Nom non valide.",
+    "invalid_chars": "Caractères non valides : \\ / : * ? \" < > |",
+    "not_specified": "Objet non spécifié."
+  },
+  "messages": {
+    "attention": "Attention",
+    "ok": "Compris"
+  },
+  "pdf_viewer": {
+    "fullscreen": "Plein écran",
+    "collapse": "Réduire",
+    "download": "Télécharger",
+    "close": "Fermer la visionneuse",
+    "rename": "Renommer",
+    "no_support": "Votre navigateur ne prend pas en charge la visualisation PDF intégrée.",
+    "download_instead": "Télécharger le fichier pour le visualiser",
+    "network_error": "Erreur réseau"
+  },
+  "txt_viewer": {
+    "fullscreen": "Plein écran",
+    "collapse": "Réduire",
+    "font_smaller": "Réduire la police",
+    "font_larger": "Agrandir la police",
+    "print": "Imprimer",
+    "download_full": "Télécharger le fichier entier",
+    "close": "Fermer",
+    "truncated": "Fichier trop volumineux ({size} Mo) — affichage des 2 premiers Mo.",
+    "lines": "lignes",
+    "not_found": "Fichier non trouvé."
+  },
+  "csv_viewer": {
+    "fullscreen": "Plein écran",
+    "collapse": "Réduire",
+    "font_smaller": "Réduire la police",
+    "font_larger": "Agrandir la police",
+    "download_full": "Télécharger le fichier entier",
+    "close_viewer": "Fermer la visionneuse",
+    "close": "Fermer",
+    "truncated": "Fichier trop volumineux ({size} Mo) — affichage des 2 premiers Mo.",
+    "lines": "lignes",
+    "not_found": "Fichier non trouvé."
+  },
+  "img_viewer": {
+    "fullscreen": "Plein écran",
+    "collapse": "Réduire",
+    "rotate": "Pivoter",
+    "reset": "Réinitialiser",
+    "download": "Télécharger",
+    "close": "Fermer",
+    "prev": "Précédent (←)",
+    "next": "Suivant (→)",
+    "hint": "Molette : Zoom  |  Clic gauche : Déplacer  |  ← → : Naviguer",
+    "load_error": "Erreur de chargement"
+  },
+  "video_viewer": {
+    "format": "Format :",
+    "download": "Télécharger",
+    "close": "Fermer",
+    "no_support": "Votre navigateur ne prend pas en charge la lecture vidéo intégrée.",
+    "not_found": "Fichier vidéo non spécifié."
+  },
+  "code_viewer": {
+    "fullscreen": "Plein écran",
+    "collapse": "Réduire",
+    "font_smaller": "Réduire la police",
+    "font_larger": "Agrandir la police",
+    "copy": "Copier",
+    "copied": "Copié",
+    "download": "Télécharger",
+    "download_full": "Télécharger le fichier entier",
+    "close": "Fermer",
+    "truncated": "Fichier trop volumineux ({size} Mo) — affichage des 2 premiers Mo.",
+    "lines": "lignes",
+    "highlight_unavailable": "coloration non disponible",
+    "not_found": "Fichier non trouvé."
+  },
+  "audio_single": {
+    "close": "Fermer",
+    "error_format": "Erreur de lecture (format non pris en charge).",
+    "error_fileinfo": "Le module PHP critique <b>fileinfo</b> n'est pas activé.<br>Décommentez <code>extension=fileinfo</code> dans php.ini et redémarrez.",
+    "error_fileinfo_short": "Erreur : module fileinfo non activé."
+  },
+  "audio_player": {
+    "playlist": "Playlist",
+    "loading": "Chargement...",
+    "empty": "La playlist est vide.",
+    "close": "Fermer",
+    "repeat_all": "Répéter la liste",
+    "repeat_one": "Répéter la piste",
+    "shuffle": "Aléatoire"
+  }
+}

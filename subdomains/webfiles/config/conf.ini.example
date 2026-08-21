@@ -1,0 +1,17 @@
+[general]
+base_dir = "C:/Work/littlelecollection/"
+title = "My little files collection"
+date_format = "d-m-Y H:i"
+background  = "includes/bgroundimg.jpg"   ; Leave blank to remove the background.
+language = en
+
+[options]
+enable_search = true
+enable_download = true
+enable_upload = true
+max_upload_size  = 100MB
+enable_delete = true
+debug = true
+
+[exclude]
+patterns = "*.exe, robots.txt, App_Resources, *.xls, *.xlsx, Thumbs.db, bin, web.config, *.aspx" ; Or leave blank.

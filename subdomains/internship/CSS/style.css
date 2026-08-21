@@ -1,0 +1,123 @@
+/* style.css */
+
+/* Elegant gradient background */
+body {
+    margin: 0;
+    padding: 0;
+    height: 100vh;
+    background: linear-gradient(135deg, #0f2027, #203a43, #2c5364); /* Deep blue tones */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* Glassmorphism container */
+.container {
+    max-width: 420px;
+    width: 100%;
+    padding: 2.5rem 2rem;
+    background: rgba(255, 255, 255, 0.12);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(12px);
+    border-radius: 16px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: #ffffff;
+}
+
+/* Heading */
+.container p:first-of-type {
+    font-size: 1.8rem;
+    font-weight: 600;
+    margin-bottom: 1.5rem;
+    text-align: center;
+    color: #ffffff;
+}
+
+/* Form group spacing */
+.form-group {
+    margin-bottom: 1.2rem;
+}
+
+/* Form input styles */
+.form-control {
+    background: rgba(255, 255, 255, 0.1);
+    border: none;
+    border-radius: 10px;
+    padding: 0.75rem;
+    color: #fff;
+    font-size: 0.95rem;
+    transition: 0.3s ease;
+}
+
+.form-control::placeholder {
+    color: #ddd;
+}
+
+.form-control:focus {
+    background: rgba(255, 255, 255, 0.2);
+    box-shadow: 0 0 8px rgba(255, 255, 255, 0.25);
+    color: #fff;
+}
+
+/* Button styles */
+.btn-primary {
+    width: 100%;
+    padding: 0.75rem;
+    border: none;
+    border-radius: 10px;
+    background: #f7c873; /* Gold-like tone */
+    color: #2c3e50;
+    font-weight: bold;
+    transition: 0.3s ease;
+}
+
+.btn-primary:hover {
+    background: #f5b041;
+    color: #fff;
+}
+
+/* Link and text below form */
+.container p {
+    text-align: center;
+    margin-top: 1rem;
+    font-size: 0.95rem;
+    color: #ffffff;
+}
+
+.container a {
+    color: #f7c873;
+    font-weight: 500;
+    text-decoration: underline;
+}
+
+.container a:hover {
+    color: #fff7e6;
+}
+
+/* Alerts styling */
+.alert {
+    margin-bottom: 1rem;
+    border-radius: 8px;
+    font-size: 0.9rem;
+}
+/* Text below the form */
+.container .form-footer {
+    text-align: center;
+    margin-top: 1.5rem;
+    font-size: 0.9rem;
+    font-weight: 400;
+    color: #ddd;
+}
+
+/* Link style */
+.container .form-footer a {
+    color: #f7c873;
+    text-decoration: none;
+    margin-left: 5px;
+    font-weight: 500;
+}
+
+.container .form-footer a:hover {
+    text-decoration: underline;
+}

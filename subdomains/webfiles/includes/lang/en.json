@@ -1,0 +1,177 @@
+{
+  "_meta": {
+    "lang": "en",
+    "name": "English"
+  },
+  "app": {
+    "title": "Files",
+    "title_full": "Files and folders"
+  },
+  "nav": {
+    "root": "Root",
+    "show": "Show:",
+    "show_all": "All",
+    "search_placeholder": "Search...",
+    "search_btn": "Find",
+    "displayed": "Showing {from} to {to} of {total}",
+    "prev": "Previous",
+    "next": "Next"
+  },
+  "toolbar": {
+    "listen": "Listen",
+    "upload": "Upload",
+    "create_folder": "Create folder",
+    "download_selected": "Download selected",
+    "delete_selected": "Delete selected"
+  },
+  "table": {
+    "col_name": "NAME",
+    "col_path": "PATH",
+    "col_size": "SIZE",
+    "col_date": "DATE",
+    "sort_name": "Sort by name",
+    "sort_size": "Sort by size",
+    "sort_date": "Sort by date",
+    "no_files": "No files found",
+    "go_to_folder": "Go to folder",
+    "rename_file": "Rename file",
+    "rename_folder": "Rename folder",
+    "delete_file": "Delete file"
+  },
+  "theme": {
+    "dark": "Dark theme",
+    "light": "Light theme"
+  },
+  "upload_modal": {
+    "title": "Upload file",
+    "label": "Select a file to upload to the current folder:",
+    "max_size": "Maximum size:",
+    "btn_upload": "Upload",
+    "btn_cancel": "Cancel",
+    "no_file": "Please select a file.",
+    "too_large": "File is too large. Maximum allowed size: <b>{size}</b>.",
+    "server_error": "Server error.",
+    "network_error": "Network error.",
+    "drop_label": "Click or drag a file here"
+  },
+  "folder_modal": {
+    "title": "Create folder",
+    "label": "New folder name:",
+    "placeholder": "e.g. New folder",
+    "btn_create": "Create",
+    "btn_cancel": "Cancel",
+    "empty": "Please enter a folder name.",
+    "invalid_chars": "Name contains invalid characters."
+  },
+  "delete_modal": {
+    "title_many": "Delete {n} file(s)?",
+    "title_one": "Delete file?",
+    "file_label": "File:",
+    "irreversible": "This action cannot be undone.",
+    "btn_delete": "Delete",
+    "btn_cancel": "Cancel",
+    "error_title": "Delete error",
+    "error_many": "Failed to delete {n} file(s).",
+    "network_error": "Network error while deleting."
+  },
+  "rename_modal": {
+    "title_file": "Rename file",
+    "title_folder": "Rename folder",
+    "label_old_file": "Current file name:",
+    "label_old_folder": "Current folder name:",
+    "label_new": "New name:",
+    "btn_rename": "Rename",
+    "btn_cancel": "Cancel",
+    "unchanged": "Name not changed.",
+    "invalid": "Invalid name.",
+    "invalid_chars": "Invalid characters: \\ / : * ? \" < > |",
+    "not_specified": "Object not specified."
+  },
+  "messages": {
+    "attention": "Attention",
+    "ok": "Got it"
+  },
+  "pdf_viewer": {
+    "fullscreen": "Fullscreen",
+    "collapse": "Collapse",
+    "download": "Download",
+    "close": "Close viewer",
+    "rename": "Rename",
+    "no_support": "Your browser does not support inline PDF viewing.",
+    "download_instead": "Download file to view",
+    "network_error": "Network error"
+  },
+  "txt_viewer": {
+    "fullscreen": "Fullscreen",
+    "collapse": "Collapse",
+    "font_smaller": "Decrease font",
+    "font_larger": "Increase font",
+    "print": "Print",
+    "download_full": "Download full file",
+    "close": "Close",
+    "truncated": "File is too large ({size} MB) — showing first 2 MB.",
+    "lines": "lines",
+    "not_found": "File not found."
+  },
+  "csv_viewer": {
+    "fullscreen": "Fullscreen",
+    "collapse": "Collapse",
+    "font_smaller": "Decrease font",
+    "font_larger": "Increase font",
+    "download_full": "Download full file",
+    "close_viewer": "Close viewer",
+    "close": "Close",
+    "truncated": "File is too large ({size} MB) — showing first 2 MB.",
+    "lines": "rows",
+    "not_found": "File not found."
+  },
+  "img_viewer": {
+    "fullscreen": "Fullscreen",
+    "collapse": "Collapse",
+    "rotate": "Rotate",
+    "reset": "Reset",
+    "download": "Download",
+    "close": "Close",
+    "prev": "Previous (←)",
+    "next": "Next (→)",
+    "hint": "Scroll: Zoom  |  LMB: Drag  |  ← →: Navigate",
+    "load_error": "Load error"
+  },
+  "video_viewer": {
+    "format": "Format:",
+    "download": "Download",
+    "close": "Close",
+    "no_support": "Your browser does not support inline video playback.",
+    "not_found": "Video file not specified."
+  },
+  "code_viewer": {
+    "fullscreen": "Fullscreen",
+    "collapse": "Collapse",
+    "font_smaller": "Decrease font",
+    "font_larger": "Increase font",
+    "copy": "Copy",
+    "copied": "Copied",
+    "download": "Download",
+    "download_full": "Download full file",
+    "close": "Close",
+    "truncated": "File is too large ({size} MB) — showing first 2 MB.",
+    "lines": "lines",
+    "highlight_unavailable": "highlighting unavailable",
+    "not_found": "File not found."
+  },
+  "audio_single": {
+    "close": "Close",
+    "error_format": "Playback error (format not supported).",
+    "error_fileinfo": "Critical PHP module <b>fileinfo</b> (file type detection) is not enabled.<br>Uncomment <code>extension=fileinfo</code> in php.ini and restart.",
+    "error_fileinfo_short": "Error: fileinfo module not enabled."
+  },
+  "audio_player": {
+    "playlist": "Playlist",
+    "loading": "Loading...",
+    "empty": "Playlist is empty.",
+    "close": "Close",
+    "repeat_all": "Repeat list",
+    "repeat_one": "Repeat track",
+    "shuffle": "Shuffle"
+  }
+}

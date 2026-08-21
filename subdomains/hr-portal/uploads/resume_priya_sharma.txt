@@ -1,0 +1,21 @@
+Full Name: Priya Sharma
+Email: priya.sharma@email.com
+Phone: +91-9876543210
+LinkedIn: linkedin.com/in/priyasharma
+
+SUMMARY
+Full-Stack Web Developer with 5 years of expertise in React, Node.js, and cloud-native development.
+
+EXPERIENCE
+Frontend Lead — PixelCraft Studios (2021–Present)
+  - Built component library used across 12 internal products
+  - Reduced bundle size by 45% through code splitting and lazy loading
+
+Junior Developer — WebSphere Agency (2019–2021)
+  - Developed dynamic CMS themes and custom plugins
+
+EDUCATION
+B.E. Information Technology — Mumbai University, 2019
+
+SKILLS
+JavaScript, React, Node.js, TypeScript, MongoDB, GraphQL, Tailwind CSS

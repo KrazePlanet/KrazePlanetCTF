@@ -1,0 +1,77 @@
+/* Page background */
+body {
+  min-height: 100vh;
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+  color: #fff;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* Centered card */
+.form-container {
+  background: #1f2937;
+  padding: 30px;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+  width: 400px;
+  text-align: center;
+}
+
+/* Heading */
+.form-container h2 {
+  margin-bottom: 20px;
+  color: #f3f4f6;
+  font-weight: 600;
+}
+
+/* Labels */
+label {
+  font-weight: 500;
+  color: #e5e7eb;
+  display: block;
+  margin-bottom: 6px;
+  text-align: left;
+}
+
+/* Inputs & textarea */
+input[type="text"],
+textarea {
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 15px;
+  border: none;
+  border-radius: 8px;
+  background: #111827;
+  color: #f9fafb;
+  font-size: 1rem;
+}
+
+input[type="text"]:focus,
+textarea:focus {
+  outline: none;
+  background: #374151;
+  box-shadow: 0 0 0 2px #2563eb;
+}
+
+/* Submit button */
+input[type="submit"] {
+  width: 100%;
+  padding: 12px;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  background: #2563eb;
+  color: #fff;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+input[type="submit"]:hover {
+  background: #1e40af;
+  transform: translateY(-2px);
+  box-shadow: 0 3px 10px rgba(0,0,0,0.25);
+}

@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Footer</title>
+  <style>
+   .site-footer {
+    background-color: #333;
+    color: #ddd;
+    padding: 10px 0;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    text-align: center;
+    z-index: 1000;
+}
+
+.footer-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+}
+
+.footer-container p {
+    margin: 0;
+    font-size: 16px;
+}
+
+.footer-divider {
+    color: #888;
+    font-size: 16px;
+}
+
+.footer-container strong {
+    color: #fff;
+}
+
+@media (max-width: 768px) {
+    .footer-container {
+        flex-direction: column;
+        text-align: center;
+        gap: 5px;
+    }
+
+    .footer-divider {
+        display: none; /* Hide the divider on small screens */
+    }
+}
+
+
+  </style>
+</head>
+<body>
+  <footer class="site-footer">
+    <div class="footer-container">
+        <p>&copy; 2024 All Rights Reserved.</p>
+        <span class="footer-divider">|</span>
+        <p>Authored by <strong>Asna Assalam</strong></p>
+    </div>
+</footer>
+
+</body>
+</html>

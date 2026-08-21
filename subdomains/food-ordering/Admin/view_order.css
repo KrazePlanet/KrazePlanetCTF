@@ -1,0 +1,270 @@
+*{
+  margin: 0;
+  padding: 0;
+}
+body {
+  background: #fef0e8;
+  font-family: "Poppins", sans-serif;
+  margin: 0;
+}
+.content{
+  margin-bottom: 40px;
+}
+ /* Order Details Container */
+ .order-details {
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+  /* Add space between items */
+  margin-bottom: 20px;
+  margin-left: 30px;
+  margin-right: 30px;
+}
+
+.order-items {
+  flex: 60%;
+  /* Takes 60% of the space */
+  border-radius: 6px;
+  background-color: #fce9e2;
+  padding: 10px;
+}
+
+.order-summary {
+  flex: 40%;
+  /* Takes 40% of the space */
+  background-color: #fce9e2;
+  padding: 10px;
+  border-radius: 6px;
+}
+
+/* Flex Layout for Titles and Values */
+.order-items .list-group-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.summary-details {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.status-container {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.status-container label {
+  flex: 50%;
+}
+
+.status-container select,
+.summary-details select {
+  flex: 50%;
+  padding: 10px;
+  margin-right: 10px;
+  font-size: 16px;
+  border-radius: 5px;
+  border: 2px solid #fdd9c9;
+  cursor: pointer;
+  outline: none;
+}
+.summary-details select{
+  width: 40%;
+}
+#cancelReasonContainer textarea {
+  padding: 10px;
+  margin-right: 10px;
+  font-size: 16px;
+  border-radius: 5px;
+  border: 2px solid #fdd9c9;
+}
+
+#statusbtn {
+  padding: 4px 6px 4px 6px;
+  width: 100%;
+  font-size: 16px;
+  border-radius: 4px;
+  background-color: #fb4a36;
+  color: #fbdac7;
+  border: 2px solid #fb4a36;
+  font-weight: 450;
+  cursor: pointer;
+  outline: none;
+  transition: all 0.3s ease;
+}
+
+#statusbtn:hover {
+  background-color: #fbdac7;
+  color: #fb4a36;
+}
+
+/* Customer Details */
+.customer {
+  margin-top: 20px;
+  background-color: #fce9e2;
+  padding: 10px;
+  border-radius: 6px;
+  margin-left: 30px;
+  margin-right: 30px;
+}
+
+.customer-details {
+  margin-left: 30px;
+  margin-right: 30px;
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+  .content {
+    margin-left: 0;
+    /* Adjust content margin for smaller screens */
+  }
+
+  .order-details {
+    flex-direction: column;
+    margin: 0 0 0 0;
+  }
+
+  .order-items,
+  .order-summary,
+  .customer {
+    flex: 100%;
+    /* Full width for medium screens */
+  }
+
+  .customer{
+    margin: 20px 0 0 0;
+   
+  }
+}
+
+@media (max-width: 768px) {
+  .order-summary {
+    font-size: 14px;
+    /* Adjust font size for small screens */
+  }
+}
+
+@media (max-width: 576px) {
+  .order-summary {
+    font-size: 12px;
+    /* Adjust font size for very small screens */
+  }
+}
+
+@media screen and (max-width: 800px) {
+  .close-sidebar {
+    display: block;
+    /* Show close button on small screens */
+  }
+
+  .sidebar {
+    width: 100%;
+    position: absolute;
+    z-index: 1;
+    top: 0;
+    left: -100%;
+    background-color: #ffbda1;
+    transition: left 0.3s ease;
+  }
+
+  .sidebar.active {
+    left: 0;
+  }
+
+  .content {
+    margin-left: 0;
+    padding: 20px;
+  }
+
+  .sidebar ul li {
+    text-align: center;
+  }
+
+  .sidebar ul li a {
+    padding: 15px 0;
+  }
+
+  .charts {
+    flex-direction: column;
+  }
+
+  .chart-container {
+    width: 100%;
+  }
+}
+
+.toggle-button {
+  display: none;
+  background-color: #333;
+  color: #fff;
+  border: none;
+  padding: 10px;
+  cursor: pointer;
+  margin-right: 10px;
+}
+
+@media screen and (max-width: 800px) {
+  .toggle-button {
+    display: block;
+  }
+
+  .content {
+    margin-left: 0;
+    padding: 20px;
+  }
+}
+
+.list-group li {
+  border: none;
+  padding: 10px;
+  background: #ffd4c4;
+  border-radius: 5px;
+  margin-left: 30px;
+  margin-right: 30px;
+  font-size: 1.2rem;
+}
+
+hr {
+  border: 1px solid orangered;
+}
+
+img {
+  border-radius: 3px;
+  margin-right: 13px;
+}
+
+/* Make price x quantity stay in one line on small screens */
+@media (max-width: 576px) {
+  .order-items .list-group-item .d-flex div {
+    white-space: nowrap;
+  }
+  .quantity-price{
+    margin-left: 10px;
+  }
+  body{
+ padding-bottom: 150px;
+}
+}
+a{
+  text-decoration: none;
+
+}
+.button {
+  background-color: #fb4a36;
+  color: white;
+  border: 2px solid #fb4a36;
+  padding: 10px;
+  cursor: pointer;
+  border-radius: 5px;
+  transition: all 0.3s ease;
+  font-size: 1.2rem;
+}
+.button:hover {
+  background-color: #fbdac7;
+  color: #fb4a36;
+  border: 2px solid #fb4a36;
+}

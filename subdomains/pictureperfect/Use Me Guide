@@ -1,0 +1,32 @@
+Ok so to use this project and run it in your own system you will need to do some stuff first.
+
+First download xampp/wamp from which you can run the project in your localhost server and pls install it directly in localdisk c.
+
+So as we are sending email in our project you will need to do some changes in your xampp folder, so tht you can send emails.
+go to xampp>php>php.ini and do these changes there in mail function.
+php.ini file has alot of code so just search for "mail" and once you find same properties as below you can modify them.
+SMTP=smtp.gmail.com
+smtp_port=587
+sendmail_from =Pictureperfectcor@gmail.com
+sendmail_path ="\"C:\xampp\sendmail\sendmail.exe\" -t"
+go to xampp>sendmail>sendmail.ini and do these changes in there. its a small file so you will find everything directly.
+smtp_server=smtp.gmail.com
+smtp_port=587
+smtp_ssl=auto
+auth_username=Pictureperfectcor@gmail.com
+auth_password=khzhhctpndemzzst
+error_logfile=error.log
+debug_logfile=debug.log
+force_sender=Pictureperfectcor@gmail.com
+
+obviously you can change the email accroding to your needs, this is just a demo email i used to show you what changes needs to be done.
+
+Now for database go to your phpmyadmin and add a database named "picture perfect".
+
+import the sql file that i have provided to you.
+
+Here you go, If you did everything right, it should all work just fine, but if there is some problem even after all the changes you may need to do some changes according to error message.
+
+For payment gateaway we have used stripe and you can create your own email to use it and get a key that you can then modify in provided code but incase you dont want to do the hustle here is email and password that i used for this project.
+stripe payment gateaway email=terabappayush@gmail.com;
+password for both=Picture342001Perfect

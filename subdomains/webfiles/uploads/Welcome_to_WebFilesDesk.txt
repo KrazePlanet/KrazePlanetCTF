@@ -1,0 +1,2 @@
+Welcome to WebFilesDesk File Manager!
+Browse, upload, preview, download and manage your files securely.

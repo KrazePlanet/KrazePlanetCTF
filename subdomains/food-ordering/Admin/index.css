@@ -1,0 +1,428 @@
+*{
+  margin: 0;
+  padding: 0;
+}
+body {
+  background: #fef0e8;
+  font-family: "Poppins", sans-serif;
+  margin: 0;
+  
+}
+.container {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 20px;
+  padding: 16px 0 16px 0;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.card {
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  position: relative;
+  padding: 16px;
+
+  border-radius: 8px;
+
+  height: 180px;
+  border: 2px solid;
+  margin-top: 10px;
+}
+
+.card-content {
+  flex: 1;
+  height: 50%;
+  display: flex;
+  flex-direction: column;
+  justify-content: start;
+  align-items: center;
+  left: 0;
+}
+
+.card h4 {
+  font-size: 22px;
+  font-weight: 350;
+  margin: 0;
+}
+
+.card h3 {
+  font-size: 24px;
+  font-weight: 600;
+
+}
+
+.card p {
+  font-size: 16px;
+  margin: 0;
+  font-weight: 300;
+
+}
+
+.icon-top-right {
+  width: 60px;
+  /* Adjust to match or exceed the space needed for text and value */
+  height: 60px;
+
+  border-radius: 50%;
+  /* Circle shape */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 33px;
+  /* Adjust icon size */
+  color: #fff;
+  /* Icon color, adjust as needed */
+  border: none;
+
+}
+
+/* Example CSS to dynamically set border color */
+.card[data-color="blue"] .icon-top-right {
+  background-color: rgba(60, 142, 245, 0.8);
+}
+
+.card[data-color="orange"] .icon-top-right {
+  background-Color: rgba(253, 108, 77, 0.8);
+
+}
+
+.card[data-color="green"] .icon-top-right {
+  background-color: rgba(80, 198, 168, 0.8);
+}
+
+.card[data-color="pink"] .icon-top-right {
+  background-color: rgba(255, 99, 132, 0.7);
+}
+
+.card[data-color="l-blue"] .icon-top-right {
+  background-color: rgba(54, 162, 235, 0.8);
+}
+
+.card[data-color="purple"] .icon-top-right {
+  background-color: rgba(101, 116, 205, 0.8);
+}
+
+.card[data-color="purple"] {
+  background-color: rgba(101, 116, 205, 0.2);
+  border-color: rgba(101, 116, 205, 0.5);
+  box-shadow: 2px 2px 5px rgba(101, 116, 205, 0.7);
+}
+
+.card[data-color="orange"] {
+  background-color: rgba(253, 108, 77, 0.1);
+  border-color: rgba(253, 108, 77, 0.5);
+  box-shadow: 2px 2px 5px rgba(253, 108, 77, 0.7);
+}
+
+.card[data-color="green"] {
+  background-color: rgba(80, 198, 168, 0.1);
+  border-color: rgba(80, 198, 168, 0.5);
+  box-shadow: 2px 2px 5px rgba(80, 198, 168, 0.7);
+}
+
+.card[data-color="blue"] {
+  background-color: rgba(60, 142, 245, 0.2);
+  border-color: rgba(60, 142, 245, 0.5);
+  box-shadow: 2px 2px 5px rgba(60, 142, 245, 0.7);
+}
+
+.card[data-color="pink"] {
+  background-color: rgba(255, 99, 132, 0.1);
+  border-color: rgba(255, 99, 132, 0.5);
+  box-shadow: 2px 2px 5px rgba(255, 99, 132, 0.7);
+}
+
+.card[data-color="l-blue"] {
+  background-color: rgba(54, 162, 235, 0.1);
+  border-color: rgba(54, 162, 235, 0.5);
+  box-shadow: 2px 2px 5px rgba(54, 162, 235, 0.7);
+}
+
+.positive {
+  color: #4caf50;
+}
+
+.negative {
+  color: #f44336;
+}
+
+canvas {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100% !important;
+  height: 50% !important;
+  /* Reduced height */
+  border-bottom-left-radius: 8px;
+  border-bottom-right-radius: 8px;
+}
+
+
+
+@media (max-width: 768px) {
+  .container {
+    grid-template-columns: 1fr;
+    /* 1 card per row on small screens */
+    margin-top: 2px;
+  }
+
+}
+
+.content{
+  margin-bottom: 40px;
+ }
+
+.latest-orders {
+  margin: 10px 0 0 0;
+  padding: 20px;
+  background-color: rgba(101, 116, 205, 0.2);
+  border-radius: 8px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+
+  cursor: pointer;
+}
+
+.latest-orders h2 {
+  font-size: 1.5em;
+  margin-bottom: 20px;
+  color: #333;
+}
+
+.latest-orders table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.latest-orders table th,
+.latest-orders table td {
+  padding: 12px;
+  text-align: left;
+  border-bottom: 1px solid rgba(101, 116, 205, 0.8);
+  text-align: center;
+}
+
+.latest-orders table th {
+  background-color: rgba(101, 116, 205, 0.9);
+  color: #fff;
+}
+
+.latest-orders table tr:nth-child(even) {
+  background-color: rgba(101, 116, 205, 0.4);
+
+}
+
+.latest-orders table tr:hover {
+  background-color: rgba(101, 116, 205, 0.2);
+}
+
+.latest-orders button {
+  padding: 8px 12px;
+  border: none;
+  border-radius: 4px;
+  background-color: purple;
+  color: white;
+  cursor: pointer;
+}
+
+.latest-orders button:hover {
+  background-color: #0056b3;
+}
+
+.latest-orders select {
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  background-color: white;
+  cursor: pointer;
+}
+
+.latest-orders select option {
+  padding: 8px;
+}
+
+
+.table-chart {
+  display: grid;
+  gap: 15px;
+  /* Space between the table and the chart */
+  grid-template-columns: 3fr 2fr;
+  /* Two columns layout for larger screens */
+  padding: 10px;
+}
+
+/* Ensure the bar-chart and table fit into the grid */
+.bar-chart,
+.table {
+  width: 100%;
+  /* Ensure they take full width of their grid cell */
+}
+
+/* Absolute positioning for the canvas within bar-chart */
+.bar-chart {
+  position: relative;
+  background-color: rgba(255, 99, 132, 0.2);
+  /* Optional background color */
+  border-radius: 8px;
+  /* Optional rounded corners */
+  box-sizing: border-box;
+  /* Include padding in width/height calculations */
+  overflow: hidden;
+  /* Ensure no overflow from the container */
+  margin: 10px 0 0 0;
+  /* Adjust margins as needed */
+  height: 98%;
+  /* Set a default height for the chart */
+  padding: 20px;
+}
+
+/* Canvas settings */
+.bar-chart canvas {
+  padding: 13px !important;
+  position: absolute;
+  /* Absolute positioning within the .bar-chart container */
+  width: 100% !important;
+  /* Full width of the .bar-chart container */
+  height: 100% !important;
+  /* Full height of the .bar-chart container */
+  object-fit: contain;
+  /* Ensure the canvas content is contained within the div */
+}
+
+/* Responsive adjustments for medium screens */
+@media (max-width: 992px) {
+  .table-chart {
+    grid-template-columns: 1fr;
+    /* Single column layout for medium screens */
+  }
+  
+}
+
+/* Responsive adjustments for small screens */
+@media (max-width: 768px) {
+  .table-chart {
+    grid-template-columns: 1fr;
+    /* Single column layout for small screens */
+    padding: 5px;
+    /* Reduce padding for smaller screens */
+  }
+
+  .bar-chart {
+    height: auto;
+    /* Allow height to adjust based on content */
+    margin: 10px 0;
+    /* Adjust margins to fit smaller screens */
+  }
+
+  .bar-chart canvas {
+    position: static;
+    /* Position canvas statically on small screens */
+  }
+  
+}
+
+@media (min-width: 770px) and (max-width: 990px) {
+
+  .bar-chart {
+
+    margin: 10px 0;
+    /* Adjust margins to fit smaller screens */
+  }
+
+  .bar-chart canvas {
+    position: static;
+    /* Position canvas statically on small screens */
+  }
+ 
+}
+
+
+
+.review-container {
+  display: grid;
+  gap: 15px; /* Space between the charts */
+  grid-template-columns: 1fr 1fr; /* Two columns layout for larger screens */
+  padding: 10px;
+}
+
+/* Adjusting layout for the chart containers */
+.review-chart-container,
+#chartContainer {
+  position: relative;
+  background-color: rgba(80, 198, 168, 0.2); /* Optional background color */
+  border-radius: 8px; /* Optional rounded corners */
+  box-sizing: border-box; /* Include padding in width/height calculations */
+  overflow: hidden; /* Ensure no overflow from the container */
+  margin: 10px 0; /* Adjust margins as needed */
+  padding: 15px; /* Ensure there is space around the canvas */
+  height: 300px; /* Adjusted default height */
+}
+#chartContainer{
+  background-color: rgba(253, 108, 77, 0.2);
+}
+
+/* Adjust canvas within the chart containers */
+.review-chart-container canvas,
+#chartContainer canvas {
+  width: 100% !important; /* Full width of the container */
+  height: calc(100% - 50px) !important; /* Full height minus space for the heading */
+  object-fit: contain; /* Ensure the canvas content is contained within the div */
+  position: absolute; /* Absolute positioning within the container */
+  top: 40px; /* Space for the heading at the top */
+  left: 0; /* Align canvas to the left */
+  bottom: 0; /* Align canvas to the bottom */
+  right: 0; /* Align canvas to the right */
+  padding: 0; /* Remove any padding applied */
+}
+
+/* Ensure headings are above the canvas */
+.review-chart-container h2,
+#chartContainer h2 {
+  position: relative; /* Ensure the heading is positioned above the canvas */
+  z-index: 1; /* Ensure the heading is above other elements */
+  margin: 0 0 10px 0; /* Space below the heading */
+  font-size: 1.5em; /* Font size for headings */
+  color: #333; /* Text color for headings */
+}
+
+/* Responsive adjustments for medium screens (770px to 990px) */
+@media (min-width: 770px) and (max-width: 990px) {
+  .review-container {
+    grid-template-columns: 1fr 1fr; /* Maintain two-column layout */
+  }
+
+  .review-chart-container,
+  #chartContainer {
+    height: 350px; /* Adjust height for medium screens */
+    padding: 15px; /* Adjust padding for medium screens */
+  }
+}
+
+
+/* Responsive adjustments for medium screens */
+@media (max-width: 992px) {
+  .review-container {
+    grid-template-columns: 1fr; /* Single column layout for medium screens */
+  }
+
+  .review-chart-container,
+  #chartContainer {
+    height: auto; /* Allow height to adjust based on content */
+    padding: 10px; /* Adjust padding for medium screens */
+  }
+}
+
+/* Responsive adjustments for small screens */
+@media (max-width: 768px) {
+  .review-container {
+    grid-template-columns: 1fr; /* Single column layout for small screens */
+    padding: 5px; /* Reduce padding for smaller screens */
+  }
+
+  .review-chart-container,
+  #chartContainer {
+    height: 300px; /* Set a default height */
+    padding: 10px; /* Adjust padding for small screens */
+  }
+}

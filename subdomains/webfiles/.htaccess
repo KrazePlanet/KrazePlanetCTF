@@ -1,0 +1,47 @@
+# ============================================================
+# WebFilesDesk — Apache configuration
+# ============================================================
+
+Options -Indexes
+ServerSignature Off
+
+# ============================================================
+# URL REWRITING — route all requests through index.php
+# ============================================================
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteBase /webfiles/
+
+    # Allow direct access to existing files and directories
+    RewriteCond %{REQUEST_FILENAME} -f [OR]
+    RewriteCond %{REQUEST_FILENAME} -d
+    RewriteRule ^ - [L]
+
+    # Route everything else to index.php
+    RewriteRule ^ index.php [L]
+</IfModule>
+
+# ============================================================
+# SECURITY — block access to sensitive file types
+# ============================================================
+<FilesMatch "\.(ini|log|sh|sql|env|bak|swp|orig)$">
+    <IfModule mod_authz_core.c>
+        Require all denied
+    </IfModule>
+    <IfModule !mod_authz_core.c>
+        Order allow,deny
+        Deny from all
+    </IfModule>
+</FilesMatch>
+
+# Block .htaccess itself from being read
+<Files ".htaccess">
+    <IfModule mod_authz_core.c>
+        Require all denied
+    </IfModule>
+</Files>
+
+# ============================================================
+# CHARSET
+# ============================================================
+AddDefaultCharset UTF-8

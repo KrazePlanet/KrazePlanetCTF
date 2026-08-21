@@ -1,0 +1,65 @@
+/* Page background */
+body {
+  min-height: 100vh;
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+  color: #f3f4f6;
+  padding: 20px;
+}
+
+/* Heading */
+h2 {
+  text-align: center;
+  margin-bottom: 20px;
+  font-weight: 600;
+  color: #f9fafb;
+}
+
+/* Back button */
+.btn-secondary {
+  background: #374151;
+  border: none;
+  padding: 8px 16px;
+  font-weight: 500;
+  transition: background 0.2s ease, transform 0.2s ease;
+}
+.btn-secondary:hover {
+  background: #4b5563;
+  transform: translateY(-2px);
+}
+
+/* Table styling */
+.table {
+  background: #1f2937;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+  color: #e5e7eb;
+}
+
+/* Table header */
+.table th {
+  background: #111827;
+  color: #f3f4f6;
+  padding: 12px;
+  text-align: center;
+  font-weight: 600;
+  border-bottom: 2px solid #374151;
+}
+
+/* Table cells */
+.table td {
+  padding: 10px;
+  text-align: center;
+  vertical-align: middle;
+  border-bottom: 1px solid #374151;
+  word-wrap: break-word;
+  max-width: 250px;
+}
+
+/* Hover effect */
+.table tbody tr:hover {
+  background: #2d3748;
+  transition: background 0.2s ease;
+}

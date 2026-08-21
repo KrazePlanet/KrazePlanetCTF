@@ -1,0 +1,177 @@
+{
+  "_meta": {
+    "lang": "hu",
+    "name": "Magyar"
+  },
+  "app": {
+    "title": "Fájlok",
+    "title_full": "Fájlok és mappák"
+  },
+  "nav": {
+    "root": "Gyökér",
+    "show": "Megjelenítés:",
+    "show_all": "Összes",
+    "search_placeholder": "Keresés...",
+    "search_btn": "Keresés",
+    "displayed": "{from}–{to} megjelenítve {total} elemből",
+    "prev": "Előző",
+    "next": "Következő"
+  },
+  "toolbar": {
+    "listen": "Hallgatás",
+    "upload": "Feltöltés",
+    "create_folder": "Mappa létrehozása",
+    "download_selected": "Kijelöltek letöltése",
+    "delete_selected": "Kijelöltek törlése"
+  },
+  "table": {
+    "col_name": "NÉV",
+    "col_path": "ÚTVONAL",
+    "col_size": "MÉRET",
+    "col_date": "DÁTUM",
+    "sort_name": "Rendezés név szerint",
+    "sort_size": "Rendezés méret szerint",
+    "sort_date": "Rendezés dátum szerint",
+    "no_files": "Nem találhatók fájlok",
+    "go_to_folder": "Ugrás a mappába",
+    "rename_file": "Fájl átnevezése",
+    "rename_folder": "Mappa átnevezése",
+    "delete_file": "Fájl törlése"
+  },
+  "theme": {
+    "dark": "Sötét téma",
+    "light": "Világos téma"
+  },
+  "upload_modal": {
+    "title": "Fájl feltöltése",
+    "label": "Válasszon fájlt az aktuális mappába való feltöltéshez:",
+    "max_size": "Max. méret:",
+    "btn_upload": "Feltöltés",
+    "btn_cancel": "Mégse",
+    "no_file": "Kérem válasszon fájlt.",
+    "too_large": "A fájl túl nagy. Maximálisan engedélyezett méret: <b>{size}</b>.",
+    "server_error": "Szerverhiba.",
+    "network_error": "Hálózati hiba.",
+    "drop_label": "Kattintson vagy húzzon ide egy fájlt"
+  },
+  "folder_modal": {
+    "title": "Mappa létrehozása",
+    "label": "Az új mappa neve:",
+    "placeholder": "Pl.: Új mappa",
+    "btn_create": "Létrehozás",
+    "btn_cancel": "Mégse",
+    "empty": "Adjon meg egy mappanevet.",
+    "invalid_chars": "A név érvénytelen karaktereket tartalmaz."
+  },
+  "delete_modal": {
+    "title_many": "{n} fájl törlése?",
+    "title_one": "Fájl törlése?",
+    "file_label": "Fájl:",
+    "irreversible": "Ez a művelet nem vonható vissza.",
+    "btn_delete": "Törlés",
+    "btn_cancel": "Mégse",
+    "error_title": "Törlési hiba",
+    "error_many": "{n} fájlt nem sikerült törölni.",
+    "network_error": "Hálózati hiba törlés közben."
+  },
+  "rename_modal": {
+    "title_file": "Fájl átnevezése",
+    "title_folder": "Mappa átnevezése",
+    "label_old_file": "Jelenlegi fájlnév:",
+    "label_old_folder": "Jelenlegi mappanév:",
+    "label_new": "Új név:",
+    "btn_rename": "Átnevezés",
+    "btn_cancel": "Mégse",
+    "unchanged": "A név nem változott.",
+    "invalid": "Érvénytelen név.",
+    "invalid_chars": "Érvénytelen karakterek: \\ / : * ? \" < > |",
+    "not_specified": "Az objektum nincs megadva."
+  },
+  "messages": {
+    "attention": "Figyelem",
+    "ok": "Értettem"
+  },
+  "pdf_viewer": {
+    "fullscreen": "Teljes képernyő",
+    "collapse": "Kicsinyítés",
+    "download": "Letöltés",
+    "close": "Megjelenítő bezárása",
+    "rename": "Átnevezés",
+    "no_support": "A böngésző nem támogatja a beépített PDF-megjelenítést.",
+    "download_instead": "Fájl letöltése a megtekintéshez",
+    "network_error": "Hálózati hiba"
+  },
+  "txt_viewer": {
+    "fullscreen": "Teljes képernyő",
+    "collapse": "Kicsinyítés",
+    "font_smaller": "Kisebb betűméret",
+    "font_larger": "Nagyobb betűméret",
+    "print": "Nyomtatás",
+    "download_full": "Teljes fájl letöltése",
+    "close": "Bezárás",
+    "truncated": "A fájl túl nagy ({size} MB) — az első 2 MB látható.",
+    "lines": "sor",
+    "not_found": "A fájl nem található."
+  },
+  "csv_viewer": {
+    "fullscreen": "Teljes képernyő",
+    "collapse": "Kicsinyítés",
+    "font_smaller": "Kisebb betűméret",
+    "font_larger": "Nagyobb betűméret",
+    "download_full": "Teljes fájl letöltése",
+    "close_viewer": "Megjelenítő bezárása",
+    "close": "Bezárás",
+    "truncated": "A fájl túl nagy ({size} MB) — az első 2 MB látható.",
+    "lines": "sor",
+    "not_found": "A fájl nem található."
+  },
+  "img_viewer": {
+    "fullscreen": "Teljes képernyő",
+    "collapse": "Kicsinyítés",
+    "rotate": "Forgatás",
+    "reset": "Visszaállítás",
+    "download": "Letöltés",
+    "close": "Bezárás",
+    "prev": "Előző (←)",
+    "next": "Következő (→)",
+    "hint": "Görgő: Nagyítás  |  LMB: Húzás  |  ← →: Navigálás",
+    "load_error": "Betöltési hiba"
+  },
+  "video_viewer": {
+    "format": "Formátum:",
+    "download": "Letöltés",
+    "close": "Bezárás",
+    "no_support": "A böngésző nem támogatja a beépített videolejátszást.",
+    "not_found": "A videofájl nincs megadva."
+  },
+  "code_viewer": {
+    "fullscreen": "Teljes képernyő",
+    "collapse": "Kicsinyítés",
+    "font_smaller": "Kisebb betűméret",
+    "font_larger": "Nagyobb betűméret",
+    "copy": "Másolás",
+    "copied": "Másolva",
+    "download": "Letöltés",
+    "download_full": "Teljes fájl letöltése",
+    "close": "Bezárás",
+    "truncated": "A fájl túl nagy ({size} MB) — az első 2 MB látható.",
+    "lines": "sor",
+    "highlight_unavailable": "szintaxiskiemelés nem elérhető",
+    "not_found": "A fájl nem található."
+  },
+  "audio_single": {
+    "close": "Bezárás",
+    "error_format": "Lejátszási hiba (a formátum nem támogatott).",
+    "error_fileinfo": "A kritikus PHP-modul <b>fileinfo</b> nincs engedélyezve.<br>Távolítsa el a megjegyzést a <code>extension=fileinfo</code> elől a php.ini fájlban, majd indítsa újra.",
+    "error_fileinfo_short": "Hiba: a fileinfo modul nincs engedélyezve."
+  },
+  "audio_player": {
+    "playlist": "Lejátszási lista",
+    "loading": "Betöltés...",
+    "empty": "A lejátszási lista üres.",
+    "close": "Bezárás",
+    "repeat_all": "Lista ismétlése",
+    "repeat_one": "Dal ismétlése",
+    "shuffle": "Véletlenszerű"
+  }
+}

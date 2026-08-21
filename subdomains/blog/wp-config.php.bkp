@@ -1,0 +1,9 @@
+// ** MySQL settings - used during WordPress installation ** //
+
+define('DB_NAME', 'wordpress_live_db_2026');
+define('DB_USER', 'wordpress_service');
+define('DB_PASSWORD', 'X9m!k2@pL8#qT7vR');
+define('DB_HOST', '10.20.30.15');
+
+define('DB_CHARSET', 'utf8mb4');
+define('DB_COLLATE', '');

@@ -1,0 +1,31 @@
+TICKET: #1042
+DATE: 2026-08-04 14:32:11
+SUBMITTED BY: mark.henderson@acmecorp.internal
+SUBJECT: Login portal returns 500 error after password reset
+
+SCREENSHOT DESCRIPTION:
+Browser: Chrome 126.0.6478.127
+OS: Windows 11 Pro
+URL at time of error: https://portal.acmecorp.internal/auth/login
+
+ERROR OBSERVED:
+After completing password reset via email link, redirected to login page.
+Entering new credentials causes a 500 Internal Server Error.
+Error appears after 3-4 seconds, not immediately.
+
+CONSOLE OUTPUT:
+Uncaught TypeError: Cannot read properties of undefined (reading 'token')
+    at AuthService.validate (auth.bundle.js:1:48291)
+    at LoginController.submit (login.bundle.js:1:12044)
+
+STEPS TO REPRODUCE:
+1. Request password reset from /forgot-password
+2. Click reset link in email
+3. Set new password and submit
+4. Navigate to /login
+5. Enter new credentials
+6. Observe 500 error
+
+ADDITIONAL NOTES:
+Issue started after the v3.2.1 deployment on Aug 3.
+Affects ~20% of users who reset passwords.

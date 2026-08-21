@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ET LAB College Portal</title>
+    <style>
+        :root {
+            --primary-color: #4361ee;
+            --secondary-color: #3a0ca3;
+            --accent-color: #4cc9f0;
+            --gradient-primary: linear-gradient(135deg, #4361ee 0%, #3a0ca3 100%);
+            --gradient-accent: linear-gradient(90deg, #4cc9f0 0%, #4361ee 100%);
+            --bg-color: #f8fafc;
+            --card-bg: #ffffff;
+            --text-dark: #1e293b;
+            --text-muted: #64748b;
+            --shadow-sm: 0 4px 6px rgba(0, 0, 0, 0.05);
+            --shadow-md: 0 10px 15px rgba(0, 0, 0, 0.07);
+            --shadow-lg: 0 20px 25px rgba(0, 0, 0, 0.05), 0 10px 10px rgba(0, 0, 0, 0.02);
+            --shadow-accent: 0 5px 15px rgba(76, 201, 240, 0.3);
+            --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+            --font-sans: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+            --border-radius: 16px;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: var(--font-sans);
+        }
+        
+        body {
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 2rem;
+            color: var(--text-dark);
+            line-height: a.6;
+        }
+        
+        .container {
+            max-width: 1200px;
+            width: 100%;
+            background-color: var(--card-bg);
+            border-radius: var(--border-radius);
+            overflow: hidden;
+            box-shadow: var(--shadow-lg);
+        }
+        
+        header {
+            background: var(--gradient-primary);
+            color: white;
+            padding: 4rem 2rem;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        header::before {
+            content: "";
+            position: absolute;
+            top: -100px;
+            right: -100px;
+            width: 400px;
+            height: 400px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+        }
+        
+        header::after {
+            content: "";
+            position: absolute;
+            bottom: -50px;
+            left: -50px;
+            width: 200px;
+            height: 200px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+        }
+        
+        header h1 {
+            font-size: 3rem;
+            font-weight: 800;
+            margin-bottom: 0.5rem;
+            position: relative;
+            z-index: 2;
+            letter-spacing: -0.025em;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+        
+        main {
+            padding: 4rem 2rem;
+            background-color: var(--bg-color);
+        }
+        
+        .category-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2.5rem;
+            margin-top: 1rem;
+        }
+        
+        .category {
+            background-color: var(--card-bg);
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow-sm);
+            padding: 2.5rem 2rem;
+            text-align: center;
+            transition: var(--transition);
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            overflow: hidden;
+            border: 1px solid rgba(0, 0, 0, 0.03);
+        }
+        
+        .category:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-md);
+        }
+        
+        .category::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: var(--gradient-accent);
+            opacity: 1;
+        }
+        
+        .category-icon {
+            width: 90px;
+            height: 90px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #eef2ff;
+            border-radius: 50%;
+            margin: 0 auto 1.5rem;
+            font-size: 2.5rem;
+            box-shadow: 0 5px 15px rgba(67, 97, 238, 0.15);
+            position: relative;
+            z-index: 1;
+        }
+        
+        .category h2 {
+            color: var(--text-dark);
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            font-weight: 700;
+        }
+        
+        .category p {
+            color: var(--text-muted);
+            margin-bottom: 1.5rem;
+            font-size: 1rem;
+            flex: 1;
+        }
+        
+        .category-btn {
+            display: inline-block;
+            background: var(--gradient-primary);
+            color: white;
+            padding: 0.875rem 1.75rem;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: var(--transition);
+            border: none;
+            font-size: 0.95rem;
+            box-shadow: var(--shadow-accent);
+            letter-spacing: 0.5px;
+        }
+        
+        .category-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 15px rgba(67, 97, 238, 0.3);
+        }
+        
+        footer {
+            background-color: var(--card-bg);
+            color: var(--text-muted);
+            text-align: center;
+            padding: 1.5rem;
+            font-size: 0.875rem;
+            border-top: 1px solid rgba(0, 0, 0, 0.05);
+        }
+        
+        /* Custom styling for each category */
+        .category:nth-child(1)::before {
+            background: linear-gradient(90deg, #4cc9f0 0%, #4361ee 100%);
+        }
+        
+        .category:nth-child(2)::before {
+            background: linear-gradient(90deg, #4361ee 0%, #3a0ca3 100%);
+        }
+        
+        .category:nth-child(3)::before {
+            background: linear-gradient(90deg, #3a0ca3 0%, #4cc9f0 100%);
+        }
+        
+        .category:nth-child(1) .category-icon {
+            background-color: #eef2ff;
+        }
+        
+        .category:nth-child(2) .category-icon {
+            background-color: #ede9fe;
+        }
+        
+        .category:nth-child(3) .category-icon {
+            background-color: #e0f2fe;
+        }
+        
+        /* Animation for cards */
+        @keyframes fadeInUp {
+            from { 
+                opacity: 0; 
+                transform: translateY(30px); 
+            }
+            to { 
+                opacity: 1; 
+                transform: translateY(0); 
+            }
+        }
+        
+        .category {
+            opacity: 0;
+            animation: fadeInUp 0.6s ease-out forwards;
+        }
+        
+        .category:nth-child(1) { animation-delay: 0.1s; }
+        .category:nth-child(2) { animation-delay: 0.25s; }
+        .category:nth-child(3) { animation-delay: 0.4s; }
+        
+        /* Responsive design */
+        @media (max-width: 768px) {
+            body {
+                padding: 1rem;
+            }
+            
+            header {
+                padding: 2.5rem 1rem;
+            }
+            
+            header h1 {
+                font-size: 2.25rem;
+            }
+            
+            main {
+                padding: 2rem 1rem;
+            }
+            
+            .category-container {
+                grid-template-columns: 1fr;
+                gap: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Welcome to student-portal</h1>
+        </header>
+
+        <main>
+            <section class="category-container">
+                <div class="category">
+                    <div class="category-icon">👨‍🎓</div>
+                    <h2>Student</h2>
+                    <p>Access your courses, attendance, assignments and more through the student portal.</p>
+                    <a href="student_login.php" class="category-btn">Go to Student Portal</a>
+                </div>
+
+                <div class="category">
+                    <div class="category-icon">👩‍🏫</div>
+                    <h2>Teacher</h2>
+                    <p>Manage your classes, student records, grades and resources through the teacher portal.</p>
+                    <a href="faculty_login.php" class="category-btn">Go to Teacher Portal</a>
+                </div>
+
+                <div class="category">
+                    <div class="category-icon">👨‍💼</div>
+                    <h2>Admin</h2>
+                    <p>Oversee all college operations, manage faculty, students and course data from the admin portal.</p>
+                    <a href="admin_login.php" class="category-btn">Go to Admin Portal</a>
+                </div>
+            </section>
+        </main>
+
+        <footer>
+            <p>&copy; 2025 ET LAB Portal | All Rights Reserved</p>
+        </footer>
+    </div>
+
+    <script>
+        // Animation is handled by CSS for more consistent performance
+        document.addEventListener('DOMContentLoaded', function() {
+            // Any additional JS functionality can go here
+        });
+    </script>
+</body>
+</html>

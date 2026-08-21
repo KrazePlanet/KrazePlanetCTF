@@ -1,0 +1,12 @@
+{
+    "name": "hp/cowork-website",
+    "autoload": {
+        "psr-4": {
+            "Hp\\CoworkWebsite\\": "src/"
+        }
+    },
+    "require": {
+        "stripe/stripe-php": "^10.16",
+        "phpmailer/phpmailer": "^6.8"
+    }
+}

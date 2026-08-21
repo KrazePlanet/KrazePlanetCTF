@@ -1,0 +1,9 @@
+Options +Indexes
+IndexOptions FancyIndexing VersionSort NameWidth=* DescriptionWidth=*
+IndexOrderDefault Descending Date
+
+AddDescription "Image file" .jpg .jpeg
+AddDescription "Image file" .png .gif .webp
+AddDescription "Document" .pdf
+AddDescription "Data export" .csv
+AddDescription "Archive" .zip

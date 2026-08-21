@@ -1,0 +1,1054 @@
+{
+  "/tutorialrepublic": {
+    "difficulty": "easy",
+    "points": 20
+  },
+  "/guidelines": {
+    "difficulty": "easy",
+    "points": 20
+  },
+  "/refseek": {
+    "difficulty": "easy",
+    "points": 20
+  },
+  "/pubmed": {
+    "difficulty": "easy",
+    "points": 20
+  },
+  "/bigbasket": {
+    "difficulty": "easy",
+    "points": 20
+  },
+  "/search": {
+    "difficulty": "easy",
+    "points": 20
+  },
+  "/feedback": {
+    "difficulty": "easy",
+    "points": 20
+  },
+  "/cookbook": {
+    "difficulty": "easy",
+    "points": 20
+  },
+  "/board": {
+    "difficulty": "easy",
+    "points": 20
+  },
+  "/path-fetch": {
+    "difficulty": "easy",
+    "points": 20
+  },
+  "/support": {
+    "difficulty": "medium",
+    "points": 50
+  },
+  "/directory": {
+    "difficulty": "medium",
+    "points": 50
+  },
+  "/helpdesk": {
+    "difficulty": "medium",
+    "points": 50
+  },
+  "/news": {
+    "difficulty": "hard",
+    "points": 100
+  },
+  "/docs": {
+    "difficulty": "easy",
+    "points": 20
+  },
+  "/profile": {
+    "difficulty": "easy",
+    "points": 20
+  },
+  "/account": {
+    "difficulty": "medium",
+    "points": 50
+  },
+  "/tickets": {
+    "difficulty": "medium",
+    "points": 50
+  },
+  "/checkout": {
+    "difficulty": "hard",
+    "points": 100
+  },
+  "/mail": {
+    "difficulty": "hard",
+    "points": 100
+  },
+  "/settings": {
+    "difficulty": "hard",
+    "points": 100
+  },
+  "/portal": {
+    "difficulty": "hard",
+    "points": 100
+  },
+  "/useruploads": {
+    "difficulty": "easy",
+    "points": 20
+  },
+  "/dashboard": {
+    "difficulty": "hard",
+    "points": 100
+  },
+  "/kb": {
+    "difficulty": "hard",
+    "points": 100
+  },
+  "/shop": {
+    "difficulty": "hard",
+    "points": 100
+  },
+  "https://hackerone.com/reports/1818163": {
+    "difficulty": "hard",
+    "points": 100
+  },
+  "https://hackerone.com/reports/751870": {
+    "difficulty": "easy",
+    "points": 20
+  },
+  "https://hackerone.com/reports/1940245": {
+    "difficulty": "easy",
+    "points": 20
+  },
+  "https://hackerone.com/reports/149855": {
+    "difficulty": "medium",
+    "points": 50
+  },
+  "https://hackerone.com/reports/1549206": {
+    "difficulty": "hard",
+    "points": 100
+  },
+  "/community": {
+    "difficulty": "hard",
+    "points": 100
+  },
+  "/members": {
+    "difficulty": "hard",
+    "points": 100
+  },
+  "/articles": {
+    "difficulty": "hard",
+    "points": 100
+  },
+  "/digitalocean": {
+    "difficulty": "hard",
+    "points": 100
+  },
+  "/hackerone": {
+    "difficulty": "hard",
+    "points": 100
+  },
+  "/netflix": {
+    "difficulty": "hard",
+    "points": 100
+  },
+  "48.php": {
+    "difficulty": "hard",
+    "points": 100
+  },
+  "49.php": {
+    "difficulty": "hard",
+    "points": 100
+  },
+  "https://hackerone.com/reports/485748": {
+    "difficulty": "hard",
+    "points": 100
+  },
+  "https://hackerone.com/reports/1147433": {
+    "difficulty": "medium",
+    "points": 50
+  },
+  "https://hackerone.com/reports/1084183": {
+    "difficulty": "medium",
+    "points": 50
+  },
+  "/contact": {
+    "difficulty": "hard",
+    "points": 100
+  },
+  "https://hackerone.com/reports/1011888": {
+    "difficulty": "medium",
+    "points": 50
+  },
+  "/imdb": {
+    "difficulty": "hard",
+    "points": 100
+  },
+  "/anilist": {
+    "difficulty": "hard",
+    "points": 100
+  },
+  "/milesweb": {
+    "difficulty": "hard",
+    "points": 100
+  },
+  "/censys": {
+    "difficulty": "hard",
+    "points": 100
+  },
+  "https://hackerone.com/reports/474656": {
+    "difficulty": "medium",
+    "points": 50
+  },
+  "https://hackerone.com/reports/324303": {
+    "difficulty": "medium",
+    "points": 50
+  },
+  "https://hackerone.com/reports/396493": {
+    "difficulty": "hard",
+    "points": 100
+  },
+  "https://hackerone.com/reports/704266": {
+    "difficulty": "medium",
+    "points": 50
+  },
+  "https://hackerone.com/reports/1004833": {
+    "difficulty": "medium",
+    "points": 50
+  },
+  "/forms": {
+    "difficulty": "hard",
+    "points": 100
+  },
+  "/apply": {
+    "difficulty": "hard",
+    "points": 100
+  },
+  "/survey": {
+    "difficulty": "hard",
+    "points": 100
+  },
+  "/reports": {
+    "difficulty": "hard",
+    "points": 100
+  },
+  "/instance": {
+    "difficulty": "easy",
+    "points": 20
+  },
+  "/pixeleet": {
+    "difficulty": "hard",
+    "points": 100
+  },
+  "/webmail": {
+    "difficulty": "easy",
+    "points": 20
+  },
+  "/cpanel": {
+    "difficulty": "easy",
+    "points": 20
+  },
+  "/webdisk": {
+    "difficulty": "medium",
+    "points": 50
+  },
+  "/cpcontacts": {
+    "difficulty": "medium",
+    "points": 50
+  },
+  "/cpcalendars": {
+    "difficulty": "hard",
+    "points": 100
+  },
+  "/autodiscover": {
+    "difficulty": "hard",
+    "points": 100
+  },
+  "/wildcard": {
+    "difficulty": "easy",
+    "points": 20
+  },
+  "/hostmaster": {
+    "difficulty": "easy",
+    "points": 20
+  },
+  "/protection": {
+    "difficulty": "medium",
+    "points": 50
+  },
+  "/cloudapp": {
+    "difficulty": "medium",
+    "points": 50
+  },
+  "/pay": {
+    "difficulty": "hard",
+    "points": 100
+  },
+  "/atlas": {
+    "difficulty": "hard",
+    "points": 100
+  },
+  "/avito": {
+    "difficulty": "hard",
+    "points": 100
+  },
+  "/app": {
+    "difficulty": "hard",
+    "points": 100
+  },
+  "/admin": {
+    "difficulty": "hard",
+    "points": 100
+  },
+  "/dev": {
+    "difficulty": "hard",
+    "points": 100
+  },
+  "/staging": {
+    "difficulty": "hard",
+    "points": 100
+  },
+  "/sberbank": {
+    "difficulty": "hard",
+    "points": 100
+  },
+  "/demo": {
+    "difficulty": "hard",
+    "points": 100
+  },
+  "/test": {
+    "difficulty": "hard",
+    "points": 100
+  },
+  "/nalozhka": {
+    "difficulty": "hard",
+    "points": 100
+  },
+  "/sitemap": {
+    "difficulty": "hard",
+    "points": 100
+  },
+  "/sbermarket": {
+    "difficulty": "hard",
+    "points": 100
+  },
+  "/pochtabank": {
+    "difficulty": "hard",
+    "points": 100
+  },
+  "/remote": {
+    "difficulty": "hard",
+    "points": 100
+  },
+  "/store": {
+    "difficulty": "hard",
+    "points": 100
+  },
+  "/smtp": {
+    "difficulty": "hard",
+    "points": 100
+  },
+  "/cdn": {
+    "difficulty": "hard",
+    "points": 100
+  },
+  "/pop": {
+    "difficulty": "hard",
+    "points": 100
+  },
+  "/secure": {
+    "difficulty": "hard",
+    "points": 100
+  },
+  "/apps": {
+    "difficulty": "hard",
+    "points": 100
+  },
+  "/cust": {
+    "difficulty": "hard",
+    "points": 100
+  },
+  "/old": {
+    "difficulty": "hard",
+    "points": 100
+  },
+  "/uaecentral": {
+    "difficulty": "hard",
+    "points": 100
+  },
+  "/catalog": {
+    "difficulty": "easy",
+    "points": 20
+  },
+  "https://hackerone.com/reports/3079966": {
+    "difficulty": "easy",
+    "points": 20
+  },
+  "https://hackerone.com/reports/57914": {
+    "difficulty": "easy",
+    "points": 20
+  },
+  "https://hackerone.com/reports/358001": {
+    "difficulty": "easy",
+    "points": 20
+  },
+  "https://hackerone.com/reports/1374017": {
+    "difficulty": "medium",
+    "points": 50
+  },
+  "/jinja2": {
+    "difficulty": "hard",
+    "points": 100
+  },
+  "/tornado": {
+    "difficulty": "hard",
+    "points": 100
+  },
+  "/erb": {
+    "difficulty": "hard",
+    "points": 100
+  },
+  "/freemarker": {
+    "difficulty": "hard",
+    "points": 100
+  },
+  "/templates": {
+    "difficulty": "easy",
+    "points": 20
+  },
+  "https://hackerone.com/reports/1104349": {
+    "difficulty": "medium",
+    "points": 50
+  },
+  "https://hackerone.com/reports/125980": {
+    "difficulty": "medium",
+    "points": 50
+  },
+  "https://hackerone.com/reports/164224": {
+    "difficulty": "hard",
+    "points": 100
+  },
+  "/redirect": {
+    "difficulty": "easy",
+    "points": 20
+  },
+  "https://hackerone.com/reports/504751": {
+    "difficulty": "easy",
+    "points": 20
+  },
+  "https://hackerone.com/reports/311330": {
+    "difficulty": "easy",
+    "points": 20
+  },
+  "https://hackerone.com/reports/2812583": {
+    "difficulty": "medium",
+    "points": 50
+  },
+  "https://hackerone.com/reports/1490470": {
+    "difficulty": "medium",
+    "points": 50
+  },
+  "/verify": {
+    "difficulty": "medium",
+    "points": 50
+  },
+  "/mobile": {
+    "difficulty": "medium",
+    "points": 50
+  },
+  "/login": {
+    "difficulty": "easy",
+    "points": 20
+  },
+  "/reviews": {
+    "difficulty": "easy",
+    "points": 20
+  },
+  "/library": {
+    "difficulty": "medium",
+    "points": 50
+  },
+  "/inventory": {
+    "difficulty": "medium",
+    "points": 50
+  },
+  "/orders": {
+    "difficulty": "medium",
+    "points": 50
+  },
+  "/stats": {
+    "difficulty": "hard",
+    "points": 100
+  },
+  "/affiliate": {
+    "difficulty": "hard",
+    "points": 100
+  },
+  "/proxy": {
+    "difficulty": "hard",
+    "points": 100
+  },
+  "/executive": {
+    "difficulty": "hard",
+    "points": 100
+  },
+  "/registry": {
+    "difficulty": "hard",
+    "points": 100
+  },
+  "/academic": {
+    "difficulty": "hard",
+    "points": 100
+  },
+  "/industrial": {
+    "difficulty": "hard",
+    "points": 100
+  },
+  "https://hackerone.com/reports/403616": {
+    "difficulty": "hard",
+    "points": 100
+  },
+  "https://hackerone.com/reports/297478": {
+    "difficulty": "hard",
+    "points": 100
+  },
+  "https://hackerone.com/reports/1046084": {
+    "difficulty": "hard",
+    "points": 100
+  },
+  "https://hackerone.com/reports/1069531": {
+    "difficulty": "hard",
+    "points": 100
+  },
+  "https://hackerone.com/reports/273946": {
+    "difficulty": "hard",
+    "points": 100
+  },
+  "https://hackerone.com/reports/2051931": {
+    "difficulty": "hard",
+    "points": 100
+  },
+  "https://hackerone.com/reports/433792": {
+    "difficulty": "hard",
+    "points": 100
+  },
+  "https://hackerone.com/reports/1044716": {
+    "difficulty": "hard",
+    "points": 100
+  },
+  "https://hackerone.com/reports/923020": {
+    "difficulty": "hard",
+    "points": 100
+  },
+  "https://hackerone.com/reports/3198980": {
+    "difficulty": "hard",
+    "points": 100
+  },
+  "https://hackerone.com/reports/1224660": {
+    "difficulty": "hard",
+    "points": 100
+  },
+  "https://hackerone.com/reports/3127198": {
+    "difficulty": "hard",
+    "points": 100
+  },
+  "https://hackerone.com/reports/838855": {
+    "difficulty": "hard",
+    "points": 100
+  },
+  "https://hackerone.com/reports/1042746": {
+    "difficulty": "medium",
+    "points": 50
+  },
+  "https://hackerone.com/reports/491191": {
+    "difficulty": "hard",
+    "points": 100
+  },
+  "https://hackerone.com/reports/2312334": {
+    "difficulty": "medium",
+    "points": 50
+  },
+  "/security": {
+    "difficulty": "easy",
+    "points": 20
+  },
+  "/preferences": {
+    "difficulty": "easy",
+    "points": 20
+  },
+  "/privacy": {
+    "difficulty": "easy",
+    "points": 20
+  },
+  "/mfa": {
+    "difficulty": "easy",
+    "points": 20
+  },
+  "https://hackerone.com/reports/834366": {
+    "difficulty": "easy",
+    "points": 20
+  },
+  "https://hackerone.com/reports/339352": {
+    "difficulty": "medium",
+    "points": 50
+  },
+  "https://hackerone.com/reports/1122408": {
+    "difficulty": "hard",
+    "points": 100
+  },
+  "https://hackerone.com/reports/177508": {
+    "difficulty": "medium",
+    "points": 50
+  },
+  "https://hackerone.com/reports/2712857": {
+    "difficulty": "hard",
+    "points": 100
+  },
+  "https://hackerone.com/reports/1118521": {
+    "difficulty": "medium",
+    "points": 50
+  },
+  "/viewer": {
+    "difficulty": "easy",
+    "points": 20
+  },
+  "/capture": {
+    "difficulty": "easy",
+    "points": 20
+  },
+  "/scanner": {
+    "difficulty": "medium",
+    "points": 50
+  },
+  "/fetch": {
+    "difficulty": "medium",
+    "points": 50
+  },
+  "/monitor": {
+    "difficulty": "medium",
+    "points": 50
+  },
+  "/cloud": {
+    "difficulty": "medium",
+    "points": 50
+  },
+  "/print": {
+    "difficulty": "easy",
+    "points": 20
+  },
+  "/files": {
+    "difficulty": "easy",
+    "points": 20
+  },
+  "/storage": {
+    "difficulty": "medium",
+    "points": 50
+  },
+  "/uploads": {
+    "difficulty": "hard",
+    "points": 100
+  },
+  "/archive": {
+    "difficulty": "easy",
+    "points": 20
+  },
+  "/corporate": {
+    "difficulty": "medium",
+    "points": 50
+  },
+  "/doc-portal": {
+    "difficulty": "medium",
+    "points": 50
+  },
+  "/multilang-blog": {
+    "difficulty": "medium",
+    "points": 50
+  },
+  "/hr-portal": {
+    "difficulty": "medium",
+    "points": 50
+  },
+  "/lms": {
+    "difficulty": "medium",
+    "points": 50
+  },
+  "/hospital": {
+    "difficulty": "hard",
+    "points": 100
+  },
+  "/realestate": {
+    "difficulty": "medium",
+    "points": 50
+  },
+  "/hosting-panel": {
+    "difficulty": "hard",
+    "points": 100
+  },
+  "/ecommerce": {
+    "difficulty": "medium",
+    "points": 50
+  },
+  "/recipes": {
+    "difficulty": "hard",
+    "points": 100
+  },
+  "/gov": {
+    "difficulty": "hard",
+    "points": 100
+  },
+  "/control": {
+    "difficulty": "hard",
+    "points": 100
+  },
+  "/diagnostics": {
+    "difficulty": "easy",
+    "points": 20
+  },
+  "/billing": {
+    "difficulty": "easy",
+    "points": 20
+  },
+  "https://hackerone.com/reports/150095": {
+    "difficulty": "medium",
+    "points": 50
+  },
+  "/patient": {
+    "difficulty": "easy",
+    "points": 20
+  },
+  "/social": {
+    "difficulty": "medium",
+    "points": 50
+  },
+  "/bank": {
+    "difficulty": "medium",
+    "points": 50
+  },
+  "/include": {
+    "difficulty": "easy",
+    "points": 20
+  },
+  "https://hackerone.com/reports/192940": {
+    "difficulty": "medium",
+    "points": 50
+  },
+  "/pages": {
+    "difficulty": "medium",
+    "points": 50
+  },
+  "/import": {
+    "difficulty": "medium",
+    "points": 50
+  },
+  "/origin": {
+    "difficulty": "medium",
+    "points": 50
+  },
+  "/xml": {
+    "difficulty": "easy",
+    "points": 20
+  },
+  "https://hackerone.com/reports/248668": {
+    "difficulty": "medium",
+    "points": 50
+  },
+  "https://hackerone.com/reports/347139": {
+    "difficulty": "hard",
+    "points": 100
+  },
+  "https://hackerone.com/reports/836877": {
+    "difficulty": "hard",
+    "points": 100
+  },
+  "https://hackerone.com/reports/500515": {
+    "difficulty": "medium",
+    "points": 50
+  },
+  "/register": {
+    "difficulty": "medium",
+    "points": 50
+  },
+  "/auth-api": {
+    "difficulty": "medium",
+    "points": 50
+  },
+  "https://vulnera.xyz": {
+    "difficulty": "easy",
+    "points": 20
+  },
+  "/image-api": {
+    "difficulty": "easy",
+    "points": 20
+  },
+  "/notifications-api": {
+    "difficulty": "easy",
+    "points": 20
+  },
+  "/file-upload-api": {
+    "difficulty": "easy",
+    "points": 20
+  },
+  "/resend": {
+    "difficulty": "hard",
+    "points": 100
+  },
+  "/reset": {
+    "difficulty": "hard",
+    "points": 100
+  },
+  "/ratelimit": {
+    "difficulty": "hard",
+    "points": 100
+  },
+  "/rate": {
+    "difficulty": "hard",
+    "points": 100
+  },
+  "/limit": {
+    "difficulty": "hard",
+    "points": 100
+  },
+  "/throttle": {
+    "difficulty": "hard",
+    "points": 100
+  },
+  "/load": {
+    "difficulty": "hard",
+    "points": 100
+  },
+  "/request": {
+    "difficulty": "hard",
+    "points": 100
+  },
+  "/stress": {
+    "difficulty": "hard",
+    "points": 100
+  },
+  "/security-test": {
+    "difficulty": "hard",
+    "points": 100
+  },
+  "/rl-testing": {
+    "difficulty": "hard",
+    "points": 100
+  },
+  "/codeshackio": {
+    "difficulty": "easy",
+    "points": 20
+  },
+  "/counter": {
+    "difficulty": "hard",
+    "points": 100
+  },
+  "/duststaff": {
+    "difficulty": "hard",
+    "points": 100
+  },
+  "/cablej": {
+    "difficulty": "hard",
+    "points": 100
+  },
+  "/dropper": {
+    "difficulty": "hard",
+    "points": 100
+  },
+  "/flashdisk": {
+    "difficulty": "hard",
+    "points": 100
+  },
+  "/condition": {
+    "difficulty": "hard",
+    "points": 100
+  },
+  "/race_condition": {
+    "difficulty": "hard",
+    "points": 100
+  },
+  "/username_enum": {
+    "difficulty": "hard",
+    "points": 100
+  },
+  "/parameter-tampering": {
+    "difficulty": "easy",
+    "points": 20
+  },
+  "/authentication": {
+    "difficulty": "easy",
+    "points": 20
+  },
+  "/bookstore": {
+    "difficulty": "medium",
+    "points": 50
+  },
+  "/burger": {
+    "difficulty": "easy",
+    "points": 20
+  },
+  "/club": {
+    "difficulty": "medium",
+    "points": 50
+  },
+  "/coworkingspace": {
+    "difficulty": "medium",
+    "points": 50
+  },
+  "/crud": {
+    "difficulty": "easy",
+    "points": 20
+  },
+  "/docvault": {
+    "difficulty": "medium",
+    "points": 50
+  },
+  "/elpaso": {
+    "difficulty": "easy",
+    "points": 20
+  },
+  "/english": {
+    "difficulty": "easy",
+    "points": 20
+  },
+  "/event": {
+    "difficulty": "medium",
+    "points": 50
+  },
+  "/food": {
+    "difficulty": "medium",
+    "points": 50
+  },
+  "/food-ordering": {
+    "difficulty": "medium",
+    "points": 50
+  },
+  "/fooddelivery": {
+    "difficulty": "medium",
+    "points": 50
+  },
+  "/foodie": {
+    "difficulty": "medium",
+    "points": 50
+  },
+  "/foodmenu": {
+    "difficulty": "medium",
+    "points": 50
+  },
+  "/gift": {
+    "difficulty": "easy",
+    "points": 20
+  },
+  "/grecko": {
+    "difficulty": "medium",
+    "points": 50
+  },
+  "/grilli": {
+    "difficulty": "easy",
+    "points": 20
+  },
+  "/hms": {
+    "difficulty": "hard",
+    "points": 100
+  },
+  "/internship": {
+    "difficulty": "medium",
+    "points": 50
+  },
+  "/johnnys": {
+    "difficulty": "medium",
+    "points": 50
+  },
+  "/krables": {
+    "difficulty": "medium",
+    "points": 50
+  },
+  "/management": {
+    "difficulty": "medium",
+    "points": 50
+  },
+  "/pictureperfect": {
+    "difficulty": "easy",
+    "points": 20
+  },
+  "/planet": {
+    "difficulty": "hard",
+    "points": 100
+  },
+  "/rainyroof": {
+    "difficulty": "easy",
+    "points": 20
+  },
+  "/rate-limiting": {
+    "difficulty": "medium",
+    "points": 50
+  },
+  "/readsphere": {
+    "difficulty": "hard",
+    "points": 100
+  },
+  "/restaurant": {
+    "difficulty": "medium",
+    "points": 50
+  },
+  "/space": {
+    "difficulty": "hard",
+    "points": 100
+  },
+  "/student": {
+    "difficulty": "medium",
+    "points": 50
+  },
+  "/studentportal": {
+    "difficulty": "medium",
+    "points": 50
+  },
+  "/tour": {
+    "difficulty": "easy",
+    "points": 20
+  },
+  "/triptrip": {
+    "difficulty": "medium",
+    "points": 50
+  },
+  "/university": {
+    "difficulty": "medium",
+    "points": 50
+  },
+  "/webfiles": {
+    "difficulty": "medium",
+    "points": 50
+  },
+  "/yummy": {
+    "difficulty": "medium",
+    "points": 50
+  },
+  "/hub": {
+    "difficulty": "hard",
+    "points": 100
+  },
+  "/vault": {
+    "difficulty": "hard",
+    "points": 100
+  },
+  "/sync": {
+    "difficulty": "hard",
+    "points": 100
+  },
+  "/school": {
+    "difficulty": "hard",
+    "points": 100
+  },
+  "/edge": {
+    "difficulty": "hard",
+    "points": 100
+  },
+  "/shield": {
+    "difficulty": "hard",
+    "points": 100
+  },
+  "/blog": {
+    "difficulty": "hard",
+    "points": 100
+  },
+  "/kzlabs": {
+    "difficulty": "hard",
+    "points": 100
+  },
+  "https://hackerone.com/reports/1164452": {
+    "difficulty": "hard",
+    "points": 100
+  }
+}

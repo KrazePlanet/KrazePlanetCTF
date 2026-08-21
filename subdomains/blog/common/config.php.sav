@@ -1,0 +1,9 @@
+<?php
+// SAVED SNAPSHOT CONFIG
+
+$hostname = 'snapshot-db';
+$username = 'snapshot_user';
+$password = 'Snap@12345';
+$dbName   = 'snapshot_db';
+
+?>

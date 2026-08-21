@@ -1,0 +1,523 @@
+@import url("https://fonts.googleapis.com/css?family=Nunito:400,900|Montserrat|Roboto");
+@import url("https://fonts.googleapis.com/css2?family=Poppins:wght@500&display=swap");
+@import 'https://fonts.googleapis.com/css?family=Open+Sans:600,700';
+body {
+    max-height: 100vh;
+}
+
+.over-all-box {
+    padding-top: 10%;
+}
+
+.container {
+    background: #FFFFFF;
+    width: 540px;
+    height: 420px;
+    margin: 0 auto;
+    position: relative;
+    box-shadow: 2px 5px 20px rgba(119, 119, 119, 0.5);
+    cursor: auto;
+    transform: scale(1.1);
+    border-radius: 5px;
+}
+
+@media only screen and (min-width: 600px) {
+    .leftbox {
+        float: left;
+        top: 15%;
+        left: 5%;
+        position: absolute;
+        min-width: fit-content;
+        height: 70%;
+        background: #0c48db;
+        box-shadow: 3px 3px 10px rgba(119, 119, 119, 0.5);
+    }
+    navy a:first-child {
+        margin-top: 7px;
+    }
+}
+
+@media only screen and (max-width: 600px) {
+    .container {
+        width: 80vw;
+        margin: 30vh auto;
+    }
+    .leftbox {
+        float: left;
+        top: -25%;
+        left: 7.5%;
+        position: absolute;
+        min-width: 270px;
+        height: 90px;
+        background: #0c48db;
+        box-shadow: 3px 3px 10px rgba(119, 119, 119, 0.5);
+    }
+    navy {
+        display: flex;
+        flex-direction: row;
+    }
+    navy a:first-child {
+        margin-top: 0px;
+    }
+    .profile,
+    .payment,
+    .settings {
+        padding-left: 5vw;
+    }
+}
+
+.logoo {
+    float: right;
+    margin-right: 12px;
+    margin-top: 12px;
+    font-family: "Nunito Sans", sans-serif;
+    color: #0c48db;
+    font-weight: 900;
+    font-size: 1em;
+    letter-spacing: 1px;
+}
+
+navy a {
+    list-style: none;
+    padding: 35px;
+    color: #FFFFFF;
+    font-size: 1.1em;
+    display: block;
+    transition: all 0.3s ease-in-out;
+}
+
+navy a:hover {
+    color: #88a0dd;
+    transform: scale(1.2);
+    cursor: pointer;
+}
+
+.active_now {
+    color: #88a0dd;
+}
+
+.rightbox {
+    float: right;
+    width: 60%;
+    height: 100%;
+}
+
+.profile,
+.payment,
+.settings {
+    transition: opacity 0.5s ease-in;
+    position: absolute;
+    width: 70%;
+}
+
+.update-details {
+    margin-top: 9vh;
+}
+
+.update-details form {
+    display: flex;
+    flex-direction: column;
+    width: 70%;
+}
+
+.update-details button {
+    width: 100px;
+    height: 30px;
+    background-color: #0c48db;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    margin: auto;
+    cursor: pointer;
+    transition: .5;
+}
+
+.fa-undo {
+    color: #fff;
+    font-size: 40px;
+}
+
+.fa-lock {
+    color: #fff;
+    font-size: 5px;
+}
+
+.update-details button:hover {
+    background-color: #1b51d9;
+    transform: scale(.98);
+    transition: .5;
+}
+
+.container h1 {
+    font-family: "Montserrat", sans-serif;
+    color: #0c48db;
+    font-size: 1em;
+    margin-top: 40px;
+    margin-bottom: 35px;
+}
+
+.container h2 {
+    color: #777777;
+    font-family: "Roboto", sans-serif;
+    width: 80%;
+    text-transform: uppercase;
+    font-size: 8px;
+    letter-spacing: 1px;
+    margin-left: 2px;
+}
+
+.container label {
+    color: #777777;
+    font-family: "Roboto", sans-serif;
+    width: 80%;
+    text-transform: uppercase;
+    font-size: 8px;
+    letter-spacing: 1px;
+    margin-left: 2px;
+}
+
+.payment form {
+    display: flex;
+    flex-direction: column;
+    width: 70%;
+    margin-top: 10.2vh;
+}
+
+select {
+    height: 30px;
+    width: 100%;
+    border-image: linear-gradient(to right, #0c48db, #ffffff) 0 0 1 0%;
+}
+
+.payment input {
+    font-size: 12px;
+    font-family: "Roboto", sans-serif;
+}
+
+.payment button {
+    width: 100px;
+    height: 30px;
+    background-color: #0c48db;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    margin: auto;
+    cursor: pointer;
+    transition: .5;
+}
+
+.payment button:hover {
+    background-color: #2056de;
+    transform: scale(.98);
+    transition: .5;
+    text-decoration: none;
+}
+
+.btnRegister {
+    width: 100px;
+    height: 30px;
+    background-color: #0c48db;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    margin: auto;
+    cursor: pointer;
+    transition: .5;
+}
+
+.flex-row {
+    display: flex;
+    flex-direction: row;
+}
+
+.btnRegister:hover {
+    background-color: #2056de;
+    transform: scale(.98);
+    transition: .5;
+    text-decoration: none;
+}
+
+.delete {
+    background-color: #ff0000;
+}
+
+.delete:hover {
+    background-color: #e30707;
+}
+
+.container p {
+    border-width: 1px;
+    border-style: solid;
+    border-image: linear-gradient(to right, #0c48db, #ffffff) 1 0%;
+    border-top: 0;
+    width: 80%;
+    font-family: "Montserrat", sans-serif;
+    font-size: 0.7em;
+    padding: 7px 0;
+    color: #070707;
+}
+
+.container span {
+    font-size: 0.5em;
+    color: #777777;
+}
+
+.settings {
+    display: flex;
+    flex-direction: column;
+}
+
+.container input {
+    border: 1px solid #dddddd;
+    border-image: linear-gradient(to right, #0c48db, #ffffff) 0 0 1 0%;
+    font-family: "Roboto", sans-serif;
+    padding: 5px;
+    margin: 0;
+    z-index: 99;
+}
+
+.privacy h2 {
+    margin-top: 25px;
+}
+
+.settings h2 {
+    margin-top: 25px;
+}
+
+.settings input {
+    font-size: 15px;
+}
+
+.noshow {
+    opacity: 0;
+}
+
+
+/*Nav Bar*/
+
+body {
+    scroll-behavior: smooth;
+    padding: 0;
+    margin: 0;
+    font-family: "Poppins", sans-serif;
+}
+
+nav {
+    height: 3.5rem;
+    width: 100vw;
+    background-color: #ffffff;
+    box-shadow: 0 1px 10px 1px #0022ff38;
+    display: flex;
+    position: fixed;
+    z-index: 10;
+    font-family: poppins;
+}
+
+
+/*Styling logo*/
+
+.logo {
+    padding: 1vh 1vw;
+    text-align: center;
+    display: flex;
+    flex-direction: row;
+    min-width: 35vw;
+}
+
+.logo img {
+    height: 2.5rem;
+    width: 2.5rem;
+    margin-right: 1rem;
+}
+
+.logo h1 {
+    margin-top: 6px;
+    font-size: 20px;
+    font-weight: 300;
+    color: #000;
+}
+
+
+
+/*Styling Links*/
+
+.nav-links {
+    display: flex;
+    list-style: none;
+    width: 88vw;
+    padding: 0 0.7vw;
+    align-items: center;
+    justify-content: flex-end;
+}
+
+.nav-links li a {
+    text-decoration: none;
+    margin: 0 1.5vw;
+    color: #000;
+}
+
+.nav-links li a:hover {
+    color: #0c48db;
+}
+
+.nav-links li {
+    position: relative;
+}
+
+.nav-links li a {
+    padding: 5px 10px 5px 10px;
+}
+
+.nav-links li a:hover {
+    width: 80%;
+    background-color: #0c48db;
+    color: #fff;
+    transition: all ease-in-out 250ms;
+    width: fit-content;
+    height: fit-content;
+    border-radius: 80px;
+}
+
+.active {
+    background-color: #0c48db;
+    padding: 5px 10px 5px 10px;
+    border-radius: 80px;
+    color: #fff;
+}
+
+
+/*Styling Buttons*/
+
+.join-button {
+    color: #131418;
+    background-color: #fff;
+    border: 2px solid #0c48db;
+    border-radius: 2em;
+    padding: 0.6rem 0.8rem;
+    font-size: 1rem;
+    cursor: pointer;
+}
+
+.join-button:hover {
+    color: #f2f5f7;
+    background-color: transparent;
+    transition: all ease-in-out 350ms;
+}
+
+
+/*Styling Hamburger Icon*/
+
+.hamburger div {
+    width: 30px;
+    height: 3px;
+    background: #000000;
+    margin: 5px;
+    transition: all 0.3s ease;
+}
+
+.hamburger {
+    display: none;
+}
+
+
+/*Stying for small screens*/
+
+@media screen and (max-width: 500px) {
+    .logo h1 {
+        cursor: pointer;
+        margin-left: 40px;
+        font-size: 17px;
+        font-weight: 400;
+        color: #171717;
+    }
+}
+
+@media screen and (max-width: 960px) {
+    nav {
+        position: fixed;
+        z-index: 3;
+    }
+    .hamburger {
+        display: block;
+        position: absolute;
+        cursor: pointer;
+        right: 5%;
+        top: 50%;
+        transform: translate(-5%, -50%);
+        z-index: 2;
+        transition: all 0.7s ease;
+    }
+    .nav-links {
+        position: fixed;
+        background: #f7f7f7;
+        height: 100vh;
+        width: 100%;
+        flex-direction: column;
+        clip-path: circle(50px at 90% -20%);
+        -webkit-clip-path: circle(50px at 90% -10%);
+        transition: all 1s ease-out;
+        pointer-events: none;
+        justify-content: space-evenly;
+        margin: 0;
+    }
+    .nav-links.open {
+        clip-path: circle(1100px at 90% -10%);
+        -webkit-clip-path: circle(1100px at 90% -10%);
+        pointer-events: all;
+    }
+    .nav-links li {
+        opacity: 0;
+    }
+    .nav-links li:nth-child(1) {
+        transition: all 0.5s ease 0.2s;
+    }
+    .nav-links li:nth-child(2) {
+        transition: all 0.5s ease 0.4s;
+    }
+    .nav-links li:nth-child(3) {
+        transition: all 0.5s ease 0.6s;
+    }
+    .nav-links li:nth-child(4) {
+        transition: all 0.5s ease 0.7s;
+    }
+    .nav-links li:nth-child(5) {
+        transition: all 0.5s ease 0.8s;
+    }
+    .nav-links li:nth-child(6) {
+        transition: all 0.5s ease 0.9s;
+        margin: 0;
+    }
+    .nav-links li:nth-child(7) {
+        transition: all 0.5s ease 1s;
+        margin: 0;
+    }
+    li.fade {
+        opacity: 1;
+    }
+    .margin_top {
+        margin-top: 20vh;
+    }
+}
+
+
+/*Animating Hamburger Icon on Click*/
+
+.toggle .line1 {
+    transform: rotate(-45deg) translate(-5px, 6px);
+}
+
+.toggle .line2 {
+    transition: all 0.7s ease;
+    width: 0;
+}
+
+.toggle .line3 {
+    transform: rotate(45deg) translate(-5px, -6px);
+}
+
+.back_button {
+    border: none;
+    background-color: transparent;
+    padding: 11vh 0 0 2vw;
+    position: absolute;
+}

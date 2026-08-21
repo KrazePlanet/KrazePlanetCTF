@@ -1,0 +1,9 @@
+<?php
+// NUMERIC SUFFIX BACKUP FILE
+
+define('DB_NAME', 'wp_db_1');
+define('DB_USER', 'wp_user1');
+define('DB_PASSWORD', 'WpPass1!2026');
+define('DB_HOST', '127.0.0.1');
+
+?>

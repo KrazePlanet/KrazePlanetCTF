@@ -1,0 +1,543 @@
+* {
+	margin: 0;
+	padding: 0;
+	scroll-behavior: smooth;
+}
+body {
+  font-family: 'Raleway';
+  background-color: #222831;
+  /*background-color: #F5F5F5;*/
+  height: auto;
+}
+#left-bar {
+  position: fixed;
+  left: 0;
+  top: 0;
+  width: 250px;
+  height: 100%;
+  background-color: #404B4A;
+  border: 1px solid #404B4A;
+  /*border-top-right-radius: 12px;*/
+  border-bottom-right-radius: 16px;
+}
+#left-bar h2 {
+  font-size: 36px;
+  margin-top: 17px;
+  text-align: center;
+  color: #EEEEEE;
+}
+#left-bar h3 {
+  margin-top: 5px;
+  font-size: 16px;
+  text-align: center;
+  color: #EEEEEE;
+}
+hr {
+    width: 80%;
+    margin: 0 auto;
+}
+hr:first-of-type {
+    margin-top: 30px;
+}
+#left-bar h4 {
+    text-align: center;
+    padding: 12px 0;
+    color: #EEEEEE;
+}
+#left-bar a:first-of-type {
+  margin-top: 35px;
+}
+#left-bar a:last-of-type {
+  position: absolute;
+  bottom: 24px;
+}
+#left-bar a {
+  max-width: 120px;
+  display: block;
+  margin-top: 15px;
+  margin-left: 16px;
+  padding: 10px 0 10px 8px;
+  font-size: 18px;
+  text-decoration: none;
+  color: #EEEEEE;
+  border-left: 3px solid #D1BDA8;
+  transition: 0.2s;
+}
+#left-bar a:hover {
+  color: #D1BDA8;
+  /*border-left: 3.5px solid #D1BDA8;*/
+  padding-left: 12px;
+}
+p.counter {
+	margin-left: 300px;
+	font-size: 36px;
+}
+.reservation_status, .revenue_status {
+    max-width: 360px;
+    height: 240px;
+    margin-left: 280px;
+    margin-top: 35px;
+    float: left;
+    padding: 20px 20px;
+    background-color: #EEEEEE;
+    border-radius: 5px;
+    /*box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;*/
+}
+.reservation_status h1, .revenue_status h1 {
+    font-size: 24px;
+    font-weight: 500;
+    padding-right: 80px;
+}
+.reservation_status a {
+    text-decoration: none;
+    color: inherit;
+}
+.reservation_status h2, .revenue_status h2 {
+    font-size: 36px;
+    font-weight: 600;
+}
+.revenue_status {
+    margin-left: 30px;
+}
+.revenue_status h2 {
+    padding-top: 10px;
+    letter-spacing: 1px;
+}
+
+/* RESERVATIONS.PHP */
+.container_booked, .container_rooms {
+	max-width: 1100px;
+	margin-left: 270px;
+	margin-top: 35px;
+	padding-left: 10px;
+	padding-right: 10px;
+	text-align: left;
+}
+.responsive-table li, .responsive-table-rooms li {
+	border-radius: 5px;
+	padding: 15px;
+	display: flex;
+	margin-bottom: 16px;
+}
+.responsive-table a {
+    display: inline-block;
+    font-size: 16px;
+    font-weight: 500;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    text-decoration: none;
+    color: inherit;
+    border: 1px solid black;
+    border-radius: 5px;
+    padding: 3px 8px;
+    cursor: pointer;
+    transition: 0.2s;
+}
+.responsive-table a:hover {
+    border: 1px solid #52605F;
+    background-color: #52605F;
+    color: #EEEEEE;
+}
+.table-header {
+	background-color: #52605F;
+	color: #EEEEEE;
+	font-size: 14px;
+	font-weight: 700;
+	text-transform: uppercase;
+	letter-spacing: 0.5px;
+}
+.table-row {
+	background-color: #EEEEEE;
+	box-shadow: 0px 0px 9px 0px rgba(0,0,0,0.1);
+	font-size: 18px;
+}
+.space1 {
+	width: 8%;
+}
+.space {
+	width: 25%;
+}
+#myInput {
+	width: 250px;
+	margin-left: 280px;
+	margin-top: 35px;
+	padding: 10px 0 10px 12px;
+	text-align: left;
+	font-size: 16px;
+	background-color: #F2F2F2;
+	border: 2px solid #52605F;
+	border-radius: 5px;
+}
+#myInput {
+    appearance: none;
+    -webkit-appearance: none;
+    color: #95a5a6;
+    font-size: 18px;
+    border:1px solid #ecf0f1;
+    background:#ecf0f1;
+    padding:5px;
+    display: inline-block !important;
+    visibility: visible !important;
+}
+#myInput:focus {
+    color: #95a5a6;
+    box-shadow: none;
+    -webkit-box-shadow: none;
+    -moz-box-shadow: none;
+    outline: 0;
+}
+#myInput::-webkit-clear-button {
+    display: none;
+}
+#myInput::-webkit-inner-spin-button { 
+    display: none;
+}
+#myInput::-webkit-calendar-picker-indicator {
+    color: #2c3e50;
+}
+.table-refresh {
+    display: inline-block;
+    width: 120px;
+    margin-left: 12px;
+    padding: 9px 0;
+    text-decoration: none;
+    text-align: center;
+    font-size: 18px;
+    letter-spacing: 1px;
+    color: #EEEEEE;
+    background-color: #52605F;
+    border-radius: 5px;
+}
+.table-refresh:hover {
+    outline: 2px solid #52605F;
+    background-color:#465351;
+}
+/* .modal {
+    display: none;
+    position: fixed;
+    z-index: 1;
+    padding-top: 100px;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgb(0,0,0);
+    background-color: rgba(0,0,0,0.4);
+}
+.modal-content {
+    background-color: #52605F;
+    margin: auto;
+    padding: 35px;
+    border: 2px solid #EEEEEE;
+    width: 60%;
+}
+.modal-content h3 {
+    font-size: 24px;
+}
+.close {
+    color: #EEEEEE;
+    float: right;
+    font-size: 32px;
+    font-weight: bold;
+}
+.close:hover, .close:focus {
+    color: #000;
+    text-decoration: none;
+    cursor: pointer;
+} */
+
+/* login.php */
+.login-box {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 400px;
+    padding: 40px;
+    transform: translate(-50%, -50%);
+    background: rgba(0,0,0,.5);
+    box-sizing: border-box;
+    box-shadow: 0 15px 25px rgba(0,0,0,.6);
+    border-radius: 10px;
+}
+.login-box h2 {
+    margin: 0 0 30px;
+    padding: 0;
+    color: #fff;
+    text-align: center;
+}  
+.login-box .user-box {
+    position: relative;
+}  
+.login-box .user-box input {
+    width: 100%;
+    padding: 10px 0;
+    font-size: 16px;
+    color: #fff;
+    margin-bottom: 30px;
+    border: none;
+    border-bottom: 1px solid #fff;
+    outline: none;
+    background: transparent;
+}
+.login-box .user-box label {
+    position: absolute;
+    top: 0;
+    left: 0;
+    padding: 8px 0;
+    font-size: 18px;
+    color: #fff;
+    pointer-events: none;
+    transition: .5s;
+}  
+.login-box .user-box input:focus ~ label, .login-box .user-box input:valid ~ label {
+    top: -20px;
+    left: 0;
+    color: #CCC;
+    font-size: 12px;
+}  
+.login-box form .login {
+    width: 100%;
+    padding: 10px 20px;
+    color: #737373;
+    background-color: #CCC;
+    font-size: 16px;
+    text-decoration: none;
+    text-transform: uppercase;
+    overflow: hidden;
+    cursor: pointer;
+    transition: .3s;
+    margin-top: 10px;
+    letter-spacing: 4px;
+    border: 0;
+}  
+.login-box form .login:hover {
+    background: #737373;
+    color: #CCC;
+    outline: 2px solid #999;
+}
+
+/* content.php */
+.content_form {
+    max-width: 1100px;
+	margin-left: 270px;
+	margin-top: 35px;
+	padding-left: 10px;
+	padding-right: 10px; 
+}
+.content_form label {
+    font-size: 24px;
+    color: #EEEEEE;
+}
+.content_form textarea {
+    width: 550px;
+    height: 250px;
+    font-family: 'Raleway';
+    font-size: 18px;
+    resize: none;
+}
+.content_form textarea:focus {
+    outline: 0;
+    background-color: #F2F2F2;
+}
+.content_form input[type="submit"], .content_form input[type="reset"] {
+    font-size: 18px;
+    border: 2px solid #EEEEEE;
+    background-color: transparent;
+    color: #EEEEEE;
+    text-transform: uppercase;
+    padding: 24px 5px;
+    cursor: pointer;
+    transition: .2s;
+}
+.content_form input[type="submit"]:hover, .content_form input[type="reset"]:hover {
+    background-color: #52605F;
+}
+
+/* register_user.php */
+.reg_form {
+    width: 35%;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    padding: 35px 0;
+    background-color: transparent;
+    border-radius: 4px;
+    color: #F2F2F2;
+}
+.reg_form h1 {
+    text-align: center;
+    letter-spacing: 1px;
+    color: #F2F2F2;
+    padding-bottom: 30px;
+}
+.reg_form input {
+    width: 50%;
+    height: 30px;
+    padding: 18px 0 18px 12px;
+    margin-left: 25%;
+    border: 1px solid #D9D9D9;
+    color: #F2F2F2;
+    background-color: transparent;
+    border-radius: 4px;
+    font-size: 16px;
+}
+.reg_form input:focus{
+    outline: none;
+}
+.reg_form input[type="checkbox"] {
+  display: unset;
+}
+.reg_form .showpass {
+    width: 13px;
+    height: 13px;
+    margin-top: 12px;
+    margin-right: 7px;;
+}
+.reg_form .bojaPoruke {
+    position: relative;
+    width: 40%;
+    left: 36%;
+    text-align: center;
+    color: red;
+}
+.reg_form .prijava {
+    font-size: 17px;
+    height: auto;
+    padding: 10px 0;
+    transition: 0.25s;
+    cursor: pointer;
+    border: 2px solid #f29040;
+    background-color: #F4A261;
+}
+.reg_form .prijava:hover {
+    background-color: #f29040;
+    color: white;
+}
+
+/* somepage.php */
+.reservation_detail {
+    max-width: 360px;
+    height: 240px;
+    margin-left: 280px;
+    margin-top: 35px;
+    /*padding: 12px;
+    background-color: #EEEEEE;
+    border-radius: 5px;*/
+}
+.modal-header, .modal-body {
+    width: 50vw;
+    height: auto;
+    background-color: #EEEEEE;
+    border-radius: 5px;
+}
+.modal-body {
+    margin-top: 30px;
+}
+.reservation_detail h1, .reservation_detail h2 {
+    padding: 24px 0px 24px 24px;
+    font-size: 42px;
+    font-weight: 500;
+}
+.reservation_detail h2 {
+    padding: 12px 0 12px 24px;
+    font-size: 26px;
+}
+.reservation_detail h2:first-of-type {
+    padding-top: 24px;
+}
+.reservation_detail h2:last-of-type {
+    padding-bottom: 24px;
+}
+.reservation_delete, .reservation_delete2 {
+    display: inline-block;
+    position: relative;
+    top: 160px;
+    margin-left: 280px;
+    padding: 12px 20px;
+    font-size: 18px;
+    background-color: #f44336;
+    border: none;
+    opacity: 0.9;
+    cursor: pointer;
+}
+.reservation_delete2 {
+    background-color: #04AA6D;
+    margin-left: 30px;
+}
+.reservation_delete:hover {
+    opacity:1;
+}
+.cancelbtn, .deletebtn, .deletebtn2 {
+    float: left;
+    width: 48%;
+    padding: 12px 0;
+    font-size: 18px;
+    font-weight: 500;
+    color: black;
+    opacity: 0.9;
+    border: 2px solid black;
+    cursor: pointer;
+}
+.cancelbtn:hover, .deletebtn:hover, .deletebtn2:hover {
+    letter-spacing: 1px;
+    opacity: 1;
+}
+.cancelbtn {
+    background-color: #ccc;
+}
+.deletebtn, .deletebtn2 {
+    margin-left: 4%;
+    background-color: #f44336;
+    text-decoration: none;
+}
+.deletebtn2 {
+    background-color: #04AA6D;
+}
+.container {
+    padding: 25px;
+    text-align: center;
+}
+.container h1 {
+    margin: 16px 0;
+}
+.container p {
+    padding-bottom: 25px;
+}
+.modal {
+    display: none; /* Hidden by default */
+    position: fixed; /* Stay in place */
+    z-index: 1; /* Sit on top */
+    left: 0;
+    top: 0;
+    width: 100%; /* Full width */
+    height: 100%; /* Full height */
+    overflow: auto; /* Enable scroll if needed */
+    background-color: #474e5d;
+    padding-top: 50px;
+}
+.modal-content {
+    background-color: #EEEEEE;
+    margin: 5% auto 15% auto;
+    border: 1px solid #888;
+    border-radius: 5px;
+    width: 40%;
+}
+.close {
+    position: absolute;
+    right: 35px;
+    top: 15px;
+    font-size: 40px;
+    font-weight: bold;
+    color: #f1f1f1;
+}
+.close:hover, .close:focus {
+    color: #f44336;
+    cursor: pointer;
+}
+.clearfix::after {
+    content: "";
+    clear: both;
+    display: table;
+}

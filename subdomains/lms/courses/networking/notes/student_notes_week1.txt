@@ -1,0 +1,30 @@
+COURSE: Network Fundamentals & Protocols
+STUDENT NOTES — Week 1
+COMPILED BY: Student Study Group (Batch 2026)
+=========================================================
+
+TCP/IP KEY POINTS:
+
+- TCP is connection-oriented; UDP is connectionless
+- TCP guarantees delivery via ACK and retransmission
+- IP addresses are logical (Layer 3), MAC are physical (Layer 2)
+- Subnetting: A /24 has 256 addresses, 254 usable hosts
+- Default gateway = router IP on local network
+
+DNS RESOLUTION FLOW:
+  Browser → OS Cache → /etc/hosts → Recursive Resolver
+  → Root NS → TLD NS → Authoritative NS → IP returned
+
+COMMON EXAM QUESTIONS:
+  Q: What layer does a switch operate at?     A: Layer 2
+  Q: What layer does a router operate at?     A: Layer 3
+  Q: UDP is used by which protocols?          A: DNS, DHCP, VoIP
+
+WIRESHARK QUICK FILTERS:
+  tcp.port == 80          — HTTP only
+  ip.addr == 10.0.0.1     — specific host
+  http.request.method == "POST"  — POST requests only
+
+LAB TIPS FROM PROF. OKONKWO:
+  "Focus on understanding WHY each layer exists, not just memorizing."
+  "The Wireshark lab is graded on your analysis, not just the captures."

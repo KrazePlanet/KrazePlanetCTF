@@ -1,0 +1,64 @@
+PRESTIGE REALTY GROUP
+Floor Plan Documentation — PRG-001
+Property: The Meridian — Penthouse Suite 42A
+================================================================
+Document Type:   Architectural Floor Plan (Text Summary)
+Drawn By:        Dunn & Associates Architecture Studio
+Revision:        Rev 3 — July 2025
+================================================================
+
+TOTAL AREA BREAKDOWN:
+  Interior Living:    4,800 sq ft
+  Private Terrace:    1,200 sq ft
+  Total:              6,000 sq ft
+
+ROOM-BY-ROOM LAYOUT (North → South):
+
+[ ENTRY & FOYER ]
+  Private elevator lobby → Entry foyer (380 sq ft)
+  Coat closet, art display niche
+
+[ GREAT ROOM ]
+  Open-plan living + dining (1,100 sq ft)
+  Floor-to-ceiling windows — North & East exposures
+  Fireplace (gas, linear — 72")
+  Dining area seats 12
+
+[ KITCHEN ]
+  Chef's kitchen (520 sq ft)
+  Island: 14ft × 5ft (seats 6)
+  Sub-Zero 48" refrigerator + separate freezer column
+  Wolf 60" dual-fuel range with custom hood
+  Miele dishwasher × 2, steam oven, espresso station
+  Walk-in pantry (adjacent, 110 sq ft)
+
+[ BEDROOM WING — WEST ]
+  Primary Suite (980 sq ft incl. bathroom + closets)
+    Bedroom: 560 sq ft, lake-facing
+    En-suite: 280 sq ft
+      Freestanding soaking tub, steam shower (double)
+      Heated floors, Toto Neorest fixtures
+    His & Hers walk-in closets: 70 sq ft each
+
+  Guest Suite 1 (480 sq ft incl. bath)
+  Guest Suite 2 (460 sq ft incl. bath)
+
+[ BEDROOM WING — EAST ]
+  Guest Suite 3 / Home Office flex room (440 sq ft)
+  Full bath adjacent (shared)
+
+[ SERVICE AREAS ]
+  Laundry room: 120 sq ft (2× W/D, sink, folding counter)
+  Mechanical room: 90 sq ft
+  Staff powder room: 45 sq ft
+
+[ ROOF TERRACE ]
+  Accessed via internal staircase + direct elevator
+  Outdoor kitchen (BBQ island, refrigerator, sink)
+  Lounge seating area (NW corner — best sunset views)
+  Planters / landscaping: 200 sq ft
+
+STRUCTURAL NOTES:
+  Concrete slab construction — 12" floor-to-ceiling: 11'6"
+  All interior walls are non-load-bearing (full reconfiguration possible)
+================================================================

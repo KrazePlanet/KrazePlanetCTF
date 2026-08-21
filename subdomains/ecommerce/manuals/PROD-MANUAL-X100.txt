@@ -1,0 +1,25 @@
+================================================================
+          APEX WIRELESS ANC HEADPHONES (X100-PRO)
+                   USER MANUAL & QUICK START
+================================================================
+
+1. PAIRING INSTRUCTIONS
+   - Hold power button for 3 seconds until LED flashes Blue/Red.
+   - On your device, select "Apex X100-Pro" from Bluetooth menu.
+   - Multipoint Pairing: Hold Bluetooth button 2 sec to add second device.
+
+2. ACTIVE NOISE CANCELLATION (ANC)
+   - Press ANC button on left ear cup to cycle modes:
+     * ANC High (Noise blocking up to 35dB)
+     * Transparency Mode (Amplify ambient audio)
+     * ANC Off
+
+3. BATTERY & CHARGING
+   - 40 Hours playtime with ANC enabled (55 Hours ANC Off).
+   - Fast Charging: 10 mins USB-C charge yields 4 hours playtime.
+
+4. SAFETY & COMPLIANCE
+   - Water Resistance: IPX4 splashproof rating.
+   - Operating Temp: -10°C to 45°C.
+   - Do not expose battery to extreme heat or direct sunlight.
+================================================================

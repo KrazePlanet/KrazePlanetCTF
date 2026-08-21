@@ -1,0 +1,989 @@
+/* includes/styles.css */
+
+/* ============================================================
+   CSS VARIABLES — light theme (default)
+   ============================================================ */
+:root {
+    --fm-bg:              #f8f9fa;
+    --fm-bg-body:         #f8f9fa;
+    --fm-surface:         #ffffff;
+    --fm-surface-2:       #f1f1f1;
+    --fm-surface-3:       #f8f9fa;
+    --fm-border:          #dee2e6;
+    --fm-border-2:        #ddd;
+    --fm-text:            #212529;
+    --fm-text-muted:      #6c757d;
+    --fm-text-secondary:  #495057;
+    --fm-link:            #0d6efd;
+    --fm-table-stripe:    rgba(0,0,0,0.02);
+    --fm-table-hover:     rgba(0,0,0,0.04);
+    --fm-table-head-bg:   #f8f9fa;
+    --fm-breadcrumb-bg:   #ffffff;
+    --fm-input-bg:        #ffffff;
+    --fm-input-border:    #ced4da;
+    --fm-input-text:      #212529;
+    --fm-card-bg:         #ffffff;
+    --fm-card-shadow:     0 0.125rem 0.25rem rgba(0,0,0,0.075);
+    --fm-tooltip-bg:      #ffffff;
+    --fm-tooltip-border:  #dee2e6;
+    --fm-tooltip-shadow:  0 4px 16px rgba(0,0,0,0.18);
+    /* Viewers */
+    --fm-viewer-header:   #f1f1f1;
+    --fm-viewer-header-text: #212529;
+    --fm-viewer-body:     #fafafa;
+    --fm-viewer-footer:   #f8f9fa;
+    --fm-viewer-border:   #dee2e6;
+    --fm-btn-viewer-bg:   #ffffff;
+    --fm-btn-viewer-text: #495057;
+    --fm-btn-viewer-border: #ced4da;
+    --fm-btn-viewer-hover: #e9ecef;
+    --fm-lang-badge-bg:   #e9ecef;
+    --fm-lang-badge-text: #495057;
+    /* CSV */
+    --fm-csv-header-bg:   #f1f1f1;
+    --fm-csv-thead-bg:    #f1f1f1;
+    --fm-csv-cell-border: #dee2e6;
+    /* Audio */
+    --fm-audio-bg:        #ffffff;
+    --fm-audio-progress:  #eeeeee;
+    --fm-audio-info-bg:   #fcfcfc;
+    --fm-audio-ctrl-bg:   #f8f9fa;
+    --fm-audio-border:    #eeeeee;
+    /* Video */
+    --fm-video-header-bg: #f8f9fa;
+    --fm-video-close:     #6c757d;
+    /* Image */
+    --fm-img-header-bg:   #f8f9fa;
+    /* Theme toggle button */
+    --fm-theme-btn-color: #495057;
+}
+
+/* ============================================================
+   CSS VARIABLES — dark theme
+   ============================================================ */
+[data-theme="dark"] {
+    --fm-bg:              #1a1d21;
+    --fm-bg-body:         #1a1d21;
+    --fm-surface:         #242830;
+    --fm-surface-2:       #2c3038;
+    --fm-surface-3:       #2c3038;
+    --fm-border:          #3a3f4b;
+    --fm-border-2:        #3a3f4b;
+    --fm-text:            #e2e6ea;
+    --fm-text-muted:      #8b949e;
+    --fm-text-secondary:  #adb5bd;
+    --fm-link:            #6ea8fe;
+    --fm-table-stripe:    rgba(255,255,255,0.03);
+    --fm-table-hover:     rgba(255,255,255,0.06);
+    --fm-table-head-bg:   #2c3038;
+    --fm-breadcrumb-bg:   #242830;
+    --fm-input-bg:        #2c3038;
+    --fm-input-border:    #4a5060;
+    --fm-input-text:      #e2e6ea;
+    --fm-card-bg:         #242830;
+    --fm-card-shadow:     0 0.125rem 0.5rem rgba(0,0,0,0.4);
+    --fm-tooltip-bg:      #2c3038;
+    --fm-tooltip-border:  #3a3f4b;
+    --fm-tooltip-shadow:  0 4px 16px rgba(0,0,0,0.5);
+    /* Viewers */
+    --fm-viewer-header:   #2c3038;
+    --fm-viewer-header-text: #e2e6ea;
+    --fm-viewer-body:     #1e2228;
+    --fm-viewer-footer:   #242830;
+    --fm-viewer-border:   #3a3f4b;
+    --fm-btn-viewer-bg:   #2c3038;
+    --fm-btn-viewer-text: #adb5bd;
+    --fm-btn-viewer-border: #4a5060;
+    --fm-btn-viewer-hover: #363c48;
+    --fm-lang-badge-bg:   #363c48;
+    --fm-lang-badge-text: #adb5bd;
+    /* CSV */
+    --fm-csv-header-bg:   #2c3038;
+    --fm-csv-thead-bg:    #2c3038;
+    --fm-csv-cell-border: #3a3f4b;
+    /* Audio */
+    --fm-audio-bg:        #242830;
+    --fm-audio-progress:  #3a3f4b;
+    --fm-audio-info-bg:   #2c3038;
+    --fm-audio-ctrl-bg:   #2c3038;
+    --fm-audio-border:    #3a3f4b;
+    /* Video */
+    --fm-video-header-bg: #2c3038;
+    --fm-video-close:     #8b949e;
+    /* Image */
+    --fm-img-header-bg:   #2c3038;
+    /* Theme toggle button */
+    --fm-theme-btn-color: #f0c040;
+}
+
+/* ============================================================
+   BASE STYLES
+   ============================================================ */
+body {
+    font-size: 0.95rem;
+    background-color: var(--fm-bg-body) !important;
+    color: var(--fm-text) !important;
+    transition: background-color 0.2s, color 0.2s;
+}
+
+/* ============================================================
+   BOOTSTRAP OVERRIDES — dark theme
+   ============================================================ */
+[data-theme="dark"] .card {
+    background-color: var(--fm-card-bg) !important;
+    border-color: var(--fm-border) !important;
+    color: var(--fm-text);
+}
+[data-theme="dark"] .card-header {
+    background-color: var(--fm-surface-2) !important;
+    border-color: var(--fm-border) !important;
+    color: var(--fm-text);
+}
+[data-theme="dark"] .card-footer {
+    background-color: var(--fm-surface-2) !important;
+    border-color: var(--fm-border) !important;
+}
+[data-theme="dark"] .table {
+    color: var(--fm-text);
+    --bs-table-bg: var(--fm-surface);
+    --bs-table-striped-bg: var(--fm-table-stripe);
+    --bs-table-hover-bg: var(--fm-table-hover);
+    --bs-table-border-color: var(--fm-border);
+}
+[data-theme="dark"] .table thead th {
+    background-color: var(--fm-table-head-bg) !important;
+    color: var(--fm-text);
+    border-color: var(--fm-border);
+}
+[data-theme="dark"] .table td,
+[data-theme="dark"] .table th {
+    border-color: var(--fm-border);
+}
+[data-theme="dark"] .breadcrumb {
+    background-color: var(--fm-breadcrumb-bg);
+    border-color: var(--fm-border);
+}
+[data-theme="dark"] .breadcrumb-item a {
+    color: var(--fm-link);
+}
+[data-theme="dark"] .breadcrumb-item.active {
+    color: var(--fm-text-muted);
+}
+[data-theme="dark"] .form-control,
+[data-theme="dark"] .form-select {
+    background-color: var(--fm-input-bg) !important;
+    border-color: var(--fm-input-border) !important;
+    color: var(--fm-input-text) !important;
+}
+[data-theme="dark"] .form-control:focus,
+[data-theme="dark"] .form-select:focus {
+    border-color: #6ea8fe !important;
+    box-shadow: 0 0 0 0.2rem rgba(110,168,254,0.25) !important;
+}
+[data-theme="dark"] .form-control::placeholder {
+    color: var(--fm-text-muted);
+}
+[data-theme="dark"] .input-group-text {
+    background-color: var(--fm-surface-2);
+    border-color: var(--fm-input-border);
+    color: var(--fm-text-muted);
+}
+[data-theme="dark"] .btn-outline-secondary {
+    color: var(--fm-text-secondary);
+    border-color: var(--fm-border);
+}
+[data-theme="dark"] .btn-outline-secondary:hover {
+    background-color: var(--fm-surface-2);
+    color: var(--fm-text);
+}
+[data-theme="dark"] .btn-secondary {
+    background-color: #4a5060;
+    border-color: #4a5060;
+}
+[data-theme="dark"] .btn-light {
+    background-color: var(--fm-surface-2);
+    border-color: var(--fm-border);
+    color: var(--fm-text);
+}
+[data-theme="dark"] .bg-light {
+    background-color: var(--fm-surface) !important;
+}
+[data-theme="dark"] .bg-white {
+    background-color: var(--fm-surface) !important;
+}
+[data-theme="dark"] .text-dark {
+    color: var(--fm-text) !important;
+}
+[data-theme="dark"] .text-muted {
+    color: var(--fm-text-muted) !important;
+}
+[data-theme="dark"] .border,
+[data-theme="dark"] .border-bottom,
+[data-theme="dark"] .border-top {
+    border-color: var(--fm-border) !important;
+}
+[data-theme="dark"] .dropdown-menu {
+    background-color: var(--fm-surface);
+    border-color: var(--fm-border);
+}
+[data-theme="dark"] .dropdown-item {
+    color: var(--fm-text);
+}
+[data-theme="dark"] .dropdown-item:hover {
+    background-color: var(--fm-surface-2);
+}
+[data-theme="dark"] .modal-content {
+    background-color: var(--fm-card-bg);
+    border-color: var(--fm-border);
+    color: var(--fm-text);
+}
+[data-theme="dark"] .modal-header,
+[data-theme="dark"] .modal-footer {
+    border-color: var(--fm-border);
+}
+[data-theme="dark"] .modal-header {
+    background-color: var(--fm-surface-2);
+}
+[data-theme="dark"] .modal-footer {
+    background-color: var(--fm-surface-2);
+}
+[data-theme="dark"] .list-group-item {
+    background-color: var(--fm-surface);
+    border-color: var(--fm-border);
+    color: var(--fm-text);
+}
+
+/* ============================================================
+   MAIN INTERFACE
+   ============================================================ */
+.table th.sortable {
+    cursor: pointer;
+    user-select: none;
+}
+.table th.sortable::after {
+    content: ' ↕';
+    opacity: 0.4;
+    font-size: 0.8em;
+}
+.file-icon {
+    width: 1.4em;
+    text-align: center;
+    margin-right: 0.5rem;
+}
+.search-input {
+    max-width: 420px;
+}
+tr.hidden {
+    display: none;
+}
+.search-result-path {
+    font-size: 0.85rem;
+    color: var(--fm-text-muted);
+    margin-top: 2px;
+}
+.breadcrumb {
+    background-color: var(--fm-breadcrumb-bg);
+    border: 1px solid var(--fm-border);
+}
+.card {
+    box-shadow: var(--fm-card-shadow);
+}
+
+/* ============================================================
+   IMAGE THUMBNAIL TOOLTIP
+   ============================================================ */
+#fm-thumb-tip {
+    background: var(--fm-tooltip-bg) !important;
+    border: 1px solid var(--fm-tooltip-border) !important;
+    box-shadow: var(--fm-tooltip-shadow) !important;
+}
+
+/* ============================================================
+   THEME TOGGLE BUTTON
+   ============================================================ */
+#btn-theme-toggle {
+    background: none;
+    border: none;
+    color: var(--fm-theme-btn-color);
+    font-size: 1.1rem;
+    cursor: pointer;
+    padding: 2px 6px;
+    border-radius: 6px;
+    transition: color 0.2s, background 0.15s;
+    line-height: 1;
+}
+#btn-theme-toggle:hover {
+    background: rgba(128,128,128,0.15);
+}
+
+/* ============================================================
+   VIEWERS — shared elements
+   ============================================================ */
+.btn-viewer {
+    background: var(--fm-btn-viewer-bg) !important;
+    border: 1px solid var(--fm-btn-viewer-border) !important;
+    color: var(--fm-btn-viewer-text) !important;
+    border-radius: 6px;
+    padding: 3px 9px;
+    font-size: 0.8rem;
+    cursor: pointer;
+    transition: background 0.15s, border-color 0.15s;
+    line-height: 1.4;
+    white-space: nowrap;
+}
+.btn-viewer:hover {
+    background: var(--fm-btn-viewer-hover) !important;
+    border-color: var(--fm-btn-viewer-border) !important;
+}
+.btn-viewer.active {
+    background: #0d6efd !important;
+    border-color: #0d6efd !important;
+    color: #fff !important;
+}
+.btn-viewer:disabled {
+    opacity: 0.4;
+    cursor: default;
+}
+.font-size-indicator {
+    min-width: 36px;
+    text-align: center;
+    font-size: 0.75rem;
+    color: var(--fm-text-muted);
+    font-variant-numeric: tabular-nums;
+}
+.controls-divider {
+    width: 1px;
+    height: 20px;
+    background: var(--fm-border);
+    margin: 0 2px;
+}
+.viewer-controls {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+/* ============================================================
+   TXT VIEWER
+   ============================================================ */
+.txt-card {
+    background: var(--fm-surface) !important;
+}
+.txt-header {
+    background: var(--fm-viewer-header) !important;
+    border-bottom: 1px solid var(--fm-viewer-border) !important;
+    color: var(--fm-viewer-header-text) !important;
+}
+.txt-warning {
+    background: #fff3cd;
+    border-bottom: 1px solid #ffc107;
+    font-size: 0.82rem;
+    color: #856404;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+}
+[data-theme="dark"] .txt-warning {
+    background: #332900;
+    border-color: #665200;
+    color: #ffc107;
+}
+.txt-body {
+    background: var(--fm-viewer-body) !important;
+    color: var(--fm-text) !important;
+}
+.txt-footer {
+    background: var(--fm-viewer-footer) !important;
+    border-top: 1px solid var(--fm-viewer-border) !important;
+    color: var(--fm-text);
+}
+
+/* ============================================================
+   CODE VIEWER
+   ============================================================ */
+.code-card {
+    background: var(--fm-surface) !important;
+}
+.code-header {
+    background: var(--fm-viewer-header) !important;
+    border-bottom: 1px solid var(--fm-viewer-border) !important;
+}
+.code-header .file-title {
+    color: var(--fm-text) !important;
+}
+.lang-badge {
+    background: var(--fm-lang-badge-bg) !important;
+    color: var(--fm-lang-badge-text) !important;
+    border: 1px solid var(--fm-btn-viewer-border) !important;
+    padding: 2px 10px;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-family: 'Courier New', monospace;
+    letter-spacing: 0.04em;
+    white-space: nowrap;
+}
+.meta-info {
+    color: var(--fm-text-muted);
+    font-size: 0.75rem;
+    white-space: nowrap;
+}
+.btn-copy {
+    background: var(--fm-btn-viewer-bg) !important;
+    border: 1px solid var(--fm-btn-viewer-border) !important;
+    color: var(--fm-btn-viewer-text) !important;
+    padding: 3px 12px;
+    border-radius: 6px;
+    font-size: 0.8rem;
+    cursor: pointer;
+    transition: background 0.15s, border-color 0.15s;
+    white-space: nowrap;
+}
+.btn-copy:hover {
+    background: var(--fm-btn-viewer-hover) !important;
+}
+.btn-copy.copied {
+    background: #d1e7dd !important;
+    border-color: #a3cfbb !important;
+    color: #0a3622 !important;
+}
+.btn-close-code {
+    background: none;
+    border: none;
+    color: var(--fm-text-muted);
+    font-size: 1.1rem;
+    cursor: pointer;
+    padding: 2px 4px;
+    transition: color 0.15s;
+    line-height: 1;
+}
+.btn-close-code:hover {
+    color: var(--fm-text);
+}
+[data-theme="dark"] .code-warning {
+    background: #332900 !important;
+    border-color: #665200 !important;
+    color: #ffc107 !important;
+}
+
+/* ============================================================
+   CSV VIEWER
+   ============================================================ */
+.csv-card {
+    background: var(--fm-surface) !important;
+    color: var(--fm-text);
+}
+.csv-header {
+    background: var(--fm-csv-header-bg) !important;
+    border-bottom: 2px solid var(--fm-viewer-border) !important;
+    color: var(--fm-text);
+}
+.csv-warning {
+    padding: 6px 20px;
+    background: #fff3cd;
+    border-bottom: 1px solid #ffc107;
+    font-size: 0.82rem;
+    color: #856404;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+}
+[data-theme="dark"] .csv-warning {
+    background: #332900;
+    border-color: #665200;
+    color: #ffc107;
+}
+.table-container {
+    background: var(--fm-surface) !important;
+}
+#csv-table {
+    color: var(--fm-text);
+}
+.csv-row td {
+    border: 1px solid var(--fm-csv-cell-border) !important;
+    color: var(--fm-text);
+}
+#csv-table thead th {
+    background: var(--fm-csv-thead-bg) !important;
+    border: 1px solid var(--fm-csv-cell-border) !important;
+    color: var(--fm-text);
+}
+.csv-footer {
+    background: var(--fm-viewer-footer) !important;
+    border-top: 1px solid var(--fm-viewer-border) !important;
+    color: var(--fm-text-muted);
+}
+[data-theme="dark"] #pdf-rename-input {
+    background-color: var(--fm-input-bg);
+    border-color: var(--fm-input-border);
+    color: var(--fm-input-text);
+}
+
+/* ============================================================
+   PDF VIEWER
+   ============================================================ */
+.pdf-footer {
+    background: var(--fm-viewer-footer) !important;
+    border-top: 1px solid var(--fm-viewer-border) !important;
+}
+[data-theme="dark"] #pdf-rename-row input {
+    background-color: var(--fm-input-bg);
+    border-color: var(--fm-input-border);
+    color: var(--fm-input-text);
+}
+
+/* ============================================================
+   IMAGE VIEWER
+   ============================================================ */
+.img-header {
+    background: var(--fm-img-header-bg) !important;
+    border-bottom: 1px solid var(--fm-viewer-border) !important;
+    color: var(--fm-text);
+}
+[data-theme="dark"] .img-header .text-dark {
+    color: var(--fm-text) !important;
+}
+
+/* ============================================================
+   VIDEO VIEWER
+   ============================================================ */
+.video-header {
+    background: var(--fm-video-header-bg) !important;
+    border-bottom: 1px solid var(--fm-viewer-border) !important;
+    color: var(--fm-text);
+}
+.btn-close-video {
+    color: var(--fm-video-close) !important;
+}
+[data-theme="dark"] .btn-close-video:hover {
+    color: var(--fm-text) !important;
+}
+
+/* ============================================================
+   AUDIO PLAYER (audio_player.php)
+   ============================================================ */
+.player-container {
+    background: var(--fm-audio-bg) !important;
+}
+.player-header {
+    background: var(--fm-audio-bg) !important;
+    border-bottom: 1px solid var(--fm-audio-border) !important;
+    color: var(--fm-text);
+}
+.player-left {
+    background: var(--fm-audio-bg) !important;
+}
+.p-progress {
+    background: var(--fm-audio-progress) !important;
+}
+[data-theme="dark"] .freq-scale {
+    color: #00cc44;
+}
+[data-theme="dark"] .btn-mode {
+    color: #6b7280;
+}
+
+/* ============================================================
+   AUDIO VIEWER (preview_audio_single.php)
+   ============================================================ */
+.audio-single-card {
+    background: var(--fm-audio-bg) !important;
+    color: var(--fm-text);
+}
+.audio-controls {
+    background: var(--fm-audio-ctrl-bg) !important;
+}
+.audio-info-header {
+    background: var(--fm-audio-info-bg) !important;
+    border-bottom: 1px solid var(--fm-audio-border) !important;
+    color: var(--fm-text);
+}
+.audio-progress {
+    background: var(--fm-audio-progress) !important;
+}
+
+/* ============================================================
+   RENAME MODAL (edit_name.php)
+   ============================================================ */
+[data-theme="dark"] #rename-modal-wrapper .card {
+    background-color: var(--fm-card-bg) !important;
+    border-color: var(--fm-border) !important;
+    color: var(--fm-text);
+}
+[data-theme="dark"] #rename-modal-wrapper .card-header {
+    background-color: var(--fm-surface-2) !important;
+    border-color: var(--fm-border) !important;
+}
+[data-theme="dark"] #rename-modal-wrapper .card-footer {
+    background-color: var(--fm-surface-2) !important;
+    border-color: var(--fm-border) !important;
+}
+
+/* ============================================================
+   BOOTSTRAP MODALS (createFolderModal, upload)
+   ============================================================ */
+[data-theme="dark"] .modal-content {
+    background-color: var(--fm-card-bg) !important;
+    border-color: var(--fm-border) !important;
+    color: var(--fm-text);
+}
+[data-theme="dark"] .modal-header {
+    background-color: var(--fm-surface-2) !important;
+    border-color: var(--fm-border) !important;
+}
+[data-theme="dark"] .modal-footer {
+    background-color: var(--fm-surface-2) !important;
+    border-color: var(--fm-border) !important;
+}
+[data-theme="dark"] .modal-body {
+    background-color: var(--fm-card-bg) !important;
+}
+
+/* ============================================================
+   MESSAGES (messages.php)
+   ============================================================ */
+.msg-card {
+    background: var(--fm-card-bg) !important;
+    color: var(--fm-text);
+}
+.msg-header {
+    border-bottom: 1px solid var(--fm-border) !important;
+    color: var(--fm-text);
+}
+.msg-footer {
+    background: var(--fm-surface-2) !important;
+}
+[data-theme="dark"] .close-msg {
+    color: var(--fm-text-muted);
+}
+[data-theme="dark"] .close-msg:hover {
+    color: var(--fm-text);
+}
+.msg-timer-container {
+    background: var(--fm-border) !important;
+}
+
+/* ============================================================
+   PREVIEW MODAL (Bootstrap modal)
+   ============================================================ */
+#previewModal .modal-dialog {
+    max-width: 80vw;
+}
+#previewModal .modal-body {
+    text-align: center;
+}
+#previewModal img, #previewModal embed {
+    max-width: 100%;
+    max-height: 80vh;
+}
+
+/* ============================================================
+   ANIMATIONS
+   ============================================================ */
+@keyframes playBtnFadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+#btn-play-selected.show-animation {
+    display: inline-block !important;
+    animation: playBtnFadeIn 0.3s ease-out forwards;
+}
+
+@media print {
+    body * { visibility: hidden; }
+    #print-area, #print-area * { visibility: visible; }
+    #print-area { position: absolute; left: 0; top: 0; width: 100%; }
+}
+
+/* ============================================================
+   LISTING — specific overrides
+   ============================================================ */
+
+/* Breadcrumbs (bg-white inline-block) */
+[data-theme="dark"] .bg-white.rounded.border {
+    background-color: var(--fm-surface) !important;
+    border-color: var(--fm-border) !important;
+}
+
+/* File links (text-dark) */
+[data-theme="dark"] a.text-dark {
+    color: var(--fm-text) !important;
+}
+[data-theme="dark"] a.text-dark:hover {
+    color: var(--fm-link) !important;
+}
+
+/* Table header (thead bg-light) */
+[data-theme="dark"] thead.bg-light {
+    background-color: var(--fm-table-head-bg) !important;
+}
+[data-theme="dark"] thead.bg-light th {
+    color: var(--fm-link) !important;
+    border-color: var(--fm-border) !important;
+}
+
+/* Table rows */
+[data-theme="dark"] .table-hover > tbody > tr:hover > td,
+[data-theme="dark"] .table-hover > tbody > tr:hover > th {
+    background-color: var(--fm-table-hover);
+    color: var(--fm-text);
+}
+[data-theme="dark"] .table > tbody > tr > td {
+    background-color: var(--fm-surface);
+    color: var(--fm-text);
+    border-color: var(--fm-border);
+}
+
+/* Table card */
+[data-theme="dark"] .card.border-0.shadow-sm {
+    background-color: var(--fm-surface) !important;
+    box-shadow: 0 0.125rem 0.5rem rgba(0,0,0,0.4) !important;
+}
+
+/* Show: select */
+[data-theme="dark"] #perPage {
+    background-color: var(--fm-input-bg);
+    border-color: var(--fm-input-border);
+    color: var(--fm-input-text);
+}
+
+/* Pagination */
+[data-theme="dark"] .page-link {
+    background-color: var(--fm-surface);
+    border-color: var(--fm-border);
+    color: var(--fm-link);
+}
+[data-theme="dark"] .page-link:hover {
+    background-color: var(--fm-surface-2);
+    border-color: var(--fm-border);
+    color: var(--fm-link);
+}
+[data-theme="dark"] .page-item.active .page-link {
+    background-color: var(--fm-link);
+    border-color: var(--fm-link);
+    color: #fff;
+}
+[data-theme="dark"] .page-item.disabled .page-link {
+    background-color: var(--fm-surface);
+    border-color: var(--fm-border);
+    color: var(--fm-text-muted);
+}
+
+/* Toolbar outline buttons */
+[data-theme="dark"] .btn-outline-primary {
+    color: #6ea8fe;
+    border-color: #6ea8fe;
+}
+[data-theme="dark"] .btn-outline-primary:hover {
+    background-color: rgba(110,168,254,0.15);
+    color: #6ea8fe;
+}
+
+/* Checkboxes */
+[data-theme="dark"] .form-check-input {
+    background-color: var(--fm-input-bg);
+    border-color: var(--fm-input-border);
+}
+[data-theme="dark"] .form-check-input:checked {
+    background-color: var(--fm-link);
+    border-color: var(--fm-link);
+}
+
+/* Rename / delete buttons in row */
+[data-theme="dark"] .btn-rename-file,
+[data-theme="dark"] .btn-delete-file {
+    opacity: 0.7;
+}
+[data-theme="dark"] .btn-rename-file:hover {
+    opacity: 1;
+    color: var(--fm-link) !important;
+}
+
+/* Footer counter */
+[data-theme="dark"] .mt-4.d-flex.small.text-muted {
+    color: var(--fm-text-muted) !important;
+}
+
+/* ============================================================
+   DARK THEME — dimming overlay over background image
+   ============================================================ */
+[data-theme="dark"] body {
+    position: relative;
+}
+[data-theme="dark"] body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: rgba(20, 22, 28, 0.88);
+    z-index: 0;
+    pointer-events: none;
+}
+[data-theme="dark"] .container {
+    position: relative;
+    z-index: 1;
+}
+
+/* ============================================================
+   DARK THEME — muted btn-primary
+   ============================================================ */
+[data-theme="dark"] .btn-primary {
+    background-color: #2a4a8a;
+    border-color: #2a4a8a;
+    color: #6ea8fe;
+}
+[data-theme="dark"] .btn-primary:hover,
+[data-theme="dark"] .btn-primary:focus {
+    background-color: #1e3a70;
+    border-color: #1e3a70;
+    color: #8dbfff;
+}
+[data-theme="dark"] .btn-primary:active {
+    background-color: #163060;
+    border-color: #163060;
+}
+
+/* ============================================================
+   DARK THEME — btn-viewer.active (collapse button)
+   ============================================================ */
+[data-theme="dark"] .btn-viewer.active {
+    background: var(--fm-surface-2) !important;
+    border-color: #6ea8fe !important;
+    color: #6ea8fe !important;
+}
+[data-theme="dark"] .btn-viewer.active:hover {
+    background: var(--fm-btn-viewer-hover) !important;
+}
+
+/* ============================================================
+   DARK THEME — btn-viewer-img (preview_img.php)
+   ============================================================ */
+[data-theme="dark"] .btn-viewer-img {
+    background: var(--fm-btn-viewer-bg) !important;
+    border: 1px solid var(--fm-btn-viewer-border) !important;
+    color: var(--fm-btn-viewer-text) !important;
+}
+[data-theme="dark"] .btn-viewer-img:hover {
+    background: var(--fm-btn-viewer-hover) !important;
+    color: var(--fm-text) !important;
+}
+[data-theme="dark"] .btn-viewer-img.active {
+    background: var(--fm-surface-2) !important;
+    border-color: #6ea8fe !important;
+    color: #6ea8fe !important;
+}
+[data-theme="dark"] .btn-viewer-img.active:hover {
+    background: var(--fm-btn-viewer-hover) !important;
+}
+
+/* ============================================================
+   DARK THEME — audio_player.php playlist (right panel)
+   ============================================================ */
+[data-theme="dark"] .player-right {
+    background: var(--fm-surface-2) !important;
+    border-left-color: var(--fm-border) !important;
+}
+[data-theme="dark"] .playlist-title {
+    border-bottom-color: var(--fm-border) !important;
+    color: #6ea8fe !important;
+}
+[data-theme="dark"] .playlist-scroll {
+    background: var(--fm-surface-2);
+}
+[data-theme="dark"] .playlist-item {
+    border-bottom-color: var(--fm-border) !important;
+    color: var(--fm-text-secondary) !important;
+}
+[data-theme="dark"] .playlist-item:hover {
+    background: var(--fm-table-hover);
+    color: var(--fm-text) !important;
+}
+[data-theme="dark"] .playlist-item.active {
+    background: rgba(110,168,254,0.12) !important;
+    color: #6ea8fe !important;
+    border-left-color: #6ea8fe !important;
+}
+[data-theme="dark"] .playlist-item.error {
+    color: var(--fm-text-muted) !important;
+}
+/* Playlist scrollbar */
+[data-theme="dark"] .playlist-scroll::-webkit-scrollbar {
+    width: 6px;
+}
+[data-theme="dark"] .playlist-scroll::-webkit-scrollbar-track {
+    background: var(--fm-surface-2);
+}
+[data-theme="dark"] .playlist-scroll::-webkit-scrollbar-thumb {
+    background: var(--fm-border);
+    border-radius: 3px;
+}
+
+/* ============================================================
+   DARK THEME — preview_code.php
+   ============================================================ */
+[data-theme="dark"] .code-card {
+    background: var(--fm-surface) !important;
+}
+[data-theme="dark"] .code-body {
+    background: var(--fm-viewer-body) !important;
+}
+[data-theme="dark"] .line-numbers {
+    background: var(--fm-surface-2) !important;
+    border-right-color: var(--fm-border) !important;
+}
+[data-theme="dark"] .line-numbers span {
+    color: var(--fm-text-muted) !important;
+}
+[data-theme="dark"] .line-numbers span:hover {
+    color: var(--fm-text-secondary) !important;
+}
+[data-theme="dark"] .code-content .code-line:hover {
+    background: rgba(255,255,255,0.04) !important;
+}
+[data-theme="dark"] .code-footer {
+    background: var(--fm-viewer-footer) !important;
+    border-top-color: var(--fm-border) !important;
+}
+[data-theme="dark"] .code-footer .footer-meta {
+    color: var(--fm-text-muted) !important;
+}
+[data-theme="dark"] .btn-dl-code {
+    background: #4a5060 !important;
+    color: var(--fm-text) !important;
+}
+[data-theme="dark"] .btn-dl-code:hover {
+    background: #5a6070 !important;
+}
+
+/* ============================================================
+   DARK THEME — preview_code.php (enhanced overrides)
+   ============================================================ */
+
+/* Code area background */
+[data-theme="dark"] #codeBody {
+    background: #282c34 !important;  /* atom-one-dark background */
+}
+[data-theme="dark"] #codeBody .code-content {
+    background: #282c34 !important;
+}
+[data-theme="dark"] #codeBody .code-content pre,
+[data-theme="dark"] #codeBody .code-content code,
+[data-theme="dark"] #codeBody .hljs {
+    background: #282c34 !important;
+    color: #abb2bf;                  /* atom-one-dark default text */
+}
+
+/* Line numbers — background matching code area */
+[data-theme="dark"] #lineNumbers {
+    background: #21252b !important;
+    border-right-color: #3a3f4b !important;
+}
+
+/* Footer — increased specificity */
+[data-theme="dark"] .code-card .code-footer {
+    background: var(--fm-viewer-footer) !important;
+    border-top: 1px solid var(--fm-border) !important;
+    color: var(--fm-text-muted) !important;
+}

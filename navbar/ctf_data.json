@@ -1,0 +1,1639 @@
+[
+  {
+    "category": "OSINT",
+    "icon": "bi-search",
+    "color": "#38bdf8",
+    "challenges": [
+      {
+        "id": "ctf_10001",
+        "name": "Digital Detective",
+        "category": "OSINT",
+        "port": 10001,
+        "host": "192.168.1.1",
+        "protocol": "nc",
+        "difficulty": "Easy",
+        "points": 100,
+        "solves": 101
+      },
+      {
+        "id": "ctf_10002",
+        "name": "Ghost Trail",
+        "category": "OSINT",
+        "port": 10002,
+        "host": "192.168.1.1",
+        "protocol": "nc",
+        "difficulty": "Medium",
+        "points": 250,
+        "solves": 14
+      },
+      {
+        "id": "ctf_10003",
+        "name": "Open Source Hunt",
+        "category": "OSINT",
+        "port": 10003,
+        "host": "192.168.1.1",
+        "protocol": "nc",
+        "difficulty": "Hard",
+        "points": 500,
+        "solves": 99
+      },
+      {
+        "id": "ctf_10004",
+        "name": "The Missing Identity",
+        "category": "OSINT",
+        "port": 10004,
+        "host": "192.168.1.1",
+        "protocol": "nc",
+        "difficulty": "Insane",
+        "points": 1000,
+        "solves": 98
+      },
+      {
+        "id": "ctf_10005",
+        "name": "Trace the Untraceable",
+        "category": "OSINT",
+        "port": 10005,
+        "host": "192.168.1.1",
+        "protocol": "nc",
+        "difficulty": "Easy",
+        "points": 100,
+        "solves": 14
+      },
+      {
+        "id": "ctf_10006",
+        "name": "Footprints",
+        "category": "OSINT",
+        "port": 10006,
+        "host": "192.168.1.1",
+        "protocol": "nc",
+        "difficulty": "Medium",
+        "points": 250,
+        "solves": 96
+      },
+      {
+        "id": "ctf_10007",
+        "name": "Shadow Search",
+        "category": "OSINT",
+        "port": 10007,
+        "host": "192.168.1.1",
+        "protocol": "nc",
+        "difficulty": "Hard",
+        "points": 500,
+        "solves": 95
+      },
+      {
+        "id": "ctf_10008",
+        "name": "Who Is Behind It?",
+        "category": "OSINT",
+        "port": 10008,
+        "host": "192.168.1.1",
+        "protocol": "nc",
+        "difficulty": "Insane",
+        "points": 1000,
+        "solves": 14
+      }
+    ]
+  },
+  {
+    "category": "Web Exploitation",
+    "icon": "bi-globe",
+    "color": "#10b981",
+    "challenges": [
+      {
+        "id": "ctf_10009",
+        "name": "Web Breaker",
+        "category": "Web Exploitation",
+        "port": 10009,
+        "host": "192.168.1.1",
+        "protocol": "http",
+        "difficulty": "Easy",
+        "points": 100,
+        "solves": 93
+      },
+      {
+        "id": "ctf_10010",
+        "name": "Broken Web",
+        "category": "Web Exploitation",
+        "port": 10010,
+        "host": "192.168.1.1",
+        "protocol": "http",
+        "difficulty": "Medium",
+        "points": 250,
+        "solves": 127
+      },
+      {
+        "id": "ctf_10011",
+        "name": "Hack the Portal",
+        "category": "Web Exploitation",
+        "port": 10011,
+        "host": "192.168.1.1",
+        "protocol": "http",
+        "difficulty": "Hard",
+        "points": 500,
+        "solves": 14
+      },
+      {
+        "id": "ctf_10012",
+        "name": "WebLab",
+        "category": "Web Exploitation",
+        "port": 10012,
+        "host": "192.168.1.1",
+        "protocol": "http",
+        "difficulty": "Insane",
+        "points": 1000,
+        "solves": 125
+      },
+      {
+        "id": "ctf_10013",
+        "name": "Vulnerable by Design",
+        "category": "Web Exploitation",
+        "port": 10013,
+        "host": "192.168.1.1",
+        "protocol": "http",
+        "difficulty": "Easy",
+        "points": 100,
+        "solves": 124
+      },
+      {
+        "id": "ctf_10014",
+        "name": "Hidden Endpoint",
+        "category": "Web Exploitation",
+        "port": 10014,
+        "host": "192.168.1.1",
+        "protocol": "http",
+        "difficulty": "Medium",
+        "points": 250,
+        "solves": 14
+      },
+      {
+        "id": "ctf_10015",
+        "name": "The Backdoor",
+        "category": "Web Exploitation",
+        "port": 10015,
+        "host": "192.168.1.1",
+        "protocol": "http",
+        "difficulty": "Hard",
+        "points": 500,
+        "solves": 122
+      },
+      {
+        "id": "ctf_10016",
+        "name": "Exploit Avenue",
+        "category": "Web Exploitation",
+        "port": 10016,
+        "host": "192.168.1.1",
+        "protocol": "http",
+        "difficulty": "Insane",
+        "points": 1000,
+        "solves": 121
+      }
+    ]
+  },
+  {
+    "category": "Cryptography",
+    "icon": "bi-key-fill",
+    "color": "#f59e0b",
+    "challenges": [
+      {
+        "id": "ctf_10017",
+        "name": "Crypto Vault",
+        "category": "Cryptography",
+        "port": 10017,
+        "host": "192.168.1.1",
+        "protocol": "nc",
+        "difficulty": "Easy",
+        "points": 100,
+        "solves": 14
+      },
+      {
+        "id": "ctf_10018",
+        "name": "Cipher Hunt",
+        "category": "Cryptography",
+        "port": 10018,
+        "host": "192.168.1.1",
+        "protocol": "nc",
+        "difficulty": "Medium",
+        "points": 250,
+        "solves": 119
+      },
+      {
+        "id": "ctf_10019",
+        "name": "Cracked Code",
+        "category": "Cryptography",
+        "port": 10019,
+        "host": "192.168.1.1",
+        "protocol": "nc",
+        "difficulty": "Hard",
+        "points": 500,
+        "solves": 118
+      },
+      {
+        "id": "ctf_10020",
+        "name": "The Encrypted Message",
+        "category": "Cryptography",
+        "port": 10020,
+        "host": "192.168.1.1",
+        "protocol": "nc",
+        "difficulty": "Insane",
+        "points": 1000,
+        "solves": 14
+      },
+      {
+        "id": "ctf_10021",
+        "name": "CipherStorm",
+        "category": "Cryptography",
+        "port": 10021,
+        "host": "192.168.1.1",
+        "protocol": "nc",
+        "difficulty": "Easy",
+        "points": 100,
+        "solves": 116
+      },
+      {
+        "id": "ctf_10022",
+        "name": "Secret Key",
+        "category": "Cryptography",
+        "port": 10022,
+        "host": "192.168.1.1",
+        "protocol": "nc",
+        "difficulty": "Medium",
+        "points": 250,
+        "solves": 115
+      },
+      {
+        "id": "ctf_10023",
+        "name": "Codebreaker",
+        "category": "Cryptography",
+        "port": 10023,
+        "host": "192.168.1.1",
+        "protocol": "nc",
+        "difficulty": "Hard",
+        "points": 500,
+        "solves": 14
+      },
+      {
+        "id": "ctf_10024",
+        "name": "Beyond the Cipher",
+        "category": "Cryptography",
+        "port": 10024,
+        "host": "192.168.1.1",
+        "protocol": "nc",
+        "difficulty": "Insane",
+        "points": 1000,
+        "solves": 113
+      }
+    ]
+  },
+  {
+    "category": "Digital Forensics",
+    "icon": "bi-fingerprint",
+    "color": "#ec4899",
+    "challenges": [
+      {
+        "id": "ctf_10025",
+        "name": "Forensic Files",
+        "category": "Digital Forensics",
+        "port": 10025,
+        "host": "192.168.1.1",
+        "protocol": "nc",
+        "difficulty": "Easy",
+        "points": 100,
+        "solves": 112
+      },
+      {
+        "id": "ctf_10026",
+        "name": "Evidence Room",
+        "category": "Digital Forensics",
+        "port": 10026,
+        "host": "192.168.1.1",
+        "protocol": "nc",
+        "difficulty": "Medium",
+        "points": 250,
+        "solves": 14
+      },
+      {
+        "id": "ctf_10027",
+        "name": "Digital Crime Scene",
+        "category": "Digital Forensics",
+        "port": 10027,
+        "host": "192.168.1.1",
+        "protocol": "nc",
+        "difficulty": "Hard",
+        "points": 500,
+        "solves": 110
+      },
+      {
+        "id": "ctf_10028",
+        "name": "Memory Hunter",
+        "category": "Digital Forensics",
+        "port": 10028,
+        "host": "192.168.1.1",
+        "protocol": "nc",
+        "difficulty": "Insane",
+        "points": 1000,
+        "solves": 109
+      },
+      {
+        "id": "ctf_10029",
+        "name": "Artifact",
+        "category": "Digital Forensics",
+        "port": 10029,
+        "host": "192.168.1.1",
+        "protocol": "nc",
+        "difficulty": "Easy",
+        "points": 100,
+        "solves": 14
+      },
+      {
+        "id": "ctf_10030",
+        "name": "Trace Evidence",
+        "category": "Digital Forensics",
+        "port": 10030,
+        "host": "192.168.1.1",
+        "protocol": "nc",
+        "difficulty": "Medium",
+        "points": 250,
+        "solves": 107
+      },
+      {
+        "id": "ctf_10031",
+        "name": "The Lost Evidence",
+        "category": "Digital Forensics",
+        "port": 10031,
+        "host": "192.168.1.1",
+        "protocol": "nc",
+        "difficulty": "Hard",
+        "points": 500,
+        "solves": 106
+      },
+      {
+        "id": "ctf_10032",
+        "name": "Forensic Nightmare",
+        "category": "Digital Forensics",
+        "port": 10032,
+        "host": "192.168.1.1",
+        "protocol": "nc",
+        "difficulty": "Insane",
+        "points": 1000,
+        "solves": 14
+      }
+    ]
+  },
+  {
+    "category": "Reverse Engineering",
+    "icon": "bi-cpu-fill",
+    "color": "#a855f7",
+    "challenges": [
+      {
+        "id": "ctf_10033",
+        "name": "Reverse Reality",
+        "category": "Reverse Engineering",
+        "port": 10033,
+        "host": "192.168.1.1",
+        "protocol": "nc",
+        "difficulty": "Easy",
+        "points": 100,
+        "solves": 104
+      },
+      {
+        "id": "ctf_10034",
+        "name": "Crack the Binary",
+        "category": "Reverse Engineering",
+        "port": 10034,
+        "host": "192.168.1.1",
+        "protocol": "nc",
+        "difficulty": "Medium",
+        "points": 250,
+        "solves": 103
+      },
+      {
+        "id": "ctf_10035",
+        "name": "Binary Hunter",
+        "category": "Reverse Engineering",
+        "port": 10035,
+        "host": "192.168.1.1",
+        "protocol": "nc",
+        "difficulty": "Hard",
+        "points": 500,
+        "solves": 14
+      },
+      {
+        "id": "ctf_10036",
+        "name": "Inside the Machine",
+        "category": "Reverse Engineering",
+        "port": 10036,
+        "host": "192.168.1.1",
+        "protocol": "nc",
+        "difficulty": "Insane",
+        "points": 1000,
+        "solves": 101
+      },
+      {
+        "id": "ctf_10037",
+        "name": "Code Undercover",
+        "category": "Reverse Engineering",
+        "port": 10037,
+        "host": "192.168.1.1",
+        "protocol": "nc",
+        "difficulty": "Easy",
+        "points": 100,
+        "solves": 100
+      },
+      {
+        "id": "ctf_10038",
+        "name": "Binary Blackout",
+        "category": "Reverse Engineering",
+        "port": 10038,
+        "host": "192.168.1.1",
+        "protocol": "nc",
+        "difficulty": "Medium",
+        "points": 250,
+        "solves": 14
+      },
+      {
+        "id": "ctf_10039",
+        "name": "The Unknown Binary",
+        "category": "Reverse Engineering",
+        "port": 10039,
+        "host": "192.168.1.1",
+        "protocol": "nc",
+        "difficulty": "Hard",
+        "points": 500,
+        "solves": 98
+      },
+      {
+        "id": "ctf_10040",
+        "name": "Disassemble",
+        "category": "Reverse Engineering",
+        "port": 10040,
+        "host": "192.168.1.1",
+        "protocol": "nc",
+        "difficulty": "Insane",
+        "points": 1000,
+        "solves": 97
+      }
+    ]
+  },
+  {
+    "category": "Binary Exploitation / Pwn",
+    "icon": "bi-terminal-fill",
+    "color": "#ef4444",
+    "challenges": [
+      {
+        "id": "ctf_10041",
+        "name": "Pwn Arena",
+        "category": "Binary Exploitation / Pwn",
+        "port": 10041,
+        "host": "192.168.1.1",
+        "protocol": "nc",
+        "difficulty": "Easy",
+        "points": 100,
+        "solves": 14
+      },
+      {
+        "id": "ctf_10042",
+        "name": "Stack Smash",
+        "category": "Binary Exploitation / Pwn",
+        "port": 10042,
+        "host": "192.168.1.1",
+        "protocol": "nc",
+        "difficulty": "Medium",
+        "points": 250,
+        "solves": 95
+      },
+      {
+        "id": "ctf_10043",
+        "name": "Root Access",
+        "category": "Binary Exploitation / Pwn",
+        "port": 10043,
+        "host": "192.168.1.1",
+        "protocol": "nc",
+        "difficulty": "Hard",
+        "points": 500,
+        "solves": 94
+      },
+      {
+        "id": "ctf_10044",
+        "name": "Memory Mayhem",
+        "category": "Binary Exploitation / Pwn",
+        "port": 10044,
+        "host": "192.168.1.1",
+        "protocol": "nc",
+        "difficulty": "Insane",
+        "points": 1000,
+        "solves": 14
+      },
+      {
+        "id": "ctf_10045",
+        "name": "Exploit the Stack",
+        "category": "Binary Exploitation / Pwn",
+        "port": 10045,
+        "host": "192.168.1.1",
+        "protocol": "nc",
+        "difficulty": "Easy",
+        "points": 100,
+        "solves": 127
+      },
+      {
+        "id": "ctf_10046",
+        "name": "Heap Havoc",
+        "category": "Binary Exploitation / Pwn",
+        "port": 10046,
+        "host": "192.168.1.1",
+        "protocol": "nc",
+        "difficulty": "Medium",
+        "points": 250,
+        "solves": 126
+      },
+      {
+        "id": "ctf_10047",
+        "name": "Pwned",
+        "category": "Binary Exploitation / Pwn",
+        "port": 10047,
+        "host": "192.168.1.1",
+        "protocol": "nc",
+        "difficulty": "Hard",
+        "points": 500,
+        "solves": 14
+      },
+      {
+        "id": "ctf_10048",
+        "name": "Shell Game",
+        "category": "Binary Exploitation / Pwn",
+        "port": 10048,
+        "host": "192.168.1.1",
+        "protocol": "nc",
+        "difficulty": "Insane",
+        "points": 1000,
+        "solves": 124
+      }
+    ]
+  },
+  {
+    "category": "Cloud Security",
+    "icon": "bi-cloud-check-fill",
+    "color": "#06b6d4",
+    "challenges": [
+      {
+        "id": "ctf_10049",
+        "name": "Cloud Breach",
+        "category": "Cloud Security",
+        "port": 10049,
+        "host": "192.168.1.1",
+        "protocol": "http",
+        "difficulty": "Easy",
+        "points": 100,
+        "solves": 123
+      },
+      {
+        "id": "ctf_10050",
+        "name": "Cloud Nine",
+        "category": "Cloud Security",
+        "port": 10050,
+        "host": "192.168.1.1",
+        "protocol": "http",
+        "difficulty": "Medium",
+        "points": 250,
+        "solves": 14
+      },
+      {
+        "id": "ctf_10051",
+        "name": "Misconfigured",
+        "category": "Cloud Security",
+        "port": 10051,
+        "host": "192.168.1.1",
+        "protocol": "http",
+        "difficulty": "Hard",
+        "points": 500,
+        "solves": 121
+      },
+      {
+        "id": "ctf_10052",
+        "name": "Cloud Hunter",
+        "category": "Cloud Security",
+        "port": 10052,
+        "host": "192.168.1.1",
+        "protocol": "http",
+        "difficulty": "Insane",
+        "points": 1000,
+        "solves": 120
+      },
+      {
+        "id": "ctf_10053",
+        "name": "IAM Escape",
+        "category": "Cloud Security",
+        "port": 10053,
+        "host": "192.168.1.1",
+        "protocol": "http",
+        "difficulty": "Easy",
+        "points": 100,
+        "solves": 14
+      },
+      {
+        "id": "ctf_10054",
+        "name": "Bucket Breaker",
+        "category": "Cloud Security",
+        "port": 10054,
+        "host": "192.168.1.1",
+        "protocol": "http",
+        "difficulty": "Medium",
+        "points": 250,
+        "solves": 118
+      },
+      {
+        "id": "ctf_10055",
+        "name": "Cloud Under Attack",
+        "category": "Cloud Security",
+        "port": 10055,
+        "host": "192.168.1.1",
+        "protocol": "http",
+        "difficulty": "Hard",
+        "points": 500,
+        "solves": 117
+      },
+      {
+        "id": "ctf_10056",
+        "name": "Escape the Cloud",
+        "category": "Cloud Security",
+        "port": 10056,
+        "host": "192.168.1.1",
+        "protocol": "http",
+        "difficulty": "Insane",
+        "points": 1000,
+        "solves": 14
+      }
+    ]
+  },
+  {
+    "category": "Mobile Security",
+    "icon": "bi-phone-fill",
+    "color": "#8b5cf6",
+    "challenges": [
+      {
+        "id": "ctf_10057",
+        "name": "Mobile Mayhem",
+        "category": "Mobile Security",
+        "port": 10057,
+        "host": "192.168.1.1",
+        "protocol": "nc",
+        "difficulty": "Easy",
+        "points": 100,
+        "solves": 115
+      },
+      {
+        "id": "ctf_10058",
+        "name": "Android Under Attack",
+        "category": "Mobile Security",
+        "port": 10058,
+        "host": "192.168.1.1",
+        "protocol": "nc",
+        "difficulty": "Medium",
+        "points": 250,
+        "solves": 114
+      },
+      {
+        "id": "ctf_10059",
+        "name": "App Breaker",
+        "category": "Mobile Security",
+        "port": 10059,
+        "host": "192.168.1.1",
+        "protocol": "nc",
+        "difficulty": "Hard",
+        "points": 500,
+        "solves": 14
+      },
+      {
+        "id": "ctf_10060",
+        "name": "Mobile Vault",
+        "category": "Mobile Security",
+        "port": 10060,
+        "host": "192.168.1.1",
+        "protocol": "nc",
+        "difficulty": "Insane",
+        "points": 1000,
+        "solves": 112
+      },
+      {
+        "id": "ctf_10061",
+        "name": "APK Hunter",
+        "category": "Mobile Security",
+        "port": 10061,
+        "host": "192.168.1.1",
+        "protocol": "nc",
+        "difficulty": "Easy",
+        "points": 100,
+        "solves": 111
+      },
+      {
+        "id": "ctf_10062",
+        "name": "Pocket Pwn",
+        "category": "Mobile Security",
+        "port": 10062,
+        "host": "192.168.1.1",
+        "protocol": "nc",
+        "difficulty": "Medium",
+        "points": 250,
+        "solves": 14
+      },
+      {
+        "id": "ctf_10063",
+        "name": "The Broken App",
+        "category": "Mobile Security",
+        "port": 10063,
+        "host": "192.168.1.1",
+        "protocol": "nc",
+        "difficulty": "Hard",
+        "points": 500,
+        "solves": 109
+      },
+      {
+        "id": "ctf_10064",
+        "name": "Mobile Forensics",
+        "category": "Mobile Security",
+        "port": 10064,
+        "host": "192.168.1.1",
+        "protocol": "nc",
+        "difficulty": "Insane",
+        "points": 1000,
+        "solves": 108
+      }
+    ]
+  },
+  {
+    "category": "Malware Analysis",
+    "icon": "bi-bug-fill",
+    "color": "#f43f5e",
+    "challenges": [
+      {
+        "id": "ctf_10065",
+        "name": "Malware Lab",
+        "category": "Malware Analysis",
+        "port": 10065,
+        "host": "192.168.1.1",
+        "protocol": "nc",
+        "difficulty": "Easy",
+        "points": 100,
+        "solves": 14
+      },
+      {
+        "id": "ctf_10066",
+        "name": "Malicious Intent",
+        "category": "Malware Analysis",
+        "port": 10066,
+        "host": "192.168.1.1",
+        "protocol": "nc",
+        "difficulty": "Medium",
+        "points": 250,
+        "solves": 106
+      },
+      {
+        "id": "ctf_10067",
+        "name": "Code Infection",
+        "category": "Malware Analysis",
+        "port": 10067,
+        "host": "192.168.1.1",
+        "protocol": "nc",
+        "difficulty": "Hard",
+        "points": 500,
+        "solves": 105
+      },
+      {
+        "id": "ctf_10068",
+        "name": "Inside the Malware",
+        "category": "Malware Analysis",
+        "port": 10068,
+        "host": "192.168.1.1",
+        "protocol": "nc",
+        "difficulty": "Insane",
+        "points": 1000,
+        "solves": 14
+      },
+      {
+        "id": "ctf_10069",
+        "name": "Virus Hunter",
+        "category": "Malware Analysis",
+        "port": 10069,
+        "host": "192.168.1.1",
+        "protocol": "nc",
+        "difficulty": "Easy",
+        "points": 100,
+        "solves": 103
+      },
+      {
+        "id": "ctf_10070",
+        "name": "Malware Maze",
+        "category": "Malware Analysis",
+        "port": 10070,
+        "host": "192.168.1.1",
+        "protocol": "nc",
+        "difficulty": "Medium",
+        "points": 250,
+        "solves": 102
+      },
+      {
+        "id": "ctf_10071",
+        "name": "Infection Point",
+        "category": "Malware Analysis",
+        "port": 10071,
+        "host": "192.168.1.1",
+        "protocol": "nc",
+        "difficulty": "Hard",
+        "points": 500,
+        "solves": 14
+      },
+      {
+        "id": "ctf_10072",
+        "name": "Threat Analysis",
+        "category": "Malware Analysis",
+        "port": 10072,
+        "host": "192.168.1.1",
+        "protocol": "nc",
+        "difficulty": "Insane",
+        "points": 1000,
+        "solves": 100
+      }
+    ]
+  },
+  {
+    "category": "Network Security",
+    "icon": "bi-router-fill",
+    "color": "#14b8a6",
+    "challenges": [
+      {
+        "id": "ctf_10073",
+        "name": "Packet Hunter",
+        "category": "Network Security",
+        "port": 10073,
+        "host": "192.168.1.1",
+        "protocol": "nc",
+        "difficulty": "Easy",
+        "points": 100,
+        "solves": 99
+      },
+      {
+        "id": "ctf_10074",
+        "name": "Network Under Siege",
+        "category": "Network Security",
+        "port": 10074,
+        "host": "192.168.1.1",
+        "protocol": "nc",
+        "difficulty": "Medium",
+        "points": 250,
+        "solves": 14
+      },
+      {
+        "id": "ctf_10075",
+        "name": "Traffic Analysis",
+        "category": "Network Security",
+        "port": 10075,
+        "host": "192.168.1.1",
+        "protocol": "nc",
+        "difficulty": "Hard",
+        "points": 500,
+        "solves": 97
+      },
+      {
+        "id": "ctf_10076",
+        "name": "Packet Storm",
+        "category": "Network Security",
+        "port": 10076,
+        "host": "192.168.1.1",
+        "protocol": "nc",
+        "difficulty": "Insane",
+        "points": 1000,
+        "solves": 96
+      },
+      {
+        "id": "ctf_10077",
+        "name": "Sniff the Wire",
+        "category": "Network Security",
+        "port": 10077,
+        "host": "192.168.1.1",
+        "protocol": "nc",
+        "difficulty": "Easy",
+        "points": 100,
+        "solves": 14
+      },
+      {
+        "id": "ctf_10078",
+        "name": "Network Breach",
+        "category": "Network Security",
+        "port": 10078,
+        "host": "192.168.1.1",
+        "protocol": "nc",
+        "difficulty": "Medium",
+        "points": 250,
+        "solves": 94
+      },
+      {
+        "id": "ctf_10079",
+        "name": "Wiretap",
+        "category": "Network Security",
+        "port": 10079,
+        "host": "192.168.1.1",
+        "protocol": "nc",
+        "difficulty": "Hard",
+        "points": 500,
+        "solves": 93
+      },
+      {
+        "id": "ctf_10080",
+        "name": "Into the Network",
+        "category": "Network Security",
+        "port": 10080,
+        "host": "192.168.1.1",
+        "protocol": "nc",
+        "difficulty": "Insane",
+        "points": 1000,
+        "solves": 14
+      }
+    ]
+  },
+  {
+    "category": "Steganography",
+    "icon": "bi-eye-slash-fill",
+    "color": "#6366f1",
+    "challenges": [
+      {
+        "id": "ctf_10081",
+        "name": "Hidden in Plain Sight",
+        "category": "Steganography",
+        "port": 10081,
+        "host": "192.168.1.1",
+        "protocol": "nc",
+        "difficulty": "Easy",
+        "points": 100,
+        "solves": 126
+      },
+      {
+        "id": "ctf_10082",
+        "name": "Secret Pixels",
+        "category": "Steganography",
+        "port": 10082,
+        "host": "192.168.1.1",
+        "protocol": "nc",
+        "difficulty": "Medium",
+        "points": 250,
+        "solves": 125
+      },
+      {
+        "id": "ctf_10083",
+        "name": "Invisible Message",
+        "category": "Steganography",
+        "port": 10083,
+        "host": "192.168.1.1",
+        "protocol": "nc",
+        "difficulty": "Hard",
+        "points": 500,
+        "solves": 14
+      },
+      {
+        "id": "ctf_10084",
+        "name": "Hide & Seek",
+        "category": "Steganography",
+        "port": 10084,
+        "host": "192.168.1.1",
+        "protocol": "nc",
+        "difficulty": "Insane",
+        "points": 1000,
+        "solves": 123
+      },
+      {
+        "id": "ctf_10085",
+        "name": "Behind the Image",
+        "category": "Steganography",
+        "port": 10085,
+        "host": "192.168.1.1",
+        "protocol": "nc",
+        "difficulty": "Easy",
+        "points": 100,
+        "solves": 122
+      },
+      {
+        "id": "ctf_10086",
+        "name": "Silent Signal",
+        "category": "Steganography",
+        "port": 10086,
+        "host": "192.168.1.1",
+        "protocol": "nc",
+        "difficulty": "Medium",
+        "points": 250,
+        "solves": 14
+      },
+      {
+        "id": "ctf_10087",
+        "name": "Buried Data",
+        "category": "Steganography",
+        "port": 10087,
+        "host": "192.168.1.1",
+        "protocol": "nc",
+        "difficulty": "Hard",
+        "points": 500,
+        "solves": 120
+      },
+      {
+        "id": "ctf_10088",
+        "name": "The Hidden Layer",
+        "category": "Steganography",
+        "port": 10088,
+        "host": "192.168.1.1",
+        "protocol": "nc",
+        "difficulty": "Insane",
+        "points": 1000,
+        "solves": 119
+      }
+    ]
+  },
+  {
+    "category": "Authentication / Access Control",
+    "icon": "bi-shield-lock-fill",
+    "color": "#eab308",
+    "challenges": [
+      {
+        "id": "ctf_10089",
+        "name": "Access Denied",
+        "category": "Authentication / Access Control",
+        "port": 10089,
+        "host": "192.168.1.1",
+        "protocol": "nc",
+        "difficulty": "Easy",
+        "points": 100,
+        "solves": 14
+      },
+      {
+        "id": "ctf_10090",
+        "name": "Locked Out",
+        "category": "Authentication / Access Control",
+        "port": 10090,
+        "host": "192.168.1.1",
+        "protocol": "nc",
+        "difficulty": "Medium",
+        "points": 250,
+        "solves": 117
+      },
+      {
+        "id": "ctf_10091",
+        "name": "Broken Login",
+        "category": "Authentication / Access Control",
+        "port": 10091,
+        "host": "192.168.1.1",
+        "protocol": "nc",
+        "difficulty": "Hard",
+        "points": 500,
+        "solves": 116
+      },
+      {
+        "id": "ctf_10092",
+        "name": "Privilege Escalation",
+        "category": "Authentication / Access Control",
+        "port": 10092,
+        "host": "192.168.1.1",
+        "protocol": "nc",
+        "difficulty": "Insane",
+        "points": 1000,
+        "solves": 14
+      },
+      {
+        "id": "ctf_10093",
+        "name": "Who Are You?",
+        "category": "Authentication / Access Control",
+        "port": 10093,
+        "host": "192.168.1.1",
+        "protocol": "nc",
+        "difficulty": "Easy",
+        "points": 100,
+        "solves": 114
+      },
+      {
+        "id": "ctf_10094",
+        "name": "Admin Access",
+        "category": "Authentication / Access Control",
+        "port": 10094,
+        "host": "192.168.1.1",
+        "protocol": "nc",
+        "difficulty": "Medium",
+        "points": 250,
+        "solves": 113
+      },
+      {
+        "id": "ctf_10095",
+        "name": "Trust Issues",
+        "category": "Authentication / Access Control",
+        "port": 10095,
+        "host": "192.168.1.1",
+        "protocol": "nc",
+        "difficulty": "Hard",
+        "points": 500,
+        "solves": 14
+      },
+      {
+        "id": "ctf_10096",
+        "name": "The Wrong Permission",
+        "category": "Authentication / Access Control",
+        "port": 10096,
+        "host": "192.168.1.1",
+        "protocol": "nc",
+        "difficulty": "Insane",
+        "points": 1000,
+        "solves": 111
+      }
+    ]
+  },
+  {
+    "category": "AI / LLM Security",
+    "icon": "bi-robot",
+    "color": "#3b82f6",
+    "challenges": [
+      {
+        "id": "ctf_10097",
+        "name": "Prompt Injection",
+        "category": "AI / LLM Security",
+        "port": 10097,
+        "host": "192.168.1.1",
+        "protocol": "nc",
+        "difficulty": "Easy",
+        "points": 100,
+        "solves": 110
+      },
+      {
+        "id": "ctf_10098",
+        "name": "Jailbreak",
+        "category": "AI / LLM Security",
+        "port": 10098,
+        "host": "192.168.1.1",
+        "protocol": "nc",
+        "difficulty": "Medium",
+        "points": 250,
+        "solves": 14
+      },
+      {
+        "id": "ctf_10099",
+        "name": "AI Under Attack",
+        "category": "AI / LLM Security",
+        "port": 10099,
+        "host": "192.168.1.1",
+        "protocol": "nc",
+        "difficulty": "Hard",
+        "points": 500,
+        "solves": 108
+      },
+      {
+        "id": "ctf_10100",
+        "name": "LLM Breaker",
+        "category": "AI / LLM Security",
+        "port": 10100,
+        "host": "192.168.1.1",
+        "protocol": "nc",
+        "difficulty": "Insane",
+        "points": 1000,
+        "solves": 107
+      },
+      {
+        "id": "ctf_10101",
+        "name": "Model Mayhem",
+        "category": "AI / LLM Security",
+        "port": 10101,
+        "host": "192.168.1.1",
+        "protocol": "nc",
+        "difficulty": "Easy",
+        "points": 100,
+        "solves": 14
+      },
+      {
+        "id": "ctf_10102",
+        "name": "The Rogue Assistant",
+        "category": "AI / LLM Security",
+        "port": 10102,
+        "host": "192.168.1.1",
+        "protocol": "nc",
+        "difficulty": "Medium",
+        "points": 250,
+        "solves": 105
+      },
+      {
+        "id": "ctf_10103",
+        "name": "Prompt Hunter",
+        "category": "AI / LLM Security",
+        "port": 10103,
+        "host": "192.168.1.1",
+        "protocol": "nc",
+        "difficulty": "Hard",
+        "points": 500,
+        "solves": 104
+      },
+      {
+        "id": "ctf_10104",
+        "name": "Neural Breach",
+        "category": "AI / LLM Security",
+        "port": 10104,
+        "host": "192.168.1.1",
+        "protocol": "nc",
+        "difficulty": "Insane",
+        "points": 1000,
+        "solves": 14
+      }
+    ]
+  },
+  {
+    "category": "Blockchain / Web3",
+    "icon": "bi-currency-bitcoin",
+    "color": "#f97316",
+    "challenges": [
+      {
+        "id": "ctf_10105",
+        "name": "Chain Breaker",
+        "category": "Blockchain / Web3",
+        "port": 10105,
+        "host": "192.168.1.1",
+        "protocol": "http",
+        "difficulty": "Easy",
+        "points": 100,
+        "solves": 102
+      },
+      {
+        "id": "ctf_10106",
+        "name": "Smart Contract Hunt",
+        "category": "Blockchain / Web3",
+        "port": 10106,
+        "host": "192.168.1.1",
+        "protocol": "http",
+        "difficulty": "Medium",
+        "points": 250,
+        "solves": 101
+      },
+      {
+        "id": "ctf_10107",
+        "name": "Crypto Heist",
+        "category": "Blockchain / Web3",
+        "port": 10107,
+        "host": "192.168.1.1",
+        "protocol": "http",
+        "difficulty": "Hard",
+        "points": 500,
+        "solves": 14
+      },
+      {
+        "id": "ctf_10108",
+        "name": "Block Breach",
+        "category": "Blockchain / Web3",
+        "port": 10108,
+        "host": "192.168.1.1",
+        "protocol": "http",
+        "difficulty": "Insane",
+        "points": 1000,
+        "solves": 99
+      },
+      {
+        "id": "ctf_10109",
+        "name": "Contract Under Attack",
+        "category": "Blockchain / Web3",
+        "port": 10109,
+        "host": "192.168.1.1",
+        "protocol": "http",
+        "difficulty": "Easy",
+        "points": 100,
+        "solves": 98
+      },
+      {
+        "id": "ctf_10110",
+        "name": "Wallet Hunter",
+        "category": "Blockchain / Web3",
+        "port": 10110,
+        "host": "192.168.1.1",
+        "protocol": "http",
+        "difficulty": "Medium",
+        "points": 250,
+        "solves": 14
+      },
+      {
+        "id": "ctf_10111",
+        "name": "Decentralized Disaster",
+        "category": "Blockchain / Web3",
+        "port": 10111,
+        "host": "192.168.1.1",
+        "protocol": "http",
+        "difficulty": "Hard",
+        "points": 500,
+        "solves": 96
+      },
+      {
+        "id": "ctf_10112",
+        "name": "The Broken Contract",
+        "category": "Blockchain / Web3",
+        "port": 10112,
+        "host": "192.168.1.1",
+        "protocol": "http",
+        "difficulty": "Insane",
+        "points": 1000,
+        "solves": 95
+      }
+    ]
+  },
+  {
+    "category": "Hardware / IoT",
+    "icon": "bi-motherboard-fill",
+    "color": "#10b981",
+    "challenges": [
+      {
+        "id": "ctf_10113",
+        "name": "IoT Under Siege",
+        "category": "Hardware / IoT",
+        "port": 10113,
+        "host": "192.168.1.1",
+        "protocol": "nc",
+        "difficulty": "Easy",
+        "points": 100,
+        "solves": 14
+      },
+      {
+        "id": "ctf_10114",
+        "name": "Hardware Hacker",
+        "category": "Hardware / IoT",
+        "port": 10114,
+        "host": "192.168.1.1",
+        "protocol": "nc",
+        "difficulty": "Medium",
+        "points": 250,
+        "solves": 93
+      },
+      {
+        "id": "ctf_10115",
+        "name": "Smart Device",
+        "category": "Hardware / IoT",
+        "port": 10115,
+        "host": "192.168.1.1",
+        "protocol": "nc",
+        "difficulty": "Hard",
+        "points": 500,
+        "solves": 127
+      },
+      {
+        "id": "ctf_10116",
+        "name": "Firmware Hunt",
+        "category": "Hardware / IoT",
+        "port": 10116,
+        "host": "192.168.1.1",
+        "protocol": "nc",
+        "difficulty": "Insane",
+        "points": 1000,
+        "solves": 14
+      },
+      {
+        "id": "ctf_10117",
+        "name": "Embedded",
+        "category": "Hardware / IoT",
+        "port": 10117,
+        "host": "192.168.1.1",
+        "protocol": "nc",
+        "difficulty": "Easy",
+        "points": 100,
+        "solves": 125
+      },
+      {
+        "id": "ctf_10118",
+        "name": "Device Breaker",
+        "category": "Hardware / IoT",
+        "port": 10118,
+        "host": "192.168.1.1",
+        "protocol": "nc",
+        "difficulty": "Medium",
+        "points": 250,
+        "solves": 124
+      },
+      {
+        "id": "ctf_10119",
+        "name": "Silicon Secrets",
+        "category": "Hardware / IoT",
+        "port": 10119,
+        "host": "192.168.1.1",
+        "protocol": "nc",
+        "difficulty": "Hard",
+        "points": 500,
+        "solves": 14
+      },
+      {
+        "id": "ctf_10120",
+        "name": "The Connected Target",
+        "category": "Hardware / IoT",
+        "port": 10120,
+        "host": "192.168.1.1",
+        "protocol": "nc",
+        "difficulty": "Insane",
+        "points": 1000,
+        "solves": 122
+      }
+    ]
+  },
+  {
+    "category": "Stealth / Red Team",
+    "icon": "bi-incognito",
+    "color": "#dc2626",
+    "challenges": [
+      {
+        "id": "ctf_10121",
+        "name": "Red Team Rising",
+        "category": "Stealth / Red Team",
+        "port": 10121,
+        "host": "192.168.1.1",
+        "protocol": "nc",
+        "difficulty": "Easy",
+        "points": 100,
+        "solves": 121
+      },
+      {
+        "id": "ctf_10122",
+        "name": "Operation Blackout",
+        "category": "Stealth / Red Team",
+        "port": 10122,
+        "host": "192.168.1.1",
+        "protocol": "nc",
+        "difficulty": "Medium",
+        "points": 250,
+        "solves": 14
+      },
+      {
+        "id": "ctf_10123",
+        "name": "Silent Intruder",
+        "category": "Stealth / Red Team",
+        "port": 10123,
+        "host": "192.168.1.1",
+        "protocol": "nc",
+        "difficulty": "Hard",
+        "points": 500,
+        "solves": 119
+      },
+      {
+        "id": "ctf_10124",
+        "name": "Shadow Ops",
+        "category": "Stealth / Red Team",
+        "port": 10124,
+        "host": "192.168.1.1",
+        "protocol": "nc",
+        "difficulty": "Insane",
+        "points": 1000,
+        "solves": 118
+      },
+      {
+        "id": "ctf_10125",
+        "name": "Breach Protocol",
+        "category": "Stealth / Red Team",
+        "port": 10125,
+        "host": "192.168.1.1",
+        "protocol": "nc",
+        "difficulty": "Easy",
+        "points": 100,
+        "solves": 14
+      },
+      {
+        "id": "ctf_10126",
+        "name": "Covert Access",
+        "category": "Stealth / Red Team",
+        "port": 10126,
+        "host": "192.168.1.1",
+        "protocol": "nc",
+        "difficulty": "Medium",
+        "points": 250,
+        "solves": 116
+      },
+      {
+        "id": "ctf_10127",
+        "name": "Mission: Root",
+        "category": "Stealth / Red Team",
+        "port": 10127,
+        "host": "192.168.1.1",
+        "protocol": "nc",
+        "difficulty": "Hard",
+        "points": 500,
+        "solves": 115
+      },
+      {
+        "id": "ctf_10128",
+        "name": "Operation Zero",
+        "category": "Stealth / Red Team",
+        "port": 10128,
+        "host": "192.168.1.1",
+        "protocol": "nc",
+        "difficulty": "Insane",
+        "points": 1000,
+        "solves": 14
+      }
+    ]
+  },
+  {
+    "category": "Mixed / Jeopardy",
+    "icon": "bi-trophy-fill",
+    "color": "#e11d48",
+    "challenges": [
+      {
+        "id": "ctf_10129",
+        "name": "CyberGauntlet 2026",
+        "category": "Mixed / Jeopardy",
+        "port": 10129,
+        "host": "192.168.1.1",
+        "protocol": "nc",
+        "difficulty": "Easy",
+        "points": 100,
+        "solves": 113
+      },
+      {
+        "id": "ctf_10130",
+        "name": "HackStorm 2026",
+        "category": "Mixed / Jeopardy",
+        "port": 10130,
+        "host": "192.168.1.1",
+        "protocol": "nc",
+        "difficulty": "Medium",
+        "points": 250,
+        "solves": 112
+      },
+      {
+        "id": "ctf_10131",
+        "name": "CyberQuest 2026",
+        "category": "Mixed / Jeopardy",
+        "port": 10131,
+        "host": "192.168.1.1",
+        "protocol": "nc",
+        "difficulty": "Hard",
+        "points": 500,
+        "solves": 14
+      },
+      {
+        "id": "ctf_10132",
+        "name": "RootRush",
+        "category": "Mixed / Jeopardy",
+        "port": 10132,
+        "host": "192.168.1.1",
+        "protocol": "nc",
+        "difficulty": "Insane",
+        "points": 1000,
+        "solves": 110
+      },
+      {
+        "id": "ctf_10133",
+        "name": "HackTheGrid",
+        "category": "Mixed / Jeopardy",
+        "port": 10133,
+        "host": "192.168.1.1",
+        "protocol": "nc",
+        "difficulty": "Easy",
+        "points": 100,
+        "solves": 109
+      },
+      {
+        "id": "ctf_10134",
+        "name": "CyberArena",
+        "category": "Mixed / Jeopardy",
+        "port": 10134,
+        "host": "192.168.1.1",
+        "protocol": "nc",
+        "difficulty": "Medium",
+        "points": 250,
+        "solves": 14
+      },
+      {
+        "id": "ctf_10135",
+        "name": "ZeroDay Challenge",
+        "category": "Mixed / Jeopardy",
+        "port": 10135,
+        "host": "192.168.1.1",
+        "protocol": "nc",
+        "difficulty": "Hard",
+        "points": 500,
+        "solves": 107
+      },
+      {
+        "id": "ctf_10136",
+        "name": "Capture the Flag: 2026",
+        "category": "Mixed / Jeopardy",
+        "port": 10136,
+        "host": "192.168.1.1",
+        "protocol": "nc",
+        "difficulty": "Insane",
+        "points": 1000,
+        "solves": 106
+      },
+      {
+        "id": "ctf_10137",
+        "name": "DarkWeb CTF",
+        "category": "Mixed / Jeopardy",
+        "port": 10137,
+        "host": "192.168.1.1",
+        "protocol": "nc",
+        "difficulty": "Easy",
+        "points": 100,
+        "solves": 14
+      },
+      {
+        "id": "ctf_10138",
+        "name": "Cyber Siege",
+        "category": "Mixed / Jeopardy",
+        "port": 10138,
+        "host": "192.168.1.1",
+        "protocol": "nc",
+        "difficulty": "Medium",
+        "points": 250,
+        "solves": 104
+      }
+    ]
+  }
+]

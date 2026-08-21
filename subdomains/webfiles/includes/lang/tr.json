@@ -1,0 +1,177 @@
+{
+  "_meta": {
+    "lang": "tr",
+    "name": "Türkçe"
+  },
+  "app": {
+    "title": "Dosyalar",
+    "title_full": "Dosyalar ve klasörler"
+  },
+  "nav": {
+    "root": "Kök",
+    "show": "Göster:",
+    "show_all": "Tümü",
+    "search_placeholder": "Ara...",
+    "search_btn": "Ara",
+    "displayed": "{total} öğeden {from}–{to} gösteriliyor",
+    "prev": "Önceki",
+    "next": "Sonraki"
+  },
+  "toolbar": {
+    "listen": "Dinle",
+    "upload": "Yükle",
+    "create_folder": "Klasör oluştur",
+    "download_selected": "Seçilenleri indir",
+    "delete_selected": "Seçilenleri sil"
+  },
+  "table": {
+    "col_name": "AD",
+    "col_path": "YOL",
+    "col_size": "BOYUT",
+    "col_date": "TARİH",
+    "sort_name": "Ada göre sırala",
+    "sort_size": "Boyuta göre sırala",
+    "sort_date": "Tarihe göre sırala",
+    "no_files": "Dosya bulunamadı",
+    "go_to_folder": "Klasöre git",
+    "rename_file": "Dosyayı yeniden adlandır",
+    "rename_folder": "Klasörü yeniden adlandır",
+    "delete_file": "Dosyayı sil"
+  },
+  "theme": {
+    "dark": "Koyu tema",
+    "light": "Açık tema"
+  },
+  "upload_modal": {
+    "title": "Dosya yükle",
+    "label": "Geçerli klasöre yüklenecek dosyayı seçin:",
+    "max_size": "Maks. boyut:",
+    "btn_upload": "Yükle",
+    "btn_cancel": "İptal",
+    "no_file": "Lütfen bir dosya seçin.",
+    "too_large": "Dosya çok büyük. İzin verilen maksimum boyut: <b>{size}</b>.",
+    "server_error": "Sunucu hatası.",
+    "network_error": "Ağ hatası.",
+    "drop_label": "Tıklayın veya bir dosyayı buraya sürükleyin"
+  },
+  "folder_modal": {
+    "title": "Klasör oluştur",
+    "label": "Yeni klasörün adı:",
+    "placeholder": "Örn.: Yeni klasör",
+    "btn_create": "Oluştur",
+    "btn_cancel": "İptal",
+    "empty": "Lütfen bir klasör adı girin.",
+    "invalid_chars": "Ad geçersiz karakterler içeriyor."
+  },
+  "delete_modal": {
+    "title_many": "{n} dosya silinsin mi?",
+    "title_one": "Dosya silinsin mi?",
+    "file_label": "Dosya:",
+    "irreversible": "Bu işlem geri alınamaz.",
+    "btn_delete": "Sil",
+    "btn_cancel": "İptal",
+    "error_title": "Silme hatası",
+    "error_many": "{n} dosya silinemedi.",
+    "network_error": "Silme sırasında ağ hatası."
+  },
+  "rename_modal": {
+    "title_file": "Dosyayı yeniden adlandır",
+    "title_folder": "Klasörü yeniden adlandır",
+    "label_old_file": "Geçerli dosya adı:",
+    "label_old_folder": "Geçerli klasör adı:",
+    "label_new": "Yeni ad:",
+    "btn_rename": "Yeniden adlandır",
+    "btn_cancel": "İptal",
+    "unchanged": "Ad değişmedi.",
+    "invalid": "Geçersiz ad.",
+    "invalid_chars": "Geçersiz karakterler: \\ / : * ? \" < > |",
+    "not_specified": "Nesne belirtilmedi."
+  },
+  "messages": {
+    "attention": "Dikkat",
+    "ok": "Anlaşıldı"
+  },
+  "pdf_viewer": {
+    "fullscreen": "Tam ekran",
+    "collapse": "Küçült",
+    "download": "İndir",
+    "close": "Görüntüleyiciyi kapat",
+    "rename": "Yeniden adlandır",
+    "no_support": "Tarayıcınız yerleşik PDF görüntülemeyi desteklemiyor.",
+    "download_instead": "Görüntülemek için dosyayı indirin",
+    "network_error": "Ağ hatası"
+  },
+  "txt_viewer": {
+    "fullscreen": "Tam ekran",
+    "collapse": "Küçült",
+    "font_smaller": "Yazı tipini küçült",
+    "font_larger": "Yazı tipini büyüt",
+    "print": "Yazdır",
+    "download_full": "Tam dosyayı indir",
+    "close": "Kapat",
+    "truncated": "Dosya çok büyük ({size} MB) — ilk 2 MB gösteriliyor.",
+    "lines": "satır",
+    "not_found": "Dosya bulunamadı."
+  },
+  "csv_viewer": {
+    "fullscreen": "Tam ekran",
+    "collapse": "Küçült",
+    "font_smaller": "Yazı tipini küçült",
+    "font_larger": "Yazı tipini büyüt",
+    "download_full": "Tam dosyayı indir",
+    "close_viewer": "Görüntüleyiciyi kapat",
+    "close": "Kapat",
+    "truncated": "Dosya çok büyük ({size} MB) — ilk 2 MB gösteriliyor.",
+    "lines": "satır",
+    "not_found": "Dosya bulunamadı."
+  },
+  "img_viewer": {
+    "fullscreen": "Tam ekran",
+    "collapse": "Küçült",
+    "rotate": "Döndür",
+    "reset": "Sıfırla",
+    "download": "İndir",
+    "close": "Kapat",
+    "prev": "Önceki (←)",
+    "next": "Sonraki (→)",
+    "hint": "Tekerlek: Zoom  |  LMB: Sürükle  |  ← →: Gezin",
+    "load_error": "Yükleme hatası"
+  },
+  "video_viewer": {
+    "format": "Biçim:",
+    "download": "İndir",
+    "close": "Kapat",
+    "no_support": "Tarayıcınız yerleşik video oynatmayı desteklemiyor.",
+    "not_found": "Video dosyası belirtilmedi."
+  },
+  "code_viewer": {
+    "fullscreen": "Tam ekran",
+    "collapse": "Küçült",
+    "font_smaller": "Yazı tipini küçült",
+    "font_larger": "Yazı tipini büyüt",
+    "copy": "Kopyala",
+    "copied": "Kopyalandı",
+    "download": "İndir",
+    "download_full": "Tam dosyayı indir",
+    "close": "Kapat",
+    "truncated": "Dosya çok büyük ({size} MB) — ilk 2 MB gösteriliyor.",
+    "lines": "satır",
+    "highlight_unavailable": "sözdizimi vurgulama kullanılamıyor",
+    "not_found": "Dosya bulunamadı."
+  },
+  "audio_single": {
+    "close": "Kapat",
+    "error_format": "Oynatma hatası (biçim desteklenmiyor).",
+    "error_fileinfo": "Kritik PHP modülü <b>fileinfo</b> etkin değil.<br>php.ini dosyasında <code>extension=fileinfo</code> satırının yorumunu kaldırın ve yeniden başlatın.",
+    "error_fileinfo_short": "Hata: fileinfo modülü etkin değil."
+  },
+  "audio_player": {
+    "playlist": "Çalma listesi",
+    "loading": "Yükleniyor...",
+    "empty": "Çalma listesi boş.",
+    "close": "Kapat",
+    "repeat_all": "Listeyi tekrarla",
+    "repeat_one": "Parçayı tekrarla",
+    "shuffle": "Karıştır"
+  }
+}

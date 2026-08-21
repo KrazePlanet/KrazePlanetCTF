@@ -1,0 +1,35 @@
+ACME CORPORATION
+Human Resources Department
+100 Corporate Drive, Suite 800
+San Francisco, CA 94107
+
+Date: August 4, 2026
+
+Dear John Davidson,
+
+We are pleased to extend this formal offer of employment for the position of
+Senior Software Engineer at ACME Corporation.
+
+OFFER DETAILS
+  Position:     Senior Software Engineer
+  Department:   Platform Engineering
+  Start Date:   September 1, 2026
+  Base Salary:  $145,000 USD per annum
+  Bonus:        Up to 20% annual performance bonus
+  Equity:       0.05% RSUs vesting over 4 years
+
+BENEFITS
+  - Comprehensive health, dental & vision insurance
+  - 25 days paid vacation
+  - $2,000 annual learning & development budget
+  - Remote-first hybrid work model
+
+This offer is contingent upon successful completion of background verification.
+Please sign and return by August 15, 2026.
+
+Sincerely,
+
+Sarah Mitchell
+VP of Human Resources
+ACME Corporation
+hr@acmecorp.internal

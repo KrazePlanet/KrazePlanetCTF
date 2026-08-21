@@ -1,0 +1,186 @@
+# Environment files
+.env
+
+# Fichiers de configuration sensibles
+.htaccess
+.htpasswd
+/database/bookreview.sql
+database/bookreview.sql
+
+# Dossiers à ignorer
+/vendor/
+/node_modules/
+/composer.phar
+/composer.lock
+
+# Dossier git 
+.git/
+
+# Fichiers de logs
+/logs/*
+*.log
+
+# Dossiers de stockage et uploads
+/uploads/*
+!/uploads/.gitkeep
+/storage/*
+!/storage/.gitkeep
+
+# Fichiers de cache
+*.cache
+.cache/
+*.tmp
+.tmp/
+
+# Fichiers de configuration d'éditeurs
+.idea/
+.vscode/
+*.sublime-workspace
+*.sublime-project
+
+# Fichiers système
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Fichiers de session PHP
+sess_*
+
+# Fosses à mails
+/mailoutput/*
+
+# Fichiers de débogage
+*.swo
+*.swp
+*~
+
+# Fichiers de couverture de test
+/coverage/
+
+# Fichiers de déploiement
+*.zip
+*.tar
+*.tar.gz
+*.rar
+
+# Fichiers de configuration local
+/config/local.php
+/config/development.php
+
+# Fichiers de sauvegarde
+*.bak
+*.backup
+
+# Fichiers de configuration spécifiques à WAMP/XAMPP
+wamp/
+xampp/
+
+# Fichiers de cache PHP
+/var/cache/*
+
+# Fichiers temporaires
+/tmp/
+
+# Fichiers de déploiement
+/build/
+/dist/
+
+# Fichiers de configuration PHPUnit
+/phpunit.xml
+
+# Fichiers de configuration PHP_CodeSniffer
+/phpcs.xml
+
+# Fichiers de configuration PHPStan
+/phpstan.neon
+
+# Fichiers de configuration PHP-CS-Fixer
+/.php_cs
+/.php_cs.cache
+
+# Fichiers de configuration PHPUnit
+/phpunit.xml.dist
+
+# Fichiers de configuration PHP_CodeSniffer
+/phpcs.xml.dist
+
+# Fichiers de configuration PHPStan
+/phpstan.neon.dist
+
+# Fichiers de configuration PHP-CS-Fixer
+/.php_cs.dist
+
+# Fichiers de configuration PHPUnit
+/phpunit.xml
+
+# Fichiers de configuration PHP_CodeSniffer
+/phpcs.xml
+
+# Fichiers de configuration PHPStan
+/phpstan.neon
+
+# Fichiers de configuration PHP-CS-Fixer
+/.php_cs
+/.php_cs.cache
+
+# Fichiers de configuration PHPUnit
+/phpunit.xml.dist
+
+# Fichiers de configuration PHP_CodeSniffer
+/phpcs.xml.dist
+
+# Fichiers de configuration PHPStan
+/phpstan.neon.dist
+
+# Fichiers de configuration PHP-CS-Fixer
+/.php_cs.dist
+
+# Fichiers de configuration PHPUnit
+/phpunit.xml
+
+# Fichiers de configuration PHP_CodeSniffer
+/phpcs.xml
+
+# Fichiers de configuration PHPStan
+/phpstan.neon
+
+# Fichiers de configuration PHP-CS-Fixer
+/.php_cs
+/.php_cs.cache
+
+# Fichiers de configuration PHPUnit
+/phpunit.xml.dist
+
+# Fichiers de configuration PHP_CodeSniffer
+/phpcs.xml.dist
+
+# Fichiers de configuration PHPStan
+/phpstan.neon.dist
+
+# Fichiers de configuration PHP-CS-Fixer
+/.php_cs.dist
+
+# Fichiers de configuration PHPUnit
+/phpunit.xml
+
+# Fichiers de configuration PHP_CodeSniffer
+/phpcs.xml
+
+# Fichiers de configuration PHPStan
+/phpstan.neon
+
+# Fichiers de configuration PHP-CS-Fixer
+/.php_cs
+/.php_cs.cache
+
+# Fichiers de configuration PHPUnit
+/phpunit.xml.dist
+
+# Fichiers de configuration PHP_CodeSniffer
+/phpcs.xml.dist
+
+# Fichiers de configuration PHPStan
+/phpstan.neon.dist
+
+# Fichiers de configuration PHP-CS-Fixer
+/.php_cs.dist
