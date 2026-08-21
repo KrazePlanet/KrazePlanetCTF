@@ -5,7 +5,7 @@ Open-source web security training platform with 260+ interactive challenges and 
 ## Quick Start
 
 ```console
-git clone https://github.com/KrazePlanet/KrazePlanetCTF.git
+git clone https://github.com/KrazePlanet/KrazePlanetCTF.git --depth 1
 cd KrazePlanetCTF
 
 apt update && apt install docker-compose-v2 docker.io -y
