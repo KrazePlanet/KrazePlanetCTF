@@ -1,6 +1,8 @@
 <?php
 // lab_auth_guard.php - Global Authentication & Access Protection Guard for KrazePlanet Labs
 
+
+
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
@@ -24,6 +26,10 @@ $public_paths = [
     '/navbar/about.php',
     '/contact.php',
     '/navbar/contact.php',
+    '/open_mailbox.php',
+    '/navbar/open_mailbox.php',
+    '/spawn_mailpit.php',
+    '/navbar/spawn_mailpit.php',
     '/leaderboard.php',
     '/navbar/leaderboard.php',
     '/ctf.php',

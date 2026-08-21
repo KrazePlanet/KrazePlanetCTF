@@ -115,6 +115,12 @@ if [ -f "/opt/lampp/htdocs/kraze-vhost.conf" ]; then
     cp /opt/lampp/htdocs/kraze-vhost.conf /etc/apache2/sites-available/000-default.conf
 fi
 
+# Ensure default onboarding mailpit container (kp_newuser_mailpit) is ready
+if ! docker inspect kp_newuser_mailpit >/dev/null 2>&1; then
+    echo "[+] Auto-provisioning kp_newuser_mailpit for onboarding..."
+    docker run -d --name kp_newuser_mailpit --network htdocs_default --memory=128m --cpus=0.5 --pids-limit=100 --restart=unless-stopped -e MP_MAX_MESSAGES=5000 -e MP_SMTP_AUTH_ACCEPT_ANY=1 -e MP_SMTP_AUTH_ALLOW_INSECURE=true axllent/mailpit:latest >/dev/null 2>&1 || true
+fi
+
 # Start Background Garbage Collector Daemon Loop (every 60 seconds)
 (
     while true; do

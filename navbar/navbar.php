@@ -297,6 +297,17 @@ if (empty($user_avatar)) {
           <a class="nav-pill-link <?php echo ($current_page === 'ctf.php') ? 'active' : ''; ?>" href="/navbar/ctf.php">CTF</a>
           <a class="nav-pill-link <?php echo ($current_page === 'about.php') ? 'active' : ''; ?>" href="/navbar/about.php">About</a>
           <a class="nav-pill-link <?php echo ($current_page === 'contact.php') ? 'active' : ''; ?>" href="/navbar/contact.php">Contact</a>
+          <?php
+            $rawNavUser = $_SESSION['username'] ?? 'newuser';
+            $mailNavUser = preg_replace('/[^a-zA-Z0-9_]/', '', strtolower($rawNavUser));
+            $isKzNav = (strpos($_SERVER['HTTP_HOST'] ?? '', 'kzlabs.in') !== false);
+            $mailNavProto = $isKzNav ? 'https://' : 'http://';
+            $mailNavDomain = $isKzNav ? 'kzlabs.in' : 'localhost';
+            $userMailpitUrl = "{$mailNavProto}{$mailNavUser}-mailpit.{$mailNavDomain}";
+          ?>
+          <a class="nav-pill-link" href="/navbar/open_mailbox.php" target="_blank" rel="noopener noreferrer" title="Open your private isolated Mailpit Inbox">
+            <i class="bi bi-envelope-at me-1"></i>Email Client
+          </a>
         </div>
       </div>
 
@@ -355,6 +366,13 @@ if (empty($user_avatar)) {
             </button>
 
             <ul class="dropdown-menu dropdown-menu-dark dropdown-menu-end custom-nav-dropdown">
+              <!-- Mailpit Isolated Inbox -->
+              <li>
+                <a class="dropdown-item" href="//<?php echo preg_replace('/[^a-zA-Z0-9_]/', '', strtolower($_SESSION['username'] ?? 'user')); ?>-mailpit.<?php echo (strpos($_SERVER['HTTP_HOST'] ?? '', 'kzlabs.in') !== false ? 'kzlabs.in' : 'localhost'); ?>" target="_blank">
+                  <i class="bi bi-envelope-open text-info"></i> Mailpit Inbox
+                </a>
+              </li>
+
               <!-- 1. Profile -->
               <li>
                 <a class="dropdown-item" href="profile.php?tab=profile">

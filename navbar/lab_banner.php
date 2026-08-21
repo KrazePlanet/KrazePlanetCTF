@@ -6,10 +6,12 @@ $parsedUser = '';
 $parsedLab = '';
 
 // Check if current host is an instance subdomain (e.g. rix4uni-diagnostics.kzlabs.in or rix4uni.diagnostics.localhost)
-if (preg_match('/^([a-zA-Z0-9_]+)[-.]([a-zA-Z0-9_\-]+)\.(kzlabs\.in|localhost)$/i', $httpHost, $m)) {
-    $isInstanceSubdomain = true;
+if (preg_match('/^([a-zA-Z0-9_]+)[-.]([a-zA-Z0-9_\-]+)\.(kzlabs\.in|localhost|localtest\.me|127\.0\.0\.1\.nip\.io|nip\.io)$/i', $httpHost, $m)) {
     $parsedUser = htmlspecialchars($m[1]);
     $parsedLab = htmlspecialchars($m[2]);
+    if ($parsedLab !== 'mailpit' && $parsedLab !== 'mail') {
+        $isInstanceSubdomain = true;
+    }
 }
 
 if ($isInstanceSubdomain):
@@ -40,7 +42,7 @@ if ($isInstanceSubdomain):
       🔄 Restart Lab
     </button>
 
-    <!-- Extend +1h Button -->
+<!-- Extend +1h Button -->
     <button onclick="extendKrazeSandbox()" style="background: rgba(16, 185, 129, 0.15); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.35); padding: 4px 10px; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 4px; transition: all 0.2s;">
       ⏳ Extend +1h
     </button>

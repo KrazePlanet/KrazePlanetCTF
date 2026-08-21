@@ -4,13 +4,13 @@ if (session_status() === PHP_SESSION_NONE) {
     $host = $_SERVER['HTTP_HOST'] ?? '';
     if (strpos($host, 'kzlabs.in') !== false) {
         ini_set('session.cookie_domain', '.kzlabs.in');
-    } elseif (strpos($host, 'localhost') !== false) {
-        ini_set('session.cookie_domain', '.localhost');
+    } elseif (strpos($host, 'localhost') !== false || strpos($host, 'localtest.me') !== false) {
+        ini_set('session.cookie_domain', (strpos($host, 'localtest.me') !== false ? '.localtest.me' : '.localhost'));
     }
     @session_start();
 }
 
-error_reporting(0);
+error_reporting(E_ALL & ~E_NOTICE & ~E_DEPRECATED);
 ini_set('display_errors', '0');
 header('Content-Type: application/json');
 ob_start();
@@ -37,12 +37,14 @@ if (!$userId || !$username) {
 function recursiveCopy($src, $dst) {
     $dir = opendir($src);
     @mkdir($dst, 0777, true);
+    @chmod($dst, 0777);
     while (false !== ($file = readdir($dir))) {
         if (($file != '.') && ($file != '..')) {
             if (is_dir($src . '/' . $file)) {
                 recursiveCopy($src . '/' . $file, $dst . '/' . $file);
             } else {
                 copy($src . '/' . $file, $dst . '/' . $file);
+                @chmod($dst . '/' . $file, 0777);
             }
         }
     }
@@ -61,7 +63,6 @@ function recursiveDelete($dir) {
 
 function sanitizeLabId($raw) {
     $cleaned = trim($raw, '/');
-    $cleaned = preg_replace('#^subdomains/#i', '', $cleaned);
     $cleaned = preg_replace('/[^a-zA-Z0-9_\-\/\.]/', '', $cleaned);
     return strtolower($cleaned);
 }
@@ -75,8 +76,11 @@ function getCleanSubdomainTag($username, $labId) {
 
 $httpHost = $_SERVER['HTTP_HOST'] ?? 'localhost';
 $isKzLabs = (strpos($httpHost, 'kzlabs.in') !== false);
-$baseDomain = $isKzLabs ? 'kzlabs.in' : 'localhost';
-$proto = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https://' : 'http://';
+$baseDomain = (strpos($httpHost, 'kzlabs.in') !== false) ? 'kzlabs.in' : ((strpos($httpHost, 'localtest.me') !== false) ? 'localtest.me' : 'localhost');
+$proto = "https://";
+if ($baseDomain === 'localhost') {
+    $proto = "http://";
+}
 
 function handleLaunchLab($userId, $username, $rawLab, $labTitle, $forceFresh = false) {
     global $pdo, $baseDomain, $proto;
@@ -87,6 +91,83 @@ function handleLaunchLab($userId, $username, $rawLab, $labTitle, $forceFresh = f
     }
 
     list($cleanUser, $cleanLab) = getCleanSubdomainTag($username, $labId);
+
+    // 0. Dedicated Per-User Isolated Mailpit Inbox Handler
+    if ($cleanLab === 'mailpit' || $cleanLab === 'mail') {
+        $containerName = "kp_{$cleanUser}_mailpit";
+        $subdomain = "{$cleanUser}-mailpit.{$baseDomain}";
+        $altSubdomain = "{$cleanUser}.mailpit.{$baseDomain}";
+
+        if (!$forceFresh) {
+            $checkRunning = trim(shell_exec("docker inspect -f '{{.State.Running}}' " . escapeshellarg($containerName) . " 2>/dev/null") ?? '');
+            if ($checkRunning === 'true') {
+                $stmt = $pdo->prepare("SELECT * FROM lab_instances WHERE user_id = ? AND lab_id = 'mailpit' AND status = 'active' AND expires_at > NOW() LIMIT 1");
+                $stmt->execute([$userId]);
+                $existing = $stmt->fetch(PDO::FETCH_ASSOC);
+                if ($existing) {
+                    $secondsLeft = max(0, strtotime($existing['expires_at']) - time());
+                    sendInstanceJson([
+                        'status' => 200,
+                        'success' => true,
+                        'message' => 'Active isolated Mailpit inbox retrieved.',
+                        'url' => $proto . $existing['subdomain'],
+                        'alt_url' => $proto . $altSubdomain,
+                        'subdomain' => $existing['subdomain'],
+                        'expires_at' => $existing['expires_at'],
+                        'seconds_left' => $secondsLeft,
+                        'lab_id' => 'mailpit',
+                        'lab_title' => 'Mailpit Inbox',
+                        'container' => $containerName,
+                        'is_existing' => true
+                    ]);
+                }
+            }
+        }
+
+        shell_exec("docker rm -f " . escapeshellarg($containerName) . " 2>/dev/null");
+
+        $dockerNet = "htdocs_default";
+        $netCheck = trim(shell_exec("docker network inspect htdocs_default -f '{{.Name}}' 2>/dev/null") ?? '');
+        if (empty($netCheck)) {
+            $dockerNet = "bridge";
+        }
+
+        @chmod('/var/run/docker.sock', 0666);
+        $dockerCmd = sprintf(
+            "docker run -d --name %s --network %s --memory=128m --cpus=0.5 --pids-limit=100 --restart=no -e MP_MAX_MESSAGES=5000 -e MP_SMTP_AUTH_ACCEPT_ANY=1 -e MP_SMTP_AUTH_ALLOW_INSECURE=true axllent/mailpit:latest 2>&1",
+            escapeshellarg($containerName),
+            escapeshellarg($dockerNet)
+        );
+
+        shell_exec($dockerCmd);
+        usleep(250000);
+
+        $expiresAt = date('Y-m-d H:i:s', time() + 3600);
+        $pdo->prepare("UPDATE lab_instances SET status = 'destroyed' WHERE user_id = ? AND lab_id = 'mailpit'")->execute([$userId]);
+
+        $stmtIns = $pdo->prepare("
+            INSERT INTO lab_instances (user_id, username, lab_id, lab_title, subdomain, instance_dir, db_name, status, expires_at)
+            VALUES (?, ?, 'mailpit', 'Mailpit Inbox', ?, '', null, 'active', ?)
+        ");
+        $stmtIns->execute([$userId, $username, $subdomain, $expiresAt]);
+
+        sendInstanceJson([
+            'status' => 200,
+            'success' => true,
+            'message' => 'Isolated Mailpit inbox launched for 1 hour!',
+            'url' => $proto . $subdomain,
+            'alt_url' => $proto . $altSubdomain,
+            'subdomain' => $subdomain,
+            'expires_at' => $expiresAt,
+            'seconds_left' => 3600,
+            'lab_id' => 'mailpit',
+            'lab_title' => 'Mailpit Inbox',
+            'container' => $containerName,
+            'is_existing' => false
+        ]);
+    }
+
+    // 1. Regular Lab Sandbox Provisioning
     $containerName = "kp_{$cleanUser}_{$cleanLab}";
     $subdomain = "{$cleanUser}-{$cleanLab}.{$baseDomain}";
     $altSubdomain = "{$cleanUser}.{$cleanLab}.{$baseDomain}";
@@ -178,7 +259,6 @@ function handleLaunchLab($userId, $username, $rawLab, $labTitle, $forceFresh = f
                 if (file_exists($cfgPath)) {
                     $cfgStr = file_get_contents($cfgPath);
                     $cfgStr = preg_replace('/(\$db_name|\$dbname|\$database|DB_NAME)\s*=\s*[\'"][^\'"]+[\'"]/', "\$1 = '{$dbName}'", $cfgStr);
-                    // Point db host to container's mariadb host (krazeplanet or 172.17.0.1)
                     $cfgStr = preg_replace('/(\$db_host|\$dbhost|\$hostname|DB_HOST)\s*=\s*[\'"][^\'"]+[\'"]/', "\$1 = 'krazeplanet'", $cfgStr);
                     file_put_contents($cfgPath, $cfgStr);
                 }
@@ -188,19 +268,32 @@ function handleLaunchLab($userId, $username, $rawLab, $labTitle, $forceFresh = f
         }
     }
 
-    // Point localhost DB host to krazeplanet container inside micro-container
+    // Ensure user isolated Mailpit container is running for email labs
+    $userMailpitContainer = "kp_{$cleanUser}_mailpit";
+    $mailpitCheck = trim(shell_exec("docker inspect -f '{{.State.Running}}' {$userMailpitContainer} 2>/dev/null") ?? '');
+    if ($mailpitCheck !== 'true') {
+        $dockerNet = "htdocs_default";
+        $netCheck = trim(shell_exec("docker network inspect htdocs_default -f '{{.Name}}' 2>/dev/null") ?? '');
+        if (empty($netCheck)) $dockerNet = "bridge";
+        shell_exec("docker rm -f {$userMailpitContainer} 2>/dev/null");
+        shell_exec("docker run -d --name {$userMailpitContainer} --network {$dockerNet} --memory=128m --cpus=0.5 --pids-limit=100 --restart=no -e MP_MAX_MESSAGES=5000 -e MP_SMTP_AUTH_ACCEPT_ANY=1 -e MP_SMTP_AUTH_ALLOW_INSECURE=true axllent/mailpit:latest 2>/dev/null");
+    }
+
+    // Point localhost DB host to krazeplanet container and SMTP host to user Mailpit
     $phpFiles = glob("{$instanceFolder}/*.php");
     $subPhpFiles = glob("{$instanceFolder}/*/*.php");
     $allPhpFiles = array_merge($phpFiles ?: [], $subPhpFiles ?: []);
     foreach ($allPhpFiles as $phpFile) {
         if (file_exists($phpFile)) {
             $code = file_get_contents($phpFile);
-            // Replace localhost/127.0.0.1 in mysqli/PDO/mysql_connect calls
             $updatedCode = preg_replace("/(new\s+mysqli\s*\(\s*['\"])localhost(['\"])/i", "$1krazeplanet$2", $code);
             $updatedCode = preg_replace("/(mysqli_connect\s*\(\s*['\"])localhost(['\"])/i", "$1krazeplanet$2", $updatedCode);
             $updatedCode = preg_replace("/(host\s*=\s*)localhost/i", "${1}krazeplanet", $updatedCode);
             $updatedCode = preg_replace("/(DB_HOST\s*,\s*['\"])localhost(['\"])/i", "$1krazeplanet$2", $updatedCode);
             $updatedCode = preg_replace("/(\$[a-zA-Z0-9_]*host[a-zA-Z0-9_]*|\$servername)\s*=\s*['\"]localhost['\"]/i", "$1 = 'krazeplanet'", $updatedCode);
+            $mailIp = gethostbyname($userMailpitContainer);
+            $cHost = ($mailIp !== $userMailpitContainer) ? $mailIp : $userMailpitContainer;
+            $updatedCode = preg_replace('/(\$mail->Host\s*=\s*[\'"])mailpit([\'\"])/i', '${1}' . $cHost . '${2}', $updatedCode);
             if ($updatedCode !== $code) {
                 file_put_contents($phpFile, $updatedCode);
             }
@@ -213,15 +306,13 @@ function handleLaunchLab($userId, $username, $rawLab, $labTitle, $forceFresh = f
         shell_exec("cp -r /opt/lampp/htdocs/subdomains/PHPMailer/* {$instanceFolder}/PHPMailer/ 2>/dev/null");
     }
 
-    // 6. Launch Dedicated Micro-Container (Takes ~200ms)
-    // Detect active Docker network
+    // 6. Launch Dedicated Micro-Container
     $dockerNet = "htdocs_default";
     $netCheck = trim(shell_exec("docker network inspect htdocs_default -f '{{.Name}}' 2>/dev/null") ?? '');
     if (empty($netCheck)) {
         $dockerNet = "bridge";
     }
 
-// Ensure lab-runtime image exists (fallback build if missing)
     $imgCheck = trim(shell_exec("docker image inspect rix4uni/krazeplanet:lab-runtime -f '{{.Id}}' 2>/dev/null") ?? '');
     $runtimeImage = "rix4uni/krazeplanet:lab-runtime";
     if (empty($imgCheck)) {
@@ -244,14 +335,12 @@ function handleLaunchLab($userId, $username, $rawLab, $labTitle, $forceFresh = f
     );
 
     $containerOutput = trim(shell_exec($dockerCmd) ?? '');
-    // Brief pause (400ms) to ensure Apache socket in container is accepting connections
     usleep(400000);
 
     // Verify container is running
     $isRunning = trim(shell_exec("docker inspect -f '{{.State.Running}}' " . escapeshellarg($containerName) . " 2>/dev/null") ?? '');
     if ($isRunning !== 'true') {
         error_log("Container launch failed for {$containerName}: {$containerOutput}");
-        // If image failed, retry with main image
         if ($runtimeImage !== 'rix4uni/krazeplanet:main') {
             shell_exec("docker rm -f " . escapeshellarg($containerName) . " 2>/dev/null");
             $fallbackCmd = sprintf(
@@ -260,7 +349,7 @@ function handleLaunchLab($userId, $username, $rawLab, $labTitle, $forceFresh = f
                 escapeshellarg($dockerNet),
                 escapeshellarg($instanceFolder)
             );
-            $containerOutput = trim(shell_exec($fallbackCmd) ?? '');
+            shell_exec($fallbackCmd);
             usleep(400000);
         }
     }
@@ -287,7 +376,6 @@ function handleLaunchLab($userId, $username, $rawLab, $labTitle, $forceFresh = f
         'lab_id' => $labId,
         'lab_title' => $labTitle ?: $cleanLab,
         'container' => $containerName,
-        'container_id' => substr($containerId, 0, 12),
         'is_existing' => false
     ]);
 }
@@ -344,9 +432,11 @@ if ($action === 'terminate_lab') {
     $dbName = "kp_{$cleanUser}_{$cleanLab}";
 
     shell_exec("docker rm -f {$containerName} 2>/dev/null");
-    recursiveDelete($instanceFolder);
-    if ($pdo) {
-        @$pdo->exec("DROP DATABASE IF EXISTS `{$dbName}`;");
+    if ($cleanLab !== 'mailpit' && $cleanLab !== 'mail') {
+        recursiveDelete($instanceFolder);
+        if ($pdo) {
+            @$pdo->exec("DROP DATABASE IF EXISTS `{$dbName}`;");
+        }
     }
     $pdo->prepare("UPDATE lab_instances SET status = 'destroyed' WHERE user_id = ? AND lab_id = ?")->execute([$userId, $labId]);
 
