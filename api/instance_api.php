@@ -35,17 +35,20 @@ if (!$userId || !$username) {
 
 // Helpers
 function recursiveCopy($src, $dst) {
-    $dir = opendir($src);
+    if (!is_dir($src)) return;
     @mkdir($dst, 0777, true);
     @chmod($dst, 0777);
+    $dir = opendir($src);
+    if (!$dir) return;
     while (false !== ($file = readdir($dir))) {
-        if (($file != '.') && ($file != '..')) {
-            if (is_dir($src . '/' . $file)) {
-                recursiveCopy($src . '/' . $file, $dst . '/' . $file);
-            } else {
-                copy($src . '/' . $file, $dst . '/' . $file);
-                @chmod($dst . '/' . $file, 0777);
-            }
+        if ($file === '.' || $file === '..') continue;
+        $srcPath = $src . '/' . $file;
+        $dstPath = $dst . '/' . $file;
+        if (is_dir($srcPath)) {
+            recursiveCopy($srcPath, $dstPath);
+        } else {
+            copy($srcPath, $dstPath);
+            @chmod($dstPath, 0777);
         }
     }
     closedir($dir);
@@ -54,11 +57,47 @@ function recursiveCopy($src, $dst) {
 
 function recursiveDelete($dir) {
     if (!is_dir($dir)) return;
-    $files = array_diff(scandir($dir), ['.', '..']);
+    $files = array_diff(scandir($dir) ?: [], ['.', '..']);
     foreach ($files as $file) {
-        (is_dir("$dir/$file")) ? recursiveDelete("$dir/$file") : @unlink("$dir/$file");
+        $p = "$dir/$file";
+        (is_dir($p)) ? recursiveDelete($p) : @unlink($p);
     }
     @rmdir($dir);
+}
+
+
+function getHostWorkspacePath() {
+    static $hostPath = null;
+    if ($hostPath !== null) return $hostPath;
+    
+    $inspectJson = shell_exec("docker inspect krazeplanet -f '{{json .Mounts}}' 2>/dev/null");
+    if (!empty($inspectJson)) {
+        $mounts = json_decode($inspectJson, true);
+        if (is_array($mounts)) {
+            foreach ($mounts as $m) {
+                if (isset($m['Destination']) && $m['Destination'] === '/opt/lampp/htdocs' && !empty($m['Source'])) {
+                    $hostPath = rtrim($m['Source'], '/');
+                    return $hostPath;
+                }
+            }
+        }
+    }
+    $hostPath = '/opt/lampp/htdocs';
+    return $hostPath;
+}
+
+function getDockerNetwork() {
+    static $netName = null;
+    if ($netName !== null) return $netName;
+    
+    $inspectNet = shell_exec("docker inspect krazeplanet -f '{{range $k, $v := .NetworkSettings.Networks}}{{$k}}{{end}}' 2>/dev/null");
+    $net = trim($inspectNet ?? '');
+    if (!empty($net)) {
+        $netName = $net;
+        return $netName;
+    }
+    $netName = 'htdocs_default';
+    return $netName;
 }
 
 function sanitizeLabId($raw) {
@@ -233,11 +272,13 @@ function handleLaunchLab($userId, $username, $rawLab, $labTitle, $forceFresh = f
 
     // 4. Clone template to private folder
     if (is_dir($instanceFolder)) {
-        recursiveDelete($instanceFolder);
+        shell_exec("rm -rf " . escapeshellarg($instanceFolder));
     }
-    @mkdir('/opt/lampp/htdocs/instances', 0777, true);
+    @mkdir($instanceFolder, 0777, true);
+    shell_exec("cp -r " . escapeshellarg($templateDir) . "/. " . escapeshellarg($instanceFolder) . "/");
     recursiveCopy($templateDir, $instanceFolder);
     @chmod($instanceFolder, 0777);
+    shell_exec("chmod -R 777 " . escapeshellarg($instanceFolder));
 
     // 5. Provision Isolated DB if needed
     $hasDb = false;
@@ -306,32 +347,25 @@ function handleLaunchLab($userId, $username, $rawLab, $labTitle, $forceFresh = f
         shell_exec("cp -r /opt/lampp/htdocs/subdomains/PHPMailer/* {$instanceFolder}/PHPMailer/ 2>/dev/null");
     }
 
-    // 6. Launch Dedicated Micro-Container
-    $dockerNet = "htdocs_default";
-    $netCheck = trim(shell_exec("docker network inspect htdocs_default -f '{{.Name}}' 2>/dev/null") ?? '');
-    if (empty($netCheck)) {
-        $dockerNet = "bridge";
-    }
-
+    // 6. Launch Dedicated Micro-Container with Universal Volume Sharing
+    $dockerNet = getDockerNetwork();
     $imgCheck = trim(shell_exec("docker image inspect rix4uni/krazeplanet:lab-runtime -f '{{.Id}}' 2>/dev/null") ?? '');
     $runtimeImage = "rix4uni/krazeplanet:lab-runtime";
     if (empty($imgCheck)) {
-        if (file_exists('/opt/lampp/htdocs/Dockerfile.lab_runtime')) {
-            shell_exec("docker build -f /opt/lampp/htdocs/Dockerfile.lab_runtime -t rix4uni/krazeplanet:lab-runtime /opt/lampp/htdocs 2>&1");
-        } else {
-            $runtimeImage = "rix4uni/krazeplanet:main";
-        }
+        $runtimeImage = "php:8.2-apache";
     }
 
     @chmod('/var/run/docker.sock', 0666);
     shell_exec("chmod -R 777 {$instanceFolder} 2>/dev/null");
 
+    $startScript = "cp -a " . escapeshellarg($instanceFolder) . "/. /var/www/html/ && chmod -R 777 /var/www/html && apache2-foreground";
+
     $dockerCmd = sprintf(
-        "docker run -d --name %s --network %s -v %s:/var/www/html:rw -v /var/run/mysqld:/var/run/mysqld:rw --memory=128m --cpus=0.5 --pids-limit=100 --restart=no %s 2>&1",
+        "docker run -d --name %s --network %s --volumes-from krazeplanet:rw -v /var/run/mysqld:/var/run/mysqld:rw --memory=128m --cpus=0.5 --pids-limit=100 --restart=no %s bash -c %s 2>&1",
         escapeshellarg($containerName),
         escapeshellarg($dockerNet),
-        escapeshellarg($instanceFolder),
-        escapeshellarg($runtimeImage)
+        escapeshellarg($runtimeImage),
+        escapeshellarg($startScript)
     );
 
     $containerOutput = trim(shell_exec($dockerCmd) ?? '');
