@@ -85,7 +85,7 @@ echo "==========================================================="
 
 # Enable Docker socket access for www-data & Apache proxy modules
 chmod 666 /var/run/docker.sock 2>/dev/null || true
-chmod -R 777 /opt/lampp/htdocs/instances 2>/dev/null || true
+mkdir -p /opt/lampp/htdocs/instances && chown -R www-data:www-data /opt/lampp/htdocs/instances && chmod -R 777 /opt/lampp/htdocs/instances 2>/dev/null || true
 # Enable SSL and Auto-Generate Cloudflare Full Mode Origin Certificate
 mkdir -p /etc/ssl/certs /etc/ssl/private
 if [ ! -f "/etc/ssl/certs/kzlabs-origin.crt" ] || [ ! -f "/etc/ssl/private/kzlabs-origin.key" ]; then
@@ -103,7 +103,7 @@ a2enmod ssl proxy proxy_http proxy_wstunnel rewrite headers env vhost_alias >/de
 # Self-healing: Ensure lab-runtime image is available for micro-containers
 if [ -e "/var/run/docker.sock" ] || [ -S "/var/run/docker.sock" ]; then
     chmod 666 /var/run/docker.sock 2>/dev/null || true
-chmod -R 777 /opt/lampp/htdocs/instances 2>/dev/null || true
+mkdir -p /opt/lampp/htdocs/instances && chown -R www-data:www-data /opt/lampp/htdocs/instances && chmod -R 777 /opt/lampp/htdocs/instances 2>/dev/null || true
     if ! docker image inspect rix4uni/krazeplanet:lab-runtime >/dev/null 2>&1; then
         echo "[+] Auto-building lab-runtime image for dynamic sandboxes..."
         docker build -f /opt/lampp/htdocs/Dockerfile.lab_runtime -t rix4uni/krazeplanet:lab-runtime /opt/lampp/htdocs >/dev/null 2>&1 &
