@@ -177,7 +177,7 @@
                 <?php
                 $dbuser="root";
                 $dbpass="";
-                $host="localhost";
+                $host=(getenv('DB_HOST') ?: (file_exists('/.dockerenv') ? 'krazeplanet' : '127.0.0.1'));
                 $db="cowork_db";
                 $conn=new mysqli($host,$dbuser, $dbpass, $db);
     

@@ -1,5 +1,5 @@
 <?php
-$hostname = "localhost";
+$hostname = (getenv('DB_HOST') ?: (file_exists('/.dockerenv') ? 'krazeplanet' : '127.0.0.1'));
 $dbuser = "root";
 $dbPassword = "";
 $dbname = "university_portal";

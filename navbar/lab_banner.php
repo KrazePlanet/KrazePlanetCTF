@@ -1,12 +1,17 @@
 <?php
-// lab_banner.php - PortSwigger-Style Floating Control Header for Isolated Sandboxes
+// lab_banner.php - Floating Control Header for Isolated Sandboxes
+require_once __DIR__ . '/../config/domain.php';
+
 $httpHost = $_SERVER['HTTP_HOST'] ?? '';
+$hostNoPort = preg_replace('/:\d+$/', '', strtolower($httpHost));
+$baseDomain = getKrazeBaseDomain($hostNoPort);
+
 $isInstanceSubdomain = false;
 $parsedUser = '';
 $parsedLab = '';
 
 // Check if current host is an instance subdomain (e.g. rix4uni-diagnostics.kzlabs.in or rix4uni.diagnostics.localhost)
-if (preg_match('/^([a-zA-Z0-9_]+)[-.]([a-zA-Z0-9_\-]+)\.(kzlabs\.in|localhost|localtest\.me|127\.0\.0\.1\.nip\.io|nip\.io)$/i', $httpHost, $m)) {
+if (preg_match('/^([a-zA-Z0-9_]+)[-.]([a-zA-Z0-9_\-]+)\.(.+)$/i', $hostNoPort, $m)) {
     $parsedUser = htmlspecialchars($m[1]);
     $parsedLab = htmlspecialchars($m[2]);
     if ($parsedLab !== 'mailpit' && $parsedLab !== 'mail') {
@@ -19,7 +24,7 @@ if ($isInstanceSubdomain):
 <!-- PortSwigger-Style Persistent Lab Control Bar -->
 <div id="krazeLabControlBar" style="position: fixed; top: 0; left: 0; right: 0; height: 44px; background: linear-gradient(90deg, #0b1120 0%, #0f172a 100%); border-bottom: 1px solid rgba(56, 189, 248, 0.35); box-shadow: 0 4px 20px rgba(0,0,0,0.6); z-index: 999999; display: flex; align-items: center; justify-content: space-between; padding: 0 16px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; color: #f8fafc; font-size: 13px;">
   <div style="display: flex; align-items: center; gap: 12px;">
-    <a href="//<?php echo (strpos($httpHost, 'kzlabs.in') !== false ? 'kzlabs.in' : 'localhost'); ?>" target="_blank" style="display: flex; align-items: center; gap: 6px; text-decoration: none; color: #38bdf8; font-weight: 700; font-size: 14px;">
+    <a href="//<?php echo htmlspecialchars($baseDomain); ?>" target="_blank" style="display: flex; align-items: center; gap: 6px; text-decoration: none; color: #38bdf8; font-weight: 700; font-size: 14px;">
       <span>🪐 KrazePlanet</span>
     </a>
     <span style="background: rgba(56, 189, 248, 0.15); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.3); padding: 2px 8px; border-radius: 6px; font-size: 11px; font-weight: 600; text-transform: uppercase;">
@@ -42,13 +47,13 @@ if ($isInstanceSubdomain):
       🔄 Restart Lab
     </button>
 
-<!-- Extend +1h Button -->
+    <!-- Extend +1h Button -->
     <button onclick="extendKrazeSandbox()" style="background: rgba(16, 185, 129, 0.15); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.35); padding: 4px 10px; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 4px; transition: all 0.2s;">
       ⏳ Extend +1h
     </button>
 
     <!-- Main Portal Link -->
-    <a href="//<?php echo (strpos($httpHost, 'kzlabs.in') !== false ? 'kzlabs.in' : 'localhost'); ?>" style="background: rgba(255,255,255,0.08); color: #e2e8f0; border: 1px solid rgba(255,255,255,0.15); padding: 4px 10px; border-radius: 6px; font-size: 12px; font-weight: 600; text-decoration: none; display: flex; align-items: center; gap: 4px;">
+    <a href="//<?php echo htmlspecialchars($baseDomain); ?>" style="background: rgba(255,255,255,0.08); color: #e2e8f0; border: 1px solid rgba(255,255,255,0.15); padding: 4px 10px; border-radius: 6px; font-size: 12px; font-weight: 600; text-decoration: none; display: flex; align-items: center; gap: 4px;">
       🏠 Portal
     </a>
   </div>
@@ -62,7 +67,7 @@ if ($isInstanceSubdomain):
 
 <script>
 (function() {
-  const portalOrigin = '//' + (location.hostname.includes('kzlabs.in') ? 'kzlabs.in' : 'localhost');
+  const portalOrigin = '//<?php echo htmlspecialchars($baseDomain); ?>';
   const labId = '<?php echo $parsedLab; ?>';
   let remainingSeconds = 3600;
 

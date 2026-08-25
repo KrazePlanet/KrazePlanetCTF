@@ -3,12 +3,33 @@
 // Platform: Acronis Forum (forum.acronis.com) | HackerOne #1084183
 // Vulnerability: Profile Signature field stored raw, rendered via innerHTML in every forum post
 // Attack: Any user who views a thread where the attacker has posted triggers the XSS payload
+// ── Database setup ──
+$db_name = 'KrazePlanet';
+$db_user = 'root';
+$db_pass = '';
+$hosts   = ['krazeplanet', '127.0.0.1', 'localhost', '172.19.0.1', 'host.docker.internal'];
 
-$host='localhost'; $db='KrazePlanet'; $user='root'; $pass='';
-try {
-    $pdo=new PDO("mysql:host=$host;dbname=$db;charset=utf8mb4",$user,$pass,
-        [PDO::ATTR_ERRMODE=>PDO::ERRMODE_EXCEPTION,PDO::ATTR_DEFAULT_FETCH_MODE=>PDO::FETCH_ASSOC]);
-} catch(Exception $e){ die(json_encode(['ok'=>false,'message'=>'DB error'])); }
+$pdo = null;
+$lastException = null;
+
+foreach ($hosts as $host) {
+    try {
+        $pdo = new PDO("mysql:host=$host;charset=utf8mb4", $db_user, $db_pass, [
+            PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+            PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+            PDO::ATTR_TIMEOUT => 2
+        ]);
+        $pdo->exec("CREATE DATABASE IF NOT EXISTS `$db_name` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci");
+        $pdo->exec("USE `$db_name`");
+        break;
+    } catch (PDOException $e) {
+        $lastException = $e;
+    }
+}
+
+if (!$pdo) {
+    die("DB connection failed: " . ($lastException ? $lastException->getMessage() : "Unable to connect to database"));
+}
 
 $pdo->exec("CREATE TABLE IF NOT EXISTS lab62_users (
     id INT AUTO_INCREMENT PRIMARY KEY, name VARCHAR(100) NOT NULL,

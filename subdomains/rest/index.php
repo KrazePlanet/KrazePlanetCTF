@@ -16,7 +16,7 @@
 //                                    → TRUE if DB name length = 11 → salesLeadId echoed
 // ============================================================
 
-$server   = "localhost";
+$server   = (getenv('DB_HOST') ?: (file_exists('/.dockerenv') ? 'krazeplanet' : '127.0.0.1'));
 $username = "root";
 $password = "";
 $database = "KrazePlanet_DB";

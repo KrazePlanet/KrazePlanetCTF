@@ -12,7 +12,17 @@ $username=$_POST['username'];
 $password=$_POST['password'];
 $usercheck=$username;
 //connect to the server and select the database
-$db=mysqli_connect("localhost","root","","hms");
+$db_hosts = ['krazeplanet', '127.0.0.1', 'localhost', '172.19.0.1', 'host.docker.internal'];
+$db = null;
+foreach ($db_hosts as $h) {
+    $db = @new mysqli($h, 'root', '');
+    if (!$db->connect_error) {
+        $db->query("CREATE DATABASE IF NOT EXISTS `hms` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci");
+        $db->select_db('hms');
+        break;
+    }
+}
+if (!$db || $db->connect_error) { die('DB connection failed: ' . ($db ? $db->connect_error : 'Unable to connect to database')); }
 //query
 $usercheck="SELECT * FROM signup where username= '$username'";
 $result=mysqli_query($db,$usercheck);

@@ -48,7 +48,7 @@ secret = flag{rfi_ecommerce_import_1004}
 }
 
 // ── Database ────────────────────────────────────────────────────────────
-$host = 'localhost';
+$host = (getenv('DB_HOST') ?: (file_exists('/.dockerenv') ? 'krazeplanet' : '127.0.0.1'));
 $db   = 'KrazePlanet';
 $user = 'root';
 $pass = '';
@@ -771,7 +771,7 @@ body { background:var(--ss-bg); color:var(--ss-text); font-family:'Segoe UI', sy
 <?php endif; ?>
 
 <footer style="margin-top:32px;padding-top:16px;border-top:1px solid var(--ss-border);font-size:0.72rem;color:var(--ss-text-dim);">
-    ShopStream v3.2.1 &mdash; E-Commerce Management Console
+    ShopStream v3.2.1 - E-Commerce Management Console
 </footer>
 
 </main>

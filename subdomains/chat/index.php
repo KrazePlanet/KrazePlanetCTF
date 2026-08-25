@@ -6,17 +6,37 @@
 
 session_start();
 
-$host = 'localhost';
-$db   = 'KrazePlanet';
-$user = 'root';
-$pass = '';
+$db_name = 'KrazePlanet';
+$pdo = null;
 
-try {
-    $pdo = new PDO("mysql:host=$host;dbname=$db;charset=utf8mb4", $user, $pass, [
-        PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
-        PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC
-    ]);
-} catch (Exception $e) {
+$db_candidates = [
+    ['host' => 'krazeplanet', 'port' => 3306],
+    ['host' => '127.0.0.1', 'port' => 3306],
+    ['host' => 'localhost', 'port' => 3306],
+    ['socket' => '/var/run/mysqld/mysqld.sock']
+];
+
+foreach ($db_candidates as $cand) {
+    try {
+        if (isset($cand['socket']) && file_exists($cand['socket'])) {
+            $dsn = "mysql:unix_socket={$cand['socket']};charset=utf8mb4";
+        } else {
+            $dsn = "mysql:host={$cand['host']};port={$cand['port']};charset=utf8mb4";
+        }
+        $pdo = new PDO($dsn, 'root', '', [
+            PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
+            PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+            PDO::ATTR_TIMEOUT            => 2
+        ]);
+        $pdo->exec("CREATE DATABASE IF NOT EXISTS `{$db_name}` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;");
+        $pdo->exec("USE `{$db_name}`;");
+        break;
+    } catch (Exception $e) {
+        $pdo = null;
+    }
+}
+
+if (!$pdo) {
     die('DB connection failed');
 }
 

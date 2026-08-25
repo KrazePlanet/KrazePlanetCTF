@@ -588,9 +588,7 @@ function createSampleEnvironment() {
     
     // Create sample config files
     $configs = [
-        'database.php' => '<?php 
-// Database configuration
-$db_host = "localhost";
+        'database.php' => '<?php \n// Database configuration\n$db_host = "localhost";
 $db_user = "root"; 
 $db_pass = "secret123";
 $db_name = "KrazePlanet";

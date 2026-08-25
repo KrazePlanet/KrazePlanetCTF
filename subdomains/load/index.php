@@ -2,6 +2,8 @@
 session_start();
 
 $db_file = __DIR__ . '/gifts.db';
+if (file_exists($db_file)) { @chmod($db_file, 0666); }
+@chmod(__DIR__, 0777);
 $pdo = new PDO('sqlite:' . $db_file);
 $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 $pdo->exec("CREATE TABLE IF NOT EXISTS comments (

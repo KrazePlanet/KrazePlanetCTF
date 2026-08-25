@@ -27,11 +27,11 @@ _within Select2_.
 
 The ideal bug report follows these guidelines:
 
-1. **Use the [GitHub issue search][issue-search]**  &mdash; Check if the issue
+1. **Use the [GitHub issue search][issue-search]**  - Check if the issue
    has already been reported.
-2. **Check if the issue has been fixed**  &mdash; Try to reproduce the problem
+2. **Check if the issue has been fixed**  - Try to reproduce the problem
    using the code in the `master` branch.
-3. **Isolate the problem**  &mdash; Try to create an
+3. **Isolate the problem**  - Try to create an
    [isolated test case][isolated-case] that consistently reproduces the problem.
 
 Please try to be as detailed as possible in your bug report, especially if an

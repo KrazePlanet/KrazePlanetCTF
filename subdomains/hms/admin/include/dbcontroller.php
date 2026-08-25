@@ -1,5 +1,5 @@
 <?php
-$DB_host = "localhost";
+$DB_host = (getenv('DB_HOST') ?: (file_exists('/.dockerenv') ? 'krazeplanet' : '127.0.0.1'));
 $DB_user = "root";
 $DB_pass = "";
 $DB_name = "ingram";

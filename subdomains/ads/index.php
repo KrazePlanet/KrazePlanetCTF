@@ -1,20 +1,34 @@
 <?php
 ob_start();
 // ── Database setup ──
-$db_host = 'localhost';
+// ── Database setup ──
 $db_name = 'KrazePlanet';
 $db_user = 'root';
 $db_pass = '';
+$hosts   = ['krazeplanet', '127.0.0.1', 'localhost', '172.19.0.1', 'host.docker.internal'];
 
-try {
-    $pdo = new PDO("mysql:host=$db_host;dbname=$db_name;charset=utf8", $db_user, $db_pass);
-    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-    $pdo->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
-} catch (PDOException $e) {
-    die(json_encode(['ok' => false, 'message' => 'DB error']));
+$pdo = null;
+$lastException = null;
+
+foreach ($hosts as $host) {
+    try {
+        $pdo = new PDO("mysql:host=$host;charset=utf8mb4", $db_user, $db_pass, [
+            PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+            PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+            PDO::ATTR_TIMEOUT => 2
+        ]);
+        $pdo->exec("CREATE DATABASE IF NOT EXISTS `$db_name` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci");
+        $pdo->exec("USE `$db_name`");
+        break;
+    } catch (PDOException $e) {
+        $lastException = $e;
+    }
 }
 
-// ── Users table ──
+if (!$pdo) {
+    die("DB connection failed: " . ($lastException ? $lastException->getMessage() : "Unable to connect to database"));
+}
+
 $pdo->exec("
     CREATE TABLE IF NOT EXISTS lab60_users (
         id INT AUTO_INCREMENT PRIMARY KEY,

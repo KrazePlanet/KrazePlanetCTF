@@ -199,7 +199,7 @@
           </div>
           <h5 class="fw-bold text-white mb-2">Live Multi-Layer Interactions</h5>
           <p class="text-secondary small mb-0" style="line-height: 1.6;">
-            From race conditions and rate limiting to IDORs, SQLi, and prototype pollution—train with live HTTP requests, Burp Suite, and automation scripts.
+            From race conditions and rate limiting to IDORs, SQLi, and prototype pollution-train with live HTTP requests, Burp Suite, and automation scripts.
           </p>
         </div>
       </div>

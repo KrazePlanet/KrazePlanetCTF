@@ -1,21 +1,16 @@
 <?php
 // spawn_mailpit.php - Strict Security & Auto-Launcher for User Mailpit Containers
-if (session_status() === PHP_SESSION_NONE) {
-    $host = $_SERVER['HTTP_HOST'] ?? '';
-    if (strpos($host, 'kzlabs.in') !== false) {
-        @ini_set('session.cookie_domain', '.kzlabs.in');
-    } elseif (strpos($host, 'localhost') !== false || strpos($host, 'localtest.me') !== false) {
-        @ini_set('session.cookie_domain', (strpos($host, 'localtest.me') !== false ? '.localtest.me' : '.localhost'));
-    }
-    @session_start();
-}
+require_once __DIR__ . '/../config/domain.php';
+startKrazeSession();
 
 require_once __DIR__ . '/../config/db.php';
 
 $httpHost = $_SERVER['HTTP_HOST'] ?? '';
+$hostNoPort = preg_replace('/:\d+$/', '', strtolower($httpHost));
+$baseDomain = getKrazeBaseDomain($hostNoPort);
 $mailUser = '';
 
-if (preg_match('/^([a-zA-Z0-9_]+)-mailpit\.(kzlabs\.in|localhost|localtest\.me|127\.0\.0\.1\.nip\.io|nip\.io)$/i', $httpHost, $m)) {
+if (preg_match('/^([a-zA-Z0-9_]+)-mailpit\.(.+)$/i', $hostNoPort, $m)) {
     $mailUser = preg_replace('/[^a-zA-Z0-9_]/', '', strtolower($m[1]));
 }
 
@@ -64,7 +59,7 @@ if ($mailUser === 'newuser') {
           <div class="box">
             <h2>⚠️ Mailbox Not Found</h2>
             <p>The user <strong><?php echo htmlspecialchars($mailUser); ?></strong> does not exist in KrazePlanet.</p>
-            <a href="//<?php echo (strpos($httpHost, 'kzlabs.in') !== false ? 'kzlabs.in' : 'localhost'); ?>">← Return to Home</a>
+            <a href="//<?php echo htmlspecialchars($baseDomain); ?>">← Return to Home</a>
           </div>
         </body>
         </html>
@@ -76,9 +71,8 @@ if ($mailUser === 'newuser') {
     $sessionUser = $_SESSION['username'] ?? '';
     $sessionRole = $_SESSION['role'] ?? '';
     if (empty($sessionUser) || (strtolower($sessionUser) !== strtolower($mailUser) && $sessionRole !== 'admin')) {
-        $portalDomain = (strpos($httpHost, 'kzlabs.in') !== false) ? 'kzlabs.in' : 'localhost';
-        $proto = (strpos($httpHost, 'kzlabs.in') !== false) ? 'https://' : 'http://';
-        header("Location: {$proto}{$portalDomain}/index.php?modal=login");
+        $proto = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https://' : 'http://';
+        header("Location: {$proto}{$baseDomain}/index.php?modal=login");
         exit;
     }
 

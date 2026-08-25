@@ -1,7 +1,7 @@
 <?php
 // Assuming you have already established a MySQL database connection
 // Database configuration
-$host = "localhost";     // Hostname
+$host = (getenv('DB_HOST') ?: (file_exists('/.dockerenv') ? 'krazeplanet' : '127.0.0.1'));     // Hostname
 $user = "root";      // Username
 $password = "";  // Password
 $database = "cowork_db";    // Database name

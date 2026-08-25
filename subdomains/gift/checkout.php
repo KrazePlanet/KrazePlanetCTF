@@ -6,7 +6,7 @@ if(!isset($_SESSION["userid"]))
 }
 if(isset($_POST['submit']))
 {
-$conn=mysqli_connect("localhost","root","","giftstore");
+$conn=mysqli_connect((getenv('DB_HOST') ?: (file_exists('/.dockerenv') ? 'krazeplanet' : '127.0.0.1')),"root","","giftstore");
 $fname=$_POST["fname"];
 $lname=$_POST["lname"];
 $email=$_POST["email"];

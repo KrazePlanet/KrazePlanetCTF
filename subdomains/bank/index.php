@@ -2,7 +2,7 @@
 session_start();
 $flag = "flag{idor_banking_support_ticket_disclosure_705}";
 
-$host = 'localhost';
+$host = (getenv('DB_HOST') ?: (file_exists('/.dockerenv') ? 'krazeplanet' : '127.0.0.1'));
 $db = 'KrazePlanet';
 $user = 'root';
 $pass = '';

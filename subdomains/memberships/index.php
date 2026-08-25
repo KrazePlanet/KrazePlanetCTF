@@ -17,7 +17,7 @@
 //   log=0'XOR(if(now()=sysdate(),sleep(10),0))XOR'Z  → ~10s ← confirmed SQLi
 // ============================================================
 
-$server   = "localhost";
+$server   = (getenv('DB_HOST') ?: (file_exists('/.dockerenv') ? 'krazeplanet' : '127.0.0.1'));
 $username = "root";
 $password = "";
 $database = "KrazePlanet_DB";

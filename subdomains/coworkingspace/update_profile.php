@@ -1,6 +1,6 @@
 <?php
 
-$host = 'localhost'; // Your host name
+$host = (getenv('DB_HOST') ?: (file_exists('/.dockerenv') ? 'krazeplanet' : '127.0.0.1')); // Your host name
 $username = 'root'; // Your database username
 $password = ''; // Your database password
 $database = 'cowork_db'; // Your database name
@@ -89,7 +89,7 @@ if(isset($_POST['update_profile'])){
 
    <?php
             
-      $host = 'localhost'; // Your host name
+      $host = (getenv('DB_HOST') ?: (file_exists('/.dockerenv') ? 'krazeplanet' : '127.0.0.1')); // Your host name
       $username = 'root'; // Your database username
       $password = ''; // Your database password
       $database = 'cowork_db'; // Your database name

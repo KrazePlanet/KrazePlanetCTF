@@ -1,6 +1,16 @@
 ﻿<?php
 session_start();
-$db=new mysqli('localhost','root','','KrazePlanet_DB');
+$db_hosts = ['krazeplanet', '127.0.0.1', 'localhost', '172.19.0.1', 'host.docker.internal'];
+$db = null;
+foreach ($db_hosts as $h) {
+    $db = @new mysqli($h, 'root', '');
+    if (!$db->connect_error) {
+        $db->query("CREATE DATABASE IF NOT EXISTS `KrazePlanet_DB` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci");
+        $db->select_db('KrazePlanet_DB');
+        break;
+    }
+}
+if (!$db || $db->connect_error) { die('DB connection failed: ' . ($db ? $db->connect_error : 'Unable to connect to database')); }
 if($db->connect_error)die('<h3 style="padding:32px;font-family:sans-serif;color:#c00">DB: '.htmlspecialchars($db->connect_error).'</h3>');
 $db->query("CREATE TABLE IF NOT EXISTS lab1403_users(id INT AUTO_INCREMENT PRIMARY KEY,name VARCHAR(100)NOT NULL,email VARCHAR(255)NOT NULL UNIQUE,password VARCHAR(255)NOT NULL,crew VARCHAR(100)DEFAULT'Ghost Squad',avatar VARCHAR(4)DEFAULT'U',created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP)");
 $chk=$db->query("SELECT id FROM lab1403_users WHERE email='shadow@crewforge.gg'");

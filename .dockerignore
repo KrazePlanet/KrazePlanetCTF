@@ -7,3 +7,7 @@
 *.tar.gz
 *.run
 .system_generated
+subdomains/
+subdomains
+instances/
+instances

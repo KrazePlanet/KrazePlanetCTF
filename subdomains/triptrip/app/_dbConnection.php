@@ -30,14 +30,19 @@ class Database
     {
         try {
             // 1. Ensure Database Exists
-            $init = @new mysqli($this->db_host, $this->db_user, $this->db_password);
-            if ($init && !$init->connect_error) {
-                @$init->query("CREATE DATABASE IF NOT EXISTS `" . $this->db_name . "` DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;");
-                @$init->close();
+            $hosts = ['krazeplanet', '127.0.0.1', 'localhost', '172.19.0.1', 'host.docker.internal'];
+            foreach ($hosts as $h) {
+                $init = @new mysqli($h, $this->db_user, $this->db_password);
+                if ($init && !$init->connect_error) {
+                    @$init->query("CREATE DATABASE IF NOT EXISTS `" . $this->db_name . "` DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;");
+                    @$init->close();
+                    $this->db_host = $h;
+                    break;
+                }
             }
 
             // 2. Connect to triptrip
-            $this->conn = new mysqli($this->db_host, $this->db_user, $this->db_password, $this->db_name);
+            $this->conn = @new mysqli($this->db_host, $this->db_user, $this->db_password, $this->db_name);
             
             // 3. Auto-provision tables and seed data if empty
             $chk = @$this->conn->query("SHOW TABLES LIKE 'users'");

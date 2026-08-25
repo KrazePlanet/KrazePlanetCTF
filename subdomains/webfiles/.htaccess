@@ -10,7 +10,6 @@ ServerSignature Off
 # ============================================================
 <IfModule mod_rewrite.c>
     RewriteEngine On
-    RewriteBase /webfiles/
 
     # Allow direct access to existing files and directories
     RewriteCond %{REQUEST_FILENAME} -f [OR]

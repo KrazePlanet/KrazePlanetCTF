@@ -1,11 +1,7 @@
 <?php
 // lab_auth_guard.php - Global Authentication & Access Protection Guard for KrazePlanet Labs
-
-
-
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
-}
+require_once __DIR__ . '/../config/domain.php';
+startKrazeSession();
 
 $uri = $_SERVER['REQUEST_URI'] ?? '';
 $script = $_SERVER['SCRIPT_NAME'] ?? '';
@@ -93,26 +89,25 @@ if (!$is_public) {
         exit;
     }
 
-    // 5. If logged-in user requests /subdomains/<lab_name> directly on localhost or kzlabs.in, auto-redirect to isolated microcontainer subdomain
+    // 5. If logged-in user requests /subdomains/<lab_name> directly on main host, auto-redirect to isolated microcontainer subdomain
     $host = strtolower($_SERVER['HTTP_HOST'] ?? 'localhost');
     $hostNoPort = explode(':', $host)[0];
+    $baseDomain = getKrazeBaseDomain($hostNoPort);
 
     // If request is on the main portal host (not on a user sandbox subdomain)
-    if (in_array($hostNoPort, ['localhost', '127.0.0.1', 'kzlabs.in', 'www.kzlabs.in'])) {
+    if ($hostNoPort === $baseDomain || $hostNoPort === 'localhost' || $hostNoPort === '127.0.0.1') {
         if (preg_match('#^/subdomains/([a-zA-Z0-9_\-\.]+)(/.*)?$#i', $path_lower, $matches)) {
             $labSlug = trim($matches[1], '/');
             $rawUsername = $_SESSION['username'] ?? 'user';
             $cleanUser = preg_replace('/[^a-zA-Z0-9_-]/', '', strtolower($rawUsername));
             $cleanLab = preg_replace('/[^a-zA-Z0-9_-]/', '', strtolower($labSlug));
 
-            $baseDomain = ($hostNoPort === 'kzlabs.in' || $hostNoPort === 'www.kzlabs.in') ? 'kzlabs.in' : 'localhost';
             $targetSubdomain = "{$cleanUser}-{$cleanLab}.{$baseDomain}";
             
             // Auto-provision container if needed
             $containerName = "kp_{$cleanUser}_{$cleanLab}";
             $checkRun = trim(shell_exec("docker inspect -f '{{.State.Running}}' {$containerName} 2>/dev/null") ?? '');
             if ($checkRun !== 'true') {
-                // Call instance_api to provision container
                 @file_get_contents("http://127.0.0.1/api/instance_api.php?action=launch_lab&lab_id=" . urlencode($labSlug), false, stream_context_create([
                     'http' => ['header' => "Cookie: " . session_name() . "=" . session_id() . "\r\n"]
                 ]));
@@ -125,7 +120,6 @@ if (!$is_public) {
         }
     }
 }
-
 
 // Automatically inject PortSwigger-style lab banner on instance subdomains
 if (file_exists(__DIR__ . '/lab_banner.php')) {

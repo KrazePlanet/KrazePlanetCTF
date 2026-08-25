@@ -3,7 +3,7 @@
 session_start();
 
 // Database configuration & initialization if required (just reuse if needed)
-$host = 'localhost';
+$host = (getenv('DB_HOST') ?: (file_exists('/.dockerenv') ? 'krazeplanet' : '127.0.0.1'));
 $username = 'root';
 $password = '';
 $user = null;

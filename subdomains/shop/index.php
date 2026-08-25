@@ -419,7 +419,7 @@ $sort_labels = ['newest'=>'Newest','oldest'=>'Oldest','popular'=>'Most Popular',
     </nav>
     <div class="header-issue">
         <?php echo date('D, M j Y'); ?><br>
-        Vol. IV &mdash; Issue 031
+        Vol. IV - Issue 031
     </div>
 </header>
 
@@ -495,7 +495,7 @@ $sort_labels = ['newest'=>'Newest','oldest'=>'Oldest','popular'=>'Most Popular',
 </div>
 
 <footer>
-    <p>© <?php echo date('Y'); ?> KrazePlanet &mdash; <a href="#">Open Science Initiative</a></p>
+    <p>© <?php echo date('Y'); ?> KrazePlanet - <a href="#">Open Science Initiative</a></p>
     <p>Viewing: <strong><?php echo $raw_category; ?></strong> &bull; Sorted by <strong><?php echo $raw_sort; ?></strong></p>
 </footer>
 

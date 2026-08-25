@@ -19,7 +19,7 @@
 //   res_id=51-CASE/**/WHEN(LENGTH(version())=10)THEN(SLEEP(5))END → conditional
 // ============================================================
 
-$server   = "localhost";
+$server   = (getenv('DB_HOST') ?: (file_exists('/.dockerenv') ? 'krazeplanet' : '127.0.0.1'));
 $username = "root";
 $password = "";
 $database = "KrazePlanet_DB";

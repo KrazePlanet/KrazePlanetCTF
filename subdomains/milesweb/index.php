@@ -587,7 +587,7 @@
   <!-- Top Announcement Bar -->
   <div class="top-announcement-bar">
     <span>🇮🇳 Freedom Sale Is LIVE: <strong>80% Off Hosting</strong> + Free Domain</span>
-    <span>&mdash; Ends in <span class="countdown-timer" id="timer">12h 58m 51s</span></span>
+    <span>- Ends in <span class="countdown-timer" id="timer">12h 58m 51s</span></span>
     <a href="#plansSection">View Plans &rarr;</a>
   </div>
 

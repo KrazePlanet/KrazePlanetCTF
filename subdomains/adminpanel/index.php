@@ -1,16 +1,30 @@
 <?php
 // ── Database setup ──
-$db_host = 'localhost';
-$db_name = 'KrazePlanet';
-$db_user = 'root';
-$db_pass = '';
+$db_name = "KrazePlanet";
+$db_user = "root";
+$db_pass = "";
+$hosts   = ["krazeplanet", "127.0.0.1", "localhost", "172.19.0.1", "host.docker.internal"];
 
-try {
-    $pdo = new PDO("mysql:host=$db_host;dbname=$db_name;charset=utf8", $db_user, $db_pass);
-    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-    $pdo->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
-} catch (PDOException $e) {
-    die("DB connection failed: " . $e->getMessage());
+$pdo = null;
+$lastException = null;
+
+foreach ($hosts as $host) {
+    try {
+        $pdo = new PDO("mysql:host=$host;charset=utf8mb4", $db_user, $db_pass, [
+            PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+            PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+            PDO::ATTR_TIMEOUT => 2
+        ]);
+        $pdo->exec("CREATE DATABASE IF NOT EXISTS `$db_name` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci");
+        $pdo->exec("USE `$db_name`");
+        break;
+    } catch (PDOException $e) {
+        $lastException = $e;
+    }
+}
+
+if (!$pdo) {
+    die("DB connection failed: " . ($lastException ? $lastException->getMessage() : "Unable to connect to database"));
 }
 
 // Auto-create lab201_users table and seed default accounts
@@ -21,13 +35,13 @@ $pdo->exec("
         password VARCHAR(255) NOT NULL,
         role ENUM('user','admin') DEFAULT 'user',
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-    )
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
 ");
 $seedCheck = $pdo->query("SELECT COUNT(*) FROM lab201_users")->fetchColumn();
 if ($seedCheck == 0) {
     $ins = $pdo->prepare("INSERT INTO lab201_users (username, password, role) VALUES (?, ?, ?)");
-    $ins->execute(['admin',   password_hash('admin',       PASSWORD_DEFAULT), 'admin']);
-    $ins->execute(['support', password_hash('support@123', PASSWORD_DEFAULT), 'user']);
+    $ins->execute(["admin",   password_hash("admin",       PASSWORD_DEFAULT), "admin"]);
+    $ins->execute(["support", password_hash("support@123", PASSWORD_DEFAULT), "user"]);
 }
 
 // ── AJAX login handler ──
@@ -56,7 +70,7 @@ if (isset($_GET['action']) && $_GET['action'] === 'login' && $_SERVER['REQUEST_M
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>UPS Admin Portal — Login</title>
+    <title>UPS Admin Portal - Login</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.9.1/font/bootstrap-icons.css">
     <style>
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -423,7 +437,7 @@ if (isset($_GET['action']) && $_GET['action'] === 'login' && $_SERVER['REQUEST_M
         <a href="index.php">
             <i class="bi bi-arrow-left"></i> Back to Labs
         </a>
-        <span class="lab-badge-real">HackerOne #1490470 &mdash; UPS VDP &mdash; Auth Bypass &mdash; Real World</span>
+        <span class="lab-badge-real">HackerOne #1490470 - UPS VDP - Auth Bypass - Real World</span>
     </div>
 
     <!-- UPS site header -->
@@ -496,7 +510,7 @@ if (isset($_GET['action']) && $_GET['action'] === 'login' && $_SERVER['REQUEST_M
             <div class="admin-bypass-alert">
                 <i class="bi bi-check-circle-fill" style="font-size:1.2rem;color:#2ecc71;flex-shrink:0;"></i>
                 <div>
-                    <strong>Authentication Bypassed!</strong> — You flipped <code style="background:rgba(255,255,255,0.1);padding:0.1rem 0.3rem;border-radius:3px;font-family:monospace;color:#a0f0c0;">"status":false</code> →
+                    <strong>Authentication Bypassed!</strong> - You flipped <code style="background:rgba(255,255,255,0.1);padding:0.1rem 0.3rem;border-radius:3px;font-family:monospace;color:#a0f0c0;">"status":false</code> →
                     <code style="background:rgba(255,255,255,0.1);padding:0.1rem 0.3rem;border-radius:3px;font-family:monospace;color:#a0f0c0;">"status":true</code>
                     in the server response. The app trusted the client-side value and granted admin access.
                 </div>
@@ -528,7 +542,7 @@ if (isset($_GET['action']) && $_GET['action'] === 'login' && $_SERVER['REQUEST_M
 
             <!-- Shipment reports table -->
             <div class="admin-section-title">
-                <i class="bi bi-table"></i> Shipment Reports — PII Data
+                <i class="bi bi-table"></i> Shipment Reports - PII Data
             </div>
             <table class="reports-table">
                 <thead>
@@ -555,7 +569,7 @@ if (isset($_GET['action']) && $_GET['action'] === 'login' && $_SERVER['REQUEST_M
                     <tr>
                         <td><code style="color:var(--ups-gold);">1Z999AA10234567895</code></td>
                         <td>87 Oak Ave, Austin TX 78701</td>
-                        <td>Sender — 87 Oak Ave</td>
+                        <td>Sender - 87 Oak Ave</td>
                         <td>UPS 2nd Day Air</td>
                         <td>2022-02-19</td>
                         <td><span class="status-badge status-transit">In Transit</span></td>
@@ -582,7 +596,7 @@ if (isset($_GET['action']) && $_GET['action'] === 'login' && $_SERVER['REQUEST_M
                     <tr>
                         <td><code style="color:var(--ups-gold);">1Z999AA10567890128</code></td>
                         <td>220 Pine St, Boston MA 02101</td>
-                        <td>Sender — 220 Pine St</td>
+                        <td>Sender - 220 Pine St</td>
                         <td>UPS Worldwide Express</td>
                         <td>2022-02-22</td>
                         <td><span class="status-badge status-transit">In Transit</span></td>
@@ -593,12 +607,12 @@ if (isset($_GET['action']) && $_GET['action'] === 'login' && $_SERVER['REQUEST_M
 
             <!-- Lab info box inside admin panel -->
             <div class="lab-info-box">
-                <h4><i class="bi bi-bug-fill"></i> Real World Lab — Vulnerability Explained</h4>
+                <h4><i class="bi bi-bug-fill"></i> Real World Lab - Vulnerability Explained</h4>
                 <p>
                     The database contains two accounts: <code>admin / admin</code> and <code>support / support@123</code>.<br><br>
                     The login endpoint returns <code>{"status":true}</code> for correct credentials and
                     <code>{"status":false}</code> for wrong ones. The client-side JavaScript reads this
-                    <code>status</code> field to decide whether to grant access —
+                    <code>status</code> field to decide whether to grant access -
                     <strong style="color:#fbbf24;">no server-side session is created or validated</strong>.<br><br>
                     Use <strong style="color:#fbbf24;">Burp Suite</strong> to intercept the login response:
                     send any wrong password, intercept the response in Burp Proxy, and change
@@ -642,7 +656,7 @@ if (isset($_GET['action']) && $_GET['action'] === 'login' && $_SERVER['REQUEST_M
             const data = await resp.json();
 
             // VULNERABLE: app trusts the client-received JSON status field.
-            // No server-side session is created — intercepting this response
+            // No server-side session is created - intercepting this response
             // in Burp Suite and flipping false → true grants admin access.
             if (data.status === true) {
                 document.getElementById('loginPage').style.display = 'none';

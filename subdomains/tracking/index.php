@@ -329,7 +329,7 @@ if (isset($_GET['search']) && $_GET['search'] !== '') {
         </div>
 
     <footer>
-        <p>&copy; 2023 Equifax Inc. &mdash; <a href="#">Privacy Policy</a> &mdash; <a href="#">Terms of Use</a></p>
+        <p>&copy; 2023 Equifax Inc. - <a href="#">Privacy Policy</a> - <a href="#">Terms of Use</a></p>
         <p style="margin-top:0.4rem; font-size:0.7rem; opacity:0.5;">This is a simulated lab environment for security training purposes only.</p>
     </footer>
 

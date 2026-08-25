@@ -305,7 +305,7 @@ include 'sidebar.php';
             <div class="table">
                 <?php
                 // Database connection (update with your actual connection details)
-                $servername = "localhost";
+                $servername = (getenv('DB_HOST') ?: (file_exists('/.dockerenv') ? 'krazeplanet' : '127.0.0.1'));
                 $username = "root";
                 $password = "";
                 $dbname = "restaurant";

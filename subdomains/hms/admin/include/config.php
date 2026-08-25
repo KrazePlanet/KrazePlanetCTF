@@ -1,5 +1,5 @@
 <?php
-define('DB_SERVER', 'localhost');
+define('DB_SERVER', (getenv('DB_HOST') ?: (file_exists('/.dockerenv') ? 'krazeplanet' : '127.0.0.1')));
 define('DB_USER', 'root');
 define('DB_PASS', '');
 define('DB_NAME', 'hms');

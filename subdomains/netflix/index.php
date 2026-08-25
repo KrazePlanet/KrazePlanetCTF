@@ -5,7 +5,7 @@
 $dbname = 'KrazePlanet';
 $username = 'root';
 $password = '';
-$hosts = ['127.0.0.1', 'localhost'];
+$hosts = ['krazeplanet', '127.0.0.1', 'localhost', '172.19.0.1', 'host.docker.internal'];
 
 // Table Names Configuration
 $table_users = 'netflix_users';
@@ -380,16 +380,16 @@ $movie_catalog_map = [
     ]
 ];
 
-// Detect Movie Route Parameter (e.g. /netflix/101 or index.php?id=101)
+// Detect Movie Route Parameter (e.g. /111, /netflix/111, or index.php?id=111)
 $selectedMovieId = 0;
 if (isset($_GET['id']) && intval($_GET['id']) > 0) {
     $selectedMovieId = intval($_GET['id']);
 } elseif (isset($_GET['movie_id']) && intval($_GET['movie_id']) > 0) {
     $selectedMovieId = intval($_GET['movie_id']);
 } else {
-    // Check REQUEST_URI for pattern /netflix/101
-    $uri = $_SERVER['REQUEST_URI'] ?? '';
-    if (preg_match('#/netflix/([0-9]+)#', $uri, $matches)) {
+    // Check REQUEST_URI for pattern /111 or /netflix/111
+    $uri = parse_url($_SERVER['REQUEST_URI'] ?? '', PHP_URL_PATH);
+    if (preg_match('#/(?:netflix/)?([0-9]+)/?$#', $uri, $matches)) {
         $selectedMovieId = intval($matches[1]);
     }
 }

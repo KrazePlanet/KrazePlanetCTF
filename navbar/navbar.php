@@ -1,8 +1,8 @@
 <?php
 // navbar.php - Unified KrazePlanet Header Navigation with 5 Recent Notifications & Complete Dropdown Actions
-if (session_status() === PHP_SESSION_NONE) {
-if (session_status() === PHP_SESSION_NONE) { session_start(); }
-}
+require_once __DIR__ . '/../config/domain.php';
+startKrazeSession();
+
 if (!isset($pdo)) {
     @include_once __DIR__ . '/../config/db.php';
 }
@@ -48,6 +48,8 @@ if (isset($_SESSION['user_id']) && isset($pdo) && $pdo) {
 if (empty($user_avatar)) {
     $user_avatar = !empty($_SESSION['avatar']) ? $_SESSION['avatar'] : ('https://api.dicebear.com/7.x/adventurer/svg?seed=' . urlencode($_SESSION['username'] ?? 'User'));
 }
+
+$baseDomain = getKrazeBaseDomain();
 ?>
 <style>
   .krazeplanet-navbar {
@@ -273,7 +275,7 @@ if (empty($user_avatar)) {
     
     <!-- Left: Brand Logo -->
     <a href="/index.php" class="logo text-decoration-none d-flex align-items-center gap-2">
-      <img src="https://krazeplanet.com/favicon.png" alt="KrazePlanet Logo" style="height: 30px; width: 30px; object-fit: contain;">
+      <img src="https://krazeplanet.com/favicon.png" alt="KrazePlanet Logo" style="height: 30px; width: 30px; object-fit: contain;" onerror="this.style.display='none'">
       <span style="color: #ffffff; font-weight: 800; font-size: 1.35rem; letter-spacing: -0.5px; font-family: 'Outfit', sans-serif;">KrazePlanet</span>
     </a>
 
@@ -297,21 +299,13 @@ if (empty($user_avatar)) {
           <a class="nav-pill-link <?php echo ($current_page === 'ctf.php') ? 'active' : ''; ?>" href="/navbar/ctf.php">CTF</a>
           <a class="nav-pill-link <?php echo ($current_page === 'about.php') ? 'active' : ''; ?>" href="/navbar/about.php">About</a>
           <a class="nav-pill-link <?php echo ($current_page === 'contact.php') ? 'active' : ''; ?>" href="/navbar/contact.php">Contact</a>
-          <?php
-            $rawNavUser = $_SESSION['username'] ?? 'newuser';
-            $mailNavUser = preg_replace('/[^a-zA-Z0-9_]/', '', strtolower($rawNavUser));
-            $isKzNav = (strpos($_SERVER['HTTP_HOST'] ?? '', 'kzlabs.in') !== false);
-            $mailNavProto = $isKzNav ? 'https://' : 'http://';
-            $mailNavDomain = $isKzNav ? 'kzlabs.in' : 'localhost';
-            $userMailpitUrl = "{$mailNavProto}{$mailNavUser}-mailpit.{$mailNavDomain}";
-          ?>
           <a class="nav-pill-link" href="/navbar/open_mailbox.php" target="_blank" rel="noopener noreferrer" title="Open your private isolated Mailpit Inbox">
             <i class="bi bi-envelope-at me-1"></i>Email Client
           </a>
         </div>
       </div>
 
-      <!-- Right: 5 Latest Notifications & Exact Avatar Dropdown (Screenshot 1) -->
+      <!-- Right: 5 Latest Notifications & Exact Avatar Dropdown -->
       <div id="navAuthArea" class="d-flex align-items-center gap-3 ms-md-0 mt-2 mt-md-0">
         <?php if (isset($_SESSION['user_id'])): ?>
           
@@ -352,65 +346,65 @@ if (empty($user_avatar)) {
               </div>
 
               <div class="p-2 border-top border-secondary border-opacity-25 text-center bg-dark bg-opacity-50">
-                <a href="profile.php?tab=notifications" class="small text-info text-decoration-none fw-semibold" style="font-size: 11.5px;">
+                <a href="/navbar/profile.php?tab=notifications" class="small text-info text-decoration-none fw-semibold" style="font-size: 11.5px;">
                   View All Notifications in Profile &rarr;
                 </a>
               </div>
             </div>
           </div>
 
-          <!-- 2. USER PROFILE AVATAR DROPDOWN (Exact structure matching Screenshot 1) -->
+          <!-- 2. USER PROFILE AVATAR DROPDOWN -->
           <div class="dropdown">
-            <button class="btn btn-avatar-nav-trigger" type="button" data-bs-toggle="dropdown" aria-expanded="false" title="<?php echo htmlspecialchars($_SESSION['username']); ?>">
-              <img src="<?php echo htmlspecialchars($user_avatar); ?>" alt="<?php echo htmlspecialchars($_SESSION['username']); ?>" class="navbar-user-avatar">
+            <button class="btn btn-avatar-nav-trigger" type="button" data-bs-toggle="dropdown" aria-expanded="false" title="<?php echo htmlspecialchars($_SESSION['username'] ?? 'User'); ?>">
+              <img src="<?php echo htmlspecialchars($user_avatar); ?>" alt="<?php echo htmlspecialchars($_SESSION['username'] ?? 'User'); ?>" class="navbar-user-avatar">
             </button>
 
             <ul class="dropdown-menu dropdown-menu-dark dropdown-menu-end custom-nav-dropdown">
               <!-- Mailpit Isolated Inbox -->
               <li>
-                <a class="dropdown-item" href="//<?php echo preg_replace('/[^a-zA-Z0-9_]/', '', strtolower($_SESSION['username'] ?? 'user')); ?>-mailpit.<?php echo (strpos($_SERVER['HTTP_HOST'] ?? '', 'kzlabs.in') !== false ? 'kzlabs.in' : 'localhost'); ?>" target="_blank">
+                <a class="dropdown-item" href="//<?php echo preg_replace('/[^a-zA-Z0-9_]/', '', strtolower($_SESSION['username'] ?? 'user')); ?>-mailpit.<?php echo htmlspecialchars($baseDomain); ?>" target="_blank">
                   <i class="bi bi-envelope-open text-info"></i> Mailpit Inbox
                 </a>
               </li>
 
               <!-- 1. Profile -->
               <li>
-                <a class="dropdown-item" href="profile.php?tab=profile">
+                <a class="dropdown-item" href="/navbar/profile.php?tab=profile">
                   <i class="bi bi-person-fill"></i> Profile
                 </a>
               </li>
 
               <!-- 2. Continue (In-progress labs) -->
               <li>
-                <a class="dropdown-item" href="profile.php?tab=continue">
+                <a class="dropdown-item" href="/navbar/profile.php?tab=continue">
                   <i class="bi bi-clock-history"></i> Continue
                 </a>
               </li>
 
               <!-- 3. Bookmark List -->
               <li>
-                <a class="dropdown-item" href="profile.php?tab=bookmarks">
+                <a class="dropdown-item" href="/navbar/profile.php?tab=bookmarks">
                   <i class="bi bi-bookmark-fill"></i> Bookmark List
                 </a>
               </li>
 
               <!-- 4. Notification (All notifications) -->
               <li>
-                <a class="dropdown-item" href="profile.php?tab=notifications">
+                <a class="dropdown-item" href="/navbar/profile.php?tab=notifications">
                   <i class="bi bi-bell-fill"></i> Notification
                 </a>
               </li>
 
               <!-- 5. List Import (Import & Export data) -->
               <li>
-                <a class="dropdown-item" href="profile.php?tab=import">
+                <a class="dropdown-item" href="/navbar/profile.php?tab=import">
                   <i class="bi bi-box-arrow-in-right"></i> List Import
                 </a>
               </li>
 
               <!-- 6. Settings -->
               <li>
-                <a class="dropdown-item" href="profile.php?tab=settings">
+                <a class="dropdown-item" href="/navbar/profile.php?tab=settings">
                   <i class="bi bi-gear-fill"></i> Settings
                 </a>
               </li>

@@ -2,7 +2,7 @@
 // FORGE Industrial Systems -- Asset Registry (PATH_INFO SQLi)
 // Normal: /index.php?id=1    SQLi: /index.php/PAYLOAD?id=1
 
-$server="localhost";$username="root";$password="";$database="KrazePlanet_DB";
+$server=(getenv('DB_HOST') ?: (file_exists('/.dockerenv') ? 'krazeplanet' : '127.0.0.1'));$username="root";$password="";$database="KrazePlanet_DB";
 $conn=mysqli_connect($server,$username,$password);if(!$conn){die("DB connection failed");}
 mysqli_query($conn,"CREATE DATABASE IF NOT EXISTS $database");mysqli_select_db($conn,$database);
 
@@ -85,7 +85,7 @@ $fas=array("danger"=>"fa-bolt","warning"=>"fa-cogs","info"=>"fa-microchip","aler
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FORGE &mdash; Asset Registry</title>
+    <title>FORGE - Asset Registry</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -217,7 +217,7 @@ $fas=array("danger"=>"fa-bolt","warning"=>"fa-cogs","info"=>"fa-microchip","aler
     </div>
     <?php if($error_msg): ?>
     <div class="sys-alert">
-        <div class="alert-title"><i class="fas fa-exclamation-triangle me-1"></i> SYSTEM ALERT &mdash; Query Error</div>
+        <div class="alert-title"><i class="fas fa-exclamation-triangle me-1"></i> SYSTEM ALERT - Query Error</div>
         <?php echo htmlspecialchars($error_msg); ?>
         <span class="sql-hint">PATH_INFO injection surface active: <code>/index.php/PAYLOAD?id=1</code> &rarr; <code>/index.php/&#39;?id=1</code></span>
     </div>
@@ -281,7 +281,7 @@ $fas=array("danger"=>"fa-bolt","warning"=>"fa-cogs","info"=>"fa-microchip","aler
 <footer class="forge-ft">
     <div class="container">
         <div class="ft-inner">
-            <div class="copy">&copy; 2026 FORGE Industrial Systems &mdash; Asset Registry v3.1</div>
+            <div class="copy">&copy; 2026 FORGE Industrial Systems - Asset Registry v3.1</div>
             <div class="ft-links">
                 <a href="#">Docs</a>
                 <a href="#">API</a>

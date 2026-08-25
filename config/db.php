@@ -15,7 +15,7 @@ $pdo = null;
 $db_error = null;
 
 // Try combinations of hosts & common default passwords for local XAMPP/LAMPP
-$hosts = array_unique([$db_host, "127.0.0.1", "localhost"]);
+$hosts = array_unique([$db_host, "krazeplanet", "127.0.0.1", "localhost", "172.19.0.1", "host.docker.internal"]);
 $passwords = array_unique([$db_pass, "", "secret123", "root"]);
 
 $connected = false;

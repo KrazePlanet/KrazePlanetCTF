@@ -4489,7 +4489,7 @@ class PHPMailer
                 return self::rfcDate();
             }
 
-            //Reject future dates — they are invalid for outgoing message headers
+            //Reject future dates - they are invalid for outgoing message headers
             if ($dt->getTimestamp() > time()) {
                 return self::rfcDate();
             }

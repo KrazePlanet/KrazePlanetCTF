@@ -1,6 +1,6 @@
 <?php
 session_start();
-$connect=mysqli_connect("localhost","root","","giftstore");
+$connect=mysqli_connect((getenv('DB_HOST') ?: (file_exists('/.dockerenv') ? 'krazeplanet' : '127.0.0.1')),"root","","giftstore");
 $count=0;
 ?>
 <!doctype html>

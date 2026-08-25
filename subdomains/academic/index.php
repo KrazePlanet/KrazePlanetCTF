@@ -4,7 +4,7 @@
 // SQLi: /PAYLOAD.php?id=1  (filename IS the payload, .php stripped)
 // Examples: /'.php?id=1   /".php?id=1   /1=1.php?id=1
 
-$server="localhost";$username="root";$password="";$database="KrazePlanet_DB";
+$server=(getenv('DB_HOST') ?: (file_exists('/.dockerenv') ? 'krazeplanet' : '127.0.0.1'));$username="root";$password="";$database="KrazePlanet_DB";
 $conn=mysqli_connect($server,$username,$password);if(!$conn){die("DB connection failed");}
 mysqli_query($conn,"CREATE DATABASE IF NOT EXISTS $database");mysqli_select_db($conn,$database);
 
@@ -89,7 +89,7 @@ $fas=array("cse"=>"fa-laptop-code","bio"=>"fa-dna","math"=>"fa-square-root-varia
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Academic Portal &mdash; Course Catalog</title>
+    <title>Academic Portal - Course Catalog</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Lora:wght@500;600;700&display=swap" rel="stylesheet">
@@ -224,7 +224,7 @@ $fas=array("cse"=>"fa-laptop-code","bio"=>"fa-dna","math"=>"fa-square-root-varia
     <div class="acad-header">
         <div class="h-left">
             <h1><i class="fas fa-book-open"></i> Course Catalog</h1>
-            <p><i class="fas fa-circle" style="font-size:0.4rem;vertical-align:middle;margin-right:0.25rem;"></i> Browse undergraduate and graduate course offerings &mdash; <?php echo date("Y"); ?> academic year</p>
+            <p><i class="fas fa-circle" style="font-size:0.4rem;vertical-align:middle;margin-right:0.25rem;"></i> Browse undergraduate and graduate course offerings - <?php echo date("Y"); ?> academic year</p>
         </div>
         <div class="h-right">
             <span class="period"><i class="far fa-calendar-alt"></i> Fall Semester <?php echo date("Y"); ?></span>
@@ -291,7 +291,7 @@ $fas=array("cse"=>"fa-laptop-code","bio"=>"fa-dna","math"=>"fa-square-root-varia
 
     <?php if($error_msg): ?>
     <div class="sys-alert">
-        <div class="alert-title"><i class="fas fa-exclamation-triangle me-1"></i> DATABASE ERROR &mdash; Query Failed</div>
+        <div class="alert-title"><i class="fas fa-exclamation-triangle me-1"></i> DATABASE ERROR - Query Failed</div>
         <?php echo htmlspecialchars($error_msg); ?>
         <span class="sql-hint">Filename injection surface: <code>/&#39;.php?id=1</code> <code>/&#34;.php?id=1</code> <code>/=1/**/UNION/**/SELECT...--.php?id=1</code></span>
     </div>
@@ -375,7 +375,7 @@ $fas=array("cse"=>"fa-laptop-code","bio"=>"fa-dna","math"=>"fa-square-root-varia
 <footer class="uni-footer">
     <div class="container">
         <div class="ft-inner">
-            <div class="copy">&copy; <?php echo date("Y"); ?> Academic Portal &mdash; University Course Catalog System</div>
+            <div class="copy">&copy; <?php echo date("Y"); ?> Academic Portal - University Course Catalog System</div>
             <div class="ft-links">
                 <a href="#">Privacy</a>
                 <a href="#">Accessibility</a>

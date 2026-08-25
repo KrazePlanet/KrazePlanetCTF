@@ -1,14 +1,65 @@
 <?php
 session_start();
-require_once __DIR__ . '/../codeshackio/vendor/autoload.php';
+// Resilient PHPMailer & Composer Loader
+if (file_exists(__DIR__ . '/vendor/autoload.php')) {
+    require_once __DIR__ . '/vendor/autoload.php';
+} elseif (file_exists(__DIR__ . '/../codeshackio/vendor/autoload.php')) {
+    require_once __DIR__ . '/../codeshackio/vendor/autoload.php';
+} elseif (file_exists(__DIR__ . '/PHPMailer/PHPMailer.php')) {
+    require_once __DIR__ . '/PHPMailer/Exception.php';
+    require_once __DIR__ . '/PHPMailer/PHPMailer.php';
+    require_once __DIR__ . '/PHPMailer/SMTP.php';
+} elseif (file_exists('/opt/lampp/htdocs/PHPMailer/PHPMailer.php')) {
+    require_once '/opt/lampp/htdocs/PHPMailer/Exception.php';
+    require_once '/opt/lampp/htdocs/PHPMailer/PHPMailer.php';
+    require_once '/opt/lampp/htdocs/PHPMailer/SMTP.php';
+}
 
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
 
+// ── Database (auto-created on first run) ────────────────────────────────────
+mysqli_report(MYSQLI_REPORT_OFF);
+$db       = null;
+$dbError  = '';
+$database = 'KrazePlanet_DB';
+
+$conn = @mysqli_connect('127.0.0.1', 'root', '') ?: @mysqli_connect((getenv('DB_HOST') ?: (file_exists('/.dockerenv') ? 'krazeplanet' : '127.0.0.1')), 'root', '');
+if ($conn) {
+    @mysqli_query($conn, "CREATE DATABASE IF NOT EXISTS `$database` DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci");
+    @mysqli_select_db($conn, $database);
+    @mysqli_query($conn, "CREATE TABLE IF NOT EXISTS lab57914_users (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        email VARCHAR(255) NOT NULL UNIQUE,
+        nickname TEXT,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )");
+    @mysqli_query($conn, "CREATE TABLE IF NOT EXISTS lab57914_invites (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        from_email VARCHAR(255) DEFAULT '',
+        to_email VARCHAR(255) DEFAULT '',
+        nickname TEXT,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )");
+    @mysqli_query($conn, "INSERT IGNORE INTO lab57914_users (email, nickname) VALUES ('user@romit.io', 'Romit')");
+    $db = $conn;
+} else {
+    $dbError = 'DB connection failed: ' . mysqli_connect_error();
+}
+
 // ── Handle Nickname Save ────────────────────────────────────────────────────
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'save_nickname') {
     // ⚠ VULNERABLE — nickname stored raw, no sanitization
-    $_SESSION['nickname'] = $_POST['nickname'] ?? '';
+    $nickname_raw = $_POST['nickname'] ?? '';
+    $_SESSION['nickname'] = $nickname_raw;
+    if ($db) {
+        $stmt = mysqli_prepare($db, "UPDATE lab57914_users SET nickname = ? WHERE email = 'user@romit.io'");
+        if ($stmt) {
+            mysqli_stmt_bind_param($stmt, 's', $nickname_raw);
+            mysqli_stmt_execute($stmt);
+            mysqli_stmt_close($stmt);
+        }
+    }
     header('Location: ' . $_SERVER['PHP_SELF'] . '?saved=1#settings');
     exit;
 }
@@ -18,12 +69,32 @@ $share_sent = false;
 $share_email = '';
 $mailError = '';
 
-$nickname = $_SESSION['nickname'] ?? 'Romit';
-$saved    = isset($_GET['saved']);
+// Load persisted nickname (DB is source of truth, falls back to session/default)
+$nickname = $_SESSION['nickname'] ?? '';
+if ($db) {
+    $res = mysqli_query($db, "SELECT nickname FROM lab57914_users WHERE email = 'user@romit.io' LIMIT 1");
+    if ($res && ($row = mysqli_fetch_assoc($res)) && $row['nickname'] !== null && $row['nickname'] !== '') {
+        $nickname = $row['nickname'];
+    }
+}
+if ($nickname === '') {
+    $nickname = 'Romit';
+}
+$saved = isset($_GET['saved']);
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'share_wallet') {
     $share_sent = true;
     $share_email = trim($_POST['phone'] ?? '');
+
+    // Persist invitation record (nickname stored raw — intentionally vulnerable)
+    if ($db && $share_email) {
+        $stmt = mysqli_prepare($db, "INSERT INTO lab57914_invites (from_email, to_email, nickname) VALUES ('user@romit.io', ?, ?)");
+        if ($stmt) {
+            mysqli_stmt_bind_param($stmt, 'ss', $share_email, $nickname);
+            mysqli_stmt_execute($stmt);
+            mysqli_stmt_close($stmt);
+        }
+    }
 
     if ($share_email) {
         $mail = new PHPMailer(true);
@@ -31,9 +102,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
             $mail->isSMTP();
             $mail->Host       = 'mailpit';
             $mail->SMTPAuth   = false;
-                        $mail->SMTPSecure = '';
-        $mail->SMTPAutoTLS = false;
+            $mail->SMTPSecure = '';
+            $mail->SMTPAutoTLS = false;
             $mail->Port       = 1025;
+            $mail->Timeout    = 3;
             $mail->setFrom('noreply@krazeplanet.com', 'Romit');
             $mail->addAddress($share_email);
             $mail->isHTML(true);
@@ -250,6 +322,11 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
           <div class="alert alert-success">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>
             Nickname saved!
+          </div>
+          <?php endif; ?>
+          <?php if ($dbError): ?>
+          <div class="alert" style="background:#fef2f2;border:1px solid #fecaca;color:#dc2626;">
+            Database unavailable — nickname will only persist in this session. (<?= htmlspecialchars($dbError, ENT_QUOTES, 'UTF-8') ?>)
           </div>
           <?php endif; ?>
 

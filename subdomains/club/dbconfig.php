@@ -1,7 +1,7 @@
 <?php
 global $con;
 
-$hostname = 'localhost';
+$hostname = (getenv('DB_HOST') ?: (file_exists('/.dockerenv') ? 'krazeplanet' : '127.0.0.1'));
 $user     = 'root';
 $password = '';
 $dbname   = 'db';

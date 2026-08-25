@@ -1,33 +1,22 @@
 <?php
 // spawn_lab.php - Self-Healing Gateway & On-Demand Auto-Provisioner for Lab Subdomains
-if (session_status() === PHP_SESSION_NONE) {
-    $host = $_SERVER['HTTP_HOST'] ?? '';
-    if (strpos($host, 'kzlabs.in') !== false) {
-        @ini_set('session.cookie_domain', '.kzlabs.in');
-    } elseif (strpos($host, 'localtest.me') !== false) {
-        @ini_set('session.cookie_domain', '.localtest.me');
-    } elseif (strpos($host, 'localhost') !== false) {
-        @ini_set('session.cookie_domain', '.localhost');
-    }
-    @session_start();
-}
+require_once __DIR__ . '/../config/domain.php';
+startKrazeSession();
 
 $httpHost = strtolower($_SERVER['HTTP_HOST'] ?? '');
 $hostNoPort = preg_replace('/:\d+$/', '', $httpHost);
-
-$baseDomain = 'localhost';
-if (strpos($hostNoPort, 'kzlabs.in') !== false) $baseDomain = 'kzlabs.in';
-elseif (strpos($hostNoPort, 'localtest.me') !== false) $baseDomain = 'localtest.me';
+$baseDomain = getKrazeBaseDomain($hostNoPort);
 
 $isInstance = false;
 $parsedUser = '';
 $parsedLab = '';
 
-if (preg_match('/^([a-zA-Z0-9_]+)-([a-zA-Z0-9_\-]+)\.(kzlabs\.in|localhost|localtest\.me|127\.0\.0\.1\.nip\.io|nip\.io)$/i', $hostNoPort, $m)) {
+// Match hyphenated {username}-{lab}.{domain} or nested {username}.{lab}.{domain}
+if (preg_match('/^([a-zA-Z0-9_]+)-([a-zA-Z0-9_\-]+)\.(.+)$/i', $hostNoPort, $m)) {
     $parsedUser = strtolower($m[1]);
     $parsedLab = strtolower($m[2]);
     $isInstance = true;
-} elseif (preg_match('/^([a-zA-Z0-9_]+)\.([a-zA-Z0-9_\-]+)\.(kzlabs\.in|localhost|localtest\.me|127\.0\.0\.1\.nip\.io|nip\.io)$/i', $hostNoPort, $m)) {
+} elseif (preg_match('/^([a-zA-Z0-9_]+)\.([a-zA-Z0-9_\-]+)\.(.+)$/i', $hostNoPort, $m)) {
     $parsedUser = strtolower($m[1]);
     $parsedLab = strtolower($m[2]);
     $isInstance = true;

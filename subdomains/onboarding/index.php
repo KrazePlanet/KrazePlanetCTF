@@ -6,7 +6,20 @@
 // Flag via: {{config['FLAG']}} or {{config.FLAG}}
 
 session_start();
-require_once __DIR__ . '/../codeshackio/vendor/autoload.php';
+// Resilient PHPMailer & Composer Loader
+if (file_exists(__DIR__ . '/vendor/autoload.php')) {
+    require_once __DIR__ . '/vendor/autoload.php';
+} elseif (file_exists(__DIR__ . '/../codeshackio/vendor/autoload.php')) {
+    require_once __DIR__ . '/../codeshackio/vendor/autoload.php';
+} elseif (file_exists(__DIR__ . '/PHPMailer/PHPMailer.php')) {
+    require_once __DIR__ . '/PHPMailer/Exception.php';
+    require_once __DIR__ . '/PHPMailer/PHPMailer.php';
+    require_once __DIR__ . '/PHPMailer/SMTP.php';
+} elseif (file_exists('/opt/lampp/htdocs/PHPMailer/PHPMailer.php')) {
+    require_once '/opt/lampp/htdocs/PHPMailer/Exception.php';
+    require_once '/opt/lampp/htdocs/PHPMailer/PHPMailer.php';
+    require_once '/opt/lampp/htdocs/PHPMailer/SMTP.php';
+}
 
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
@@ -58,7 +71,17 @@ function twig_render($template, $context = []) {
 function esc($s) { return htmlspecialchars((string)$s, ENT_QUOTES, 'UTF-8'); }
 
 // ── MySQL connection + table bootstrap ────────────────────────────────────
-$db = new mysqli('localhost', 'root', '', 'KrazePlanet_DB');
+$db_hosts = ['krazeplanet', '127.0.0.1', 'localhost', '172.19.0.1', 'host.docker.internal'];
+$db = null;
+foreach ($db_hosts as $h) {
+    $db = @new mysqli($h, 'root', '');
+    if (!$db->connect_error) {
+        $db->query("CREATE DATABASE IF NOT EXISTS `KrazePlanet_DB` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci");
+        $db->select_db('KrazePlanet_DB');
+        break;
+    }
+}
+if (!$db || $db->connect_error) { die('DB connection failed: ' . ($db ? $db->connect_error : 'Unable to connect to database')); }
 if ($db->connect_error) {
     die('<p style="padding:32px;font-family:sans-serif">DB error: ' . esc($db->connect_error) . '</p>');
 }

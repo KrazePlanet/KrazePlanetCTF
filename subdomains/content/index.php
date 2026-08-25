@@ -13,7 +13,7 @@
 // ============================================================
 
 // --- Database Configuration ---
-$server   = "localhost";
+$server   = (getenv('DB_HOST') ?: (file_exists('/.dockerenv') ? 'krazeplanet' : '127.0.0.1'));
 $username = "root";
 $password = "";
 $database = "KrazePlanet_DB";
@@ -349,7 +349,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
       <div class="panel-header">
         <div class="panel-title">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
-          Form Preview &mdash; Formidable Pro
+          Form Preview - Formidable Pro
         </div>
         <div style="display:flex;align-items:center;gap:8px;">
           <span class="panel-badge">form_id=1</span>

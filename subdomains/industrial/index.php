@@ -5,7 +5,7 @@
 // SQLi:   /index.php?offset=1;SELECT+IF((1=1),SLEEP(5),0)--+-
 // Uses mysqli_multi_query — stacked queries supported for time-based blind
 
-$server="localhost";$username="root";$password="";$database="KrazePlanet_DB";
+$server=(getenv('DB_HOST') ?: (file_exists('/.dockerenv') ? 'krazeplanet' : '127.0.0.1'));$username="root";$password="";$database="KrazePlanet_DB";
 $conn=mysqli_connect($server,$username,$password);if(!$conn){die("DB connection failed");}
 mysqli_query($conn,"CREATE DATABASE IF NOT EXISTS $database");mysqli_select_db($conn,$database);
 

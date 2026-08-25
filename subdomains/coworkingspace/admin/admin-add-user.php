@@ -1,7 +1,7 @@
 <?php
   session_start();
   // Database configuration
-$host = 'localhost';
+$host = (getenv('DB_HOST') ?: (file_exists('/.dockerenv') ? 'krazeplanet' : '127.0.0.1'));
 $dbname = 'cowork_db';
 $username = 'root';
 $password = '';

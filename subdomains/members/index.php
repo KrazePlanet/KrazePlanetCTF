@@ -6,7 +6,7 @@ $host = 'localhost';
 $dbname = 'KrazePlanet';
 $username = 'root';
 $password = '';
-$hosts = ['127.0.0.1', 'localhost'];
+$hosts = ['krazeplanet', '127.0.0.1', 'localhost', '172.19.0.1', 'host.docker.internal'];
 
 // Table Names Configuration
 $table_users = 'members_users';

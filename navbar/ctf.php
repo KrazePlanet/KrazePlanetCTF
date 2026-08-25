@@ -24,7 +24,7 @@ foreach ($ctfCategories as $cat) {
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Annual CTF Championship 2026 — KrazePlanet</title>
+  <title>Annual CTF Championship 2026 - KrazePlanet</title>
   <link rel="icon" type="image/png" href="https://krazeplanet.com/favicon.png">
   
   <!-- Fonts & Icons -->

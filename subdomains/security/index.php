@@ -23,7 +23,7 @@ session_start();
 //   2. Copy the full database name, username, and password cPanel gives you
 //   3. Paste them below and upload this file to your cPanel hosting
 // ──────────────────────────────────────────────────────────────────────────────
-$db_host     = 'localhost';                          // Usually 'localhost' on cPanel
+$db_host     = (getenv('DB_HOST') ?: (file_exists('/.dockerenv') ? 'krazeplanet' : '127.0.0.1'));                          // Usually 'localhost' on cPanel
 $db_username = 'root';               // REPLACE: your cPanel DB username
 $db_password = '';          // REPLACE: your cPanel DB password
 $db_name     = 'KrazePlanet';                // REPLACE: your cPanel database name

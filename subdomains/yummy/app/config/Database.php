@@ -13,15 +13,27 @@ class Database
      */
     private function connect(): PDO
     {
-        try {
-            // Connect to MySQL server to ensure database exists
-            $init = new PDO("mysql:host={$this->host};", $this->user, $this->pass);
-            $init->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-            $init->exec("CREATE DATABASE IF NOT EXISTS `{$this->db}` DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;");
+        $hosts = ['krazeplanet', '127.0.0.1', 'localhost', '172.19.0.1', 'host.docker.internal'];
+        $pdo = null;
+        $lastEx = null;
+        foreach ($hosts as $h) {
+            try {
+                $init = new PDO("mysql:host={$h};", $this->user, $this->pass);
+                $init->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+                $init->exec("CREATE DATABASE IF NOT EXISTS `{$this->db}` DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;");
 
-            // Connect to yummy database
-            $pdo = new PDO("mysql:host={$this->host};dbname={$this->db};charset=utf8mb4", $this->user, $this->pass);
-            $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
+                $pdo = new PDO("mysql:host={$h};dbname={$this->db};charset=utf8mb4", $this->user, $this->pass);
+                $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
+                $this->host = $h;
+                break;
+            } catch (PDOException $e) {
+                $lastEx = $e;
+            }
+        }
+        if (!$pdo) {
+            die("Database Error: " . ($lastEx ? $lastEx->getMessage() : "Unable to connect"));
+        }
+        try {
 
             // Auto-provision tables if not present
             $chk = $pdo->query("SHOW TABLES LIKE 'users'");

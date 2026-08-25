@@ -1,32 +1,16 @@
 <?php
 // open_mailbox.php - Fast Provisioner & Gateway to User's Mailpit Container
-$h = strtolower($_SERVER['HTTP_HOST'] ?? '');
-if (session_status() === PHP_SESSION_NONE) {
-    if (strpos($h, 'kzlabs.in') !== false) {
-        @ini_set('session.cookie_domain', '.kzlabs.in');
-    } elseif (strpos($h, 'localtest.me') !== false) {
-        @ini_set('session.cookie_domain', '.localtest.me');
-    } elseif (strpos($h, 'localhost') !== false) {
-        @ini_set('session.cookie_domain', '.localhost');
-    }
-    @session_start();
-}
+require_once __DIR__ . '/../config/domain.php';
+startKrazeSession();
 
+$h = strtolower($_SERVER['HTTP_HOST'] ?? '');
 $hostNoPort = strtolower(preg_replace('/:\d+$/', '', $h));
+$domain = getKrazeBaseDomain($hostNoPort);
+
 $isHttps = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') || 
            (isset($_SERVER['SERVER_PORT']) && $_SERVER['SERVER_PORT'] == 443) || 
            (isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https');
 $proto = $isHttps ? 'https://' : 'http://';
-
-if (strpos($hostNoPort, 'kzlabs.in') !== false) {
-    $domain = 'kzlabs.in';
-} elseif (strpos($hostNoPort, 'localtest.me') !== false) {
-    $domain = 'localtest.me';
-} elseif (strpos($hostNoPort, 'nip.io') !== false) {
-    $domain = '127.0.0.1.nip.io';
-} else {
-    $domain = 'localhost';
-}
 
 // If logged in, use their username; if not, use 'newuser'
 $rawUser = $_SESSION['username'] ?? 'newuser';

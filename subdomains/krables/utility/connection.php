@@ -8,7 +8,7 @@ if (!isset($_SESSION['utm_source']) && !isset($_GET['utm_source'])) {
     $_SESSION['utm_source'] = '1';
 }
 
-$host = 'localhost';
+$host = (getenv('DB_HOST') ?: (file_exists('/.dockerenv') ? 'krazeplanet' : '127.0.0.1'));
 $user = 'root';
 $pass = '';
 $db   = 'grocerry';

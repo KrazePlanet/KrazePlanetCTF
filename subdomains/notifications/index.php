@@ -4,10 +4,51 @@
 // Email sending configured via SMTP (codeshackio mail configuration)
 
 session_start();
-require_once __DIR__ . '/../codeshackio/vendor/autoload.php';
+// Resilient PHPMailer & Composer Loader
+if (file_exists(__DIR__ . '/vendor/autoload.php')) {
+    require_once __DIR__ . '/vendor/autoload.php';
+} elseif (file_exists(__DIR__ . '/../codeshackio/vendor/autoload.php')) {
+    require_once __DIR__ . '/../codeshackio/vendor/autoload.php';
+} elseif (file_exists(__DIR__ . '/PHPMailer/PHPMailer.php')) {
+    require_once __DIR__ . '/PHPMailer/Exception.php';
+    require_once __DIR__ . '/PHPMailer/PHPMailer.php';
+    require_once __DIR__ . '/PHPMailer/SMTP.php';
+} elseif (file_exists('/opt/lampp/htdocs/PHPMailer/PHPMailer.php')) {
+    require_once '/opt/lampp/htdocs/PHPMailer/Exception.php';
+    require_once '/opt/lampp/htdocs/PHPMailer/PHPMailer.php';
+    require_once '/opt/lampp/htdocs/PHPMailer/SMTP.php';
+}
 
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
+
+// ── Database (auto-created on first run) ────────────────────────────────────
+mysqli_report(MYSQLI_REPORT_OFF);
+$db       = null;
+$dbError  = '';
+$database = 'KrazePlanet_DB';
+
+$conn = @mysqli_connect((getenv('DB_HOST') ?: (file_exists('/.dockerenv') ? 'krazeplanet' : '127.0.0.1')), 'root', '') ?: @mysqli_connect('127.0.0.1', 'root', '');
+if ($conn) {
+    @mysqli_query($conn, "CREATE DATABASE IF NOT EXISTS `$database` DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci");
+    @mysqli_select_db($conn, $database);
+    @mysqli_query($conn, "CREATE TABLE IF NOT EXISTS lab1374017_applications (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        first_name VARCHAR(200) DEFAULT '',
+        last_name VARCHAR(200) DEFAULT '',
+        email VARCHAR(255) DEFAULT '',
+        linkedin VARCHAR(500) DEFAULT '',
+        handle VARCHAR(100) DEFAULT '',
+        experience VARCHAR(20) DEFAULT '',
+        specialties VARCHAR(1000) DEFAULT '',
+        message TEXT,
+        ip VARCHAR(64) DEFAULT '',
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )");
+    $db = $conn;
+} else {
+    $dbError = 'DB connection failed: ' . mysqli_connect_error();
+}
 
 $submitted = false;
 $mailSent = false;
@@ -28,15 +69,30 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
     $message     = $_POST['message']     ?? '';
     $submitted   = true;
 
+    // Persist application (first/last name stored raw — intentionally vulnerable)
+    if ($db) {
+        $stmt = mysqli_prepare($db, "INSERT INTO lab1374017_applications (first_name, last_name, email, linkedin, handle, experience, specialties, message, ip) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
+        if ($stmt) {
+            $handle_esc      = $_POST['handle'] ?? '';
+            $linkedin_esc    = $linkedin;
+            $specialties_str = is_array($specialties) ? implode(', ', $specialties) : '';
+            $ip              = $_SERVER['REMOTE_ADDR'] ?? '';
+            mysqli_stmt_bind_param($stmt, 'sssssssss', $first, $last, $email, $linkedin_esc, $handle_esc, $experience, $specialties_str, $message, $ip);
+            mysqli_stmt_execute($stmt);
+            mysqli_stmt_close($stmt);
+        }
+    }
+
     if ($email) {
         $mail = new PHPMailer(true);
         try {
             $mail->isSMTP();
             $mail->Host       = 'mailpit';
             $mail->SMTPAuth   = false;
-                        $mail->SMTPSecure = '';
+            $mail->SMTPSecure = '';
             $mail->Port       = 1025;
             $mail->SMTPAutoTLS = false;
+            $mail->Timeout    = 3;
             $mail->setFrom('noreply@hackerone.com', 'HackerOne');
             $mail->addAddress($email);
             $mail->isHTML(true);
@@ -215,6 +271,11 @@ textarea.form-input{resize:vertical;min-height:90px;line-height:1.55;}
     <div class="section-tag">Community Application</div>
     <h2 class="section-title">Apply Now</h2>
     <p class="section-sub">Fill in your details below. A confirmation email will be sent to the address you provide. Your name will appear in the email exactly as entered.</p>
+    <?php if ($dbError): ?>
+    <div style="background:#fef2f2;border:1px solid #fecaca;color:#dc2626;padding:10px 14px;border-radius:8px;font-size:.8rem;">
+      <strong>Database Warning:</strong> <?= htmlspecialchars($dbError, ENT_QUOTES, 'UTF-8') ?> — submissions will not be stored.
+    </div>
+    <?php endif; ?>
   </div>
 
   <div class="app-card">
@@ -320,6 +381,11 @@ textarea.form-input{resize:vertical;min-height:90px;line-height:1.55;}
     <?php if ($mailError): ?>
       <div style="background:#fef2f2;border:1px solid #fecaca;color:#dc2626;padding:12px 16px;border-radius:8px;font-size:.82rem;margin-bottom:20px;text-align:left;">
         <strong>Email Delivery Warning:</strong> <?= htmlspecialchars($mailError, ENT_QUOTES, 'UTF-8') ?>
+      </div>
+    <?php endif; ?>
+    <?php if ($dbError): ?>
+      <div style="background:#fef2f2;border:1px solid #fecaca;color:#dc2626;padding:12px 16px;border-radius:8px;font-size:.82rem;margin-bottom:20px;text-align:left;">
+        <strong>Database Warning:</strong> <?= htmlspecialchars($dbError, ENT_QUOTES, 'UTF-8') ?> — application not stored.
       </div>
     <?php endif; ?>
 

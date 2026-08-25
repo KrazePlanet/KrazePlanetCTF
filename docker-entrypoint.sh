@@ -2,7 +2,71 @@
 
 echo "[+] Starting KrazePlanet container setup..."
 
-# 1. Initialize MariaDB data directory if empty
+# 0. Resolve Configured Domain
+CUSTOM_DOMAIN="kzlabs.in"
+if [ -n "$APP_DOMAIN" ]; then
+    CUSTOM_DOMAIN="$APP_DOMAIN"
+elif [ -f "/opt/lampp/htdocs/config/domain.txt" ]; then
+    FILE_DOM=$(head -n 1 /opt/lampp/htdocs/config/domain.txt | tr -d '\r\n' | xargs)
+    if [ -n "$FILE_DOM" ]; then
+        CUSTOM_DOMAIN="$FILE_DOM"
+    fi
+fi
+echo "[+] Active Platform Domain: ${CUSTOM_DOMAIN}"
+
+# 1. Automatic 2GB Swap & Swappiness Setup (Runs automatically on host kernel)
+TOTAL_SWAP=$(free -m 2>/dev/null | awk '/Swap:/ {print $2}')
+if [ -z "$TOTAL_SWAP" ] || [ "$TOTAL_SWAP" -lt 1024 ]; then
+    echo "[+] Low/No Swap detected (${TOTAL_SWAP:-0}MB). Automatically creating 2GB Swap space..."
+    if [ ! -f /swapfile ]; then
+        fallocate -l 2G /swapfile 2>/dev/null || dd if=/dev/zero of=/swapfile bs=1M count=2048 2>/dev/null || true
+        chmod 600 /swapfile 2>/dev/null || true
+        mkswap /swapfile >/dev/null 2>&1 || true
+        swapon /swapfile >/dev/null 2>&1 || true
+        if ! grep -q '/swapfile' /etc/fstab 2>/dev/null; then
+            echo '/swapfile none swap sw 0 0' >> /etc/fstab 2>/dev/null || true
+        fi
+    else
+        swapon /swapfile >/dev/null 2>&1 || true
+    fi
+    sysctl -w vm.swappiness=10 >/dev/null 2>&1 || true
+    if ! grep -q 'vm.swappiness' /etc/sysctl.conf 2>/dev/null; then
+        echo 'vm.swappiness=10' >> /etc/sysctl.conf 2>/dev/null || true
+    fi
+    echo "[✔] 2GB Swap enabled successfully!"
+else
+    echo "[✔] Active Swap detected (${TOTAL_SWAP}MB)."
+fi
+
+# 2. Apply Low-RAM MariaDB and Apache Configurations (Prevents OOM database crashes on 1GB VPS)
+mkdir -p /etc/mysql/mariadb.conf.d /etc/apache2/mods-available
+cat << 'LOWRAM_MYSQL' > /etc/mysql/mariadb.conf.d/99-lowram.cnf
+[mysqld]
+bind-address = 0.0.0.0
+performance_schema = OFF
+innodb_buffer_pool_size = 32M
+innodb_log_buffer_size = 4M
+innodb_buffer_pool_instances = 1
+max_connections = 30
+key_buffer_size = 16M
+table_open_cache = 64
+table_definition_cache = 64
+query_cache_type = 0
+query_cache_size = 0
+max_allowed_packet = 16M
+LOWRAM_MYSQL
+
+cat << 'LOWRAM_APACHE' > /etc/apache2/mods-available/mpm_prefork.conf
+<IfModule mpm_prefork_module>
+    StartServers             2
+    MinSpareServers          2
+    MaxSpareServers          4
+    MaxRequestWorkers       15
+    MaxConnectionsPerChild 500
+</IfModule>
+LOWRAM_APACHE
+
+# 3. Initialize MariaDB data directory if empty
 if [ ! -d "/var/lib/mysql/mysql" ]; then
     echo "[+] Initializing MariaDB data directory..."
     mariadb-install-db --user=mysql --datadir=/var/lib/mysql > /dev/null 2>&1 || mysql_install_db --user=mysql --datadir=/var/lib/mysql > /dev/null 2>&1
@@ -11,8 +75,8 @@ fi
 mkdir -p /var/run/mysqld /var/run/apache2 /var/lock/apache2 /var/log/apache2
 chown -R mysql:mysql /var/lib/mysql /var/run/mysqld 2>/dev/null || true
 
-# 2. Start MariaDB service
-echo "[+] Starting MariaDB server..."
+# 4. Start MariaDB service (Low-RAM Profile)
+echo "[+] Starting MariaDB server (Low-RAM Profile)..."
 service mariadb start || service mysql start
 
 # Wait for MariaDB to become ready
@@ -28,10 +92,10 @@ until mysqladmin ping --silent >/dev/null 2>&1; do
     fi
 done
 
-# 3. Configure Database Permissions and Auto-Import Schemas
-echo "[+] Configuring database users and authentication plugins..."
+# 5. Configure Database Permissions and Auto-Initialize Complete Schemas
+echo "[+] Configuring database users and initializing schemas..."
 mysql -u root << 'SQL_INIT' || true
--- Ensure root user exists and can authenticate from www-data/PHP and remote with mysql_native_password
+-- Ensure root user exists and can authenticate
 CREATE USER IF NOT EXISTS 'root'@'%' IDENTIFIED BY '';
 CREATE USER IF NOT EXISTS 'root'@'localhost' IDENTIFIED BY '';
 CREATE USER IF NOT EXISTS 'root'@'127.0.0.1' IDENTIFIED BY '';
@@ -47,72 +111,130 @@ FLUSH PRIVILEGES;
 
 CREATE DATABASE IF NOT EXISTS `KrazePlanet` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 CREATE DATABASE IF NOT EXISTS `KrazePlanet_DB` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+USE `KrazePlanet`;
+
+CREATE TABLE IF NOT EXISTS `users` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `username` varchar(50) NOT NULL,
+  `fullname` varchar(100) DEFAULT '',
+  `phone` varchar(30) DEFAULT '',
+  `email` varchar(100) NOT NULL,
+  `password` varchar(255) NOT NULL,
+  `country` varchar(10) DEFAULT 'IN',
+  `avatar` varchar(500) DEFAULT NULL,
+  `role` varchar(20) DEFAULT 'trainee',
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `username` (`username`),
+  UNIQUE KEY `email` (`email`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS `tasks` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `title` varchar(255) NOT NULL,
+  `description` text DEFAULT NULL,
+  `category_name` varchar(100) DEFAULT 'Web Security',
+  `assigned_users` varchar(255) DEFAULT 'All Trainees',
+  `submission_date` date DEFAULT NULL,
+  `labs_json` longtext DEFAULT NULL,
+  `created_by` varchar(100) DEFAULT 'admin',
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS `user_solved_labs` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) NOT NULL,
+  `lab_id` varchar(255) NOT NULL,
+  `difficulty` varchar(20) DEFAULT 'easy',
+  `points` int(11) DEFAULT 20,
+  `solved_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `user_lab_unique` (`user_id`,`lab_id`),
+  CONSTRAINT `user_solved_labs_fk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS `user_bookmarks` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) NOT NULL,
+  `lab_id` varchar(255) NOT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `user_bookmark_unique` (`user_id`,`lab_id`),
+  CONSTRAINT `user_bookmarks_fk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS `user_lab_history` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) NOT NULL,
+  `lab_id` varchar(255) NOT NULL,
+  `lab_title` varchar(255) DEFAULT NULL,
+  `lab_badge` varchar(50) DEFAULT 'LAB',
+  `lab_category` varchar(100) DEFAULT 'Web Security',
+  `lab_url` varchar(500) DEFAULT NULL,
+  `last_accessed_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `user_lab_hist_unique` (`user_id`,`lab_id`),
+  CONSTRAINT `user_lab_history_fk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS `user_notifications` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) DEFAULT NULL,
+  `title` varchar(255) NOT NULL,
+  `message` text NOT NULL,
+  `link` varchar(255) DEFAULT 'assignments.php',
+  `icon` varchar(50) DEFAULT 'bi-bell-fill',
+  `icon_bg` varchar(50) DEFAULT 'bg-info bg-opacity-10 text-info',
+  `is_read` tinyint(1) DEFAULT 0,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Insert default admin user if not exists
+INSERT IGNORE INTO `users` (`id`, `username`, `fullname`, `phone`, `email`, `password`, `country`, `avatar`, `role`)
+VALUES (1, 'admin', 'System Administrator', '+91 9876543210', 'admin@krazeplanet.com', '$2y$10$c5VmO.FbPSL2bl8b4Dq9Ye9015OctPyRATU43IxaZIuZ5VP25Pt2G', 'IN', 'https://api.dicebear.com/7.x/adventurer/svg?seed=Admin&hair=short01', 'admin');
+
+-- Insert default starter notifications if empty
+INSERT INTO `user_notifications` (`title`, `message`, `link`, `icon`, `icon_bg`, `is_read`)
+SELECT 'Platform Labs Ready', '260+ interactive vulnerability laboratories are active and online.', 'index.php', 'bi-shield-check', 'bg-success bg-opacity-10 text-success', 0
+FROM DUAL WHERE NOT EXISTS (SELECT 1 FROM `user_notifications` LIMIT 1);
 SQL_INIT
 
-# Import KrazePlanet.sql if present
-if [ -f "/opt/lampp/htdocs/database/KrazePlanet.sql" ]; then
-    echo "[+] Importing KrazePlanet.sql into KrazePlanet database..."
-    mysql -u root KrazePlanet < /opt/lampp/htdocs/database/KrazePlanet.sql 2>/dev/null || true
-    mysql -u root KrazePlanet_DB < /opt/lampp/htdocs/database/KrazePlanet.sql 2>/dev/null || true
-fi
-
-# Import other lab-specific SQL files if present
-if [ -f "/opt/lampp/htdocs/tour/tour.sql" ]; then
-    mysql -u root -e "CREATE DATABASE IF NOT EXISTS tour;" 2>/dev/null || true
-    mysql -u root tour < /opt/lampp/htdocs/tour/tour.sql 2>/dev/null || true
-fi
-if [ -f "/opt/lampp/htdocs/pictureperfect/picture_perfect.sql" ]; then
-    mysql -u root -e "CREATE DATABASE IF NOT EXISTS picture_perfect;" 2>/dev/null || true
-    mysql -u root picture_perfect < /opt/lampp/htdocs/pictureperfect/picture_perfect.sql 2>/dev/null || true
-fi
-if [ -f "/opt/lampp/htdocs/gift/giftstore.sql" ]; then
-    mysql -u root -e "CREATE DATABASE IF NOT EXISTS giftstore;" 2>/dev/null || true
-    mysql -u root giftstore < /opt/lampp/htdocs/gift/giftstore.sql 2>/dev/null || true
-fi
-if [ -f "/opt/lampp/htdocs/krables/grocerry.sql" ]; then
-    mysql -u root -e "CREATE DATABASE IF NOT EXISTS grocerry;" 2>/dev/null || true
-    mysql -u root grocerry < /opt/lampp/htdocs/krables/grocerry.sql 2>/dev/null || true
-fi
-
-# 4. Clean up any stale Apache PID files
+# 6. Clean up any stale Apache PID files
 rm -f /var/run/apache2/apache2.pid 2>/dev/null || true
-
-echo "==========================================================="
-echo "  🚀 KrazePlanet is ready!"
-echo "  🌐 Web Application : http://localhost (Port 80)"
-echo "  🗄️  MariaDB / MySQL  : localhost:3306 (User: root, Pass: empty)"
-echo "==========================================================="
 
 # Enable Docker socket access for www-data & Apache proxy modules
 chmod 666 /var/run/docker.sock 2>/dev/null || true
 mkdir -p /opt/lampp/htdocs/instances && chown -R www-data:www-data /opt/lampp/htdocs/instances && chmod -R 777 /opt/lampp/htdocs/instances 2>/dev/null || true
-# Enable SSL and Auto-Generate Cloudflare Full Mode Origin Certificate
+
+# Enable SSL and Auto-Generate Cloudflare Full Mode Origin Certificate for configured domain
 mkdir -p /etc/ssl/certs /etc/ssl/private
 if [ ! -f "/etc/ssl/certs/kzlabs-origin.crt" ] || [ ! -f "/etc/ssl/private/kzlabs-origin.key" ]; then
-    echo "[+] Auto-generating SSL Origin Certificate for Cloudflare Full Mode (15-year validity)..."
+    echo "[+] Auto-generating SSL Origin Certificate for Cloudflare Full Mode (${CUSTOM_DOMAIN})..."
     openssl req -x509 -nodes -days 5475 -newkey rsa:2048 \
         -keyout /etc/ssl/private/kzlabs-origin.key \
         -out /etc/ssl/certs/kzlabs-origin.crt \
-        -subj "/C=IN/ST=Delhi/L=NewDelhi/O=KrazePlanet/OU=Security/CN=kzlabs.in" \
-        -addext "subjectAltName=DNS:kzlabs.in,DNS:*.kzlabs.in,DNS:localhost,DNS:*.localhost,IP:157.230.58.200,IP:127.0.0.1" \
+        -subj "/C=IN/ST=Delhi/L=NewDelhi/O=KrazePlanet/OU=Security/CN=${CUSTOM_DOMAIN}" \
+        -addext "subjectAltName=DNS:${CUSTOM_DOMAIN},DNS:*.${CUSTOM_DOMAIN},DNS:localhost,DNS:*.localhost,DNS:localtest.me,DNS:*.localtest.me,IP:127.0.0.1" \
         >/dev/null 2>&1 || true
 fi
 a2enmod ssl proxy proxy_http proxy_wstunnel rewrite headers env vhost_alias >/dev/null 2>&1 || true
 
+# Configure Dynamic Wildcard Apache VirtualHost
+if [ -f "/opt/lampp/htdocs/kraze-vhost.conf" ]; then
+    cp /opt/lampp/htdocs/kraze-vhost.conf /etc/apache2/sites-available/000-default.conf
+fi
 
 # Self-healing: Ensure lab-runtime image is available for micro-containers
 if [ -e "/var/run/docker.sock" ] || [ -S "/var/run/docker.sock" ]; then
     chmod 666 /var/run/docker.sock 2>/dev/null || true
-mkdir -p /opt/lampp/htdocs/instances && chown -R www-data:www-data /opt/lampp/htdocs/instances && chmod -R 777 /opt/lampp/htdocs/instances 2>/dev/null || true
+    mkdir -p /opt/lampp/htdocs/instances && chown -R www-data:www-data /opt/lampp/htdocs/instances && chmod -R 777 /opt/lampp/htdocs/instances 2>/dev/null || true
     if ! docker image inspect rix4uni/krazeplanet:lab-runtime >/dev/null 2>&1; then
         echo "[+] Auto-building lab-runtime image for dynamic sandboxes..."
         docker build -f /opt/lampp/htdocs/Dockerfile.lab_runtime -t rix4uni/krazeplanet:lab-runtime /opt/lampp/htdocs >/dev/null 2>&1 &
     fi
-fi
-
-# Configure Dynamic Wildcard Apache VirtualHost
-if [ -f "/opt/lampp/htdocs/kraze-vhost.conf" ]; then
-    cp /opt/lampp/htdocs/kraze-vhost.conf /etc/apache2/sites-available/000-default.conf
 fi
 
 # Ensure default onboarding mailpit container (kp_newuser_mailpit) is ready
@@ -128,6 +250,13 @@ fi
         php /opt/lampp/htdocs/scripts/cleanup_daemon.php > /dev/null 2>&1 || true
     done
 ) &
+
+echo "==========================================================="
+echo "  🚀 KrazePlanet is ready!"
+echo "  🌐 Domain Configured: ${CUSTOM_DOMAIN}"
+echo "  🌐 Web Application  : http://localhost (Port 80)"
+echo "  🗄️  MariaDB / MySQL   : localhost:3306 (User: root, Pass: empty)"
+echo "==========================================================="
 
 # Start Apache in the foreground as main container process
 exec /usr/sbin/apache2ctl -D FOREGROUND

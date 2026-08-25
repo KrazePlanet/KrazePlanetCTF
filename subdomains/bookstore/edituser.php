@@ -12,7 +12,7 @@ $oEmail;
 $oPhone;
 $oAddress;
 
-$servername = "localhost";
+$servername = (getenv('DB_HOST') ?: (file_exists('/.dockerenv') ? 'krazeplanet' : '127.0.0.1'));
 $username = "root";
 $password = "";
 
@@ -101,7 +101,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 												}else{
 													$address = $_POST['address'];
 
-													$servername = "localhost";
+													$servername = (getenv('DB_HOST') ?: (file_exists('/.dockerenv') ? 'krazeplanet' : '127.0.0.1'));
 													$username = "root";
 													$password = "";
 

@@ -3,7 +3,17 @@ session_set_cookie_params(['lifetime' => 86400 * 30, 'path' => '/']);
 session_start();
 
 // ── Database ──────────────────────────────────────────────────────────────────
-$db = new mysqli('localhost', 'root', '', 'KrazePlanet_DB');
+$db_hosts = ['krazeplanet', '127.0.0.1', 'localhost', '172.19.0.1', 'host.docker.internal'];
+$db = null;
+foreach ($db_hosts as $h) {
+    $db = @new mysqli($h, 'root', '');
+    if (!$db->connect_error) {
+        $db->query("CREATE DATABASE IF NOT EXISTS `KrazePlanet_DB` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci");
+        $db->select_db('KrazePlanet_DB');
+        break;
+    }
+}
+if (!$db || $db->connect_error) { die('DB connection failed: ' . ($db ? $db->connect_error : 'Unable to connect to database')); }
 if ($db->connect_error) { die('Database connection failed.'); }
 
 // ── Table ─────────────────────────────────────────────────────────────────────
@@ -737,7 +747,7 @@ a { text-decoration: none; color: inherit; }
                         <i class="fas fa-upload"></i> Upload
                     </button>
                 </form>
-                <div style="margin-top:6px;font-size:12px;color:#94a3b8;">JPG, PNG, GIF &mdash; max 5MB</div>
+                <div style="margin-top:6px;font-size:12px;color:#94a3b8;">JPG, PNG, GIF - max 5MB</div>
             </div>
 
             <div style="margin-top:16px;font-size:13px;color:#94a3b8;">

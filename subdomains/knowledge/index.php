@@ -2,7 +2,7 @@
 // SQL Injection Lab 124 — DoD Publications Search Page
 // HackerOne Report #2312334 (High — U.S. Dept of Defense)
 
-$server   = "localhost";
+$server   = (getenv('DB_HOST') ?: (file_exists('/.dockerenv') ? 'krazeplanet' : '127.0.0.1'));
 $username = "root";
 $password = "";
 $database = "KrazePlanet_DB";

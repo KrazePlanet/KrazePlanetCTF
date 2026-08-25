@@ -14,7 +14,7 @@
 session_start();
 
 // ── Database Configuration ──────────────────────────────────────────────────
-$db_host = "localhost";
+$db_host = (getenv('DB_HOST') ?: (file_exists('/.dockerenv') ? 'krazeplanet' : '127.0.0.1'));
 $db_user = "root";
 $db_pass = "";
 $db_name = "KrazePlanet_DB";

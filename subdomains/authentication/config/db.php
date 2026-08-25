@@ -7,7 +7,7 @@ if(!isset($_SESSION)) {
     session_start();
 }
 
-$hostname = "localhost";
+$hostname = (getenv('DB_HOST') ?: (file_exists('/.dockerenv') ? 'krazeplanet' : '127.0.0.1'));
 $username = "root";
 $password = "";
 $dbname   = "php8_mysql_authentication";

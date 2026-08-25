@@ -1,7 +1,7 @@
 <!---File was used to create the table 'users' in the PHPMyAdmin database-->
 
 <?php
-$servername = "localhost";
+$servername = (getenv('DB_HOST') ?: (file_exists('/.dockerenv') ? 'krazeplanet' : '127.0.0.1'));
 $username = "root";
 $password = "";
 $dbname = "burger palace";

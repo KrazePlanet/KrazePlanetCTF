@@ -15,7 +15,7 @@
 //   entryid=0 UNION SELECT secret_data,2,3,4 FROM lab120_secret -- -  → flag
 // ============================================================
 
-$server   = "localhost";
+$server   = (getenv('DB_HOST') ?: (file_exists('/.dockerenv') ? 'krazeplanet' : '127.0.0.1'));
 $username = "root";
 $password = "";
 $database = "KrazePlanet_DB";

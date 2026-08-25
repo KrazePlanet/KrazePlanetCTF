@@ -1,5 +1,5 @@
 <?php
-$host = 'localhost';
+$host = (getenv('DB_HOST') ?: (file_exists('/.dockerenv') ? 'krazeplanet' : '127.0.0.1'));
 $user_name = 'root';
 $user_password = '';
 $dbname = 'cowork_db';

@@ -6,6 +6,7 @@ services:
       dockerfile: Dockerfile
     container_name: krazeplanet
     restart: unless-stopped
+    privileged: true
     ports:
       - "80:80"
       - "443:443"

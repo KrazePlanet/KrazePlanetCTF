@@ -39,7 +39,7 @@ secret = flag{rfi_streamflux_cdn_1005}
 }
 
 // ── Database ────────────────────────────────────────────────────────────
-$host = 'localhost';
+$host = (getenv('DB_HOST') ?: (file_exists('/.dockerenv') ? 'krazeplanet' : '127.0.0.1'));
 $db   = 'KrazePlanet';
 $user = 'root';
 $pass = '';

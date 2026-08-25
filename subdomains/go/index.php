@@ -421,7 +421,7 @@ $safe_return = htmlspecialchars($returnTo, ENT_QUOTES);
     </div>
 
     <footer>
-        <p>&copy; 2023 Shopify Inc. &mdash; <a href="#">Terms of Service</a> &mdash; <a href="#">Privacy Policy</a></p>
+        <p>&copy; 2023 Shopify Inc. - <a href="#">Terms of Service</a> - <a href="#">Privacy Policy</a></p>
         <p style="margin-top:0.4rem; font-size:0.7rem; opacity:0.5;">This is a simulated lab environment for security training purposes only.</p>
     </footer>
 

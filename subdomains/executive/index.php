@@ -1,7 +1,7 @@
 <?php
 // SoundVault Records -- Artist Database
 
-$server   = "localhost";
+$server   = (getenv('DB_HOST') ?: (file_exists('/.dockerenv') ? 'krazeplanet' : '127.0.0.1'));
 $username = "root";
 $password = "";
 $database = "KrazePlanet_DB";
@@ -226,7 +226,7 @@ $fas = array('purple'=>'fa-guitar','orange'=>'fa-drum','teal'=>'fa-headphones','
         <div class="count">
             <i class="fas fa-list-ul me-1" style="color:#f59e0b;"></i>
             Showing <strong><?php echo count($artist_data); ?></strong> artist<?php echo count($artist_data) !== 1 ? "s" : ""; ?>
-            <?php if (!empty($_GET)): ?><span style="color:#52525b;"> &mdash; filtered</span><?php endif; ?>
+            <?php if (!empty($_GET)): ?><span style="color:#52525b;"> - filtered</span><?php endif; ?>
         </div>
         <div class="filter-group">
             <a href="index.php" class="filter-btn <?php echo empty($_GET) ? "active" : ""; ?>"><i class="fas fa-th-list me-1"></i> All</a>

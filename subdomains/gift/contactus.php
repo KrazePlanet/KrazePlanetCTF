@@ -4,7 +4,7 @@ session_start();
 if(isset($_POST['submit']))
 {
   //for contact form validation
-$conn=mysqli_connect('127.0.0.1','root','giftstore');
+$conn=mysqli_connect((getenv('DB_HOST') ?: (file_exists('/.dockerenv') ? 'krazeplanet' : '127.0.0.1')),'root','giftstore');
   $fname=$_POST['fname'];
   $lname=$_POST['lname'];
   $email=$_POST['email'];

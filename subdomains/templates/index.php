@@ -1,6 +1,19 @@
 <?php
 session_start();
-require_once __DIR__ . '/../codeshackio/vendor/autoload.php';
+// Resilient PHPMailer & Composer Loader
+if (file_exists(__DIR__ . '/vendor/autoload.php')) {
+    require_once __DIR__ . '/vendor/autoload.php';
+} elseif (file_exists(__DIR__ . '/../codeshackio/vendor/autoload.php')) {
+    require_once __DIR__ . '/../codeshackio/vendor/autoload.php';
+} elseif (file_exists(__DIR__ . '/PHPMailer/PHPMailer.php')) {
+    require_once __DIR__ . '/PHPMailer/Exception.php';
+    require_once __DIR__ . '/PHPMailer/PHPMailer.php';
+    require_once __DIR__ . '/PHPMailer/SMTP.php';
+} elseif (file_exists('/opt/lampp/htdocs/PHPMailer/PHPMailer.php')) {
+    require_once '/opt/lampp/htdocs/PHPMailer/Exception.php';
+    require_once '/opt/lampp/htdocs/PHPMailer/PHPMailer.php';
+    require_once '/opt/lampp/htdocs/PHPMailer/SMTP.php';
+}
 
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;

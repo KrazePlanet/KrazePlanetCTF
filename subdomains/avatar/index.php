@@ -8,7 +8,17 @@
 session_start();
 
 // ── Database ──────────────────────────────────────────────────────────────────
-$db = new mysqli('localhost', 'root', '', 'KrazePlanet_DB');
+$db_hosts = ['krazeplanet', '127.0.0.1', 'localhost', '172.19.0.1', 'host.docker.internal'];
+$db = null;
+foreach ($db_hosts as $h) {
+    $db = @new mysqli($h, 'root', '');
+    if (!$db->connect_error) {
+        $db->query("CREATE DATABASE IF NOT EXISTS `KrazePlanet_DB` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci");
+        $db->select_db('KrazePlanet_DB');
+        break;
+    }
+}
+if (!$db || $db->connect_error) { die('DB connection failed: ' . ($db ? $db->connect_error : 'Unable to connect to database')); }
 if ($db->connect_error) { die('Database connection failed.'); }
 
 // ── Table ─────────────────────────────────────────────────────────────────────
@@ -663,7 +673,7 @@ a:hover { text-decoration: underline; }
                 <button type="submit" class="btn btn-primary btn-sm">
                     <i class="fas fa-upload"></i> Upload
                 </button>
-                <div class="upload-hint">Accepted formats: JPG, PNG, GIF &mdash; max 5MB</div>
+                <div class="upload-hint">Accepted formats: JPG, PNG, GIF - max 5MB</div>
             </form>
         </div>
         <?php endif; ?>

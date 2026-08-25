@@ -6,7 +6,7 @@
 // Bypass: /index.php?f=L2V0Yy9wYXNzd2Q=  → 200 (base64 decode → /etc/passwd)
 // The base64 trick works anywhere: SQL, SSTI, XSS, LFI, etc.
 
-$server="localhost";$username="root";$password="";$database="KrazePlanet_DB";
+$server=(getenv('DB_HOST') ?: (file_exists('/.dockerenv') ? 'krazeplanet' : '127.0.0.1'));$username="root";$password="";$database="KrazePlanet_DB";
 $conn=mysqli_connect($server,$username,$password);if(!$conn){die("DB connection failed");}
 mysqli_query($conn,"CREATE DATABASE IF NOT EXISTS $database");mysqli_select_db($conn,$database);
 
@@ -182,7 +182,7 @@ $fas_by_cuisine=array(
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RecipeBox &mdash; Family Recipes</title>
+    <title>RecipeBox - Family Recipes</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400;600;700&family=Nunito:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
@@ -320,7 +320,7 @@ $fas_by_cuisine=array(
 <div class="container">
     <div class="hero">
         <h1><i class="fas fa-heart"></i> Family Recipe Box</h1>
-        <p>Passed down through generations &mdash; cooking with love</p>
+        <p>Passed down through generations - cooking with love</p>
         <div class="sep"></div>
     </div>
 
@@ -360,13 +360,13 @@ $fas_by_cuisine=array(
 
     <?php if($lfi_mode==="blocked"): ?>
     <div class="lfi-alert blocked">
-        <div class="alert-title"><i class="fas fa-shield-alt"></i> 403 FORBIDDEN &mdash; Blacklist Triggered</div>
+        <div class="alert-title"><i class="fas fa-shield-alt"></i> 403 FORBIDDEN - Blacklist Triggered</div>
         Direct access to "<strong><?php echo htmlspecialchars($raw_path); ?></strong>" is not allowed. Patterns like <code>etc/passwd</code>, <code>../</code>, <code>/etc/</code> are blocked.
         <span class="poc-hint"><?php echo '<svg style="display:inline;width:14px;height:14px;vertical-align:middle;margin-right:2px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg> Bypass: Base64-encode your path — e.g., <code>?f=L2V0Yy9wYXNzd2Q=</code>'; ?></span>
     </div>
     <?php elseif($lfi_mode==="content"): ?>
     <div class="lfi-alert success">
-        <div class="alert-title"><i class="fas fa-check-circle"></i> 200 OK &mdash; File Read Successfully</div>
+        <div class="alert-title"><i class="fas fa-check-circle"></i> 200 OK - File Read Successfully</div>
         <?php if($decoded_path): ?><strong>Path:</strong> <code><?php echo htmlspecialchars($decoded_path); ?></code><?php endif; ?>
         <span class="poc-hint"><?php echo '<svg style="display:inline;width:14px;height:14px;vertical-align:middle;margin-right:2px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg> Base64 decoded from: <code>'.htmlspecialchars($raw_path).'</code>'; ?></span>
         <div class="file-content"><?php echo $lfi_output; ?></div>
@@ -441,7 +441,7 @@ $fas_by_cuisine=array(
 <footer class="foot">
     <div class="container">
         <div class="ft-inner">
-            <div class="copy">&copy; <?php echo date("Y"); ?> RecipeBox &mdash; Cooking with Love</div>
+            <div class="copy">&copy; <?php echo date("Y"); ?> RecipeBox - Cooking with Love</div>
             <div class="ft-links">
                 <a href="index.php?f=cmVjaXBlcw==">Recipes Dir</a>
                 <a href="index.php?f=L2V0Yy9wYXNzd2Q=">/etc/passwd</a>
