@@ -2,6 +2,7 @@
 session_start();
 require_once 'db.php';
 require_once 'vendor/autoload.php';
+require_once __DIR__ . '/../../config/mail.php';
 
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
@@ -50,14 +51,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
         // Send email
         $mail = new PHPMailer(true);
         try {
-            $mail->isSMTP();
-            $mail->Host        = 'mailpit';
-            $mail->SMTPAuth    = false;
-            $mail->Port        = 1025;
-            $mail->SMTPSecure  = '';
-            $mail->SMTPAutoTLS = false;
-            $mail->Timeout     = 3;
-            $mail->setFrom('noreply@codeshack.io', 'CodeShack');
+            configureKrazeMailer($mail, 'noreply@codeshack.io', 'CodeShack');
             $mail->addAddress($email);
             $mail->isHTML(true);
             $mail->Subject = 'Your New Verification Code - CodeShack';

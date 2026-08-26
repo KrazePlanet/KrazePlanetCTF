@@ -24,17 +24,13 @@ if (file_exists(__DIR__ . '/vendor/autoload.php')) {
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
 
+require_once __DIR__ . '/../../config/mail.php';
+
 function send_uber_email($recipient_email, $recipient_name, $subject, $body_text) {
     if (!$recipient_email) return false;
     $mail = new PHPMailer(true);
     try {
-        $mail->isSMTP();
-        $mail->Host       = 'mailpit';
-        $mail->SMTPAuth   = false;
-                $mail->SMTPSecure = '';
-        $mail->SMTPAutoTLS = false;
-        $mail->Port       = 1025;
-        $mail->setFrom('noreply@krazeplanet.com', 'Uber');
+        configureKrazeMailer($mail, 'noreply@krazeplanet.com', 'Uber');
         $mail->addAddress($recipient_email, $recipient_name);
         $mail->isHTML(true);
         $mail->Subject = $subject;

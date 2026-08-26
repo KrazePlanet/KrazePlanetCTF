@@ -27,101 +27,96 @@ foreach ($possibleMailerPaths as $path) {
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
 
+require_once __DIR__ . '/../config/mail.php';
+
 $action = $_POST['action'] ?? $_GET['action'] ?? '';
 
 // Helper function to send email via SMTP
 function sendAuthEmail($to_email, $to_name, $otp_code, $type = 'verification', $targetUser = '') {
-    $hosts = [];
+    $mail = new PHPMailer(true);
+    try {
+        configureKrazeMailer($mail);
+        $mail->Timeout = 5;
+        $mail->addAddress($to_email, $to_name ?: 'KrazePlanet User');
+        $mail->isHTML(true);
 
-    // 1. User-specific container if available
-    $u = $targetUser ?: ($_SESSION['username'] ?? ($_SESSION['signup_otp_session']['username'] ?? ''));
-    if (!empty($u)) {
-        $cleanU = preg_replace('/[^a-zA-Z0-9_]/', '', strtolower($u));
-        $hosts[] = "kp_{$cleanU}_mailpit";
-    }
+        if ($type === 'verification') {
+            $mail->Subject = 'Your Verification Code - KrazePlanet';
+            $mail->Body    = '
+            <div style="font-family: -apple-system, BlinkMacSystemFont, Roboto, sans-serif; background-color: #070b14; padding: 35px 20px; color: #f8fafc;">
+                <div style="max-width: 500px; margin: 0 auto; background: #0f172a; border: 1px solid rgba(255, 255, 255, 0.12); border-radius: 16px; padding: 32px; box-shadow: 0 20px 40px rgba(0,0,0,0.6);">
+                    <div style="display:flex; align-items:center; gap:8px; margin-bottom: 20px;">
+                        <span style="font-size: 24px; font-weight: 800; color: #38bdf8; letter-spacing: -0.5px;">KrazePlanet</span>
+                        <span style="font-size: 12px; font-weight: 600; background: rgba(56, 189, 248, 0.15); color: #38bdf8; padding: 3px 8px; border-radius: 8px; border: 1px solid rgba(56, 189, 248, 0.3);">Verification</span>
+                    </div>
+                    
+                    <h2 style="font-size: 22px; font-weight: 700; margin-bottom: 8px; color: #ffffff;">Verify Your Email Address</h2>
+                    <p style="font-size: 14px; color: #94a3b8; line-height: 1.6; margin-bottom: 24px;">
+                        Hello <strong style="color: #f1f5f9;">' . htmlspecialchars($to_name ?: 'User') . '</strong>, use the 6-digit one-time verification code below to complete your KrazePlanet account registration.
+                    </p>
 
-    // 2. Onboarding container (newuser-mailpit.localhost)
-    $hosts[] = 'kp_newuser_mailpit';
+                    <div style="background: linear-gradient(135deg, rgba(56, 189, 248, 0.1) 0%, rgba(99, 102, 241, 0.1) 100%); border: 2px dashed rgba(56, 189, 248, 0.4); border-radius: 12px; padding: 18px; text-align: center; margin-bottom: 24px;">
+                        <span style="font-family: monospace; font-size: 36px; font-weight: 800; letter-spacing: 8px; color: #38bdf8;">' . htmlspecialchars($otp_code) . '</span>
+                    </div>
 
-    // 3. Default container
-    $hosts[] = 'mailpit';
+                    <p style="font-size: 13px; color: #64748b; line-height: 1.5; margin-bottom: 0;">
+                        This verification code is valid for <strong>10 minutes</strong>. If you did not request this code, you can safely ignore this email.
+                    </p>
+                </div>
+            </div>';
+        } elseif ($type === 'reset') {
+            $mail->Subject = 'Reset Your Password - KrazePlanet';
+            $mail->Body    = '
+            <div style="font-family: -apple-system, BlinkMacSystemFont, Roboto, sans-serif; background-color: #070b14; padding: 35px 20px; color: #f8fafc;">
+                <div style="max-width: 500px; margin: 0 auto; background: #0f172a; border: 1px solid rgba(255, 255, 255, 0.12); border-radius: 16px; padding: 32px; box-shadow: 0 20px 40px rgba(0,0,0,0.6);">
+                    <div style="display:flex; align-items:center; gap:8px; margin-bottom: 20px;">
+                        <span style="font-size: 24px; font-weight: 800; color: #ef4444; letter-spacing: -0.5px;">KrazePlanet</span>
+                        <span style="font-size: 12px; font-weight: 600; background: rgba(239, 68, 68, 0.15); color: #ef4444; padding: 3px 8px; border-radius: 8px; border: 1px solid rgba(239, 68, 68, 0.3);">Password Reset</span>
+                    </div>
+                    
+                    <h2 style="font-size: 22px; font-weight: 700; margin-bottom: 8px; color: #ffffff;">Password Recovery Request</h2>
+                    <p style="font-size: 14px; color: #94a3b8; line-height: 1.6; margin-bottom: 24px;">
+                        Hello <strong style="color: #f1f5f9;">' . htmlspecialchars($to_name ?: 'User') . '</strong>, we received a request to reset your password. Use the verification code below to proceed:
+                    </p>
 
-    $hosts = array_unique($hosts);
+                    <div style="background: linear-gradient(135deg, rgba(239, 68, 68, 0.1) 0%, rgba(249, 115, 22, 0.1) 100%); border: 2px dashed rgba(239, 68, 68, 0.4); border-radius: 12px; padding: 18px; text-align: center; margin-bottom: 24px;">
+                        <span style="font-family: monospace; font-size: 36px; font-weight: 800; letter-spacing: 8px; color: #f87171;">' . htmlspecialchars($otp_code) . '</span>
+                    </div>
 
-    foreach ($hosts as $h) {
-        $resolved = gethostbyname($h);
-        if ($resolved === $h && !filter_var($h, FILTER_VALIDATE_IP) && $h !== 'mailpit') {
-            continue;
+                    <p style="font-size: 13px; color: #64748b; line-height: 1.5; margin-bottom: 0;">
+                        This OTP is valid for <strong>15 minutes</strong>. If you did not request this, please secure your account immediately.
+                    </p>
+                </div>
+            </div>';
+        } elseif ($type === 'forgot') {
+            $mail->Subject = 'Reset Your Password - KrazePlanet';
+            $mail->Body    = '
+            <div style="font-family: -apple-system, BlinkMacSystemFont, Roboto, sans-serif; background-color: #070b14; padding: 35px 20px; color: #f8fafc;">
+                <div style="max-width: 500px; margin: 0 auto; background: #0f172a; border: 1px solid rgba(255, 255, 255, 0.12); border-radius: 16px; padding: 32px; box-shadow: 0 20px 40px rgba(0,0,0,0.6);">
+                    <div style="display:flex; align-items:center; gap:8px; margin-bottom: 20px;">
+                        <span style="font-size: 24px; font-weight: 800; color: #ef4444; letter-spacing: -0.5px;">KrazePlanet</span>
+                        <span style="font-size: 12px; font-weight: 600; background: rgba(239, 68, 68, 0.15); color: #ef4444; padding: 3px 8px; border-radius: 8px; border: 1px solid rgba(239, 68, 68, 0.3);">Password Reset</span>
+                    </div>
+                    
+                    <h2 style="font-size: 22px; font-weight: 700; margin-bottom: 8px; color: #ffffff;">Password Recovery Request</h2>
+                    <p style="font-size: 14px; color: #94a3b8; line-height: 1.6; margin-bottom: 24px;">
+                        Hello <strong style="color: #f1f5f9;">' . htmlspecialchars($to_name ?: 'User') . '</strong>, we received a request to reset your password. Use the verification code below to proceed:
+                    </p>
+
+                    <div style="background: linear-gradient(135deg, rgba(239, 68, 68, 0.1) 0%, rgba(249, 115, 22, 0.1) 100%); border: 2px dashed rgba(239, 68, 68, 0.4); border-radius: 12px; padding: 18px; text-align: center; margin-bottom: 24px;">
+                        <span style="font-family: monospace; font-size: 36px; font-weight: 800; letter-spacing: 8px; color: #f87171;">' . htmlspecialchars($otp_code) . '</span>
+                    </div>
+
+                    <p style="font-size: 13px; color: #64748b; line-height: 1.5; margin-bottom: 0;">
+                        This OTP is valid for <strong>15 minutes</strong>. If you did not request this, please secure your account immediately.
+                    </p>
+                </div>
+            </div>';
         }
 
-        $mail = new PHPMailer(true);
-        try {
-            $mail->isSMTP();
-            $mail->Host        = $resolved;
-            $mail->SMTPAuth    = false;
-            $mail->Port        = 1025;
-            $mail->SMTPSecure  = '';
-            $mail->SMTPAutoTLS = false;
-            $mail->Timeout     = 2;
-
-            $mail->setFrom('noreply@krazeplanet.com', 'KrazePlanet Security');
-            $mail->addAddress($to_email, $to_name ?: 'KrazePlanet User');
-            $mail->isHTML(true);
-
-            if ($type === 'verification') {
-                $mail->Subject = 'Your Verification Code - KrazePlanet';
-                $mail->Body    = '
-                <div style="font-family: -apple-system, BlinkMacSystemFont, Roboto, sans-serif; background-color: #070b14; padding: 35px 20px; color: #f8fafc;">
-                    <div style="max-width: 500px; margin: 0 auto; background: #0f172a; border: 1px solid rgba(255, 255, 255, 0.12); border-radius: 16px; padding: 32px; box-shadow: 0 20px 40px rgba(0,0,0,0.6);">
-                        <div style="display:flex; align-items:center; gap:8px; margin-bottom: 20px;">
-                            <span style="font-size: 24px; font-weight: 800; color: #38bdf8; letter-spacing: -0.5px;">KrazePlanet</span>
-                            <span style="font-size: 12px; font-weight: 600; background: rgba(56, 189, 248, 0.15); color: #38bdf8; padding: 3px 8px; border-radius: 8px; border: 1px solid rgba(56, 189, 248, 0.3);">Verification</span>
-                        </div>
-                        
-                        <h2 style="font-size: 22px; font-weight: 700; margin-bottom: 8px; color: #ffffff;">Verify Your Email Address</h2>
-                        <p style="font-size: 14px; color: #94a3b8; line-height: 1.6; margin-bottom: 24px;">
-                            Hello <strong style="color: #f1f5f9;">' . htmlspecialchars($to_name ?: 'User') . '</strong>, use the 6-digit one-time verification code below to complete your KrazePlanet account registration.
-                        </p>
-
-                        <div style="background: linear-gradient(135deg, rgba(56, 189, 248, 0.1) 0%, rgba(99, 102, 241, 0.1) 100%); border: 2px dashed rgba(56, 189, 248, 0.4); border-radius: 12px; padding: 18px; text-align: center; margin-bottom: 24px;">
-                            <span style="font-family: monospace; font-size: 36px; font-weight: 800; letter-spacing: 8px; color: #38bdf8;">' . htmlspecialchars($otp_code) . '</span>
-                        </div>
-
-                        <p style="font-size: 13px; color: #64748b; line-height: 1.5; margin-bottom: 0;">
-                            This verification code is valid for <strong>10 minutes</strong>. If you did not request this code, you can safely ignore this email.
-                        </p>
-                    </div>
-                </div>';
-            } elseif ($type === 'reset') {
-                $mail->Subject = 'Reset Your Password - KrazePlanet';
-                $mail->Body    = '
-                <div style="font-family: -apple-system, BlinkMacSystemFont, Roboto, sans-serif; background-color: #070b14; padding: 35px 20px; color: #f8fafc;">
-                    <div style="max-width: 500px; margin: 0 auto; background: #0f172a; border: 1px solid rgba(255, 255, 255, 0.12); border-radius: 16px; padding: 32px; box-shadow: 0 20px 40px rgba(0,0,0,0.6);">
-                        <div style="display:flex; align-items:center; gap:8px; margin-bottom: 20px;">
-                            <span style="font-size: 24px; font-weight: 800; color: #ef4444; letter-spacing: -0.5px;">KrazePlanet</span>
-                            <span style="font-size: 12px; font-weight: 600; background: rgba(239, 68, 68, 0.15); color: #ef4444; padding: 3px 8px; border-radius: 8px; border: 1px solid rgba(239, 68, 68, 0.3);">Password Reset</span>
-                        </div>
-                        
-                        <h2 style="font-size: 22px; font-weight: 700; margin-bottom: 8px; color: #ffffff;">Password Recovery Request</h2>
-                        <p style="font-size: 14px; color: #94a3b8; line-height: 1.6; margin-bottom: 24px;">
-                            Hello <strong style="color: #f1f5f9;">' . htmlspecialchars($to_name ?: 'User') . '</strong>, we received a request to reset your password. Use the verification code below to proceed:
-                        </p>
-
-                        <div style="background: linear-gradient(135deg, rgba(239, 68, 68, 0.1) 0%, rgba(249, 115, 22, 0.1) 100%); border: 2px dashed rgba(239, 68, 68, 0.4); border-radius: 12px; padding: 18px; text-align: center; margin-bottom: 24px;">
-                            <span style="font-family: monospace; font-size: 36px; font-weight: 800; letter-spacing: 8px; color: #f87171;">' . htmlspecialchars($otp_code) . '</span>
-                        </div>
-
-                        <p style="font-size: 13px; color: #64748b; line-height: 1.5; margin-bottom: 0;">
-                            This OTP is valid for <strong>15 minutes</strong>. If you did not request this, please secure your account immediately.
-                        </p>
-                    </div>
-                </div>';
-            }
-
-            @$mail->send();
-        } catch (Exception $e) {
-            // Try next
-        }
+        $mail->send();
+    } catch (Exception $e) {
+        error_log("Auth email failed for {$to_email}: " . $mail->ErrorInfo);
     }
 }
 
@@ -158,7 +153,7 @@ if ($action === 'login') {
         $_SESSION['user_email'] = $authenticated_user['email'];
         // Pre-warm isolated user mailpit
         $uMailpit = "kp_" . preg_replace('/[^a-zA-Z0-9_]/', '', strtolower($authenticated_user['username'])) . "_mailpit";
-        shell_exec("docker run -d --name {$uMailpit} --network htdocs_default --memory=128m --cpus=0.5 --pids-limit=100 --restart=no -e MP_MAX_MESSAGES=5000 -e MP_SMTP_AUTH_ACCEPT_ANY=1 -e MP_SMTP_AUTH_ALLOW_INSECURE=true axllent/mailpit:latest >/dev/null 2>&1 &");
+        // Docker container spawn removed for native performance
 
         $_SESSION['avatar'] = !empty($authenticated_user['avatar']) ? $authenticated_user['avatar'] : ('https://api.dicebear.com/7.x/adventurer/svg?seed=' . urlencode($authenticated_user['username']));
 
@@ -354,7 +349,7 @@ if ($action === 'signup_create_account' || $action === 'signup_verify_otp') {
         $_SESSION['username'] = $username;
         $_SESSION['user_email'] = $email;
         $sMailpit = "kp_" . preg_replace('/[^a-zA-Z0-9_]/', '', strtolower($username)) . "_mailpit";
-        shell_exec("docker run -d --name {$sMailpit} --network htdocs_default --memory=128m --cpus=0.5 --pids-limit=100 --restart=no -e MP_MAX_MESSAGES=5000 -e MP_SMTP_AUTH_ACCEPT_ANY=1 -e MP_SMTP_AUTH_ALLOW_INSECURE=true axllent/mailpit:latest >/dev/null 2>&1 &");
+        // Docker container spawn removed for native performance
 
         $_SESSION['avatar'] = 'https://api.dicebear.com/7.x/adventurer/svg?seed=' . urlencode($username);
 
@@ -791,7 +786,7 @@ if ($action === 'update_settings' || $action === 'update_profile') {
                 $params[] = $email;
                 $_SESSION['user_email'] = $email;
         $sMailpit = "kp_" . preg_replace('/[^a-zA-Z0-9_]/', '', strtolower($username)) . "_mailpit";
-        shell_exec("docker run -d --name {$sMailpit} --network htdocs_default --memory=128m --cpus=0.5 --pids-limit=100 --restart=no -e MP_MAX_MESSAGES=5000 -e MP_SMTP_AUTH_ACCEPT_ANY=1 -e MP_SMTP_AUTH_ALLOW_INSECURE=true axllent/mailpit:latest >/dev/null 2>&1 &");
+        // Docker container spawn removed for native performance
 
             }
 

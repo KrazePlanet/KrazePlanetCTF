@@ -8,6 +8,8 @@ require_once __DIR__ . '/PHPMailer/SMTP.php';
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
 
+require_once __DIR__ . '/../../config/mail.php';
+
 $msg = '';
 $is_ajax = isset($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest';
 $is_gform = isset($_POST['is_submit_6']) || isset($_POST['email']) || isset($_POST['input_1']);
@@ -19,15 +21,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($is_gform || isset($_POST['subscri
     if (!empty($email_val) && filter_var($email_val, FILTER_VALIDATE_EMAIL)) {
         try {
             $mail = new PHPMailer(false);
-            $mail->isSMTP();
-            $mail->Host       = 'mailpit';
-            $mail->SMTPAuth   = false;
-                        $mail->SMTPSecure = '';
-        $mail->SMTPAutoTLS = false;
-            $mail->Port       = 1025;
+            configureKrazeMailer($mail, 'noreply@krazeplanet.com', 'Yelp for Business');
             $mail->Timeout    = 5;
-
-            $mail->setFrom('noreply@krazeplanet.com', 'Yelp for Business');
             $mail->addAddress($email_val);
             $mail->isHTML(true);
             $mail->Subject = 'Thanks for Subscribing to Yelp for Business Updates';

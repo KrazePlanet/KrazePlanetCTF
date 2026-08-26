@@ -2,6 +2,7 @@
 require_once __DIR__ . '/PHPMailer/Exception.php';
 require_once __DIR__ . '/PHPMailer/PHPMailer.php';
 require_once __DIR__ . '/PHPMailer/SMTP.php';
+require_once __DIR__ . '/../../config/mail.php';
 
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
@@ -13,15 +14,7 @@ function sendYelpConfirmationEmail($email, $business_name = "Artisan Bakery & Ca
 
     try {
         $mail = new PHPMailer(false);
-        $mail->isSMTP();
-        $mail->Host       = 'mailpit';
-        $mail->SMTPAuth   = false;
-                $mail->SMTPSecure = '';
-        $mail->SMTPAutoTLS = false;
-        $mail->Port       = 1025;
-        $mail->Timeout    = 5;
-
-        $mail->setFrom('noreply@krazeplanet.com', 'Yelp for Business Owners');
+        configureKrazeMailer($mail, 'noreply@krazeplanet.com', 'Yelp for Business Owners');
         $mail->addAddress($email);
         $mail->isHTML(true);
         // Subject matching HackerOne #774050 screenshot: Confirm Your Email Address on Yelp

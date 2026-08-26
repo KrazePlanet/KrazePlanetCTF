@@ -2,6 +2,7 @@
 require_once __DIR__ . '/PHPMailer/Exception.php';
 require_once __DIR__ . '/PHPMailer/PHPMailer.php';
 require_once __DIR__ . '/PHPMailer/SMTP.php';
+require_once __DIR__ . '/../../config/mail.php';
 
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
@@ -13,15 +14,7 @@ function sendPasswordResetEmail($email) {
 
     try {
         $mail = new PHPMailer(false);
-        $mail->isSMTP();
-        $mail->Host       = 'mailpit';
-        $mail->SMTPAuth   = false;
-                $mail->SMTPSecure = '';
-        $mail->SMTPAutoTLS = false;
-        $mail->Port       = 1025;
-        $mail->Timeout    = 5;
-
-        $mail->setFrom('noreply@krazeplanet.com', 'WakaTime');
+        configureKrazeMailer($mail, 'noreply@krazeplanet.com', 'WakaTime');
         $mail->addAddress($email);
         $mail->isHTML(true);
         // Subject matching HackerOne #658089 screenshot exactly: [WakaTime] Reset your password

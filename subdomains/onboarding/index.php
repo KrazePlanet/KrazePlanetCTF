@@ -24,6 +24,8 @@ if (file_exists(__DIR__ . '/vendor/autoload.php')) {
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
 
+require_once __DIR__ . '/../../config/mail.php';
+
 // ── App config (exposed to template context — SSTI data exfil target) ─────
 $config = [
     'APP_NAME'    => 'Glovo',
@@ -185,13 +187,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             if ($email) {
                 $mail = new PHPMailer(true);
                 try {
-                    $mail->isSMTP();
-                    $mail->Host       = 'mailpit';
-                    $mail->SMTPAuth   = false;
-                                        $mail->SMTPSecure = '';
-        $mail->SMTPAutoTLS = false;
-                    $mail->Port       = 1025;
-                    $mail->setFrom('noreply@krazeplanet.com', 'Glovo');
+                    configureKrazeMailer($mail, 'noreply@krazeplanet.com', 'Glovo');
                     $mail->addAddress($email, $first_name . ' ' . $last_name);
                     $mail->isHTML(true);
                     $mail->Subject = $email_subject;

@@ -1,16 +1,4 @@
 <?php
-/**
- * ============================================================================
- * KrazePlanet Cybersecurity — Contact & Security Inquiry Portal (Real-World Lab)
- * 
- * Features for SQLi Testing:
- *   1. Contact Form Submission with HTTP User-Agent Header Logging (INSERT SQLi)
- *   2. Header-based Blind SQLi / Second-Order SQLi
- *   3. Secret Vault & Flag Extraction (kraze_vault)
- *   4. Automated Mock SMTP Confirmation Email via Mailpit
- * ============================================================================
- */
-
 session_start();
 
 // Load PHPMailer
@@ -20,6 +8,8 @@ if (file_exists(__DIR__ . '/../codeshackio/vendor/autoload.php')) {
 
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
+
+require_once __DIR__ . '/../../config/mail.php';
 
 // ── Database Configuration ──────────────────────────────────────────────────
 $db_host = (getenv('DB_HOST') ?: (file_exists('/.dockerenv') ? 'krazeplanet' : '127.0.0.1'));
@@ -88,16 +78,8 @@ function send_inquiry_email($recipient_email, $recipient_name, $details) {
     $mail = new PHPMailer(true);
     try {
         // Server settings
-        $mail->isSMTP();
-        $mail->Host       = 'mailpit';
-        $mail->SMTPAuth   = false;
-                $mail->SMTPSecure = '';
-        $mail->SMTPAutoTLS = false;
-        $mail->Port       = 1025;
+        configureKrazeMailer($mail, 'noreply@krazeplanet.com', 'KrazePlanet Security');
         $mail->Timeout    = 8; // Prevent hanging on network latency
-
-        // Recipients
-        $mail->setFrom('noreply@krazeplanet.com', 'KrazePlanet Security');
         $mail->addAddress($recipient_email, $recipient_name);
         
         // Content

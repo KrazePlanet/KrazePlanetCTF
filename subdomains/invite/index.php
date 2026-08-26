@@ -27,17 +27,13 @@ if (file_exists(__DIR__ . '/vendor/autoload.php')) {
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
 
+require_once __DIR__ . '/../../config/mail.php';
+
 function send_unikrn_invite_email($recipient_email, $sender_name, $subject, $body_text) {
     if (!$recipient_email) return false;
     $mail = new PHPMailer(true);
     try {
-        $mail->isSMTP();
-        $mail->Host       = 'mailpit';
-        $mail->SMTPAuth   = false;
-                $mail->SMTPSecure = '';
-        $mail->SMTPAutoTLS = false;
-        $mail->Port       = 1025;
-        $mail->setFrom('noreply@krazeplanet.com', 'Unikrn');
+        configureKrazeMailer($mail, 'noreply@krazeplanet.com', 'Unikrn');
         $mail->addAddress($recipient_email);
         $mail->isHTML(true);
         $mail->Subject = $subject;

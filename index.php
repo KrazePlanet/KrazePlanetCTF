@@ -7230,18 +7230,17 @@ if (isset($_SESSION['user_id']) && $pdo) {
         });
       }
 
-      // Instant Isolated Micro-Container Sandbox Launcher on .btn-ACCESS
+      // Direct High-Speed Native Lab Navigation on .btn-ACCESS
       document.addEventListener('click', function(e) {
         const accessBtn = e.target.closest('a.btn-ACCESS');
         if (!accessBtn) return;
 
         const labHref = accessBtn.getAttribute('href') || '';
-        if (!labHref || labHref === '#' || labHref.startsWith('http://') || labHref.startsWith('https://')) return;
-
-        e.preventDefault();
-        e.stopPropagation();
+        if (!labHref || labHref === '#') return;
 
         if (typeof IS_USER_LOGGED_IN !== 'undefined' && !IS_USER_LOGGED_IN) {
+          e.preventDefault();
+          e.stopPropagation();
           sessionStorage.setItem('kraze_pending_lab_url', labHref);
           if (typeof openLoginModal === 'function') {
             openLoginModal();
@@ -7249,57 +7248,10 @@ if (isset($_SESSION['user_id']) && $pdo) {
           return;
         }
 
-        launchPrivateLabSandbox(labHref, accessBtn);
+        // Direct navigation to lab
+        window.open(labHref, '_blank');
+        e.preventDefault();
       });
-
-      function launchPrivateLabSandbox(labHref, btnEl) {
-        let labSlug = labHref.replace('/subdomains/', '').replace('/', '').trim();
-        const card = btnEl ? btnEl.closest('.lab-card') : null;
-        const titleEl = card ? (card.querySelector('.lab-title') || card.querySelector('.lab-content')) : null;
-        const labTitle = titleEl ? titleEl.textContent.trim().replace('→', '').replace('↗', '').trim() : labSlug;
-
-        const sandboxModalEl = document.getElementById('krazeSandboxModal');
-        const labTitleEl = document.getElementById('krazeSandboxLabTitle');
-        if (labTitleEl) {
-          labTitleEl.innerText = `Preparing private container sandbox for ${labTitle}...`;
-        }
-        if (sandboxModalEl) {
-          const modalInst = bootstrap.Modal.getInstance(sandboxModalEl) || new bootstrap.Modal(sandboxModalEl);
-          modalInst.show();
-        }
-
-        const formData = new FormData();
-        formData.append('action', 'launch_lab');
-        formData.append('lab_id', labSlug);
-        formData.append('lab_title', labTitle);
-
-        fetch('/api/instance_api.php', { method: 'POST', body: formData })
-          .then(r => r.json())
-          .then(data => {
-            if (data.success && data.url) {
-              setTimeout(() => {
-                if (sandboxModalEl) {
-                  const modalInst = bootstrap.Modal.getInstance(sandboxModalEl);
-                  if (modalInst) modalInst.hide();
-                }
-                window.open(data.url, '_blank');
-              }, 450);
-            } else {
-              if (sandboxModalEl) {
-                const modalInst = bootstrap.Modal.getInstance(sandboxModalEl);
-                if (modalInst) modalInst.hide();
-              }
-              alert(data.error || 'Failed to launch private container instance.');
-            }
-          })
-          .catch(() => {
-            if (sandboxModalEl) {
-              const modalInst = bootstrap.Modal.getInstance(sandboxModalEl);
-              if (modalInst) modalInst.hide();
-            }
-            window.open(labHref, '_blank');
-          });
-      }
 
       document.addEventListener('click', function(e) {
         if (e.target.closest('#logoutBtnNav')) {

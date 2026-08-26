@@ -1,8 +1,2 @@
-php_value auto_prepend_file "/opt/lampp/htdocs/navbar/lab_auth_guard.php"
-
+Options -Indexes
 RewriteEngine On
-RewriteRule ^portal\.php$ /navbar/portal.php [L,QSA]
-
-# Route legacy root API calls to /api/
-RewriteRule ^auth_api\.php$ /api/auth_api.php [L,QSA]
-RewriteRule ^instance_api\.php$ /api/instance_api.php [L,QSA]

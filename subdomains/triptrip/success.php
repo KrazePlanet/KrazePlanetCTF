@@ -9,6 +9,8 @@ require './services/phpmailer/src/Exception.php';
 require './services/phpmailer/src/PHPMailer.php';
 require './services/phpmailer/src/SMTP.php';
 
+require_once __DIR__ . '/../../config/mail.php';
+
 if (!isset($_SESSION)) {
     session_start();
 }
@@ -19,19 +21,11 @@ function smtp_mailer($to, $subject, $msg)
 {
     $mail = new PHPMailer();
     try {
-        //Server settings
-        $mail->isSMTP(); //Send using SMTP
-        $mail->Host = 'smtp.gmail.com'; //Set the SMTP server to send through
-        $mail->SMTPAuth = true; //Enable SMTP authentication
-        $mail->Username = getenv('SMTP_USERNAME'); //SMTP username
-        $mail->Password = getenv('SMTP_PASSWORD'); //SMTP password
-        $mail->SMTPSecure = 'tls'; //Enable  TLS encryption
-        $mail->Port = 587; //TCP port to connect to
-        $mail->SMTPDebug = 0; // Set to 2 for verbose SMTP debug output in error_log
+        configureKrazeMailer($mail, getenv('SMTP_USERNAME') ?: null, 'TripTrip');
+        $mail->SMTPDebug = 0;
         $mail->Debugoutput = 'error_log';
 
         //Recipients
-        $mail->setFrom(getenv('SMTP_USERNAME'));
         $mail->addAddress($to); //Add a recipient
 
         //Content

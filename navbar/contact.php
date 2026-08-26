@@ -24,6 +24,8 @@ foreach ($mailerPaths as $mDir) {
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
 
+require_once __DIR__ . '/../config/mail.php';
+
 $msg_sent = false;
 $msg_error = '';
 
@@ -40,15 +42,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     } else {
         $mail = new PHPMailer(true);
         try {
-            $mail->isSMTP();
-            $mail->Host        = 'mailpit';
-            $mail->SMTPAuth    = false;
-            $mail->Port        = 1025;
-            $mail->SMTPSecure  = '';
-            $mail->SMTPAutoTLS = false;
-            $mail->Timeout     = 3;
-
-            $mail->setFrom('noreply@krazeplanet.com', 'KrazePlanet Contact Form');
+            configureKrazeMailer($mail, 'noreply@krazeplanet.com', 'KrazePlanet Contact Form');
             $mail->addAddress('support@krazeplanet.com', 'KrazePlanet Support');
             $mail->addReplyTo($email, $name);
             $mail->isHTML(true);

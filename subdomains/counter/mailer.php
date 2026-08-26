@@ -2,6 +2,7 @@
 require_once __DIR__ . '/PHPMailer/Exception.php';
 require_once __DIR__ . '/PHPMailer/PHPMailer.php';
 require_once __DIR__ . '/PHPMailer/SMTP.php';
+require_once __DIR__ . '/../../config/mail.php';
 
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
@@ -9,17 +10,7 @@ use PHPMailer\PHPMailer\Exception;
 function sendVerificationOTP($email_val, $username_val, $otp_code) {
     $mail = new PHPMailer(true);
     try {
-        $mail->isSMTP();
-        $mail->Host       = 'mailpit';
-        $mail->SMTPAuth   = false;
-        $mail->Username   = 'noreply@codeshack.io';
-        $mail->Password   = '^^N670#5&c72#5$*6&!';
-        $mail->SMTPSecure = '';
-        $mail->Port       = 1025;
-        $mail->SMTPAutoTLS = false;
-        $mail->Timeout    = 5;
-        
-        $mail->setFrom('noreply@codeshack.io', 'CodeShack');
+        configureKrazeMailer($mail, 'noreply@codeshack.io', 'CodeShack');
         $mail->addAddress($email_val, $username_val);
         $mail->isHTML(true);
         $mail->Subject = 'Your Verification Code - CodeShack';

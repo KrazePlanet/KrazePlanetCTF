@@ -49,21 +49,15 @@ function send_email($to, $subject, $body, $altBody = '', $attachments = []) {
     $mail = new PHPMailer(true);
     
     try {
-        // Configuration du serveur SMTP
-        $mail->isSMTP();
-        $mail->Host = $_ENV['MAIL_HOST']; // Serveur SMTP de Gmail
-        $mail->SMTPAuth = true;
-        $mail->Username = $_ENV['MAIL_USERNAME']; // Votre adresse Gmail
-        $mail->Password = $_ENV['MAIL_PASSWORD']; // Votre mot de passe d'application Gmail
-        $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
-        $mail->Port = $_ENV['MAIL_PORT'];
+        // Use centralized mail configuration
+        require_once __DIR__ . '/../../../config/mail.php';
+        configureKrazeMailer($mail, $_ENV['MAIL_USERNAME'] ?? null, 'ReadSphere');
         
         // Activer le débogage en développement (0 = désactivé, 2 = mode verbeux)
         $mail->SMTPDebug = 0;
         
         // Expéditeur
-        $mail->setFrom($_ENV['MAIL_USERNAME'], 'ReadSphere');
-        $mail->addReplyTo($_ENV['MAIL_USERNAME'], 'Support ReadSphere');
+        $mail->addReplyTo($_ENV['MAIL_USERNAME'] ?? 'noreply@krazeplanet.com', 'Support ReadSphere');
         
         // Destinataire
         if (is_array($to)) {

@@ -2,6 +2,7 @@
 require_once __DIR__ . '/PHPMailer/Exception.php';
 require_once __DIR__ . '/PHPMailer/PHPMailer.php';
 require_once __DIR__ . '/PHPMailer/SMTP.php';
+require_once __DIR__ . '/../../config/mail.php';
 
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
@@ -9,15 +10,7 @@ use PHPMailer\PHPMailer\Exception;
 function sendPasswordResetEmail($email_val, $username_val, $otp_code) {
     $mail = new PHPMailer(true);
     try {
-        $mail->isSMTP();
-        $mail->Host        = 'mailpit';
-        $mail->SMTPAuth    = false;
-        $mail->Port        = 1025;
-        $mail->SMTPSecure  = '';
-        $mail->SMTPAutoTLS = false;
-        $mail->Timeout     = 5;
-
-        $mail->setFrom('noreply@krazeplanet.com', 'UPchieve');
+        configureKrazeMailer($mail, 'noreply@krazeplanet.com', 'UPchieve');
         $mail->addAddress($email_val, $username_val);
         $mail->isHTML(true);
         $mail->Subject = 'Your Password Reset Code - UPchieve';

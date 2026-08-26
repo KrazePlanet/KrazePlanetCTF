@@ -22,6 +22,8 @@ if (file_exists(__DIR__ . '/vendor/autoload.php')) {
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
 
+require_once __DIR__ . '/../../config/mail.php';
+
 // ── Database (auto-created on first run) ────────────────────────────────────
 mysqli_report(MYSQLI_REPORT_OFF);
 $db       = null;
@@ -86,14 +88,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
     if ($email) {
         $mail = new PHPMailer(true);
         try {
-            $mail->isSMTP();
-            $mail->Host       = 'mailpit';
-            $mail->SMTPAuth   = false;
-            $mail->SMTPSecure = '';
-            $mail->Port       = 1025;
-            $mail->SMTPAutoTLS = false;
-            $mail->Timeout    = 3;
-            $mail->setFrom('noreply@hackerone.com', 'HackerOne');
+            configureKrazeMailer($mail, 'noreply@hackerone.com', 'HackerOne');
             $mail->addAddress($email);
             $mail->isHTML(true);
             $mail->Subject = 'Your HackerOne Pentest Community Application';

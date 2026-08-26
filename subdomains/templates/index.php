@@ -18,6 +18,8 @@ if (file_exists(__DIR__ . '/vendor/autoload.php')) {
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
 
+require_once __DIR__ . '/../../config/mail.php';
+
 $message = '';
 $template_output = '';
 $user_input = '';
@@ -66,13 +68,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['render_template'])) {
         if ($email) {
             $mail = new PHPMailer(true);
             try {
-                $mail->isSMTP();
-                $mail->Host       = 'mailpit';
-                $mail->SMTPAuth   = false;
-                                $mail->SMTPSecure = '';
-        $mail->SMTPAutoTLS = false;
-                $mail->Port       = 1025;
-                $mail->setFrom('noreply@krazeplanet.com', 'SendStack');
+                configureKrazeMailer($mail, 'noreply@krazeplanet.com', 'SendStack');
                 $mail->addAddress($email, $name);
                 $mail->isHTML(true);
                 $mail->Subject = 'Your SendStack Personalized Campaign Message';

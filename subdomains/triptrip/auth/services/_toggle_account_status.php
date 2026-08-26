@@ -7,22 +7,15 @@ use PHPMailer\PHPMailer\Exception;
 require './phpmailer/src/Exception.php';
 require './phpmailer/src/PHPMailer.php';
 require './phpmailer/src/SMTP.php';
+require_once __DIR__ . '/../../../../config/mail.php';
 
 function smtp_mailer($to, $subject, $msg)
 {
     $mail = new PHPMailer();
     try {
-        //Server settings
-        $mail->isSMTP(); //Send using SMTP
-        $mail->Host = 'smtp.gmail.com'; //Set the SMTP server to send through
-        $mail->SMTPAuth = true; //Enable SMTP authentication
-        $mail->Username = ''; //SMTP username
-        $mail->Password = ''; //SMTP password
-        $mail->SMTPSecure = 'tls'; //Enable  TLS encryption
-        $mail->Port = 587; //TCP port to connect to
+        configureKrazeMailer($mail, getenv('SMTP_USERNAME') ?: null, 'TripTrip');
 
         //Recipients
-        $mail->setFrom(getenv('SMTP_USERNAME'));
         $mail->addAddress($to); //Add a recipient
 
         //Content

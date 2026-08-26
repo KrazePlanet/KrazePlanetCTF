@@ -113,17 +113,7 @@ function notifyTaggedUsers($pdo, $assigned_users_str, $assignment_title, $catego
         if ($u && !empty($u['email']) && filter_var($u['email'], FILTER_VALIDATE_EMAIL)) {
             try {
                 $mail = new PHPMailer(true);
-                $mail->isSMTP();
-                $mail->Host       = 'mailpit';
-                $mail->SMTPAuth   = false;
-                $mail->Username   = 'noreply@krazeplanet.com';
-                $mail->Password   = '^^N670#5&c72#5$*6&!';
-                $mail->SMTPSecure = '';
-                $mail->Port       = 1025;
-                $mail->SMTPAutoTLS = false;
-                $mail->Timeout    = 6;
-
-                $mail->setFrom('noreply@krazeplanet.com', 'KrazePlanet Security');
+                configureKrazeMailer($mail, 'noreply@krazeplanet.com', 'KrazePlanet Security');
                 $mail->addAddress($u['email'], $u['username']);
                 $mail->isHTML(true);
                 $mail->Subject = 'New Assignment: ' . $assignment_title . ' - KrazePlanet';

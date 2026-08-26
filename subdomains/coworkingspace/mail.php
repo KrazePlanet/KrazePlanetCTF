@@ -5,20 +5,15 @@ use PHPMailer\PHPMailer\PHPMailer;
 
 require 'PHPMailer/src/Exception.php';
 require 'PHPMailer/src/PHPMailer.php';
-require 'PHPMailer/src/SMTP.php';;
+require 'PHPMailer/src/SMTP.php';
+require_once __DIR__ . '/../../config/mail.php';
 
 // Use PHPMailer to send the email
 
 $mail = new PHPMailer();
 
-// Gmail SMTP configuration
-$mail->isSMTP();
-$mail->Host = 'smtp.gmail.com';
-$mail->SMTPAuth = true;
-$mail->Username = 'soukainasbai77@gmail.com';
-$mail->Password = 'jltaynfdmrvhoenr';
-$mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
-$mail->Port = 587;
+// Centralized SMTP configuration
+configureKrazeMailer($mail, null, 'CoworkingSpace');
 
 $name = $_POST['name'];
 $Address = $_POST['Address'];
