@@ -59,13 +59,13 @@ RUN sed -i 's|DocumentRoot /var/www/html|DocumentRoot /opt/lampp/htdocs|g' /etc/
     && echo '</Directory>' >> /etc/apache2/apache2.conf \
     && echo 'ServerName localhost' >> /etc/apache2/apache2.conf
 
-# Configure Apache MPM Prefork for low memory (limits workers to prevent RAM exhaustion on 1GB VPS)
+# Configure Apache MPM Prefork with high responsiveness
 RUN printf "<IfModule mpm_prefork_module>\n\
-    StartServers             2\n\
-    MinSpareServers          2\n\
-    MaxSpareServers          4\n\
-    MaxRequestWorkers       15\n\
-    MaxConnectionsPerChild 500\n\
+    StartServers             4\n\
+    MinSpareServers          4\n\
+    MaxSpareServers          10\n\
+    MaxRequestWorkers       50\n\
+    MaxConnectionsPerChild 1000\n\
 </IfModule>\n" > /etc/apache2/mods-available/mpm_prefork.conf
 
 # Configure PHP settings for security testing labs (display errors, uploads, memory)
@@ -77,21 +77,23 @@ RUN sed -i 's/short_open_tag = Off/short_open_tag = On/' /etc/php/*/apache2/php.
     && sed -i 's/display_startup_errors = Off/display_startup_errors = On/' /etc/php/*/apache2/php.ini \
     && sed -i 's/error_reporting = .*/error_reporting = E_ALL \& ~E_NOTICE \& ~E_DEPRECATED \& ~E_STRICT/' /etc/php/*/apache2/php.ini
 
-# Configure MariaDB for low-memory environments (prevents OOM database crashes on 1GB VPS)
+# Configure MariaDB with production performance tuning
 RUN mkdir -p /etc/mysql/mariadb.conf.d \
     && printf "[mysqld]\n\
 bind-address = 0.0.0.0\n\
+skip-name-resolve\n\
 performance_schema = OFF\n\
-innodb_buffer_pool_size = 32M\n\
-innodb_log_buffer_size = 4M\n\
+innodb_buffer_pool_size = 256M\n\
+innodb_log_buffer_size = 16M\n\
 innodb_buffer_pool_instances = 1\n\
-max_connections = 30\n\
-key_buffer_size = 16M\n\
-table_open_cache = 64\n\
-table_definition_cache = 64\n\
-query_cache_type = 0\n\
-query_cache_size = 0\n\
-max_allowed_packet = 16M\n" > /etc/mysql/mariadb.conf.d/99-lowram.cnf
+max_connections = 200\n\
+wait_timeout = 60\n\
+interactive_timeout = 60\n\
+connect_timeout = 10\n\
+key_buffer_size = 32M\n\
+table_open_cache = 400\n\
+table_definition_cache = 400\n\
+max_allowed_packet = 64M\n" > /etc/mysql/mariadb.conf.d/99-performance.cnf
 
 # Setup directory structure & symlink compatibility (/opt/lampp/htdocs and /var/www/html)
 RUN mkdir -p /opt/lampp/htdocs /var/run/mysqld /var/run/apache2 /var/lock/apache2 /var/log/apache2 \

@@ -14,7 +14,7 @@ elif [ -f "/opt/lampp/htdocs/config/domain.txt" ]; then
 fi
 echo "[+] Active Platform Domain: ${CUSTOM_DOMAIN}"
 
-# 1. Automatic 2GB Swap & Swappiness Setup (Runs automatically on host kernel)
+# 1. Automatic Swap Setup (Runs automatically if low swap detected)
 TOTAL_SWAP=$(free -m 2>/dev/null | awk '/Swap:/ {print $2}')
 if [ -z "$TOTAL_SWAP" ] || [ "$TOTAL_SWAP" -lt 1024 ]; then
     echo "[+] Low/No Swap detected (${TOTAL_SWAP:-0}MB). Automatically creating 2GB Swap space..."
@@ -38,33 +38,67 @@ else
     echo "[✔] Active Swap detected (${TOTAL_SWAP}MB)."
 fi
 
-# 2. Apply Low-RAM MariaDB and Apache Configurations (Prevents OOM database crashes on 1GB VPS)
+# 2. Dynamic MariaDB & Apache Auto-Tuning based on Available RAM
+TOTAL_MEM_MB=$(free -m 2>/dev/null | awk '/Mem:/ {print $2}')
+TOTAL_MEM_MB=${TOTAL_MEM_MB:-1024}
+
+if [ "$TOTAL_MEM_MB" -ge 16000 ]; then
+    INNODB_BUFFER="4096M"
+    MAX_CONN=500
+    TABLE_CACHE=2000
+    APACHE_WORKERS=150
+elif [ "$TOTAL_MEM_MB" -ge 7000 ]; then
+    INNODB_BUFFER="2048M"
+    MAX_CONN=300
+    TABLE_CACHE=1000
+    APACHE_WORKERS=100
+elif [ "$TOTAL_MEM_MB" -ge 3500 ]; then
+    INNODB_BUFFER="1024M"
+    MAX_CONN=250
+    TABLE_CACHE=500
+    APACHE_WORKERS=60
+elif [ "$TOTAL_MEM_MB" -ge 1800 ]; then
+    INNODB_BUFFER="512M"
+    MAX_CONN=150
+    TABLE_CACHE=400
+    APACHE_WORKERS=35
+else
+    INNODB_BUFFER="128M"
+    MAX_CONN=100
+    TABLE_CACHE=256
+    APACHE_WORKERS=20
+fi
+
+echo "[+] Tuning MariaDB (${INNODB_BUFFER} Buffer, ${MAX_CONN} Max Connections) & Apache (${APACHE_WORKERS} Workers)..."
+
 mkdir -p /etc/mysql/mariadb.conf.d /etc/apache2/mods-available
-cat << 'LOWRAM_MYSQL' > /etc/mysql/mariadb.conf.d/99-lowram.cnf
+cat << MYSQL_PERF > /etc/mysql/mariadb.conf.d/99-performance.cnf
 [mysqld]
 bind-address = 0.0.0.0
+skip-name-resolve
 performance_schema = OFF
-innodb_buffer_pool_size = 32M
-innodb_log_buffer_size = 4M
+innodb_buffer_pool_size = ${INNODB_BUFFER}
+innodb_log_buffer_size = 16M
 innodb_buffer_pool_instances = 1
-max_connections = 30
-key_buffer_size = 16M
-table_open_cache = 64
-table_definition_cache = 64
-query_cache_type = 0
-query_cache_size = 0
-max_allowed_packet = 16M
-LOWRAM_MYSQL
+max_connections = ${MAX_CONN}
+wait_timeout = 60
+interactive_timeout = 60
+connect_timeout = 10
+key_buffer_size = 32M
+table_open_cache = ${TABLE_CACHE}
+table_definition_cache = ${TABLE_CACHE}
+max_allowed_packet = 64M
+MYSQL_PERF
 
-cat << 'LOWRAM_APACHE' > /etc/apache2/mods-available/mpm_prefork.conf
+cat << APACHE_PERF > /etc/apache2/mods-available/mpm_prefork.conf
 <IfModule mpm_prefork_module>
-    StartServers             2
-    MinSpareServers          2
-    MaxSpareServers          4
-    MaxRequestWorkers       15
-    MaxConnectionsPerChild 500
+    StartServers             4
+    MinSpareServers          4
+    MaxSpareServers          10
+    MaxRequestWorkers       ${APACHE_WORKERS}
+    MaxConnectionsPerChild 1000
 </IfModule>
-LOWRAM_APACHE
+APACHE_PERF
 
 # 3. Initialize MariaDB data directory if empty
 if [ ! -d "/var/lib/mysql/mysql" ]; then
@@ -75,8 +109,8 @@ fi
 mkdir -p /var/run/mysqld /var/run/apache2 /var/lock/apache2 /var/log/apache2
 chown -R mysql:mysql /var/lib/mysql /var/run/mysqld 2>/dev/null || true
 
-# 4. Start MariaDB service (Low-RAM Profile)
-echo "[+] Starting MariaDB server (Low-RAM Profile)..."
+# 4. Start MariaDB service
+echo "[+] Starting MariaDB server..."
 service mariadb start || service mysql start
 
 # Wait for MariaDB to become ready
@@ -177,6 +211,24 @@ CREATE TABLE IF NOT EXISTS `user_lab_history` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `user_lab_hist_unique` (`user_id`,`lab_id`),
   CONSTRAINT `user_lab_history_fk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS `lab_instances` (
+  `id` INT AUTO_INCREMENT PRIMARY KEY,
+  `user_id` INT NOT NULL,
+  `username` VARCHAR(50) NOT NULL,
+  `lab_id` VARCHAR(100) NOT NULL,
+  `lab_title` VARCHAR(255) DEFAULT NULL,
+  `subdomain` VARCHAR(255) NOT NULL,
+  `instance_dir` VARCHAR(500) NOT NULL,
+  `db_name` VARCHAR(100) DEFAULT NULL,
+  `status` ENUM('active', 'expired', 'destroyed') DEFAULT 'active',
+  `expires_at` DATETIME NOT NULL,
+  `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  `last_activity` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  INDEX(`username`, `lab_id`),
+  INDEX(`status`, `expires_at`),
+  CONSTRAINT `lab_instances_fk_1` FOREIGN KEY (`user_id`) REFERENCES `users`(`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS `user_notifications` (

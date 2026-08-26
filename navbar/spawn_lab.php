@@ -3,6 +3,8 @@
 require_once __DIR__ . '/../config/domain.php';
 startKrazeSession();
 
+require_once __DIR__ . '/../config/db.php';
+
 $httpHost = strtolower($_SERVER['HTTP_HOST'] ?? '');
 $hostNoPort = preg_replace('/:\d+$/', '', $httpHost);
 $baseDomain = getKrazeBaseDomain($hostNoPort);
@@ -27,14 +29,75 @@ if (!$isInstance || $parsedLab === 'mailpit' || $parsedLab === 'mail') {
     exit;
 }
 
-// Database Connection
-$pdo = null;
-try {
-    $pdo = new PDO("mysql:host=localhost;dbname=KrazePlanet;charset=utf8mb4", "root", "", [
-        PDO::ATTR_ERRMODE => PDO::ERRMODE_SILENT,
-        PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC
-    ]);
-} catch (Exception $e) {}
+// Helpers
+function recursiveDelete($dir) {
+    if (!is_dir($dir)) return;
+    $files = array_diff(scandir($dir) ?: [], ['.', '..']);
+    foreach ($files as $file) {
+        $p = "$dir/$file";
+        (is_dir($p)) ? recursiveDelete($p) : @unlink($p);
+    }
+    @rmdir($dir);
+}
+
+function terminateUserOtherLabs($userId, $username, $keepLabId = null) {
+    global $pdo;
+    $cleanUser = preg_replace('/[^a-zA-Z0-9_]/', '', strtolower($username));
+
+    // 1. Terminate other active records in DB for this user
+    if ($pdo) {
+        $query = "SELECT id, lab_id, instance_dir, db_name FROM lab_instances WHERE user_id = ? AND status = 'active'";
+        $params = [$userId];
+        if ($keepLabId !== null) {
+            $query .= " AND lab_id != ?";
+            $params[] = $keepLabId;
+        }
+        $stmt = $pdo->prepare($query);
+        $stmt->execute($params);
+        $oldList = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        foreach ($oldList as $oldInst) {
+            $rawLab = preg_replace('#^subdomains/#i', '', strtolower($oldInst['lab_id']));
+            $cleanLab = str_replace('/', '-', preg_replace('/[^a-zA-Z0-9_\-\/\.]/', '', $rawLab));
+            $oldCont = "kp_{$cleanUser}_{$cleanLab}";
+            shell_exec("docker rm -f " . escapeshellarg($oldCont) . " 2>/dev/null");
+            if (!empty($oldInst['instance_dir']) && is_dir($oldInst['instance_dir'])) {
+                recursiveDelete($oldInst['instance_dir']);
+            }
+            if (!empty($oldInst['db_name'])) {
+                @$pdo->exec("DROP DATABASE IF EXISTS `{$oldInst['db_name']}`;");
+            }
+        }
+
+        $updQuery = "UPDATE lab_instances SET status = 'destroyed' WHERE user_id = ?";
+        $updParams = [$userId];
+        if ($keepLabId !== null) {
+            $updQuery .= " AND lab_id != ?";
+            $updParams[] = $keepLabId;
+        }
+        $pdo->prepare($updQuery)->execute($updParams);
+    }
+
+    // 2. Sweep filesystem: remove any lingering folders for this user in /opt/lampp/htdocs/instances/
+    $currCleanLab = $keepLabId ? str_replace('/', '-', preg_replace('/[^a-zA-Z0-9_\-\/\.]/', '', strtolower($keepLabId))) : '';
+    $userDirs = glob("/opt/lampp/htdocs/instances/{$cleanUser}_*");
+    if ($userDirs) {
+        foreach ($userDirs as $uDir) {
+            $baseDirName = basename($uDir);
+            $labPart = substr($baseDirName, strlen($cleanUser) + 1);
+            if ($labPart === 'mailpit' || $labPart === 'mail' || ($currCleanLab && $labPart === $currCleanLab)) {
+                continue;
+            }
+            $lingeringCont = "kp_{$cleanUser}_{$labPart}";
+            shell_exec("docker rm -f " . escapeshellarg($lingeringCont) . " 2>/dev/null");
+            recursiveDelete($uDir);
+            if ($pdo) {
+                $lingeringDb = "kp_{$cleanUser}_{$labPart}";
+                @$pdo->exec("DROP DATABASE IF EXISTS `{$lingeringDb}`;");
+            }
+        }
+    }
+}
 
 // Verify if user exists in KrazePlanet
 $userExists = false;
@@ -114,9 +177,12 @@ if (!$templateDir) {
     exit;
 }
 
-// Provision and Launch Container On-Demand
+// STRICT 1-LAB-PER-USER: Terminate all other active lab containers and folders for this user
+terminateUserOtherLabs($userId, $parsedUser, $parsedLab);
+
 $containerName = "kp_{$parsedUser}_{$parsedLab}";
 $instanceFolder = "/opt/lampp/htdocs/instances/{$parsedUser}_{$parsedLab}";
+$dbName = "kp_{$parsedUser}_{$parsedLab}";
 
 @mkdir('/opt/lampp/htdocs/instances', 0777, true);
 if (!is_dir($instanceFolder)) {
@@ -124,6 +190,55 @@ if (!is_dir($instanceFolder)) {
     shell_exec("cp -r " . escapeshellarg($templateDir) . "/. " . escapeshellarg($instanceFolder) . "/");
     @chmod($instanceFolder, 0777);
     shell_exec("chmod -R 777 " . escapeshellarg($instanceFolder));
+
+    // Discover SQL files and import
+    $sqlFiles = glob("{$instanceFolder}/*.sql");
+    $hasDb = false;
+    if (!empty($sqlFiles) && $pdo) {
+        $hasDb = true;
+        @$pdo->exec("DROP DATABASE IF EXISTS `{$dbName}`;");
+        @$pdo->exec("CREATE DATABASE IF NOT EXISTS `{$dbName}` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;");
+
+        foreach ($sqlFiles as $sqlFile) {
+            $sqlContent = file_get_contents($sqlFile);
+            $sqlContent = preg_replace('/CREATE\s+DATABASE\s+IF\s+NOT\s+EXISTS\s+`?[a-zA-Z0-9_]+`?/i', '', $sqlContent);
+            $sqlContent = preg_replace('/USE\s+`?[a-zA-Z0-9_]+`?;?/i', '', $sqlContent);
+            try {
+                $pdoInstance = new PDO("mysql:host=127.0.0.1;dbname={$dbName};charset=utf8mb4", "root", "", [PDO::ATTR_ERRMODE => PDO::ERRMODE_SILENT]);
+                $pdoInstance->exec($sqlContent);
+            } catch (Exception $e) {}
+        }
+    }
+}
+
+// Point localhost to krazeplanet container and SMTP host to mailpit
+$phpFiles = glob("{$instanceFolder}/*.php");
+$subPhpFiles = glob("{$instanceFolder}/*/*.php");
+$allPhpFiles = array_merge($phpFiles ?: [], $subPhpFiles ?: []);
+foreach ($allPhpFiles as $phpFile) {
+    if (file_exists($phpFile)) {
+        $code = file_get_contents($phpFile);
+        $updatedCode = preg_replace("/(new\s+mysqli\s*\(\s*['\"])localhost(['\"])/i", "$1krazeplanet$2", $code);
+        $updatedCode = preg_replace("/(mysqli_connect\s*\(\s*['\"])localhost(['\"])/i", "$1krazeplanet$2", $updatedCode);
+        $updatedCode = preg_replace("/(host\s*=\s*)localhost/i", "${1}krazeplanet", $updatedCode);
+        $updatedCode = preg_replace("/(DB_HOST\s*,\s*['\"])localhost(['\"])/i", "$1krazeplanet$2", $updatedCode);
+        $updatedCode = preg_replace("/(\$[a-zA-Z0-9_]*host[a-zA-Z0-9_]*|\$servername)\s*=\s*['\"]localhost['\"]/i", "$1 = 'krazeplanet'", $updatedCode);
+        if ($updatedCode !== $code) {
+            file_put_contents($phpFile, $updatedCode);
+        }
+    }
+}
+
+// Register in database
+if ($pdo) {
+    $expiresAt = date('Y-m-d H:i:s', time() + 3600);
+    $pdo->prepare("UPDATE lab_instances SET status = 'destroyed' WHERE user_id = ? AND lab_id = ?")->execute([$userId, $parsedLab]);
+    $subdomain = "{$parsedUser}-{$parsedLab}.{$baseDomain}";
+    $stmtIns = $pdo->prepare("
+        INSERT INTO lab_instances (user_id, username, lab_id, lab_title, subdomain, instance_dir, db_name, status, expires_at)
+        VALUES (?, ?, ?, ?, ?, ?, ?, 'active', ?)
+    ");
+    $stmtIns->execute([$userId, $parsedUser, $parsedLab, $parsedLab, $subdomain, $instanceFolder, $dbName, $expiresAt]);
 }
 
 $checkRunning = trim(shell_exec("docker inspect -f '{{.State.Running}}' " . escapeshellarg($containerName) . " 2>/dev/null") ?? '');

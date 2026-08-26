@@ -109,6 +109,65 @@ $httpHost = $_SERVER['HTTP_HOST'] ?? 'localhost';
 $baseDomain = getKrazeBaseDomain($httpHost);
 $proto = ($baseDomain === 'localhost') ? "http://" : "https://";
 
+
+function terminateUserOtherLabs($userId, $username, $keepLabId = null) {
+    global $pdo;
+    $cleanUser = preg_replace('/[^a-zA-Z0-9_]/', '', strtolower($username));
+
+    // 1. Terminate all previous active records in DB for this user (except $keepLabId)
+    if ($pdo) {
+        $query = "SELECT id, lab_id, instance_dir, db_name FROM lab_instances WHERE user_id = ? AND status = 'active'";
+        $params = [$userId];
+        if ($keepLabId !== null) {
+            $query .= " AND lab_id != ?";
+            $params[] = $keepLabId;
+        }
+        $stmt = $pdo->prepare($query);
+        $stmt->execute($params);
+        $oldList = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        foreach ($oldList as $oldInst) {
+            list($u, $l) = getCleanSubdomainTag($username, $oldInst['lab_id']);
+            $oldCont = "kp_{$u}_{$l}";
+            shell_exec("docker rm -f " . escapeshellarg($oldCont) . " 2>/dev/null");
+            if (!empty($oldInst['instance_dir']) && is_dir($oldInst['instance_dir'])) {
+                recursiveDelete($oldInst['instance_dir']);
+            }
+            if (!empty($oldInst['db_name'])) {
+                @$pdo->exec("DROP DATABASE IF EXISTS `{$oldInst['db_name']}`;");
+            }
+        }
+
+        $updQuery = "UPDATE lab_instances SET status = 'destroyed' WHERE user_id = ?";
+        $updParams = [$userId];
+        if ($keepLabId !== null) {
+            $updQuery .= " AND lab_id != ?";
+            $updParams[] = $keepLabId;
+        }
+        $pdo->prepare($updQuery)->execute($updParams);
+    }
+
+    // 2. Sweep filesystem: destroy any lingering containers & remove folders for this user
+    $currCleanLab = $keepLabId ? getCleanSubdomainTag($username, $keepLabId)[1] : '';
+    $userDirs = glob("/opt/lampp/htdocs/instances/{$cleanUser}_*");
+    if ($userDirs) {
+        foreach ($userDirs as $uDir) {
+            $baseDirName = basename($uDir);
+            $labPart = substr($baseDirName, strlen($cleanUser) + 1);
+            if ($labPart === 'mailpit' || $labPart === 'mail' || ($currCleanLab && $labPart === $currCleanLab)) {
+                continue;
+            }
+            $lingeringCont = "kp_{$cleanUser}_{$labPart}";
+            shell_exec("docker rm -f " . escapeshellarg($lingeringCont) . " 2>/dev/null");
+            recursiveDelete($uDir);
+            if ($pdo) {
+                $lingeringDb = "kp_{$cleanUser}_{$labPart}";
+                @$pdo->exec("DROP DATABASE IF EXISTS `{$lingeringDb}`;");
+            }
+        }
+    }
+}
+
 function handleLaunchLab($userId, $username, $rawLab, $labTitle, $forceFresh = false) {
     global $pdo, $baseDomain, $proto;
 
@@ -183,7 +242,8 @@ function handleLaunchLab($userId, $username, $rawLab, $labTitle, $forceFresh = f
         }
     }
 
-    // 2. Kill and remove any old container
+    // 2. Strict 1-Lab-Per-User Policy: Terminate any previous lab containers for this user immediately
+    terminateUserOtherLabs($userId, $username, $forceFresh ? null : $labId);
     shell_exec("docker rm -f " . escapeshellarg($containerName) . " 2>/dev/null");
 
     // 3. Locate source template directory

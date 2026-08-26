@@ -474,6 +474,32 @@ if ($action === 'forgot_reset_password') {
 
 // 6. LOGOUT
 if ($action === 'logout') {
+    $currUserId = $_SESSION['user_id'] ?? null;
+    $currUsername = $_SESSION['username'] ?? '';
+    if ($currUserId && $currUsername && $pdo) {
+        $cleanUser = preg_replace('/[^a-zA-Z0-9_]/', '', strtolower($currUsername));
+        $stmtInst = $pdo->prepare("SELECT id, lab_id, instance_dir, db_name FROM lab_instances WHERE user_id = ? AND status = 'active'");
+        $stmtInst->execute([$currUserId]);
+        $activeInsts = $stmtInst->fetchAll(PDO::FETCH_ASSOC);
+        foreach ($activeInsts as $inst) {
+            $rawLab = preg_replace('#^subdomains/#i', '', strtolower($inst['lab_id']));
+            $cleanLab = str_replace('/', '-', preg_replace('/[^a-zA-Z0-9_\-\/\.]/', '', $rawLab));
+            $containerName = "kp_{$cleanUser}_{$cleanLab}";
+            shell_exec("docker rm -f {$containerName} 2>/dev/null");
+            if (!empty($inst['instance_dir']) && is_dir($inst['instance_dir'])) {
+                $files = array_diff(scandir($inst['instance_dir']) ?: [], ['.', '..']);
+                foreach ($files as $file) {
+                    $p = "{$inst['instance_dir']}/$file";
+                    (is_dir($p)) ? @shell_exec("rm -rf " . escapeshellarg($p)) : @unlink($p);
+                }
+                @rmdir($inst['instance_dir']);
+            }
+            if (!empty($inst['db_name'])) {
+                @$pdo->exec("DROP DATABASE IF EXISTS `{$inst['db_name']}`;");
+            }
+        }
+        $pdo->prepare("UPDATE lab_instances SET status = 'destroyed' WHERE user_id = ?")->execute([$currUserId]);
+    }
     $_SESSION = [];
     if (ini_get("session.use_cookies")) {
         $params = session_get_cookie_params();
