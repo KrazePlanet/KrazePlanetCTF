@@ -2,7 +2,7 @@
 
 # Install required utilities
 sudo apt-get update -y
-sudo apt-get install -y wget curl unzip git
+sudo apt-get install -y wget curl unzip net-tools git
 
 # Download XAMPP
 wget https://sourceforge.net/projects/xampp/files/XAMPP%20Linux/8.2.12/xampp-linux-x64-8.2.12-0-installer.run
@@ -24,4 +24,21 @@ sudo sed -i 's/Require local/Require all granted/g' /opt/lampp/etc/extra/httpd-x
 
 sudo /opt/lampp/lampp restart
 
-hostname -I
+# Wait for MySQL to be fully ready (up to 30 seconds)
+echo 'Waiting for MySQL to start...'
+for i in $(seq 1 30); do
+  if /opt/lampp/bin/mysqladmin ping -u root --silent 2>/dev/null; then
+    echo 'MySQL is ready.'
+    break
+  fi
+  echo "  Waiting... ($i/30)"
+  sleep 2
+done
+
+# Create the KrazePlanet database (tables are auto-created by PHP on first load)
+echo 'Setting up database...'
+/opt/lampp/bin/mysql -u root -e "CREATE DATABASE IF NOT EXISTS \`KrazePlanet\` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
+/opt/lampp/bin/mysql -u root -e "CREATE DATABASE IF NOT EXISTS \`KrazePlanet_DB\` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
+echo 'Database setup complete!'
+
+ifconfig
