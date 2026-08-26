@@ -5,7 +5,7 @@ Open-source web security training platform with 260+ interactive challenges and 
 ## Quick Start
 
 ```console
-mkdir -p /opt/lampp && git clone https://github.com/KrazePlanet/KrazePlanetCTF.git /opt/lampp/htdocs && cd /opt/lampp/htdocs
+mkdir -p /opt/lampp && git clone --depth 1 https://github.com/KrazePlanet/KrazePlanetCTF.git /opt/lampp/htdocs && cd /opt/lampp/htdocs
 
 apt update && apt install docker-compose-v2 docker.io -y
 
