@@ -174,4 +174,15 @@ if ($pdo) {
             // Table may already exist or other non-critical error
         }
     }
+
+    // Seed default admin user if no users exist
+    try {
+        $count = $pdo->query("SELECT COUNT(*) FROM users")->fetchColumn();
+        if ($count == 0) {
+            $hashed = password_hash('admin', PASSWORD_DEFAULT);
+            $pdo->exec("INSERT INTO users (username, fullname, email, password, role) VALUES ('admin', 'Administrator', 'admin@krazeplanet.com', '{$hashed}', 'admin')");
+        }
+    } catch (PDOException $e) {
+        // Users table may not exist yet or other non-critical error
+    }
 }
