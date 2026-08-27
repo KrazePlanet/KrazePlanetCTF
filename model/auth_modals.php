@@ -921,11 +921,6 @@ function handleSignupSubmit(e) {
           clearRegOtpBoxes();
           hideAlert('signupVerifyAlert');
           
-          // If OTP was returned in response (email failed), show it on screen
-          if (data.otp) {
-            showAlert('signupVerifyAlert', 'Email delivery failed. Your verification code: <strong style="font-size:1.3em;letter-spacing:3px;font-family:monospace;">' + data.otp + '</strong>', false);
-          }
-          
           const verifyModalEl = document.getElementById('signupVerifyModal');
           const verifyModalInst = bootstrap.Modal.getInstance(verifyModalEl) || new bootstrap.Modal(verifyModalEl);
           verifyModalInst.show();
@@ -1055,11 +1050,7 @@ function handleResendSignupOtp() {
     .then(r => r.json())
     .then(data => {
       if (data.success) {
-        let msg = 'A fresh 6-digit code has been sent to your email.';
-        if (data.otp) {
-          msg = 'Email delivery failed. Your verification code: <strong style="font-size:1.3em;letter-spacing:3px;font-family:monospace;">' + data.otp + '</strong>';
-        }
-        showAlert('signupVerifyAlert', msg, true);
+        showAlert('signupVerifyAlert', 'A fresh 6-digit code has been sent to your email.', true);
         clearRegOtpBoxes();
         startRegResendCountdown(60);
         document.getElementById('regOtp1').focus();
@@ -1099,10 +1090,6 @@ function handleForgotSendOtp(e) {
       btn.innerHTML = origText;
       if (data.success) {
         document.getElementById('forgotEmailTarget').innerText = data.email || inputVal;
-        // If OTP was returned in response (email failed), show it on screen
-        if (data.otp) {
-          showAlert('forgotAlert', 'Email delivery failed. Your reset code: <strong style="font-size:1.3em;letter-spacing:3px;font-family:monospace;">' + data.otp + '</strong>', false);
-        }
         switchModal('forgotModal', 'forgotOtpModal');
       } else {
         showAlert('forgotAlert', data.error || 'No account found with those details.', false);

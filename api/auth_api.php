@@ -31,7 +31,7 @@ require_once __DIR__ . '/../config/mail.php';
 
 $action = $_POST['action'] ?? $_GET['action'] ?? '';
 
-// Helper function to send email via SMTP. Returns true on success, false on failure.
+// Helper function to send email via SMTP
 function sendAuthEmail($to_email, $to_name, $otp_code, $type = 'verification', $targetUser = '') {
     $mail = new PHPMailer(true);
     try {
@@ -115,10 +115,8 @@ function sendAuthEmail($to_email, $to_name, $otp_code, $type = 'verification', $
         }
 
         $mail->send();
-        return true;
     } catch (Exception $e) {
         error_log("Auth email failed for {$to_email}: " . $mail->ErrorInfo);
-        return false;
     }
 }
 
@@ -245,21 +243,14 @@ if ($action === 'signup_send_otp') {
         'expiry' => time() + 600
     ];
 
-    $emailSent = sendAuthEmail($email, $fullname ?: $username, $otp, 'verification');
+    sendAuthEmail($email, $fullname ?: $username, $otp, 'verification');
 
-    $response = [
+    echo json_encode([
         'status' => 200,
         'success' => true,
         'message' => 'Verification code sent to ' . htmlspecialchars($email),
         'email' => $email
-    ];
-
-    if (!$emailSent) {
-        $response['otp'] = $otp;
-        $response['message'] = 'Email delivery failed. Use the code shown below to verify your account.';
-    }
-
-    echo json_encode($response);
+    ]);
     exit;
 }
 
@@ -406,21 +397,14 @@ if ($action === 'forgot_send_otp') {
             'expiry' => time() + 600
         ];
 
-        $emailSent = sendAuthEmail($user['email'], $user['username'], $otp, 'forgot');
+        sendAuthEmail($user['email'], $user['username'], $otp, 'forgot');
 
-        $response = [
+        echo json_encode([
             'status' => 200,
             'success' => true,
             'message' => 'Password reset code sent to your registered email address.',
             'email' => $user['email']
-        ];
-
-        if (!$emailSent) {
-            $response['otp'] = $otp;
-            $response['message'] = 'Email delivery failed. Use the code shown below to reset your password.';
-        }
-
-        echo json_encode($response);
+        ]);
         exit;
     } else {
         echo json_encode([
