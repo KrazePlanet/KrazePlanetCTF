@@ -174,4 +174,24 @@ if ($pdo) {
             // Table may already exist or other non-critical error
         }
     }
+
+    // Auto-seed / ensure default admin account exists with username 'admin' and password 'admin'
+    try {
+        $stmt = $pdo->prepare("SELECT id, password FROM users WHERE username = 'admin' LIMIT 1");
+        $stmt->execute();
+        $adminUser = $stmt->fetch();
+        $adminHashed = password_hash('admin', PASSWORD_DEFAULT);
+
+        if (!$adminUser) {
+            $ins = $pdo->prepare("INSERT INTO users (username, fullname, email, password, role) VALUES ('admin', 'Administrator', 'admin@krazeplanet.com', ?, 'admin')");
+            $ins->execute([$adminHashed]);
+        } else {
+            if (!password_verify('admin', $adminUser['password']) && $adminUser['password'] !== 'admin') {
+                $upd = $pdo->prepare("UPDATE users SET password = ? WHERE id = ?");
+                $upd->execute([$adminHashed, $adminUser['id']]);
+            }
+        }
+    } catch (PDOException $e) {
+        // Non-critical auto-seed error
+    }
 }

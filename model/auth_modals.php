@@ -193,6 +193,44 @@ $initial_theme = $auth_themes[$initial_auth_img];
     filter: brightness(1.1);
   }
 
+
+  .auth-form-container .input-group .form-control:not(:last-child) {
+    border-top-right-radius: 0 !important;
+    border-bottom-right-radius: 0 !important;
+  }
+  .auth-form-container .input-group .form-control:not(:first-child) {
+    border-top-left-radius: 0 !important;
+    border-bottom-left-radius: 0 !important;
+  }
+  .auth-form-container .auth-password-toggle-btn {
+    background: rgba(15, 23, 42, 0.82) !important;
+    border: 1px solid rgba(255, 255, 255, 0.12) !important;
+    border-left: 0 !important;
+    border-top-right-radius: 10px !important;
+    border-bottom-right-radius: 10px !important;
+    border-top-left-radius: 0 !important;
+    border-bottom-left-radius: 0 !important;
+    color: #94a3b8 !important;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 13px;
+    cursor: pointer;
+    font-size: 15px;
+    transition: all 0.2s ease;
+  }
+  .auth-form-container .auth-password-toggle-btn:hover {
+    color: #ffffff !important;
+    background: rgba(30, 41, 59, 0.95) !important;
+    border-color: var(--auth-theme-primary) !important;
+  }
+  .auth-form-container .input-group:focus-within .auth-password-toggle-btn {
+    border-color: var(--auth-theme-primary) !important;
+  }
+  .auth-form-container .input-group:focus-within .input-group-text {
+    border-color: var(--auth-theme-primary) !important;
+  }
+
   .auth-theme-link {
     color: var(--auth-theme-text) !important;
     text-decoration: none;
@@ -296,7 +334,10 @@ $initial_theme = $auth_themes[$initial_auth_img];
               </div>
               <div class="input-group">
                 <span class="input-group-text bg-dark border-secondary border-opacity-25 text-secondary"><i class="bi bi-lock-fill"></i></span>
-                <input type="password" id="loginPassword" class="form-control" placeholder="Enter password" required style="border-top-left-radius: 0; border-bottom-left-radius: 0;">
+                <input type="password" id="loginPassword" class="form-control" placeholder="Enter password" required style="border-radius: 0;">
+                <button class="btn auth-password-toggle-btn" type="button" onclick="togglePasswordVisibility('loginPassword', this)" title="Show/Hide password" aria-label="Toggle password visibility" tabindex="-1">
+                  <i class="bi bi-eye"></i>
+                </button>
               </div>
             </div>
 
@@ -365,11 +406,21 @@ $initial_theme = $auth_themes[$initial_auth_img];
             <div class="row g-2 mb-3">
               <div class="col-6">
                 <label class="form-label small fw-semibold text-light mb-1">Password <span class="text-danger">*</span></label>
-                <input type="password" id="signupPassword" class="form-control" placeholder="••••••••" minlength="6" required>
+                <div class="input-group">
+                  <input type="password" id="signupPassword" class="form-control" placeholder="••••••••" minlength="6" required>
+                  <button class="btn auth-password-toggle-btn" type="button" onclick="togglePasswordVisibility('signupPassword', this)" title="Show/Hide password" aria-label="Toggle password visibility" tabindex="-1">
+                    <i class="bi bi-eye"></i>
+                  </button>
+                </div>
               </div>
               <div class="col-6">
                 <label class="form-label small fw-semibold text-light mb-1">Confirm <span class="text-danger">*</span></label>
-                <input type="password" id="signupConfirmPassword" class="form-control" placeholder="••••••••" minlength="6" required>
+                <div class="input-group">
+                  <input type="password" id="signupConfirmPassword" class="form-control" placeholder="••••••••" minlength="6" required>
+                  <button class="btn auth-password-toggle-btn" type="button" onclick="togglePasswordVisibility('signupConfirmPassword', this)" title="Show/Hide password" aria-label="Toggle password visibility" tabindex="-1">
+                    <i class="bi bi-eye"></i>
+                  </button>
+                </div>
               </div>
             </div>
 
@@ -568,11 +619,21 @@ $initial_theme = $auth_themes[$initial_auth_img];
             <div class="row g-2 mb-3">
               <div class="col-6">
                 <label class="form-label small fw-semibold text-light mb-1">New Password</label>
-                <input type="password" id="forgotNewPass" class="form-control" placeholder="••••••••" minlength="6" required>
+                <div class="input-group">
+                  <input type="password" id="forgotNewPass" class="form-control" placeholder="••••••••" minlength="6" required>
+                  <button class="btn auth-password-toggle-btn" type="button" onclick="togglePasswordVisibility('forgotNewPass', this)" title="Show/Hide password" aria-label="Toggle password visibility" tabindex="-1">
+                    <i class="bi bi-eye"></i>
+                  </button>
+                </div>
               </div>
               <div class="col-6">
                 <label class="form-label small fw-semibold text-light mb-1">Confirm</label>
-                <input type="password" id="forgotConfirmPass" class="form-control" placeholder="••••••••" minlength="6" required>
+                <div class="input-group">
+                  <input type="password" id="forgotConfirmPass" class="form-control" placeholder="••••••••" minlength="6" required>
+                  <button class="btn auth-password-toggle-btn" type="button" onclick="togglePasswordVisibility('forgotConfirmPass', this)" title="Show/Hide password" aria-label="Toggle password visibility" tabindex="-1">
+                    <i class="bi bi-eye"></i>
+                  </button>
+                </div>
               </div>
             </div>
 
@@ -609,6 +670,28 @@ function applyDynamicModalTheme(imgKey) {
   root.style.setProperty('--auth-theme-glow', t.glow);
   root.style.setProperty('--auth-theme-border', t.border);
   root.style.setProperty('--auth-theme-text', t.text);
+}
+
+
+function togglePasswordVisibility(inputId, btn) {
+  const input = document.getElementById(inputId);
+  if (!input) return;
+  const icon = btn.querySelector('i');
+  if (input.type === 'password') {
+    input.type = 'text';
+    if (icon) {
+      icon.className = 'bi bi-eye-slash';
+    }
+    btn.setAttribute('title', 'Hide password');
+    btn.setAttribute('aria-label', 'Hide password');
+  } else {
+    input.type = 'password';
+    if (icon) {
+      icon.className = 'bi bi-eye';
+    }
+    btn.setAttribute('title', 'Show password');
+    btn.setAttribute('aria-label', 'Show password');
+  }
 }
 
 function randomizeAuthMascot() {
