@@ -1,0 +1,6 @@
+Options +Indexes
+
+IndexOptions FancyIndexing
+IndexOptions NameWidth=*
+IndexOptions DescriptionWidth=*
+IndexOptions SuppressHTMLPreamble

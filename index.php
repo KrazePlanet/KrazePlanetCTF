@@ -846,6 +846,104 @@ if (isset($_SESSION['user_id']) && $pdo) {
 
     <h2 class="section-title">Vulnerability Categories</h2>
 
+
+    <!-- Content Discovery -->
+    <h3 class="category-title">Content Discovery</h3>
+    <div class="labs-list">
+      <div class="lab-card">
+        <div class="lab-badge">
+          <svg viewBox="0 0 24 24"><path d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+          LAB
+        </div>
+        <div class="lab-content">
+          <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+          <span class="difficulty-tag">Easy</span>
+            <span class="difficulty-tag" style="background:#0D9488;color:#fff;">Training</span>
+          </div>
+          <div class="lab-title">
+            Redirect-Based Content Discovery
+          </div>
+        </div>
+        <div class="lab-action">
+          <a href="/subdomains/japan" class="btn-ACCESS" target="blank">
+            <svg viewBox="0 0 24 24"><path d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"></path></svg>
+            ACCESS THE LAB
+          </a>
+        </div>
+      </div>
+      <div class="lab-card">
+        <div class="lab-badge">
+          <svg viewBox="0 0 24 24"><path d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+          LAB
+        </div>
+        <div class="lab-content">
+          <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+          <span class="difficulty-tag">Easy</span>
+            <span class="difficulty-tag" style="background:#0D9488;color:#fff;">Training</span>
+          </div>
+          <div class="lab-title">
+            404 Response-Based Discovery
+          </div>
+        </div>
+        <div class="lab-action">
+          <a href="/subdomains/research" class="btn-ACCESS" target="blank">
+            <svg viewBox="0 0 24 24"><path d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"></path></svg>
+            ACCESS THE LAB
+          </a>
+        </div>
+      </div>
+    </div>
+
+
+
+    <!-- Hidden Parameter Fuzzing -->
+    <h3 class="category-title">Hidden Parameter Fuzzing</h3>
+    <div class="labs-list">
+      <div class="lab-card">
+        <div class="lab-badge">
+          <svg viewBox="0 0 24 24"><path d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+          LAB
+        </div>
+        <div class="lab-content">
+          <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+          <span class="difficulty-tag">Easy</span>
+            <span class="difficulty-tag" style="background:#0D9488;color:#fff;">Training</span>
+          </div>
+          <div class="lab-title">
+            Uncovering Hidden Parameters
+          </div>
+        </div>
+        <div class="lab-action">
+          <a href="/subdomains/hide" class="btn-ACCESS" target="blank">
+            <svg viewBox="0 0 24 24"><path d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"></path></svg>
+            ACCESS THE LAB
+          </a>
+        </div>
+      </div>
+      <div class="lab-card">
+        <div class="lab-badge">
+          <svg viewBox="0 0 24 24"><path d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+          LAB
+        </div>
+        <div class="lab-content">
+          <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+          <span class="difficulty-tag">Easy</span>
+            <span class="difficulty-tag" style="background:#0D9488;color:#fff;">Training</span>
+          </div>
+          <div class="lab-title">
+            Client-Side Parameter Discovery
+          </div>
+        </div>
+        <div class="lab-action">
+          <a href="/subdomains/bbp" class="btn-ACCESS" target="blank">
+            <svg viewBox="0 0 24 24"><path d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"></path></svg>
+            ACCESS THE LAB
+          </a>
+        </div>
+      </div>
+    </div>
+
+
     <!-- Cross-Site Scripting -->
     <h3 class="category-title">Cross-Site Scripting</h3>
     <div class="labs-list">
@@ -3490,6 +3588,138 @@ if (isset($_SESSION['user_id']) && $pdo) {
     </div>
 
 
+    <!-- Information Disclosure -->
+    <h3 class="category-title">Information Disclosure</h3>
+    <div class="labs-list">
+      <div class="lab-card">
+        <div class="lab-badge">
+          <svg viewBox="0 0 24 24"><path d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+          LAB
+        </div>
+        <div class="lab-content">
+          <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+          <span class="difficulty-tag">Easy</span>
+            <span class="difficulty-tag" style="background:#0D9488;color:#fff;">Training</span>
+          </div>
+          <div class="lab-title">
+            The Forgotten Release
+          </div>
+        </div>
+        <div class="lab-action">
+          <a href="/subdomains/bird" class="btn-ACCESS" target="blank">
+            <svg viewBox="0 0 24 24"><path d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"></path></svg>
+            ACCESS THE LAB
+          </a>
+        </div>
+      </div>
+      <div class="lab-card">
+        <div class="lab-badge">
+          <svg viewBox="0 0 24 24"><path d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+          LAB
+        </div>
+        <div class="lab-content">
+          <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+          <span class="difficulty-tag">Easy</span>
+            <span class="difficulty-tag" style="background:#0D9488;color:#fff;">Training</span>
+          </div>
+          <div class="lab-title">
+            Open to the World
+          </div>
+        </div>
+        <div class="lab-action">
+          <a href="/subdomains/pc" class="btn-ACCESS" target="blank">
+            <svg viewBox="0 0 24 24"><path d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"></path></svg>
+            ACCESS THE LAB
+          </a>
+        </div>
+      </div>
+      <div class="lab-card">
+        <div class="lab-badge">
+          <svg viewBox="0 0 24 24"><path d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+          LAB
+        </div>
+        <div class="lab-content">
+          <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+          <span class="difficulty-tag">Easy</span>
+            <span class="difficulty-tag" style="background:#0D9488;color:#fff;">Training</span>
+          </div>
+          <div class="lab-title">
+            The Unseen Layer
+          </div>
+        </div>
+        <div class="lab-action">
+          <a href="/subdomains/analytics" class="btn-ACCESS" target="blank">
+            <svg viewBox="0 0 24 24"><path d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"></path></svg>
+            ACCESS THE LAB
+          </a>
+        </div>
+      </div>
+      <div class="lab-card">
+        <div class="lab-badge">
+          <svg viewBox="0 0 24 24"><path d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+          LAB
+        </div>
+        <div class="lab-content">
+          <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+          <span class="difficulty-tag">Easy</span>
+            <span class="difficulty-tag" style="background:#0D9488;color:#fff;">Training</span>
+          </div>
+          <div class="lab-title">
+            Under the Hood
+          </div>
+        </div>
+        <div class="lab-action">
+          <a href="/subdomains/campuscloud" class="btn-ACCESS" target="blank">
+            <svg viewBox="0 0 24 24"><path d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"></path></svg>
+            ACCESS THE LAB
+          </a>
+        </div>
+      </div>
+      <div class="lab-card">
+        <div class="lab-badge">
+          <svg viewBox="0 0 24 24"><path d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+          LAB
+        </div>
+        <div class="lab-content">
+          <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+          <span class="difficulty-tag">Easy</span>
+            <span class="difficulty-tag" style="background:#0D9488;color:#fff;">Training</span>
+          </div>
+          <div class="lab-title">
+            The Research Vault
+          </div>
+        </div>
+        <div class="lab-action">
+          <a href="/subdomains/researcher" class="btn-ACCESS" target="blank">
+            <svg viewBox="0 0 24 24"><path d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"></path></svg>
+            ACCESS THE LAB
+          </a>
+        </div>
+      </div>
+      <div class="lab-card">
+        <div class="lab-badge">
+          <svg viewBox="0 0 24 24"><path d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+          LAB
+        </div>
+        <div class="lab-content">
+          <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+          <span class="difficulty-tag">Easy</span>
+            <span class="difficulty-tag" style="background:#0D9488;color:#fff;">Training</span>
+          </div>
+          <div class="lab-title">
+            Behind the Profile
+          </div>
+        </div>
+        <div class="lab-action">
+          <a href="/subdomains/profiler" class="btn-ACCESS" target="blank">
+            <svg viewBox="0 0 24 24"><path d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"></path></svg>
+            ACCESS THE LAB
+          </a>
+        </div>
+      </div>
+    </div>
+
+
     <!-- Username/Email Enumeration -->
     <h3 class="category-title">Username/Email Enumeration</h3>
     <div class="labs-list">
@@ -3547,6 +3777,27 @@ if (isset($_SESSION['user_id']) && $pdo) {
     <!-- SQL Injection -->
     <h3 class="category-title">SQL Injection</h3>
     <div class="labs-list">
+      <div class="lab-card">
+        <div class="lab-badge">
+          <svg viewBox="0 0 24 24"><path d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4"></path></svg>
+          LAB
+        </div>
+        <div class="lab-content">
+          <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+          <span class="difficulty-tag">Easy</span>
+            <span class="difficulty-tag" style="background:#0D9488;color:#fff;">Training</span>
+          </div>
+          <div class="lab-title">
+            SQL Injection - GET Parameter
+          </div>
+        </div>
+        <div class="lab-action">
+          <a href="/subdomains/courses" class="btn-ACCESS" target="blank">
+            <svg viewBox="0 0 24 24"><path d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"></path></svg>
+            ACCESS THE LAB
+          </a>
+        </div>
+      </div>
       <div class="lab-card">
         <div class="lab-badge">
           <svg viewBox="0 0 24 24"><path d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4"></path></svg>
@@ -5456,33 +5707,6 @@ if (isset($_SESSION['user_id']) && $pdo) {
         </div>
         <div class="lab-action">
           <a href="/subdomains/image-api" class="btn-ACCESS" target="blank">
-            <svg viewBox="0 0 24 24"><path d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"></path></svg>
-            ACCESS THE LAB
-          </a>
-        </div>
-      </div>
-    </div>
-
-
-    <!-- Information Disclosure -->
-    <h3 class="category-title">Information Disclosure</h3>
-    <div class="labs-list">
-      <div class="lab-card">
-        <div class="lab-badge">
-          <svg viewBox="0 0 24 24"><path d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
-          LAB
-        </div>
-        <div class="lab-content">
-          <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
-          <span class="difficulty-tag">Easy</span>
-            <span class="difficulty-tag" style="background:#0D9488;color:#fff;">Training</span>
-          </div>
-          <div class="lab-title">
-            Information Disclosure
-          </div>
-        </div>
-        <div class="lab-action">
-          <a href="/subdomains/notifications-api" class="btn-ACCESS" target="blank">
             <svg viewBox="0 0 24 24"><path d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"></path></svg>
             ACCESS THE LAB
           </a>

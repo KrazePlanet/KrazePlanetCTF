@@ -1,0 +1,1155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Riverview Institute of Technology</title>
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family:
+                Arial,
+                Helvetica,
+                sans-serif;
+
+            color: #202938;
+            background: #f5f7fa;
+        }
+
+        .top-strip {
+            background: #102a43;
+            color: #d9e2ec;
+
+            font-size: 13px;
+        }
+
+        .top-strip-inner {
+            max-width: 1180px;
+            margin: auto;
+
+            padding: 9px 20px;
+
+            display: flex;
+            justify-content: space-between;
+        }
+
+        header {
+            background: white;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .header-inner {
+            max-width: 1180px;
+            margin: auto;
+
+            min-height: 88px;
+
+            padding: 0 20px;
+
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 13px;
+        }
+
+        .logo {
+            width: 48px;
+            height: 48px;
+
+            border-radius: 50%;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            background: #1769aa;
+            color: white;
+
+            font-weight: bold;
+            font-size: 19px;
+        }
+
+        .brand-name {
+            font-size: 19px;
+            font-weight: 700;
+            color: #102a43;
+        }
+
+        .brand-subtitle {
+            margin-top: 3px;
+            font-size: 11px;
+            color: #718096;
+            letter-spacing: .3px;
+        }
+
+        nav {
+            display: flex;
+            gap: 25px;
+        }
+
+        nav a {
+            text-decoration: none;
+            color: #34495e;
+            font-size: 14px;
+        }
+
+        nav a:hover {
+            color: #1769aa;
+        }
+
+        .hero {
+            background:
+                linear-gradient(
+                    120deg,
+                    rgba(16,42,67,.96),
+                    rgba(23,105,170,.91)
+                );
+
+            color: white;
+        }
+
+        .hero-inner {
+            max-width: 1180px;
+            margin: auto;
+
+            padding: 70px 20px 75px;
+        }
+
+        .hero-label {
+            font-size: 12px;
+            letter-spacing: 1.6px;
+            text-transform: uppercase;
+            color: #b9d8f2;
+            font-weight: bold;
+        }
+
+        .hero h1 {
+            max-width: 720px;
+
+            font-size: 45px;
+            line-height: 1.12;
+
+            margin: 14px 0;
+        }
+
+        .hero p {
+            max-width: 640px;
+
+            color: #dbeafe;
+
+            line-height: 1.65;
+
+            font-size: 16px;
+        }
+
+        .quick-search {
+            display: flex;
+
+            max-width: 650px;
+
+            margin-top: 28px;
+
+            background: white;
+
+            border-radius: 6px;
+
+            overflow: hidden;
+        }
+
+        .quick-search input {
+            flex: 1;
+
+            border: 0;
+            outline: 0;
+
+            padding: 16px;
+
+            font-size: 14px;
+        }
+
+        .quick-search button {
+            border: 0;
+
+            padding: 0 25px;
+
+            background: #e8b949;
+
+            color: #17202a;
+
+            font-weight: bold;
+
+            cursor: pointer;
+        }
+
+        .container {
+            max-width: 1180px;
+
+            margin: 45px auto;
+
+            padding: 0 20px;
+        }
+
+        .section-title {
+            margin-bottom: 20px;
+        }
+
+        .section-title h2 {
+            margin: 0;
+
+            color: #102a43;
+
+            font-size: 25px;
+        }
+
+        .section-title p {
+            color: #718096;
+
+            font-size: 14px;
+
+            margin-top: 7px;
+        }
+
+        .cards {
+            display: grid;
+
+            grid-template-columns:
+                repeat(
+                    auto-fit,
+                    minmax(250px, 1fr)
+                );
+
+            gap: 20px;
+        }
+
+        .card {
+            background: white;
+
+            border:
+                1px solid #e1e7ee;
+
+            border-radius: 8px;
+
+            padding: 23px;
+
+            transition: .15s;
+        }
+
+        .card:hover {
+            box-shadow:
+                0 8px 25px
+                rgba(16,42,67,.08);
+
+            transform:
+                translateY(-2px);
+        }
+
+        .card-icon {
+            width: 43px;
+            height: 43px;
+
+            border-radius: 7px;
+
+            background: #e9f3fb;
+
+            color: #1769aa;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            font-size: 20px;
+
+            margin-bottom: 16px;
+        }
+
+        .card h3 {
+            margin: 0 0 9px;
+
+            font-size: 17px;
+
+            color: #243b53;
+        }
+
+        .card p {
+            margin: 0;
+
+            color: #718096;
+
+            line-height: 1.55;
+
+            font-size: 13px;
+        }
+
+        .card-link {
+            display: inline-block;
+
+            margin-top: 17px;
+
+            color: #1769aa;
+
+            font-size: 13px;
+
+            font-weight: bold;
+
+            text-decoration: none;
+        }
+
+        .notice-area {
+            display: none;
+
+            margin-bottom: 30px;
+        }
+
+        .notice {
+            padding: 14px 17px;
+
+            background: #eef6ff;
+
+            border-left:
+                4px solid #1769aa;
+
+            color: #24445e;
+
+            font-size: 14px;
+        }
+
+        .lower-grid {
+            margin-top: 45px;
+
+            display: grid;
+
+            grid-template-columns:
+                1.4fr 1fr;
+
+            gap: 25px;
+        }
+
+        .panel {
+            background: white;
+
+            border: 1px solid #e1e7ee;
+
+            border-radius: 8px;
+
+            overflow: hidden;
+        }
+
+        .panel-header {
+            padding: 17px 20px;
+
+            border-bottom:
+                1px solid #e8edf2;
+
+            font-weight: bold;
+
+            color: #243b53;
+        }
+
+        .news-item {
+            padding: 16px 20px;
+
+            border-bottom:
+                1px solid #edf0f3;
+        }
+
+        .news-item:last-child {
+            border-bottom: 0;
+        }
+
+        .news-date {
+            font-size: 11px;
+
+            color: #1769aa;
+
+            font-weight: bold;
+
+            text-transform: uppercase;
+        }
+
+        .news-title {
+            margin-top: 5px;
+
+            font-size: 14px;
+
+            color: #34495e;
+        }
+
+        .diagnostic {
+            display: none;
+
+            margin-top: 35px;
+
+            background: #101820;
+
+            color: #cbd5e1;
+
+            padding: 18px;
+
+            border-radius: 6px;
+
+            font-family:
+                Consolas,
+                monospace;
+
+            font-size: 12px;
+
+            line-height: 1.8;
+        }
+
+        footer {
+            margin-top: 70px;
+
+            background: #102a43;
+
+            color: #9fb3c8;
+
+            padding: 35px 20px;
+        }
+
+        .footer-inner {
+            max-width: 1180px;
+
+            margin: auto;
+
+            display: flex;
+
+            justify-content: space-between;
+        }
+
+        footer strong {
+            color: white;
+        }
+
+        @media(max-width: 750px) {
+
+            nav {
+                display: none;
+            }
+
+            .hero h1 {
+                font-size: 35px;
+            }
+
+            .lower-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .footer-inner {
+                flex-direction: column;
+                gap: 15px;
+            }
+        }
+
+    </style>
+</head>
+
+
+<body>
+
+<div class="top-strip">
+
+    <div class="top-strip-inner">
+
+        <span>
+            Riverview Institute of Technology
+        </span>
+
+        <span>
+            Academic Year 2026–27
+        </span>
+
+    </div>
+
+</div>
+
+<header>
+
+    <div class="header-inner">
+
+        <div class="brand">
+
+            <div class="logo">
+                RIT
+            </div>
+
+            <div>
+
+                <div class="brand-name">
+                    Riverview Institute
+                </div>
+
+                <div class="brand-subtitle">
+                    TECHNOLOGY · INNOVATION · EXCELLENCE
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <nav>
+
+            <a href="?">
+                Home
+            </a>
+
+            <a href="?page=academics">
+                Academics
+            </a>
+
+            <a href="?page=admissions">
+                Admissions
+            </a>
+
+            <a href="?page=campus">
+                Campus
+            </a>
+
+            <a href="?page=contact">
+                Contact
+            </a>
+
+        </nav>
+
+    </div>
+
+</header>
+
+<section class="hero">
+
+    <div class="hero-inner">
+
+        <div class="hero-label">
+            A place to learn and build
+        </div>
+
+        <h1>
+            Education that prepares
+            you for what's next.
+        </h1>
+
+        <p>
+            Explore undergraduate programs, research
+            opportunities, campus life and resources
+            at Riverview Institute of Technology.
+        </p>
+
+
+        <form
+            class="quick-search"
+            id="searchForm"
+        >
+
+            <input
+                id="search"
+                name="q"
+                placeholder="Search the institute..."
+            >
+
+            <button>
+                Search
+            </button>
+
+        </form>
+
+    </div>
+
+</section>
+
+<main class="container">
+
+
+    <div
+        class="notice-area"
+        id="noticeArea"
+    ></div>
+
+
+    <div class="section-title">
+
+        <h2>
+            Explore Riverview
+        </h2>
+
+        <p>
+            Information and resources for students,
+            faculty, researchers and visitors.
+        </p>
+
+    </div>
+
+
+    <div class="cards">
+
+
+        <div class="card">
+
+            <div class="card-icon">
+                ▣
+            </div>
+
+            <h3>
+                Academic Programs
+            </h3>
+
+            <p>
+                Discover undergraduate and postgraduate
+                programs across engineering, computing,
+                management and sciences.
+            </p>
+
+            <a
+                class="card-link"
+                href="?page=academics"
+            >
+                Explore programs →
+            </a>
+
+        </div>
+
+
+        <div class="card">
+
+            <div class="card-icon">
+                ✓
+            </div>
+
+            <h3>
+                Admissions
+            </h3>
+
+            <p>
+                Find application information, important
+                dates, eligibility requirements and
+                guidance for prospective students.
+            </p>
+
+            <a
+                class="card-link"
+                href="?page=admissions"
+            >
+                Admission information →
+            </a>
+
+        </div>
+
+
+        <div class="card">
+
+            <div class="card-icon">
+                ◇
+            </div>
+
+            <h3>
+                Research
+            </h3>
+
+            <p>
+                Learn about research groups, laboratories,
+                publications and opportunities for
+                student researchers.
+            </p>
+
+            <a
+                class="card-link"
+                href="?page=research"
+            >
+                Research at RIT →
+            </a>
+
+        </div>
+
+
+        <div class="card">
+
+            <div class="card-icon">
+                ♧
+            </div>
+
+            <h3>
+                Student Life
+            </h3>
+
+            <p>
+                Explore clubs, student organizations,
+                athletics, events and the many communities
+                that make campus life unique.
+            </p>
+
+            <a
+                class="card-link"
+                href="?page=student-life"
+            >
+                Student life →
+            </a>
+
+        </div>
+
+
+    </div>
+
+    <div class="lower-grid">
+
+
+        <section class="panel">
+
+            <div class="panel-header">
+                Institute News
+            </div>
+
+
+            <div class="news-item">
+
+                <div class="news-date">
+                    26 August 2026
+                </div>
+
+                <div class="news-title">
+                    Riverview launches new Center for
+                    Applied Computing Research
+                </div>
+
+            </div>
+
+
+            <div class="news-item">
+
+                <div class="news-date">
+                    21 August 2026
+                </div>
+
+                <div class="news-title">
+                    Applications open for the 2027
+                    undergraduate intake
+                </div>
+
+            </div>
+
+
+            <div class="news-item">
+
+                <div class="news-date">
+                    16 August 2026
+                </div>
+
+                <div class="news-title">
+                    RIT students receive national
+                    innovation awards
+                </div>
+
+            </div>
+
+
+            <div class="news-item">
+
+                <div class="news-date">
+                    08 August 2026
+                </div>
+
+                <div class="news-title">
+                    Annual technology festival announced
+                    for October
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <section class="panel">
+
+            <div class="panel-header">
+                Important Dates
+            </div>
+
+
+            <div class="news-item">
+
+                <div class="news-date">
+                    September 05
+                </div>
+
+                <div class="news-title">
+                    Semester registration deadline
+                </div>
+
+            </div>
+
+
+            <div class="news-item">
+
+                <div class="news-date">
+                    September 12
+                </div>
+
+                <div class="news-title">
+                    New student orientation
+                </div>
+
+            </div>
+
+
+            <div class="news-item">
+
+                <div class="news-date">
+                    September 18
+                </div>
+
+                <div class="news-title">
+                    Scholarship applications close
+                </div>
+
+            </div>
+
+
+            <div class="news-item">
+
+                <div class="news-date">
+                    October 03
+                </div>
+
+                <div class="news-title">
+                    Technology festival
+                </div>
+
+            </div>
+
+        </section>
+
+    </div>
+
+    <div
+        class="diagnostic"
+        id="diagnostic"
+    ></div>
+
+
+</main>
+
+
+<!-- =========================
+     FOOTER
+========================== -->
+
+<footer>
+
+    <div class="footer-inner">
+
+        <div>
+            <strong>
+                Riverview Institute of Technology
+            </strong>
+
+            <br>
+
+            Department of Digital Systems
+        </div>
+
+        <div>
+            Student Portal · Library · Careers
+        </div>
+
+    </div>
+
+</footer>
+
+
+<script>
+
+const params =
+    new URLSearchParams(
+        window.location.search
+    );
+
+const page =
+    params.get("page") || "home";
+
+const query =
+    params.get("q") || "";
+
+
+const mode =
+    params.get("mode");
+
+const department =
+    params.get("dept");
+
+const semester =
+    params.get("semester");
+
+const view =
+    params.get("view");
+
+const format =
+    params.get("format");
+
+const preview =
+    params.get("preview");
+
+const debug =
+    params.get("debug");
+
+const audience =
+    params.get("audience");
+
+function showNotice(message) {
+
+    const area =
+        document.getElementById(
+            "noticeArea"
+        );
+
+    area.style.display = "block";
+
+    area.innerHTML = `
+        <div class="notice">
+            ${message}
+        </div>
+    `;
+}
+
+
+if (mode === "compact") {
+
+    document
+        .querySelectorAll(".card")
+        .forEach(card => {
+
+            card.style.padding = "14px";
+
+        });
+
+}
+
+if (mode === "staff") {
+
+    showNotice(
+        "Staff information view is currently enabled."
+    );
+
+}
+
+if (department) {
+
+    const departments = {
+
+        cse:
+            "Computer Science & Engineering",
+
+        ece:
+            "Electronics & Communication",
+
+        mech:
+            "Mechanical Engineering",
+
+        civil:
+            "Civil Engineering",
+
+        management:
+            "Management Studies"
+
+    };
+
+    if (departments[department]) {
+
+        showNotice(
+            "Showing information for: " +
+            departments[department]
+        );
+
+    }
+
+}
+
+if (semester === "odd") {
+
+    showNotice(
+        "Odd semester information is currently selected."
+    );
+
+}
+
+if (semester === "even") {
+
+    showNotice(
+        "Even semester information is currently selected."
+    );
+
+}
+
+
+if (view === "calendar") {
+
+    showNotice(
+        "Academic calendar view enabled."
+    );
+
+}
+
+if (view === "directory") {
+
+    showNotice(
+        "Directory view enabled."
+    );
+
+}
+
+
+if (format === "print") {
+
+    document.body.style.background =
+        "#ffffff";
+
+    document
+        .querySelectorAll(".card")
+        .forEach(card => {
+
+            card.style.boxShadow = "none";
+
+        });
+
+}
+
+if (preview === "1") {
+
+    showNotice(
+        "Preview content is enabled."
+    );
+
+}
+
+if (audience === "alumni") {
+
+    showNotice(
+        "Alumni information view enabled."
+    );
+
+}
+
+if (audience === "faculty") {
+
+    showNotice(
+        "Faculty information view enabled."
+    );
+
+}
+
+document
+    .getElementById("searchForm")
+    .addEventListener(
+        "submit",
+        function(event) {
+
+            event.preventDefault();
+
+            const value =
+                document
+                    .getElementById("search")
+                    .value
+                    .trim();
+
+            if (!value) {
+                return;
+            }
+
+            const url =
+                new URL(
+                    window.location.href
+                );
+
+            url.searchParams.set(
+                "q",
+                value
+            );
+
+            window.location.href =
+                url.toString();
+
+        }
+    );
+
+if (query) {
+
+    showNotice(
+        "Search results for: " +
+        query
+    );
+
+}
+
+if (debug === "1") {
+
+    const diagnostic =
+        document.getElementById(
+            "diagnostic"
+        );
+
+    diagnostic.style.display =
+        "block";
+
+    diagnostic.innerHTML = `
+
+        <strong>
+            Application Diagnostics
+        </strong>
+
+        <br><br>
+
+        Current page:
+        ${page || "home"}
+
+        <br>
+
+        Search query:
+        ${query || "(none)"}
+
+        <br>
+
+        Department:
+        ${department || "(default)"}
+
+        <br>
+
+        Semester:
+        ${semester || "(default)"}
+
+        <br>
+
+        View:
+        ${view || "(default)"}
+
+        <br>
+
+        Current parameters:
+        ${params.toString()}
+
+        <br>
+
+        Browser:
+        ${navigator.userAgent}
+
+        <br>
+
+        Timestamp:
+        ${new Date().toISOString()}
+
+    `;
+
+}
+
+</script>
+
+</body>
+</html>

@@ -1,0 +1,4 @@
+<FilesMatch "\.php\.bak$">
+    ForceType text/plain
+    SetHandler default-handler
+</FilesMatch>

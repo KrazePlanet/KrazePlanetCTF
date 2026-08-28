@@ -1,0 +1,15 @@
+RewriteEngine On
+
+# Existing files are served normally
+RewriteCond %{REQUEST_FILENAME} -f
+RewriteRule ^ - [L]
+
+# Existing directories are served normally
+RewriteCond %{REQUEST_FILENAME} -d
+RewriteRule ^ - [L]
+
+# Everything else uses the custom 404 page
+ErrorDocument 404 /404.php
+
+# Return a genuine HTTP 404 status
+RewriteRule ^ - [R=404,L]

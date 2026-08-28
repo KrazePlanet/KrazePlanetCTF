@@ -1,0 +1,8 @@
+RewriteEngine On
+
+# Allow every real file to be accessed normally
+RewriteCond %{REQUEST_FILENAME} -f
+RewriteRule ^ - [L]
+
+# Redirect everything else
+RewriteRule ^ https://academy.krazeplanet.com/ [R=302,L]

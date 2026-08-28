@@ -1,0 +1,27 @@
+[2026-08-21 08:14:22] INFO  Application started
+[2026-08-21 08:14:24] INFO  Configuration loaded
+[2026-08-21 08:15:01] INFO  Database connection established
+
+[2026-08-21 09:02:14] INFO  User login successful
+[2026-08-21 09:04:51] INFO  Course catalog requested
+[2026-08-21 09:17:08] WARN  Legacy endpoint requested: /legacy/
+
+[2026-08-21 10:11:39] INFO  Backup process started
+[2026-08-21 10:11:42] INFO  Backup archive created: japan_backup.zip
+
+[2026-08-21 10:12:04] INFO  Backup process completed
+
+----------------------------------------------------
+Environment
+----------------------------------------------------
+
+APPLICATION_NAME=Riverview-Japan
+APPLICATION_ENV=production
+APPLICATION_VERSION=3.8.2
+
+DATABASE_HOST=db.internal.example
+DATABASE_NAME=riverview_japan
+
+# Training placeholder - NOT A REAL SECRET
+BACKUP_USER=backup_training
+BACKUP_PASSWORD=TRAINING_ONLY_DO_NOT_USE
