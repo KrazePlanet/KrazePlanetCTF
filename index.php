@@ -1126,27 +1126,6 @@ if (isset($_SESSION['user_id']) && $pdo) {
             <span class="difficulty-tag" style="background:#0D9488;color:#fff;">Training</span>
           </div>
           <div class="lab-title">
-            Reflected XSS - HTML Tag Blacklist Filter
-          </div>
-        </div>
-        <div class="lab-action">
-          <a href="/subdomains/board" class="btn-ACCESS" target="blank">
-            <svg viewBox="0 0 24 24"><path d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"></path></svg>
-            ACCESS THE LAB
-          </a>
-        </div>
-      </div>
-      <div class="lab-card">
-        <div class="lab-badge">
-          <svg viewBox="0 0 24 24"><path d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"></path></svg>
-          LAB
-        </div>
-        <div class="lab-content">
-          <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
-            <span class="difficulty-tag">Easy</span>
-            <span class="difficulty-tag" style="background:#0D9488;color:#fff;">Training</span>
-          </div>
-          <div class="lab-title">
             Reflected XSS - Path Based
           </div>
         </div>
@@ -2155,6 +2134,27 @@ if (isset($_SESSION['user_id']) && $pdo) {
         </div>
         <div class="lab-action">
           <a href="/subdomains/instance" class="btn-ACCESS" target="blank">
+            <svg viewBox="0 0 24 24"><path d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"></path></svg>
+            ACCESS THE LAB
+          </a>
+        </div>
+      </div>
+      <div class="lab-card">
+        <div class="lab-badge">
+          <svg viewBox="0 0 24 24"><path d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"></path></svg>
+          LAB
+        </div>
+        <div class="lab-content">
+          <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+            <span class="difficulty-tag">Easy</span>
+            <span class="difficulty-tag" style="background:#0D9488;color:#fff;">Training</span>
+          </div>
+          <div class="lab-title">
+            Reflected XSS - HTML Tag Blacklist Filter
+          </div>
+        </div>
+        <div class="lab-action">
+          <a href="/subdomains/board" class="btn-ACCESS" target="blank">
             <svg viewBox="0 0 24 24"><path d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"></path></svg>
             ACCESS THE LAB
           </a>
