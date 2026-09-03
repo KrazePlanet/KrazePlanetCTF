@@ -1,39 +1,42 @@
 <?php
-// Lab 1304 — Teavana CSRF + Reflected/Stored XSS via Wishlist Comment (HackerOne #177508)
-// Vulnerability: POST /tea/on/demandware.store/.../Wishlist-Comments/{id} has NO CSRF token
-// and the wishlistComment value is reflected raw inside <textarea> — no htmlspecialchars().
-// CSRF elevates a Self-XSS into a Reflected XSS on the victim's account.
-// Reporter: faisalahmed | Severity: Medium | Bounty: $375 | Platform: Teavana (Starbucks)
-// Flag: flag{teavana_csrf_xss_wishlist_no_token_177508}
+// Teavana — Tea & Beverages
 
-session_start();
+$isHttps = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off')
+    || (!empty($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https');
 
+if (session_status() === PHP_SESSION_NONE) {
+    session_set_cookie_params([
+        'lifetime' => 0,
+        'path'     => '/',
+        'secure'   => $isHttps,
+        'httponly' => true,
+        'samesite' => $isHttps ? 'None' : 'Lax',
+    ]);
+    session_start();
+}
+
+mysqli_report(MYSQLI_REPORT_OFF);
 $db_hosts = ['krazeplanet', '127.0.0.1', 'localhost', '172.19.0.1', 'host.docker.internal'];
 $db = null;
 foreach ($db_hosts as $h) {
-    $db = @new mysqli($h, 'root', '');
+    $db = @new mysqli($h, 'root', '', 'KrazePlanet_DB');
     if (!$db->connect_error) {
-        $db->query("CREATE DATABASE IF NOT EXISTS `KrazePlanet_DB` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci");
-        $db->select_db('KrazePlanet_DB');
         break;
     }
 }
-if (!$db || $db->connect_error) { die('DB connection failed: ' . ($db ? $db->connect_error : 'Unable to connect to database')); }
-if ($db->connect_error) {
-    die('<h3 style="padding:32px;font-family:sans-serif;color:#c00">DB error: ' . htmlspecialchars($db->connect_error) . '</h3>');
+if (!$db || $db->connect_error) {
+    die('<h3 style="padding:32px;font-family:sans-serif;color:#c00">DB connection error: ' . htmlspecialchars($db ? $db->connect_error : 'Unable to connect to database') . '</h3>');
 }
+$db->set_charset('utf8mb4');
 
-$scheme   = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
-$host     = $scheme . '://' . $_SERVER['HTTP_HOST'];
-$loginUrl  = $host . '/index.php';
-$wishUrl   = $host . '/index.php?action=wishlist';
-$logoutUrl = $host . '/index.php?logout=1';
-$attackUrl = $host . '/index.php?attack=1';
-
-define('LAB_FLAG', 'flag{teavana_csrf_xss_wishlist_no_token_177508}');
+$baseUri   = $_SERVER['SCRIPT_NAME'] ?? '/subdomains/wishlist/index.php';
+$loginUrl  = $baseUri;
+$wishUrl   = $baseUri . '?action=wishlist';
+$logoutUrl = $baseUri . '?logout=1';
+$attackUrl = $baseUri . '?attack=1';
 
 // ── Tables ────────────────────────────────────────────────────────────────────
-$db->query("CREATE TABLE IF NOT EXISTS lab1304_users (
+$db->query("CREATE TABLE IF NOT EXISTS wishlist_users (
     id         INT AUTO_INCREMENT PRIMARY KEY,
     email      VARCHAR(255) NOT NULL UNIQUE,
     password   VARCHAR(255) NOT NULL,
@@ -41,17 +44,18 @@ $db->query("CREATE TABLE IF NOT EXISTS lab1304_users (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 )");
 
-$db->query("CREATE TABLE IF NOT EXISTS lab1304_wishlist_items (
-    id           VARCHAR(20) PRIMARY KEY,
+$db->query("CREATE TABLE IF NOT EXISTS wishlist_items (
+    id           VARCHAR(20) NOT NULL,
     user_id      INT NOT NULL,
     product_name VARCHAR(255) NOT NULL,
     price        VARCHAR(20) NOT NULL,
     emoji        VARCHAR(10) NOT NULL DEFAULT '🍵',
     weight       VARCHAR(30) NOT NULL DEFAULT '2 oz',
-    added_at     TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    added_at     TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (id, user_id)
 )");
 
-$db->query("CREATE TABLE IF NOT EXISTS lab1304_comments (
+$db->query("CREATE TABLE IF NOT EXISTS wishlist_comments (
     id              INT AUTO_INCREMENT PRIMARY KEY,
     wishlist_item_id VARCHAR(20) NOT NULL,
     user_id         INT NOT NULL,
@@ -60,17 +64,17 @@ $db->query("CREATE TABLE IF NOT EXISTS lab1304_comments (
 )");
 
 // ── Seed ──────────────────────────────────────────────────────────────────────
-$sc = $db->query("SELECT COUNT(*) FROM lab1304_users WHERE email IN ('emma@teavana.com','james@teavana.com','aria@teavana.com')")->fetch_row()[0];
+$sc = $db->query("SELECT COUNT(*) FROM wishlist_users WHERE email IN ('emma@teavana.com','james@teavana.com','aria@teavana.com')")->fetch_row()[0];
 if ($sc < 3) {
     $h1 = password_hash('emma@123',  PASSWORD_BCRYPT);
     $h2 = password_hash('james@123', PASSWORD_BCRYPT);
     $h3 = password_hash('aria@123',  PASSWORD_BCRYPT);
-    $db->query("INSERT IGNORE INTO lab1304_users (email, password, username) VALUES
+    $db->query("INSERT IGNORE INTO wishlist_users (email, password, username) VALUES
         ('emma@teavana.com',  '$h1', 'emma_sips'),
         ('james@teavana.com', '$h2', 'james_brews'),
         ('aria@teavana.com',  '$h3', 'aria_steeps')");
 }
-$users = $db->query("SELECT id FROM lab1304_users ORDER BY id ASC");
+$users = $db->query("SELECT id FROM wishlist_users ORDER BY id ASC");
 $wishlistItems = [
     "('C1005285074', {uid}, 'Emperor''s Clouds & Mist Green Tea', '\$16.98', '🍃', '2 oz tin')",
     "('C1008923411', {uid}, 'Youthberry White Tea Blend', '\$14.98', '🌸', '2 oz tin')",
@@ -79,10 +83,10 @@ $wishlistItems = [
 if ($users) {
     while ($u = $users->fetch_assoc()) {
         $uid = (int)$u['id'];
-        $check = $db->query("SELECT COUNT(*) FROM lab1304_wishlist_items WHERE user_id=$uid")->fetch_row()[0];
+        $check = $db->query("SELECT COUNT(*) FROM wishlist_items WHERE user_id=$uid")->fetch_row()[0];
         if ($check == 0) {
             $vals = array_map(function($v) use ($uid) { return str_replace('{uid}', $uid, $v); }, $wishlistItems);
-            $db->query("INSERT INTO lab1304_wishlist_items (id, user_id, product_name, price, emoji, weight) VALUES " . implode(',', $vals));
+            $db->query("INSERT INTO wishlist_items (id, user_id, product_name, price, emoji, weight) VALUES " . implode(',', $vals));
         }
     }
 }
@@ -102,9 +106,9 @@ if ($isLogout) { session_destroy(); header('Location: ' . $loginUrl); exit; }
 
 // ── Load session user ─────────────────────────────────────────────────────────
 $currentUser = null;
-if (!empty($_SESSION['lab1304_uid'])) {
-    $st = $db->prepare("SELECT * FROM lab1304_users WHERE id = ?");
-    $st->bind_param('i', $_SESSION['lab1304_uid']);
+if (!empty($_SESSION['wishlist_uid'])) {
+    $st = $db->prepare("SELECT * FROM wishlist_users WHERE id = ?");
+    $st->bind_param('i', $_SESSION['wishlist_uid']);
     $st->execute();
     $currentUser = $st->get_result()->fetch_assoc();
     $st->close();
@@ -119,16 +123,16 @@ if ($isComment && $_SERVER['REQUEST_METHOD'] === 'POST') {
     if ($currentUser && $wid) {
         // Upsert comment (store raw, no sanitization)
         $uid = $currentUser['id'];
-        $st = $db->prepare("SELECT id FROM lab1304_comments WHERE wishlist_item_id = ? AND user_id = ?");
+        $st = $db->prepare("SELECT id FROM wishlist_comments WHERE wishlist_item_id = ? AND user_id = ?");
         $st->bind_param('si', $wid, $uid);
         $st->execute();
         $existing = $st->get_result()->fetch_assoc();
         $st->close();
         if ($existing) {
-            $st = $db->prepare("UPDATE lab1304_comments SET comment_text = ? WHERE wishlist_item_id = ? AND user_id = ?");
+            $st = $db->prepare("UPDATE wishlist_comments SET comment_text = ? WHERE wishlist_item_id = ? AND user_id = ?");
             $st->bind_param('ssi', $rawComment, $wid, $uid);
         } else {
-            $st = $db->prepare("INSERT INTO lab1304_comments (wishlist_item_id, user_id, comment_text) VALUES (?,?,?)");
+            $st = $db->prepare("INSERT INTO wishlist_comments (wishlist_item_id, user_id, comment_text) VALUES (?,?,?)");
             $st->bind_param('sis', $wid, $uid, $rawComment);
         }
         $st->execute();
@@ -137,7 +141,7 @@ if ($isComment && $_SERVER['REQUEST_METHOD'] === 'POST') {
 
     // Reflect raw comment in response — this is the XSS sink
     // (browser navigates to this response when CSRF form submits)
-    $editUrl = $host . '/index.php?action=edit&wid=' . $wid;
+    $editUrl = $baseUri . '?action=edit&wid=' . urlencode($wid);
     ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -186,14 +190,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !$isComment && !$isAttack) {
     $email = trim($_POST['email'] ?? '');
     $pwd   = $_POST['password'] ?? '';
     if ($email && $pwd) {
-        $st = $db->prepare("SELECT * FROM lab1304_users WHERE email = ?");
+        $st = $db->prepare("SELECT * FROM wishlist_users WHERE email = ?");
         $st->bind_param('s', $email);
         $st->execute();
         $row = $st->get_result()->fetch_assoc();
         $st->close();
         if ($row && password_verify($pwd, $row['password'])) {
             session_regenerate_id(true);
-            $_SESSION['lab1304_uid'] = $row['id'];
+            $_SESSION['wishlist_uid'] = $row['id'];
             header('Location: ' . $wishUrl);
             exit;
         }
@@ -213,8 +217,8 @@ if ($currentUser && !$isEdit && !$isAttack && !$isComment && !$action) {
 // ── Load wishlist items ───────────────────────────────────────────────────────
 $wishlistItems = [];
 if ($currentUser) {
-    $st = $db->prepare("SELECT w.*, c.comment_text FROM lab1304_wishlist_items w
-        LEFT JOIN lab1304_comments c ON c.wishlist_item_id = w.id AND c.user_id = ?
+    $st = $db->prepare("SELECT w.*, c.comment_text FROM wishlist_items w
+        LEFT JOIN wishlist_comments c ON c.wishlist_item_id = w.id AND c.user_id = ?
         WHERE w.user_id = ? ORDER BY w.added_at");
     $st->bind_param('ii', $currentUser['id'], $currentUser['id']);
     $st->execute();
@@ -226,8 +230,8 @@ if ($currentUser) {
 $editItem = null;
 $editComment = '';
 if ($isEdit && $currentUser && $wid) {
-    $st = $db->prepare("SELECT w.*, c.comment_text FROM lab1304_wishlist_items w
-        LEFT JOIN lab1304_comments c ON c.wishlist_item_id = w.id AND c.user_id = ?
+    $st = $db->prepare("SELECT w.*, c.comment_text FROM wishlist_items w
+        LEFT JOIN wishlist_comments c ON c.wishlist_item_id = w.id AND c.user_id = ?
         WHERE w.id = ? AND w.user_id = ?");
     $st->bind_param('isi', $currentUser['id'], $wid, $currentUser['id']);
     $st->execute();
@@ -321,11 +325,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Arial,sans-s
 .tv-btn-cancel:hover{border-color:#999;color:#333;}
 .tv-char-limit{font-size:.68rem;color:#aaa;margin-left:auto;}
 
-/* ── Flag reveal banner (hidden until XSS fires) ── */
-.tv-flag-reveal{display:none;background:#2D4A1E;color:#fff;padding:16px 20px;border-radius:6px;margin-bottom:20px;font-family:'Courier New',monospace;}
-.tv-flag-reveal .tv-flag-label{font-size:.6rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:#a8d07a;margin-bottom:6px;}
-.tv-flag-reveal .tv-flag-val{font-size:.9rem;font-weight:700;word-break:break-all;}
-.tv-xss-note{background:#fff8e8;border:1px solid #f0d080;border-radius:4px;padding:10px 14px;margin-top:12px;font-size:.72rem;color:#7a5c00;line-height:1.5;}
 
 /* ══════════════════════════════════
    LOGIN PAGE
@@ -403,10 +402,10 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Arial,sans-s
            with XSS payload as wishlistComment. NO CSRF token in the form.
            Server reflects the comment raw → XSS fires in the victim's browser. -->
       <form id="csrfForm"
-            action="/index.php?action=comment&wid=C1005285074"
+            action="<?= $baseUri ?>?action=comment&wid=C1005285074"
             method="POST"
             style="display:none;">
-        <input type="hidden" name="wishlistComment" value="</textarea><img src=x onerror=document.getElementById('flag-reveal').style.display='block'>">
+        <input type="hidden" name="wishlistComment" value="</textarea><script>alert('XSS: ' + document.domain)</script>">
       </form>
 
       <div style="text-align:center;">
@@ -443,7 +442,7 @@ function fireCSRF() {
      EDIT COMMENT PAGE — XSS sink: textarea reflects raw comment
      ══════════════════════════════════════════════════════════════════════════ -->
 <header class="tv-topbar">
-  <a href="/index.php?action=wishlist" class="tv-logo">
+  <a href="<?= $wishUrl ?>" class="tv-logo">
     <span class="tv-logo-icon">🍃</span>
     <span class="tv-logo-text">teavana</span>
   </a>
@@ -452,25 +451,19 @@ function fireCSRF() {
   <a href="#" class="tv-nav-link">Gifts</a>
   <div class="tv-nav-right">
     <a href="#">Hello, <?= esc($currentUser['username']) ?></a>
-    <a href="/index.php?action=wishlist">My Wishlist</a>
-    <a href="/index.php?logout=1">Sign Out</a>
+    <a href="<?= $wishUrl ?>">My Wishlist</a>
+    <a href="<?= $logoutUrl ?>">Sign Out</a>
   </div>
 </header>
 <div class="tv-utility-bar">
   <a href="#" class="tv-utility-link">My Account</a>
   <a href="#" class="tv-utility-link">Order History</a>
-  <a href="/index.php?action=wishlist" class="tv-utility-link active-util">My Wishlist</a>
+  <a href="<?= $wishUrl ?>" class="tv-utility-link active-util">My Wishlist</a>
   <a href="#" class="tv-utility-link">Gift Registry</a>
 </div>
 
 <div style="background:#F8F6F1;min-height:calc(100vh - 84px);padding:32px 0;">
   <div class="tv-edit-wrap">
-
-    <!-- ⚠ Hidden flag div — becomes visible when XSS fires (onerror handler targets this id) -->
-    <div id="flag-reveal" class="tv-flag-reveal">
-      <div class="tv-flag-label">🚨 XSS Executed — Flag Captured</div>
-      <div class="tv-flag-val"><?= LAB_FLAG ?></div>
-    </div>
 
     <div class="tv-edit-card">
       <div class="tv-edit-card-hdr">
@@ -490,7 +483,7 @@ function fireCSRF() {
         <!-- ⚠ VULNERABLE: comment_text is echoed raw — no htmlspecialchars().
              Payload </textarea><img src=x onerror=...> escapes the textarea and fires XSS. -->
         <form method="POST"
-              action="/index.php?action=comment&wid=<?= esc($wid) ?>">
+              action="<?= $baseUri ?>?action=comment&wid=<?= esc($wid) ?>">
           <div class="tv-field">
             <label>Your Comment <span style="color:#ccc;font-weight:400;text-transform:none;">(max 150 chars)</span></label>
             <textarea
@@ -506,7 +499,7 @@ function fireCSRF() {
       </div>
       <div class="tv-edit-footer">
         <button type="submit" form="editForm" class="tv-btn-save" onclick="document.querySelector('form').submit()">Save Comment</button>
-        <a href="/index.php?action=wishlist" class="tv-btn-cancel">Cancel</a>
+        <a href="<?= $wishUrl ?>" class="tv-btn-cancel">Cancel</a>
         <span class="tv-char-limit">No CSRF token in this form</span>
       </div>
     </div>
@@ -531,7 +524,7 @@ if (ta) {
      WISHLIST PAGE
      ══════════════════════════════════════════════════════════════════════════ -->
 <header class="tv-topbar">
-  <a href="/index.php?action=wishlist" class="tv-logo">
+  <a href="<?= $wishUrl ?>" class="tv-logo">
     <span class="tv-logo-icon">🍃</span>
     <span class="tv-logo-text">teavana</span>
   </a>
@@ -540,14 +533,14 @@ if (ta) {
   <a href="#" class="tv-nav-link">Gifts</a>
   <div class="tv-nav-right">
     <a href="#">Hello, <?= esc($currentUser['username']) ?></a>
-    <a href="/index.php?action=wishlist">My Wishlist ❤</a>
-    <a href="/index.php?logout=1">Sign Out</a>
+    <a href="<?= $wishUrl ?>">My Wishlist ❤</a>
+    <a href="<?= $logoutUrl ?>">Sign Out</a>
   </div>
 </header>
 <div class="tv-utility-bar">
   <a href="#" class="tv-utility-link">My Account</a>
   <a href="#" class="tv-utility-link">Order History</a>
-  <a href="/index.php?action=wishlist" class="tv-utility-link active-util">My Wishlist</a>
+  <a href="<?= $wishUrl ?>" class="tv-utility-link active-util">My Wishlist</a>
   <a href="#" class="tv-utility-link">Gift Registry</a>
 </div>
 
@@ -560,7 +553,7 @@ if (ta) {
     <div class="tv-wishlist-grid">
     <?php foreach ($wishlistItems as $item):
       $commentText = $item['comment_text'] ?? '';
-      $editUrl = '/index.php?action=edit&wid=' . $item['id'];
+      $editUrl = $baseUri . '?action=edit&wid=' . urlencode($item['id']);
     ?>
       <div class="tv-wl-card">
         <div class="tv-wl-img"><?= esc($item['emoji']) ?></div>
@@ -598,7 +591,7 @@ if (ta) {
      ══════════════════════════════════════════════════════════════════════════ -->
 <div class="tv-login-bg">
   <header class="tv-topbar">
-    <a href="/tea/login" class="tv-logo">
+    <a href="<?= $loginUrl ?>" class="tv-logo">
       <span class="tv-logo-icon">🍃</span>
       <span class="tv-logo-text">teavana</span>
     </a>
@@ -620,7 +613,7 @@ if (ta) {
         <div class="tv-error-banner"><?= esc($error) ?></div>
         <?php endif; ?>
 
-        <form method="POST" action="/index.php">
+        <form method="POST" action="<?= $loginUrl ?>">
           <div class="tv-field">
             <label>Email Address</label>
             <input type="email" name="email" placeholder="you@example.com" required autocomplete="email">

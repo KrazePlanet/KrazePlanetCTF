@@ -1,21 +1,22 @@
 <?php
-// Lab 1307 — CSRF Basics: Password Change Without Token
-// Platform: "Pulse" — fictional social media site
-// Vulnerability: POST /index.php?action=settings has NO CSRF token.
-//   Any cross-origin HTML form can silently change the victim's password.
-// Difficulty: Easy (Training) | Pure black-box — no hints in UI
+// Pulse — Social Media Platform
 
 // SameSite=None allows cross-origin requests to include the session cookie,
 // which is required for CSRF attacks to work in modern browsers.
 // Secure=true is mandatory when SameSite=None (requires HTTPS).
-session_set_cookie_params([
-    'lifetime' => 0,
-    'path'     => '/',
-    'secure'   => true,
-    'httponly'  => true,
-    'samesite' => 'None',
-]);
-session_start();
+$isHttps = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off')
+    || (!empty($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https');
+
+if (session_status() === PHP_SESSION_NONE) {
+    session_set_cookie_params([
+        'lifetime' => 0,
+        'path'     => '/',
+        'secure'   => $isHttps,
+        'httponly' => true,
+        'samesite' => $isHttps ? 'None' : 'Lax',
+    ]);
+    session_start();
+}
 
 // ── Database Configuration ──────────────────────────────────────────────────────
 // Replace the placeholders below with your cPanel MySQL credentials:
@@ -26,27 +27,26 @@ session_start();
 $db_host     = (getenv('DB_HOST') ?: (file_exists('/.dockerenv') ? 'krazeplanet' : '127.0.0.1'));                          // Usually 'localhost' on cPanel
 $db_username = 'root';               // REPLACE: your cPanel DB username
 $db_password = '';          // REPLACE: your cPanel DB password
-$db_name     = 'KrazePlanet';                // REPLACE: your cPanel database name
+$db_name     = 'KrazePlanet_DB';             // Database name
 
-$db = new mysqli($db_host, $db_username, $db_password, $db_name);
+mysqli_report(MYSQLI_REPORT_OFF);
+$db = @new mysqli($db_host, $db_username, $db_password, $db_name);
 if ($db->connect_error) {
-    die('<h3 style="padding:32px;font-family:sans-serif;color:#c00">DB error: ' . htmlspecialchars($db->connect_error) . '</h3>');
+    die('<h3 style="padding:32px;font-family:sans-serif;color:#c00">DB connection error: ' . htmlspecialchars($db->connect_error) . '</h3>');
 }
+$db->set_charset('utf8mb4');
 
-$scheme = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
-$host   = $scheme . '://' . $_SERVER['HTTP_HOST'];
+$baseUri     = $_SERVER['SCRIPT_NAME'] ?? '/subdomains/security/index.php';
+$loginUrl    = $baseUri;
+$registerUrl = $baseUri . '?action=register';
+$profileUrl  = $baseUri . '?action=profile';
+$settingsUrl = $baseUri . '?action=settings';
+$logoutUrl   = $baseUri . '?logout=1';
+$attackUrl   = $baseUri . '?attack=1';
 
-$loginUrl    = $host . '/index.php';
-$registerUrl = $host . '/index.php?action=register';
-$profileUrl  = $host . '/index.php?action=profile';
-$settingsUrl = $host . '/index.php?action=settings';
-$logoutUrl   = $host . '/index.php?logout=1';
-$attackUrl   = $host . '/index.php?attack=1';
-
-define('LAB_FLAG', 'flag{csrf_basics_no_token_password_change_1307}');
 
 // ── Tables ────────────────────────────────────────────────────────────────────
-$db->query("CREATE TABLE IF NOT EXISTS lab1307_users (
+$db->query("CREATE TABLE IF NOT EXISTS security_users (
     id           INT AUTO_INCREMENT PRIMARY KEY,
     username     VARCHAR(100) NOT NULL UNIQUE,
     email        VARCHAR(255) NOT NULL UNIQUE,
@@ -58,12 +58,12 @@ $db->query("CREATE TABLE IF NOT EXISTS lab1307_users (
 )");
 
 // ── Seed accounts ─────────────────────────────────────────────────────────────
-$check = $db->query("SELECT id FROM lab1307_users WHERE email='jessica@pulse.social'");
+$check = $db->query("SELECT id FROM security_users WHERE email='jessica@pulse.social'");
 if ($check && $check->num_rows === 0) {
     $h1 = password_hash('jess@123', PASSWORD_BCRYPT);
     $h2 = password_hash('ryan@123', PASSWORD_BCRYPT);
     $h3 = password_hash('priya@123', PASSWORD_BCRYPT);
-    $db->query("INSERT INTO lab1307_users (username, email, password, bio, avatar_color) VALUES
+    $db->query("INSERT INTO security_users (username, email, password, bio, avatar_color) VALUES
         ('jessica_lee',   'jessica@pulse.social', '$h1', 'Designer ✨ | Cats 🐱 | Matcha 🍵', '#EC4899'),
         ('ryan_carter',   'ryan@pulse.social',    '$h2', 'Gamer 🎮 | Music � | Pizza 🍕',   '#F59E0B'),
         ('priya_sharma',  'priya@pulse.social',   '$h3', 'Coder � | Hiking 🥾 | Sushi 🍣',  '#8B5CF6')");
@@ -89,9 +89,9 @@ if ($isLogout) {
 
 // ── Load session user ─────────────────────────────────────────────────────────
 $currentUser = null;
-if (!empty($_SESSION['lab1307_uid'])) {
-    $st = $db->prepare("SELECT * FROM lab1307_users WHERE id = ?");
-    $st->bind_param('i', $_SESSION['lab1307_uid']);
+if (!empty($_SESSION['security_uid'])) {
+    $st = $db->prepare("SELECT * FROM security_users WHERE id = ?");
+    $st->bind_param('i', $_SESSION['security_uid']);
     $st->execute();
     $currentUser = $st->get_result()->fetch_assoc();
     $st->close();
@@ -104,10 +104,10 @@ if ($isRegister && $_SERVER['REQUEST_METHOD'] === 'POST') {
     $pass  = $_POST['password'] ?? '';
     if ($uname && $email && $pass) {
         $hashed = password_hash($pass, PASSWORD_BCRYPT);
-        $st = $db->prepare("INSERT INTO lab1307_users (username, email, password) VALUES (?,?,?)");
+        $st = $db->prepare("INSERT INTO security_users (username, email, password) VALUES (?,?,?)");
         $st->bind_param('sss', $uname, $email, $hashed);
         if ($st->execute()) {
-            $_SESSION['lab1307_uid'] = $db->insert_id;
+            $_SESSION['security_uid'] = $db->insert_id;
             header('Location: ' . $profileUrl);
             exit;
         }
@@ -123,13 +123,13 @@ if (!$isRegister && !$isSettings && $_SERVER['REQUEST_METHOD'] === 'POST') {
     $email = trim($_POST['email'] ?? '');
     $pass  = $_POST['password'] ?? '';
     if ($email && $pass) {
-        $st = $db->prepare("SELECT * FROM lab1307_users WHERE email = ?");
+        $st = $db->prepare("SELECT * FROM security_users WHERE email = ?");
         $st->bind_param('s', $email);
         $st->execute();
         $user = $st->get_result()->fetch_assoc();
         $st->close();
         if ($user && password_verify($pass, $user['password'])) {
-            $_SESSION['lab1307_uid'] = $user['id'];
+            $_SESSION['security_uid'] = $user['id'];
             header('Location: ' . $profileUrl);
             exit;
         }
@@ -148,7 +148,7 @@ if ($isSettings && $_SERVER['REQUEST_METHOD'] === 'POST' && $currentUser) {
         if ($newPass === $confirm) {
             $hashed = password_hash($newPass, PASSWORD_BCRYPT);
             $uid    = (int)$currentUser['id'];
-            $st = $db->prepare("UPDATE lab1307_users SET password=?, csrf_pwnd=1 WHERE id=?");
+            $st = $db->prepare("UPDATE security_users SET password=? WHERE id=?");
             $st->bind_param('si', $hashed, $uid);
             if ($st->execute()) {
                 $st->close();
@@ -178,7 +178,7 @@ if (!$currentUser && !$isAttack && !$isRegister && $action) {
 
 // ── Reload user after possible POST update ────────────────────────────────────
 if ($isSettings && $currentUser) {
-    $st = $db->prepare("SELECT * FROM lab1307_users WHERE id = ?");
+    $st = $db->prepare("SELECT * FROM security_users WHERE id = ?");
     $st->bind_param('i', $currentUser['id']);
     $st->execute();
     $currentUser = $st->get_result()->fetch_assoc();
@@ -253,10 +253,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Arial,sans-s
 .pls-btn{background:#6366F1;color:#fff;border:none;padding:9px 22px;border-radius:8px;font-size:.875rem;font-weight:600;cursor:pointer;transition:background .15s;}
 .pls-btn:hover{background:#4F46E5;}
 .pls-error{background:#FEF2F2;border:1px solid #FECACA;color:#DC2626;padding:10px 14px;border-radius:8px;font-size:.8rem;margin-bottom:14px;}
-.pls-flag-banner{background:#FEF2F2;border:1px solid #FECACA;border-radius:10px;padding:18px 20px;margin-bottom:20px;}
-.pls-flag-banner-title{font-size:.78rem;font-weight:700;color:#DC2626;text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;}
-.pls-flag-banner-label{font-size:.78rem;color:#6B7280;margin-bottom:6px;}
-.pls-flag-val{font-family:'Courier New',Courier,monospace;font-size:.9rem;font-weight:700;color:#111827;background:#F9FAFB;border:1px solid #E5E7EB;padding:10px 14px;border-radius:6px;word-break:break-all;}
 
 /* ── AUTH ──────────────────────────────────────────────────────────────────── */
 .pls-auth-bg{min-height:100vh;display:flex;align-items:center;justify-content:center;background:#F9FAFB;padding:24px;}
@@ -302,7 +298,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Arial,sans-s
   <!-- ⚠ CSRF form: POSTs to /index.php?action=settings — no CSRF token.
        Victim's password is silently changed to h@ck3d123. -->
   <form id="csrfForm"
-        action="/index.php?action=settings"
+        action="<?= $settingsUrl ?>"
         method="POST"
         style="display:none;">
     <input type="hidden" name="new_password"     value="h@ck3d123">
@@ -356,19 +352,19 @@ setTimeout(function() { document.getElementById('csrfForm').submit(); }, 1500);
      SETTINGS PAGE — Password change form (VULNERABLE: no CSRF token)
      ══════════════════════════════════════════════════════════════════════════ -->
 <nav class="pls-nav">
-  <a href="/index.php?action=profile" class="pls-logo">
+  <a href="<?= $profileUrl ?>" class="pls-logo">
     <div class="pls-logo-icon"><svg viewBox="0 0 24 24"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg></div>
     Pulse
   </a>
-  <a href="/index.php?action=profile"  class="pls-nav-link">Home</a>
-  <a href="/index.php?action=profile"  class="pls-nav-link">Profile</a>
-  <a href="/index.php?action=settings" class="pls-nav-link active">Settings</a>
+  <a href="<?= $profileUrl ?>"  class="pls-nav-link">Home</a>
+  <a href="<?= $profileUrl ?>"  class="pls-nav-link">Profile</a>
+  <a href="<?= $settingsUrl ?>" class="pls-nav-link active">Settings</a>
   <div class="pls-nav-right">
     <div class="pls-nav-avatar" style="background:<?= esc($currentUser['avatar_color']) ?>">
       <?= strtoupper(substr($currentUser['username'], 0, 2)) ?>
     </div>
     <span class="pls-nav-username"><?= esc($currentUser['username']) ?></span>
-    <a href="/index.php?logout=1" class="pls-nav-logout">Sign out</a>
+    <a href="<?= $logoutUrl ?>" class="pls-nav-logout">Sign out</a>
   </div>
 </nav>
 
@@ -403,7 +399,7 @@ setTimeout(function() { document.getElementById('csrfForm').submit(); }, 1500);
     <div class="pls-card-hdr">Change Password</div>
     <div class="pls-card-body">
       <!-- ⚠ VULNERABLE: no csrf_token hidden field -->
-      <form method="POST" action="/index.php?action=settings">
+      <form method="POST" action="<?= $settingsUrl ?>">
         <div class="pls-field">
           <label>New Password</label>
           <input type="password" name="new_password" placeholder="Enter new password" autocomplete="new-password">
@@ -423,19 +419,19 @@ setTimeout(function() { document.getElementById('csrfForm').submit(); }, 1500);
      PROFILE / HOME PAGE
      ══════════════════════════════════════════════════════════════════════════ -->
 <nav class="pls-nav">
-  <a href="/index.php?action=profile" class="pls-logo">
+  <a href="<?= $profileUrl ?>" class="pls-logo">
     <div class="pls-logo-icon"><svg viewBox="0 0 24 24"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg></div>
     Pulse
   </a>
-  <a href="/index.php?action=profile"  class="pls-nav-link active">Home</a>
-  <a href="/index.php?action=profile"  class="pls-nav-link">Profile</a>
-  <a href="/index.php?action=settings" class="pls-nav-link">Settings</a>
+  <a href="<?= $profileUrl ?>"  class="pls-nav-link active">Home</a>
+  <a href="<?= $profileUrl ?>"  class="pls-nav-link">Profile</a>
+  <a href="<?= $settingsUrl ?>" class="pls-nav-link">Settings</a>
   <div class="pls-nav-right">
     <div class="pls-nav-avatar" style="background:<?= esc($currentUser['avatar_color']) ?>">
       <?= strtoupper(substr($currentUser['username'], 0, 2)) ?>
     </div>
     <span class="pls-nav-username"><?= esc($currentUser['username']) ?></span>
-    <a href="/index.php?logout=1" class="pls-nav-logout">Sign out</a>
+    <a href="<?= $logoutUrl ?>" class="pls-nav-logout">Sign out</a>
   </div>
 </nav>
 
@@ -515,7 +511,7 @@ setTimeout(function() { document.getElementById('csrfForm').submit(); }, 1500);
 
     <?php if ($error): ?><div class="pls-error"><?= esc($error) ?></div><?php endif; ?>
 
-    <form method="POST" action="/index.php?action=register">
+    <form method="POST" action="<?= $registerUrl ?>">
       <div class="pls-field">
         <label>Username</label>
         <input type="text" name="username" placeholder="your_username" required autocomplete="username">
@@ -532,7 +528,7 @@ setTimeout(function() { document.getElementById('csrfForm').submit(); }, 1500);
     </form>
 
     <div class="pls-auth-footer">
-      Already have an account? <a href="/index.php">Sign in</a>
+      Already have an account? <a href="<?= $loginUrl ?>">Sign in</a>
     </div>
   </div>
 </div>
@@ -551,7 +547,7 @@ setTimeout(function() { document.getElementById('csrfForm').submit(); }, 1500);
 
     <?php if ($error): ?><div class="pls-error"><?= esc($error) ?></div><?php endif; ?>
 
-    <form method="POST" action="/index.php">
+    <form method="POST" action="<?= $loginUrl ?>">
       <div class="pls-field">
         <label>Email</label>
         <input type="email" name="email" placeholder="you@example.com" required autocomplete="email">
@@ -571,7 +567,7 @@ setTimeout(function() { document.getElementById('csrfForm').submit(); }, 1500);
     </div>
 
     <div class="pls-auth-footer">
-      New to Pulse? <a href="/index.php?action=register">Create account</a>
+      New to Pulse? <a href="<?= $registerUrl ?>">Create account</a>
     </div>
   </div>
 </div>
