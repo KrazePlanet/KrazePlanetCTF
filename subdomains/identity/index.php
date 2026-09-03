@@ -3,35 +3,50 @@
 // Based on HackerOne report #339352 by albatraoz
 // Vulnerability: POST /apiv1/login accepts usr+pwd with NO CSRF token and NO Origin/Referer check.
 // Any cross-origin form POST with valid credentials silently replaces the victim's session.
-// Flag: flag{unikrn_login_csrf_no_token_339352}
 
-session_start();
+$isHttps = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off')
+    || (!empty($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https');
 
-$db_hosts = ['krazeplanet', '127.0.0.1', 'localhost', '172.19.0.1', 'host.docker.internal'];
-$db = null;
-foreach ($db_hosts as $h) {
-    $db = @new mysqli($h, 'root', '');
-    if (!$db->connect_error) {
-        $db->query("CREATE DATABASE IF NOT EXISTS `KrazePlanet_DB` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci");
-        $db->select_db('KrazePlanet_DB');
-        break;
+if (session_status() === PHP_SESSION_NONE) {
+    session_set_cookie_params([
+        'lifetime' => 0,
+        'path'     => '/',
+        'secure'   => $isHttps,
+        'httponly' => true,
+        'samesite' => $isHttps ? 'None' : 'Lax',
+    ]);
+    session_start();
+}
+
+mysqli_report(MYSQLI_REPORT_OFF);
+
+$db_host = getenv('DB_HOST') ?: '127.0.0.1';
+$db_user = getenv('DB_USER') ?: 'root';
+$db_pass = getenv('DB_PASS') ?: '';
+$db_name = getenv('DB_NAME') ?: 'KrazePlanet_DB';
+
+$db = @new mysqli($db_host, $db_user, $db_pass, $db_name);
+if ($db->connect_error) {
+    foreach (['localhost', '127.0.0.1', 'krazeplanet'] as $fallback_host) {
+        $db = @new mysqli($fallback_host, $db_user, $db_pass, $db_name);
+        if (!$db->connect_error) break;
     }
 }
-if (!$db || $db->connect_error) { die('DB connection failed: ' . ($db ? $db->connect_error : 'Unable to connect to database')); }
-if ($db->connect_error) {
-    die('<h3 style="padding:32px;font-family:sans-serif;color:#c00">DB error: ' . htmlspecialchars($db->connect_error) . '</h3>');
-}
 
-$scheme       = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
-$host         = $scheme . '://' . $_SERVER['HTTP_HOST'];
-$loginUrl     = $host . '/index.php';
-$dashboardUrl = $host . '/index.php?action=dashboard';
-$registerUrl  = $host . '/index.php?action=register';
-$logoutUrl    = $host . '/index.php?logout=1';
-$attackUrl    = $host . '/index.php?attack=1&ref=vip2018&utm_source=email';
+if (!$db || $db->connect_error) {
+    die('<h3 style="padding:32px;font-family:sans-serif;color:#c00">DB connection error: ' . htmlspecialchars($db ? $db->connect_error : 'Could not connect to database') . '</h3>');
+}
+$db->set_charset('utf8mb4');
+
+$baseUri = $_SERVER['SCRIPT_NAME'] ?? '/subdomains/identity/index.php';
+$loginUrl     = $baseUri;
+$dashboardUrl = $baseUri . '?action=dashboard';
+$registerUrl  = $baseUri . '?action=register';
+$logoutUrl    = $baseUri . '?logout=1';
+$attackUrl    = $baseUri . '?attack=1&ref=vip2018&utm_source=email';
 
 // ── Table ─────────────────────────────────────────────────────────────────────
-$db->query("CREATE TABLE IF NOT EXISTS lab1302 (
+$db->query("CREATE TABLE IF NOT EXISTS identity_users (
     id           INT AUTO_INCREMENT PRIMARY KEY,
     email        VARCHAR(255) NOT NULL UNIQUE,
     password     VARCHAR(255) NOT NULL,
@@ -44,13 +59,13 @@ $db->query("CREATE TABLE IF NOT EXISTS lab1302 (
 )");
 
 // ── Seed ──────────────────────────────────────────────────────────────────────
-$sc = $db->query("SELECT COUNT(*) FROM lab1302 WHERE email IN ('blaze@unikrn.com','nova@unikrn.com','apex@unikrn.com','attacker@evil.com')")->fetch_row()[0];
+$sc = $db->query("SELECT COUNT(*) FROM identity_users WHERE email IN ('blaze@unikrn.com','nova@unikrn.com','apex@unikrn.com','attacker@evil.com')")->fetch_row()[0];
 if ($sc < 4) {
     $h1 = password_hash('blaze@123',   PASSWORD_BCRYPT);
     $h2 = password_hash('nova@123',    PASSWORD_BCRYPT);
     $h3 = password_hash('apex@123',    PASSWORD_BCRYPT);
     $ah = password_hash('attacker456', PASSWORD_BCRYPT);
-    $db->query("INSERT IGNORE INTO lab1302 (email, password, username, unikrn_coins, level, xp, steam_linked) VALUES
+    $db->query("INSERT IGNORE INTO identity_users (email, password, username, unikrn_coins, level, xp, steam_linked) VALUES
         ('blaze@unikrn.com',    '$h1', 'Blaze_Runner',    3200,  9, 9400,  1),
         ('nova@unikrn.com',     '$h2', 'NovaStrike_99',   1800,  6, 5200,  0),
         ('apex@unikrn.com',     '$h3', 'ApexPredator_X',  4500, 11,12800,  1),
@@ -58,8 +73,6 @@ if ($sc < 4) {
 }
 
 function esc($s) { return htmlspecialchars((string)$s, ENT_QUOTES, 'UTF-8'); }
-define('LAB_FLAG', 'flag{unikrn_login_csrf_no_token_339352}');
-
 // ── Logout ────────────────────────────────────────────────────────────────────
 $isLogout = isset($_GET['logout']);
 if ($isLogout) {
@@ -70,9 +83,9 @@ if ($isLogout) {
 
 // ── Load session user ─────────────────────────────────────────────────────────
 $currentUser = null;
-if (!empty($_SESSION['lab1302_uid'])) {
-    $st = $db->prepare("SELECT * FROM lab1302 WHERE id = ?");
-    $st->bind_param('i', $_SESSION['lab1302_uid']);
+if (!empty($_SESSION['identity_users_uid'])) {
+    $st = $db->prepare("SELECT * FROM identity_users WHERE id = ?");
+    $st->bind_param('i', $_SESSION['identity_users_uid']);
     $st->execute();
     $currentUser = $st->get_result()->fetch_assoc();
     $st->close();
@@ -90,10 +103,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $action === 'register') {
         $uname = preg_replace('/[^a-zA-Z0-9_]/', '', explode('@', $usr)[0]);
         if (!$uname) $uname = 'player' . rand(100, 999);
         $hash = password_hash($pwd, PASSWORD_BCRYPT);
-        $st = $db->prepare("INSERT INTO lab1302 (email, password, username) VALUES (?, ?, ?)");
+        $st = $db->prepare("INSERT INTO identity_users (email, password, username) VALUES (?, ?, ?)");
         $st->bind_param('sss', $usr, $hash, $uname);
         if ($st->execute()) {
-            $_SESSION['lab1302_uid'] = $db->insert_id;
+            $_SESSION['identity_users_uid'] = $db->insert_id;
             $st->close();
             header('Location: ' . $dashboardUrl);
             exit;
@@ -113,14 +126,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $action !== 'register') {
     // no Origin or Referer header check. Any cross-origin POST with valid credentials
     // will replace the victim's session (Login CSRF).
     if ($usr && $pwd) {
-        $st = $db->prepare("SELECT * FROM lab1302 WHERE email = ?");
+        $st = $db->prepare("SELECT * FROM identity_users WHERE email = ?");
         $st->bind_param('s', $usr);
         $st->execute();
         $row = $st->get_result()->fetch_assoc();
         $st->close();
         if ($row && password_verify($pwd, $row['password'])) {
             session_regenerate_id(true);
-            $_SESSION['lab1302_uid'] = $row['id'];
+            $_SESSION['identity_users_uid'] = $row['id'];
             header('Location: ' . $dashboardUrl);
             exit;
         }
@@ -508,7 +521,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Arial,sans-s
         <?php if ($currentUser['email'] === 'attacker@evil.com'): ?>
         <div class="vip-box">
           <div class="vip-label">🔑 API Secret Token</div>
-          <div class="vip-token"><?= LAB_FLAG ?></div>
+          <div class="vip-token">VIP-AUTH-SUCCESS</div>
           <div class="vip-note">Your developer API access token. Keep this secret — do not share.</div>
         </div>
         <?php endif; ?>

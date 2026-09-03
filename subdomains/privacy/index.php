@@ -5,46 +5,54 @@
 //   Any cross-origin form can silently wipe the victim's entire order history.
 // Difficulty: Easy (Training) | Pure black-box — no hints in UI
 
-session_set_cookie_params([
-    'lifetime' => 0,
-    'path'     => '/',
-    'secure'   => true,
-    'httponly'  => true,
-    'samesite' => 'None',
-]);
-session_start();
+$isHttps = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off')
+    || (!empty($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https');
 
-$db_hosts = ['krazeplanet', '127.0.0.1', 'localhost', '172.19.0.1', 'host.docker.internal'];
-$db = null;
-foreach ($db_hosts as $h) {
-    $db = @new mysqli($h, 'root', '');
-    if (!$db->connect_error) {
-        $db->query("CREATE DATABASE IF NOT EXISTS `KrazePlanet_DB` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci");
-        $db->select_db('KrazePlanet_DB');
-        break;
+if (session_status() === PHP_SESSION_NONE) {
+    session_set_cookie_params([
+        'lifetime' => 0,
+        'path'     => '/',
+        'secure'   => $isHttps,
+        'httponly' => true,
+        'samesite' => $isHttps ? 'None' : 'Lax',
+    ]);
+    session_start();
+}
+
+mysqli_report(MYSQLI_REPORT_OFF);
+
+$db_host = getenv('DB_HOST') ?: '127.0.0.1';
+$db_user = getenv('DB_USER') ?: 'root';
+$db_pass = getenv('DB_PASS') ?: '';
+$db_name = getenv('DB_NAME') ?: 'KrazePlanet_DB';
+
+$db = @new mysqli($db_host, $db_user, $db_pass, $db_name);
+if ($db->connect_error) {
+    foreach (['localhost', '127.0.0.1', 'krazeplanet'] as $fallback_host) {
+        $db = @new mysqli($fallback_host, $db_user, $db_pass, $db_name);
+        if (!$db->connect_error) break;
     }
 }
-if (!$db || $db->connect_error) { die('DB connection failed: ' . ($db ? $db->connect_error : 'Unable to connect to database')); }
-if ($db->connect_error) {
-    die('<h3 style="padding:32px;font-family:sans-serif;color:#c00">DB error: ' . htmlspecialchars($db->connect_error) . '</h3>');
+
+if (!$db || $db->connect_error) {
+    die('<h3 style="padding:32px;font-family:sans-serif;color:#c00">DB connection error: ' . htmlspecialchars($db ? $db->connect_error : 'Could not connect to database') . '</h3>');
 }
+$db->set_charset('utf8mb4');
 
-$scheme = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
-$host   = $scheme . '://' . $_SERVER['HTTP_HOST'];
+$baseUri = $_SERVER['SCRIPT_NAME'] ?? '/subdomains/privacy/index.php';
 
-$loginUrl    = $host . '/index.php';
-$registerUrl = $host . '/index.php?action=register';
-$dashUrl     = $host . '/index.php?action=dashboard';
-$accountUrl  = $host . '/index.php?action=account';
-$deleteUrl   = $host . '/index.php?action=delete';
-$logoutUrl   = $host . '/index.php?logout=1';
-$attackUrl   = $host . '/index.php?attack=1';
+$loginUrl    = $baseUri;
+$registerUrl = $baseUri . '?action=register';
+$dashUrl     = $baseUri . '?action=dashboard';
+$accountUrl  = $baseUri . '?action=account';
+$deleteUrl   = $baseUri . '?action=delete';
+$logoutUrl   = $baseUri . '?logout=1';
+$attackUrl   = $baseUri . '?attack=1';
 
-define('LAB_FLAG',    'flag{csrf_basics_delete_account_data_1309}');
 define('VICTIM_EMAIL','victim@shopzone.com');
 
 // ── Tables ────────────────────────────────────────────────────────────────────
-$db->query("CREATE TABLE IF NOT EXISTS lab1309_users (
+$db->query("CREATE TABLE IF NOT EXISTS privacy_users (
     id         INT AUTO_INCREMENT PRIMARY KEY,
     username   VARCHAR(100) NOT NULL UNIQUE,
     email      VARCHAR(255) NOT NULL UNIQUE,
@@ -53,7 +61,7 @@ $db->query("CREATE TABLE IF NOT EXISTS lab1309_users (
     created_at TIMESTAMP    DEFAULT CURRENT_TIMESTAMP
 )");
 
-$db->query("CREATE TABLE IF NOT EXISTS lab1309_orders (
+$db->query("CREATE TABLE IF NOT EXISTS privacy_orders (
     id         INT AUTO_INCREMENT PRIMARY KEY,
     user_id    INT          NOT NULL,
     order_num  VARCHAR(30)  NOT NULL,
@@ -64,17 +72,17 @@ $db->query("CREATE TABLE IF NOT EXISTS lab1309_orders (
 )");
 
 // ── Seed accounts + orders ────────────────────────────────────────────────────
-$check = $db->query("SELECT id FROM lab1309_users WHERE email='sofia@shopzone.com'");
+$check = $db->query("SELECT id FROM privacy_users WHERE email='sofia@shopzone.com'");
 if ($check && $check->num_rows === 0) {
     $h1 = password_hash('sofia@123', PASSWORD_BCRYPT);
     $h2 = password_hash('james@123', PASSWORD_BCRYPT);
     $h3 = password_hash('nina@123',  PASSWORD_BCRYPT);
-    $db->query("INSERT INTO lab1309_users (username, email, password) VALUES
+    $db->query("INSERT INTO privacy_users (username, email, password) VALUES
         ('sofia_chen',   'sofia@shopzone.com',  '$h1'),
         ('james_miller', 'james@shopzone.com',  '$h2'),
         ('nina_k',       'nina@shopzone.com',   '$h3')");
 }
-$users = $db->query("SELECT id FROM lab1309_users ORDER BY id ASC");
+$users = $db->query("SELECT id FROM privacy_users ORDER BY id ASC");
 $orderSets = [
     [["SZ-2026-1101", "Wireless Noise-Cancelling Headphones", 129.99, "Delivered",  "Apr 12, 2026"],
      ["SZ-2026-1102", "Women's Running Shoes (Size 8)",        74.99, "Delivered",  "Apr 28, 2026"],
@@ -93,10 +101,10 @@ if ($users) {
     $idx = 0;
     while ($u = $users->fetch_assoc()) {
         $uid = (int)$u['id'];
-        $check = $db->query("SELECT COUNT(*) FROM lab1309_orders WHERE user_id=$uid")->fetch_row()[0];
+        $check = $db->query("SELECT COUNT(*) FROM privacy_orders WHERE user_id=$uid")->fetch_row()[0];
         if ($check == 0 && isset($orderSets[$idx])) {
             foreach ($orderSets[$idx] as $o) {
-                $st = $db->prepare("INSERT INTO lab1309_orders (user_id, order_num, items, total, status, order_date) VALUES (?,?,?,?,?,?)");
+                $st = $db->prepare("INSERT INTO privacy_orders (user_id, order_num, items, total, status, order_date) VALUES (?,?,?,?,?,?)");
                 $st->bind_param('issdss', $uid, $o[0], $o[1], $o[2], $o[3], $o[4]);
                 $st->execute();
                 $st->close();
@@ -127,9 +135,9 @@ if ($isLogout) {
 
 // ── Load session user ─────────────────────────────────────────────────────────
 $currentUser = null;
-if (!empty($_SESSION['lab1309_uid'])) {
-    $st = $db->prepare("SELECT * FROM lab1309_users WHERE id = ?");
-    $st->bind_param('i', $_SESSION['lab1309_uid']);
+if (!empty($_SESSION['privacy_uid'])) {
+    $st = $db->prepare("SELECT * FROM privacy_users WHERE id = ?");
+    $st->bind_param('i', $_SESSION['privacy_uid']);
     $st->execute();
     $currentUser = $st->get_result()->fetch_assoc();
     $st->close();
@@ -142,18 +150,18 @@ if ($isRegister && $_SERVER['REQUEST_METHOD'] === 'POST') {
     $pass  = $_POST['password'] ?? '';
     if ($uname && $email && $pass) {
         $hashed = password_hash($pass, PASSWORD_BCRYPT);
-        $st = $db->prepare("INSERT INTO lab1309_users (username, email, password) VALUES (?,?,?)");
+        $st = $db->prepare("INSERT INTO privacy_users (username, email, password) VALUES (?,?,?)");
         $st->bind_param('sss', $uname, $email, $hashed);
         if ($st->execute()) {
             $newUid = $db->insert_id;
-            $_SESSION['lab1309_uid'] = $newUid;
+            $_SESSION['privacy_uid'] = $newUid;
             // Seed generic orders for new users
             $seedOrders = [
                 ["SZ-NEW-0001", "Wireless Earbuds — White", 49.99, "Delivered",  "Jun 1, 2026"],
                 ["SZ-NEW-0002", "USB-C Fast Charger",       19.99, "Shipped",    "Jun 2, 2026"],
                 ["SZ-NEW-0003", "Laptop Stand — Aluminum",  34.99, "Processing", "Jun 2, 2026"],
             ];
-            $st2 = $db->prepare("INSERT INTO lab1309_orders (user_id, order_num, items, total, status, order_date) VALUES (?,?,?,?,?,?)");
+            $st2 = $db->prepare("INSERT INTO privacy_orders (user_id, order_num, items, total, status, order_date) VALUES (?,?,?,?,?,?)");
             foreach ($seedOrders as $o) {
                 $st2->bind_param('issdss', $newUid, $o[0], $o[1], $o[2], $o[3], $o[4]);
                 $st2->execute();
@@ -174,13 +182,13 @@ if (!$isRegister && !$isDelete && $_SERVER['REQUEST_METHOD'] === 'POST') {
     $email = trim($_POST['email'] ?? '');
     $pass  = $_POST['password'] ?? '';
     if ($email && $pass) {
-        $st = $db->prepare("SELECT * FROM lab1309_users WHERE email = ?");
+        $st = $db->prepare("SELECT * FROM privacy_users WHERE email = ?");
         $st->bind_param('s', $email);
         $st->execute();
         $user = $st->get_result()->fetch_assoc();
         $st->close();
         if ($user && password_verify($pass, $user['password'])) {
-            $_SESSION['lab1309_uid'] = $user['id'];
+            $_SESSION['privacy_uid'] = $user['id'];
             header('Location: ' . $dashUrl);
             exit;
         }
@@ -194,11 +202,11 @@ if (!$isRegister && !$isDelete && $_SERVER['REQUEST_METHOD'] === 'POST') {
 if ($isDelete && $_SERVER['REQUEST_METHOD'] === 'POST' && $currentUser) {
     // ⚠ No CSRF token check — that is the vulnerability.
     $uid = (int)$currentUser['id'];
-    $st = $db->prepare("DELETE FROM lab1309_orders WHERE user_id = ?");
+    $st = $db->prepare("DELETE FROM privacy_orders WHERE user_id = ?");
     $st->bind_param('i', $uid);
     $st->execute();
     $st->close();
-    $st = $db->prepare("DELETE FROM lab1309_users WHERE id = ?");
+    $st = $db->prepare("DELETE FROM privacy_users WHERE id = ?");
     $st->bind_param('i', $uid);
     $st->execute();
     $st->close();
@@ -221,7 +229,7 @@ if (!$currentUser && !$isAttack && !$isRegister && $action) {
 
 // ── Reload user after possible POST update ────────────────────────────────────
 if (($isAccount || $isDelete) && $currentUser) {
-    $st = $db->prepare("SELECT * FROM lab1309_users WHERE id = ?");
+    $st = $db->prepare("SELECT * FROM privacy_users WHERE id = ?");
     $st->bind_param('i', $currentUser['id']);
     $st->execute();
     $currentUser = $st->get_result()->fetch_assoc();
@@ -231,7 +239,7 @@ if (($isAccount || $isDelete) && $currentUser) {
 // ── Load orders for dashboard ─────────────────────────────────────────────────
 $orders = [];
 if ($isDashboard && $currentUser) {
-    $st = $db->prepare("SELECT * FROM lab1309_orders WHERE user_id = ? ORDER BY id DESC");
+    $st = $db->prepare("SELECT * FROM privacy_orders WHERE user_id = ? ORDER BY id DESC");
     $st->bind_param('i', $currentUser['id']);
     $st->execute();
     $res = $st->get_result();
@@ -321,7 +329,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Arial,sans-s
 .sz-danger-hdr{padding:13px 20px;background:#FEE2E2;border-bottom:1px solid #FECACA;font-size:.75rem;font-weight:700;color:#DC2626;text-transform:uppercase;letter-spacing:.05em;}
 .sz-danger-body{padding:20px;}
 .sz-danger-desc{font-size:.83rem;color:#6B7280;line-height:1.55;margin-bottom:16px;}
-.sz-flag-banner{background:#FEF2F2;border:1px solid #FECACA;border-radius:10px;padding:18px 20px;margin-bottom:20px;}
+
 .sz-flag-title{font-size:.75rem;font-weight:700;color:#DC2626;text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;}
 .sz-flag-label{font-size:.78rem;color:#6B7280;margin-bottom:6px;}
 .sz-flag-val{font-family:'Courier New',Courier,monospace;font-size:.9rem;font-weight:700;color:#111827;background:#F9FAFB;border:1px solid #E5E7EB;padding:10px 14px;border-radius:6px;word-break:break-all;}

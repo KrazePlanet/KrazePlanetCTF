@@ -4,37 +4,50 @@
 // but GET /gl/api/graphql executes mutations with NO token check whatsoever.
 // Any cross-origin page can submit a GET form to create snippets on the victim's account.
 // Reporter: az3z3l | Severity: High | Bounty: $3,370 | Fixed: GitLab 14.0.2
-// Flag: flag{gitlab_graphql_csrf_get_mutation_1122408}
 
-session_start();
+$isHttps = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off')
+    || (!empty($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https');
 
-$db_hosts = ['krazeplanet', '127.0.0.1', 'localhost', '172.19.0.1', 'host.docker.internal'];
-$db = null;
-foreach ($db_hosts as $h) {
-    $db = @new mysqli($h, 'root', '');
-    if (!$db->connect_error) {
-        $db->query("CREATE DATABASE IF NOT EXISTS `KrazePlanet_DB` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci");
-        $db->select_db('KrazePlanet_DB');
-        break;
+if (session_status() === PHP_SESSION_NONE) {
+    session_set_cookie_params([
+        'lifetime' => 0,
+        'path'     => '/',
+        'secure'   => $isHttps,
+        'httponly' => true,
+        'samesite' => $isHttps ? 'None' : 'Lax',
+    ]);
+    session_start();
+}
+
+mysqli_report(MYSQLI_REPORT_OFF);
+
+$db_host = getenv('DB_HOST') ?: '127.0.0.1';
+$db_user = getenv('DB_USER') ?: 'root';
+$db_pass = getenv('DB_PASS') ?: '';
+$db_name = getenv('DB_NAME') ?: 'KrazePlanet_DB';
+
+$db = @new mysqli($db_host, $db_user, $db_pass, $db_name);
+if ($db->connect_error) {
+    foreach (['localhost', '127.0.0.1', 'krazeplanet'] as $fallback_host) {
+        $db = @new mysqli($fallback_host, $db_user, $db_pass, $db_name);
+        if (!$db->connect_error) break;
     }
 }
-if (!$db || $db->connect_error) { die('DB connection failed: ' . ($db ? $db->connect_error : 'Unable to connect to database')); }
-if ($db->connect_error) {
-    die('<h3 style="padding:32px;font-family:sans-serif;color:#c00">DB error: ' . htmlspecialchars($db->connect_error) . '</h3>');
+
+if (!$db || $db->connect_error) {
+    die('<h3 style="padding:32px;font-family:sans-serif;color:#c00">DB connection error: ' . htmlspecialchars($db ? $db->connect_error : 'Could not connect to database') . '</h3>');
 }
+$db->set_charset('utf8mb4');
 
-$scheme       = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
-$host         = $scheme . '://' . $_SERVER['HTTP_HOST'];
-$loginUrl     = $host . '/index.php';
-$dashboardUrl = $host . '/index.php?action=dashboard';
-$logoutUrl    = $host . '/index.php?logout=1';
-$graphqlUrl   = $host . '/index.php?action=graphql';
-$attackUrl    = $host . '/index.php?attack=1';
-
-define('LAB_FLAG', 'flag{gitlab_graphql_csrf_get_mutation_1122408}');
+$baseUri = $_SERVER['SCRIPT_NAME'] ?? '/subdomains/graphql/index.php';
+$loginUrl     = $baseUri;
+$dashboardUrl = $baseUri . '?action=dashboard';
+$logoutUrl    = $baseUri . '?logout=1';
+$graphqlUrl   = $baseUri . '?action=graphql';
+$attackUrl    = $baseUri . '?attack=1';
 
 // ── Tables ────────────────────────────────────────────────────────────────────
-$db->query("CREATE TABLE IF NOT EXISTS lab1303_users (
+$db->query("CREATE TABLE IF NOT EXISTS graphql_users (
     id         INT AUTO_INCREMENT PRIMARY KEY,
     email      VARCHAR(255) NOT NULL UNIQUE,
     password   VARCHAR(255) NOT NULL,
@@ -43,7 +56,7 @@ $db->query("CREATE TABLE IF NOT EXISTS lab1303_users (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 )");
 
-$db->query("CREATE TABLE IF NOT EXISTS lab1303_snippets (
+$db->query("CREATE TABLE IF NOT EXISTS graphql_snippets (
     id           INT AUTO_INCREMENT PRIMARY KEY,
     user_id      INT NOT NULL,
     title        VARCHAR(255) NOT NULL,
@@ -55,22 +68,22 @@ $db->query("CREATE TABLE IF NOT EXISTS lab1303_snippets (
 )");
 
 // ── Seed ──────────────────────────────────────────────────────────────────────
-$sc = $db->query("SELECT COUNT(*) FROM lab1303_users WHERE email IN ('kai.jordan@gitlab.com','zoe.kim@gitlab.com','leo.santos@gitlab.com')")->fetch_row()[0];
+$sc = $db->query("SELECT COUNT(*) FROM graphql_users WHERE email IN ('kai.jordan@gitlab.com','zoe.kim@gitlab.com','leo.santos@gitlab.com')")->fetch_row()[0];
 if ($sc < 3) {
     $h1 = password_hash('kai@123', PASSWORD_BCRYPT);
     $h2 = password_hash('zoe@123', PASSWORD_BCRYPT);
     $h3 = password_hash('leo@123', PASSWORD_BCRYPT);
-    $db->query("INSERT IGNORE INTO lab1303_users (email, password, username, name) VALUES
+    $db->query("INSERT IGNORE INTO graphql_users (email, password, username, name) VALUES
         ('kai.jordan@gitlab.com',  '$h1','kai_jordan','Kai Jordan'),
         ('zoe.kim@gitlab.com',     '$h2','zoe_kim',   'Zoe Kim'),
         ('leo.santos@gitlab.com',  '$h3','leo_santos','Leo Santos')");
 }
-$firstUser = $db->query("SELECT id FROM lab1303_users ORDER BY id ASC LIMIT 1")->fetch_assoc();
+$firstUser = $db->query("SELECT id FROM graphql_users ORDER BY id ASC LIMIT 1")->fetch_assoc();
 $uid = $firstUser ? $firstUser['id'] : 0;
 if ($uid) {
-    $snipCount = $db->query("SELECT COUNT(*) FROM lab1303_snippets WHERE user_id=$uid")->fetch_row()[0];
+    $snipCount = $db->query("SELECT COUNT(*) FROM graphql_snippets WHERE user_id=$uid")->fetch_row()[0];
     if ($snipCount == 0) {
-        $db->query("INSERT INTO lab1303_snippets (user_id, title, content, filename, visibility) VALUES
+        $db->query("INSERT INTO graphql_snippets (user_id, title, content, filename, visibility) VALUES
             ($uid, 'Deploy script for staging', '#!/bin/bash\n# Deployment helper\nexport ENV=staging\ndocker-compose up -d --build\necho \"Deploy complete\"', 'deploy.sh', 'private'),
             ($uid, 'GraphQL query examples', '# Fetch current user\nquery CurrentUser {\n  currentUser {\n    id\n    username\n    email\n  }\n}\n\n# List projects\nquery ListProjects {\n  projects {\n    nodes { id name }\n  }\n}', 'queries.graphql', 'internal')");
     }
@@ -79,10 +92,10 @@ if ($uid) {
 function esc($s) { return htmlspecialchars((string)$s, ENT_QUOTES, 'UTF-8'); }
 
 // ── CSRF token ────────────────────────────────────────────────────────────────
-if (empty($_SESSION['lab1303_csrf'])) {
-    $_SESSION['lab1303_csrf'] = bin2hex(random_bytes(32));
+if (empty($_SESSION['graphql_csrf'])) {
+    $_SESSION['graphql_csrf'] = bin2hex(random_bytes(32));
 }
-$csrfToken = $_SESSION['lab1303_csrf'];
+$csrfToken = $_SESSION['graphql_csrf'];
 
 // ── Route detection ───────────────────────────────────────────────────────────
 $isLogout = isset($_GET['logout']);
@@ -99,9 +112,9 @@ if ($isLogout) {
 
 // ── Load session user ─────────────────────────────────────────────────────────
 $currentUser = null;
-if (!empty($_SESSION['lab1303_uid'])) {
-    $st = $db->prepare("SELECT * FROM lab1303_users WHERE id = ?");
-    $st->bind_param('i', $_SESSION['lab1303_uid']);
+if (!empty($_SESSION['graphql_uid'])) {
+    $st = $db->prepare("SELECT * FROM graphql_users WHERE id = ?");
+    $st->bind_param('i', $_SESSION['graphql_uid']);
     $st->execute();
     $currentUser = $st->get_result()->fetch_assoc();
     $st->close();
@@ -149,10 +162,10 @@ if ($isGraph) {
 
         // Inject flag into CSRF-created snippet content
         if ($isCsrf) {
-            $content .= "\n\n# " . LAB_FLAG;
+            
         }
 
-        $st = $db->prepare("INSERT INTO lab1303_snippets (user_id, title, content, filename, visibility, csrf_created) VALUES (?, ?, ?, ?, ?, ?)");
+        $st = $db->prepare("INSERT INTO graphql_snippets (user_id, title, content, filename, visibility, csrf_created) VALUES (?, ?, ?, ?, ?, ?)");
         $st->bind_param('issssi', $uid, $title, $content, $filename, $visibility, $isCsrf);
         $st->execute();
         $st->close();
@@ -184,14 +197,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !$isAttack && !$isGraph) {
     $email = trim($_POST['email'] ?? '');
     $pwd   = $_POST['password']    ?? '';
     if ($email && $pwd) {
-        $st = $db->prepare("SELECT * FROM lab1303_users WHERE email = ?");
+        $st = $db->prepare("SELECT * FROM graphql_users WHERE email = ?");
         $st->bind_param('s', $email);
         $st->execute();
         $row = $st->get_result()->fetch_assoc();
         $st->close();
         if ($row && password_verify($pwd, $row['password'])) {
             session_regenerate_id(true);
-            $_SESSION['lab1303_uid'] = $row['id'];
+            $_SESSION['graphql_uid'] = $row['id'];
             header('Location: ' . $dashboardUrl);
             exit;
         }
@@ -212,7 +225,7 @@ if ($currentUser && !$isAttack && !$action) {
 // ── Load snippets for dashboard ───────────────────────────────────────────────
 $snippets = [];
 if ($currentUser) {
-    $st = $db->prepare("SELECT * FROM lab1303_snippets WHERE user_id = ? ORDER BY created_at DESC");
+    $st = $db->prepare("SELECT * FROM graphql_snippets WHERE user_id = ? ORDER BY created_at DESC");
     $st->bind_param('i', $currentUser['id']);
     $st->execute();
     $snippets = $st->get_result()->fetch_all(MYSQLI_ASSOC);
@@ -549,12 +562,7 @@ function fireCSRF() {
       $hasCsrfSnip = array_filter($snippets, fn($s) => $s['csrf_created']);
     ?>
     <?php if ($hasCsrfSnip): ?>
-    <div class="gl-flag-banner">
-      <div class="gl-flag-icon">🚨</div>
-      <div>
-        <div class="gl-flag-label">CSRF Attack Successful — Lab Flag</div>
-        <div class="gl-flag-val"><?= LAB_FLAG ?></div>
-      </div>
+    </div>
     </div>
     <?php endif; ?>
 

@@ -5,28 +5,45 @@
 // Full attack: attacker force-logs victim into attacker's account via cross-origin form submit.
 // Default accounts: victim@hackerone.com / victim123  |  attacker@evil.com / attacker456
 
-session_start();
+$isHttps = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off')
+    || (!empty($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https');
 
-$db_hosts = ['krazeplanet', '127.0.0.1', 'localhost', '172.19.0.1', 'host.docker.internal'];
-$db = null;
-foreach ($db_hosts as $h) {
-    $db = @new mysqli($h, 'root', '');
-    if (!$db->connect_error) {
-        $db->query("CREATE DATABASE IF NOT EXISTS `KrazePlanet_DB` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci");
-        $db->select_db('KrazePlanet_DB');
-        break;
+if (session_status() === PHP_SESSION_NONE) {
+    session_set_cookie_params([
+        'lifetime' => 0,
+        'path'     => '/',
+        'secure'   => $isHttps,
+        'httponly' => true,
+        'samesite' => $isHttps ? 'None' : 'Lax',
+    ]);
+    session_start();
+}
+
+mysqli_report(MYSQLI_REPORT_OFF);
+
+$db_host = getenv('DB_HOST') ?: '127.0.0.1';
+$db_user = getenv('DB_USER') ?: 'root';
+$db_pass = getenv('DB_PASS') ?: '';
+$db_name = getenv('DB_NAME') ?: 'KrazePlanet_DB';
+
+$db = @new mysqli($db_host, $db_user, $db_pass, $db_name);
+if ($db->connect_error) {
+    foreach (['localhost', '127.0.0.1', 'krazeplanet'] as $fallback_host) {
+        $db = @new mysqli($fallback_host, $db_user, $db_pass, $db_name);
+        if (!$db->connect_error) break;
     }
 }
-if (!$db || $db->connect_error) { die('DB connection failed: ' . ($db ? $db->connect_error : 'Unable to connect to database')); }
-if ($db->connect_error) {
-    die('<h3 style="padding:32px;font-family:sans-serif">DB error: ' . htmlspecialchars($db->connect_error) . '</h3>');
-}
 
-$scheme  = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
-$labBase = $scheme . '://' . $_SERVER['HTTP_HOST'] . '/index.php';
+if (!$db || $db->connect_error) {
+    die('<h3 style="padding:32px;font-family:sans-serif;color:#c00">DB connection error: ' . htmlspecialchars($db ? $db->connect_error : 'Could not connect to database') . '</h3>');
+}
+$db->set_charset('utf8mb4');
+
+$baseUri = $_SERVER['SCRIPT_NAME'] ?? '/subdomains/session/index.php';
+$labBase = $baseUri;
 
 // ── Auto-create table (self-contained, no external SQL needed) ────────────────
-$db->query("CREATE TABLE IF NOT EXISTS lab1301 (
+$db->query("CREATE TABLE IF NOT EXISTS session_users (
     id         INT AUTO_INCREMENT PRIMARY KEY,
     email      VARCHAR(255) NOT NULL UNIQUE,
     password   VARCHAR(255) NOT NULL,
@@ -40,13 +57,13 @@ $db->query("CREATE TABLE IF NOT EXISTS lab1301 (
 )");
 
 // ── Seed default accounts (first run only) ────────────────────────────────────
-$sc = $db->query("SELECT COUNT(*) FROM lab1301 WHERE email IN ('zara.hunt@hackerone.com','noah.carter@hackerone.com','ava.patel@hackerone.com','attacker@evil.com')")->fetch_row()[0];
+$sc = $db->query("SELECT COUNT(*) FROM session_users WHERE email IN ('zara.hunt@hackerone.com','noah.carter@hackerone.com','ava.patel@hackerone.com','attacker@evil.com')")->fetch_row()[0];
 if ($sc < 4) {
     $h1 = password_hash('zara@123',    PASSWORD_BCRYPT);
     $h2 = password_hash('noah@123',    PASSWORD_BCRYPT);
     $h3 = password_hash('ava@123',     PASSWORD_BCRYPT);
     $ah = password_hash('attacker456', PASSWORD_BCRYPT);
-    $db->query("INSERT IGNORE INTO lab1301 (email,password,username,reputation,bounties,rank_num,sig_score,impact) VALUES
+    $db->query("INSERT IGNORE INTO session_users (email,password,username,reputation,bounties,rank_num,sig_score,impact) VALUES
         ('zara.hunt@hackerone.com',  '$h1','zara_hunt',    842,  5200, 3241,6.8,7.2),
         ('noah.carter@hackerone.com','$h2','noah_carter', 1205,  8750, 2187,7.1,7.8),
         ('ava.patel@hackerone.com',  '$h3','ava_patel',    634,  3100, 4532,6.2,6.9),
@@ -72,9 +89,9 @@ if (isset($_GET['logout'])) {
 
 // ── Load session user ─────────────────────────────────────────────────────────
 $currentUser = null;
-if (!empty($_SESSION['user_id'])) {
-    $st = $db->prepare("SELECT * FROM lab1301 WHERE id = ?");
-    $st->bind_param('i', $_SESSION['user_id']);
+if (!empty($_SESSION['session_uid'])) {
+    $st = $db->prepare("SELECT * FROM session_users WHERE id = ?");
+    $st->bind_param('i', $_SESSION['session_uid']);
     $st->execute();
     $currentUser = $st->get_result()->fetch_assoc();
     $st->close();
@@ -87,10 +104,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $action === 'register') {
     $password = $_POST['password']       ?? '';
     if ($username && $email && $password) {
         $hash = password_hash($password, PASSWORD_BCRYPT);
-        $st = $db->prepare("INSERT INTO lab1301 (email, password, username) VALUES (?, ?, ?)");
+        $st = $db->prepare("INSERT INTO session_users (email, password, username) VALUES (?, ?, ?)");
         $st->bind_param('sss', $email, $hash, $username);
         if ($st->execute()) {
-            $_SESSION['user_id']  = $db->insert_id;
+            $_SESSION['session_uid']  = $db->insert_id;
             $_SESSION['username'] = $username;
             $st->close();
             header('Location: ' . $labBase);
@@ -110,13 +127,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $action !== 'register') {
     // ⚠ VULNERABLE: $_POST['authenticity_token'] is received but NEVER compared to
     // $_SESSION['csrf_token'] — any POST to this endpoint succeeds regardless of token.
     if ($email && $password) {
-        $st = $db->prepare("SELECT * FROM lab1301 WHERE email = ?");
+        $st = $db->prepare("SELECT * FROM session_users WHERE email = ?");
         $st->bind_param('s', $email);
         $st->execute();
         $row = $st->get_result()->fetch_assoc();
         $st->close();
         if ($row && password_verify($password, $row['password'])) {
-            $_SESSION['user_id']  = $row['id'];
+            $_SESSION['session_uid']  = $row['id'];
             $_SESSION['username'] = $row['username'];
             header('Location: ' . $labBase);
             exit;

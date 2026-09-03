@@ -6,46 +6,54 @@
 //   leaving the account protected by password alone.
 // Difficulty: Easy (Training) | Pure black-box — no hints in UI
 
-session_set_cookie_params([
-    'lifetime' => 0,
-    'path'     => '/',
-    'secure'   => true,
-    'httponly'  => true,
-    'samesite' => 'None',
-]);
-session_start();
+$isHttps = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off')
+    || (!empty($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https');
 
-$db_hosts = ['krazeplanet', '127.0.0.1', 'localhost', '172.19.0.1', 'host.docker.internal'];
-$db = null;
-foreach ($db_hosts as $h) {
-    $db = @new mysqli($h, 'root', '');
-    if (!$db->connect_error) {
-        $db->query("CREATE DATABASE IF NOT EXISTS `KrazePlanet_DB` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci");
-        $db->select_db('KrazePlanet_DB');
-        break;
+if (session_status() === PHP_SESSION_NONE) {
+    session_set_cookie_params([
+        'lifetime' => 0,
+        'path'     => '/',
+        'secure'   => $isHttps,
+        'httponly' => true,
+        'samesite' => $isHttps ? 'None' : 'Lax',
+    ]);
+    session_start();
+}
+
+mysqli_report(MYSQLI_REPORT_OFF);
+
+$db_host = getenv('DB_HOST') ?: '127.0.0.1';
+$db_user = getenv('DB_USER') ?: 'root';
+$db_pass = getenv('DB_PASS') ?: '';
+$db_name = getenv('DB_NAME') ?: 'KrazePlanet_DB';
+
+$db = @new mysqli($db_host, $db_user, $db_pass, $db_name);
+if ($db->connect_error) {
+    foreach (['localhost', '127.0.0.1', 'krazeplanet'] as $fallback_host) {
+        $db = @new mysqli($fallback_host, $db_user, $db_pass, $db_name);
+        if (!$db->connect_error) break;
     }
 }
-if (!$db || $db->connect_error) { die('DB connection failed: ' . ($db ? $db->connect_error : 'Unable to connect to database')); }
-if ($db->connect_error) {
-    die('<h3 style="padding:32px;font-family:sans-serif;color:#c00">DB error: ' . htmlspecialchars($db->connect_error) . '</h3>');
+
+if (!$db || $db->connect_error) {
+    die('<h3 style="padding:32px;font-family:sans-serif;color:#c00">DB connection error: ' . htmlspecialchars($db ? $db->connect_error : 'Could not connect to database') . '</h3>');
 }
+$db->set_charset('utf8mb4');
 
-$scheme = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
-$host   = $scheme . '://' . $_SERVER['HTTP_HOST'];
+$baseUri = $_SERVER['SCRIPT_NAME'] ?? '/subdomains/mfa/index.php';
 
-$loginUrl    = $host . '/index.php';
-$registerUrl = $host . '/index.php?action=register';
-$dashUrl     = $host . '/index.php?action=dashboard';
-$securityUrl = $host . '/index.php?action=security';
-$disable2Url = $host . '/index.php?action=disable2fa';
-$logoutUrl   = $host . '/index.php?logout=1';
-$attackUrl   = $host . '/index.php?attack=1';
+$loginUrl    = $baseUri;
+$registerUrl = $baseUri . '?action=register';
+$dashUrl     = $baseUri . '?action=dashboard';
+$securityUrl = $baseUri . '?action=security';
+$disable2Url = $baseUri . '?action=disable2fa';
+$logoutUrl   = $baseUri . '?logout=1';
+$attackUrl   = $baseUri . '?attack=1';
 
-define('LAB_FLAG',    'flag{csrf_basics_disable_2fa_account_exposure_1311}');
 define('VICTIM_EMAIL','victim@vaultx.io');
 
 // ── Tables ────────────────────────────────────────────────────────────────────
-$db->query("CREATE TABLE IF NOT EXISTS lab1311_users (
+$db->query("CREATE TABLE IF NOT EXISTS mfa_users (
     id           INT AUTO_INCREMENT PRIMARY KEY,
     username     VARCHAR(100) NOT NULL UNIQUE,
     email        VARCHAR(255) NOT NULL UNIQUE,
@@ -56,12 +64,12 @@ $db->query("CREATE TABLE IF NOT EXISTS lab1311_users (
 )");
 
 // ── Seed accounts ─────────────────────────────────────────────────────────────
-$check = $db->query("SELECT id FROM lab1311_users WHERE email='lucas@vaultx.io'");
+$check = $db->query("SELECT id FROM mfa_users WHERE email='lucas@vaultx.io'");
 if ($check && $check->num_rows === 0) {
     $h1 = password_hash('lucas@123',  PASSWORD_BCRYPT);
     $h2 = password_hash('mia@123',    PASSWORD_BCRYPT);
     $h3 = password_hash('oliver@123', PASSWORD_BCRYPT);
-    $db->query("INSERT INTO lab1311_users (username, email, password, totp_enabled) VALUES
+    $db->query("INSERT INTO mfa_users (username, email, password, totp_enabled) VALUES
         ('lucas_storm', 'lucas@vaultx.io',  '$h1', 1),
         ('mia_chen',    'mia@vaultx.io',    '$h2', 1),
         ('oliver_b',    'oliver@vaultx.io',  '$h3', 1)");
@@ -88,9 +96,9 @@ if ($isLogout) {
 
 // ── Load session user ─────────────────────────────────────────────────────────
 $currentUser = null;
-if (!empty($_SESSION['lab1311_uid'])) {
-    $st = $db->prepare("SELECT * FROM lab1311_users WHERE id = ?");
-    $st->bind_param('i', $_SESSION['lab1311_uid']);
+if (!empty($_SESSION['mfa_uid'])) {
+    $st = $db->prepare("SELECT * FROM mfa_users WHERE id = ?");
+    $st->bind_param('i', $_SESSION['mfa_uid']);
     $st->execute();
     $currentUser = $st->get_result()->fetch_assoc();
     $st->close();
@@ -103,10 +111,10 @@ if ($isRegister && $_SERVER['REQUEST_METHOD'] === 'POST') {
     $pass  = $_POST['password'] ?? '';
     if ($uname && $email && $pass) {
         $hashed = password_hash($pass, PASSWORD_BCRYPT);
-        $st = $db->prepare("INSERT INTO lab1311_users (username, email, password, totp_enabled) VALUES (?,?,?,1)");
+        $st = $db->prepare("INSERT INTO mfa_users (username, email, password, totp_enabled) VALUES (?,?,?,1)");
         $st->bind_param('sss', $uname, $email, $hashed);
         if ($st->execute()) {
-            $_SESSION['lab1311_uid'] = $db->insert_id;
+            $_SESSION['mfa_uid'] = $db->insert_id;
             header('Location: ' . $dashUrl);
             exit;
         }
@@ -122,13 +130,13 @@ if (!$isRegister && !$isDisable && $_SERVER['REQUEST_METHOD'] === 'POST') {
     $email = trim($_POST['email'] ?? '');
     $pass  = $_POST['password'] ?? '';
     if ($email && $pass) {
-        $st = $db->prepare("SELECT * FROM lab1311_users WHERE email = ?");
+        $st = $db->prepare("SELECT * FROM mfa_users WHERE email = ?");
         $st->bind_param('s', $email);
         $st->execute();
         $user = $st->get_result()->fetch_assoc();
         $st->close();
         if ($user && password_verify($pass, $user['password'])) {
-            $_SESSION['lab1311_uid'] = $user['id'];
+            $_SESSION['mfa_uid'] = $user['id'];
             header('Location: ' . $dashUrl);
             exit;
         }
@@ -142,7 +150,7 @@ if (!$isRegister && !$isDisable && $_SERVER['REQUEST_METHOD'] === 'POST') {
 if ($isDisable && $_SERVER['REQUEST_METHOD'] === 'POST' && $currentUser) {
     // ⚠ No CSRF token check — that is the vulnerability.
     $uid = (int)$currentUser['id'];
-    $st = $db->prepare("UPDATE lab1311_users SET totp_enabled=0, csrf_pwnd=1 WHERE id=?");
+    $st = $db->prepare("UPDATE mfa_users SET totp_enabled=0 WHERE id=?");
     $st->bind_param('i', $uid);
     if ($st->execute()) {
         $st->close();
@@ -167,7 +175,7 @@ if (!$currentUser && !$isAttack && !$isRegister && $action) {
 
 // ── Reload user after disable ─────────────────────────────────────────────────
 if ($isSecurity && $currentUser) {
-    $st = $db->prepare("SELECT * FROM lab1311_users WHERE id = ?");
+    $st = $db->prepare("SELECT * FROM mfa_users WHERE id = ?");
     $st->bind_param('i', $currentUser['id']);
     $st->execute();
     $currentUser = $st->get_result()->fetch_assoc();
@@ -288,7 +296,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Arial,sans-s
 .vx-2fa-badge-on{background:rgba(16,185,129,.15);color:#34D399;border:1px solid rgba(16,185,129,.2);font-size:.72rem;font-weight:700;padding:4px 10px;border-radius:20px;}
 .vx-2fa-badge-off{background:rgba(239,68,68,.1);color:#F87171;border:1px solid rgba(239,68,68,.2);font-size:.72rem;font-weight:700;padding:4px 10px;border-radius:20px;}
 .vx-2fa-desc{font-size:.8rem;color:#64748B;line-height:1.6;margin-bottom:16px;}
-.vx-flag-banner{background:rgba(239,68,68,.07);border:1px solid rgba(239,68,68,.2);border-radius:10px;padding:18px 20px;margin-bottom:18px;}
+
 .vx-flag-title{font-size:.75rem;font-weight:700;color:#F87171;text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;}
 .vx-flag-label{font-size:.78rem;color:#64748B;margin-bottom:6px;}
 .vx-flag-val{font-family:'Courier New',Courier,monospace;font-size:.9rem;font-weight:700;color:#F8FAFC;background:#0A0A0F;border:1px solid #1E1E2E;padding:10px 14px;border-radius:6px;word-break:break-all;}

@@ -4,38 +4,51 @@
 //   parameter raw inside an HTML attribute value="" — closing with "> breaks out and fires XSS.
 // Payload: A"><img src=x onerror=alert(document.domain)>
 // Reporter: lu3ky-13 | Severity: Medium | Platform: U.S. Dept of Defense (DoD VDP)
-// Flag: flag{dod_jko_csrf_xss_training_answer_1118521}
 
-session_start();
+$isHttps = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off')
+    || (!empty($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https');
 
-$db_hosts = ['krazeplanet', '127.0.0.1', 'localhost', '172.19.0.1', 'host.docker.internal'];
-$db = null;
-foreach ($db_hosts as $h) {
-    $db = @new mysqli($h, 'root', '');
-    if (!$db->connect_error) {
-        $db->query("CREATE DATABASE IF NOT EXISTS `KrazePlanet_DB` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci");
-        $db->select_db('KrazePlanet_DB');
-        break;
+if (session_status() === PHP_SESSION_NONE) {
+    session_set_cookie_params([
+        'lifetime' => 0,
+        'path'     => '/',
+        'secure'   => $isHttps,
+        'httponly' => true,
+        'samesite' => $isHttps ? 'None' : 'Lax',
+    ]);
+    session_start();
+}
+
+mysqli_report(MYSQLI_REPORT_OFF);
+
+$db_host = getenv('DB_HOST') ?: '127.0.0.1';
+$db_user = getenv('DB_USER') ?: 'root';
+$db_pass = getenv('DB_PASS') ?: '';
+$db_name = getenv('DB_NAME') ?: 'KrazePlanet_DB';
+
+$db = @new mysqli($db_host, $db_user, $db_pass, $db_name);
+if ($db->connect_error) {
+    foreach (['localhost', '127.0.0.1', 'krazeplanet'] as $fallback_host) {
+        $db = @new mysqli($fallback_host, $db_user, $db_pass, $db_name);
+        if (!$db->connect_error) break;
     }
 }
-if (!$db || $db->connect_error) { die('DB connection failed: ' . ($db ? $db->connect_error : 'Unable to connect to database')); }
-if ($db->connect_error) {
-    die('<h3 style="padding:32px;font-family:sans-serif;color:#c00">DB error: ' . htmlspecialchars($db->connect_error) . '</h3>');
+
+if (!$db || $db->connect_error) {
+    die('<h3 style="padding:32px;font-family:sans-serif;color:#c00">DB connection error: ' . htmlspecialchars($db ? $db->connect_error : 'Could not connect to database') . '</h3>');
 }
+$db->set_charset('utf8mb4');
 
-$scheme     = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
-$host       = $scheme . '://' . $_SERVER['HTTP_HOST'];
-$loginUrl   = $host . '/index.php';
-$dashUrl    = $host . '/index.php?action=dashboard';
-$moduleUrl  = $host . '/index.php?action=module';
-$answerUrl  = $host . '/index.php?action=answer';
-$logoutUrl  = $host . '/index.php?logout=1';
-$attackUrl  = $host . '/index.php?attack=1';
-
-define('LAB_FLAG', 'flag{dod_jko_csrf_xss_training_answer_1118521}');
+$baseUri = $_SERVER['SCRIPT_NAME'] ?? '/subdomains/academy/index.php';
+$loginUrl   = $baseUri;
+$dashUrl    = $baseUri . '?action=dashboard';
+$moduleUrl  = $baseUri . '?action=module';
+$answerUrl  = $baseUri . '?action=answer';
+$logoutUrl  = $baseUri . '?logout=1';
+$attackUrl  = $baseUri . '?attack=1';
 
 // ── Tables ─────────────────────────────────────────────────────────────────────
-$db->query("CREATE TABLE IF NOT EXISTS lab1306_users (
+$db->query("CREATE TABLE IF NOT EXISTS academy_users (
     id         INT AUTO_INCREMENT PRIMARY KEY,
     username   VARCHAR(100) NOT NULL,
     email      VARCHAR(255) NOT NULL UNIQUE,
@@ -46,12 +59,12 @@ $db->query("CREATE TABLE IF NOT EXISTS lab1306_users (
 )");
 
 // ── Seed ───────────────────────────────────────────────────────────────────────
-$sc = $db->query("SELECT COUNT(*) FROM lab1306_users WHERE email IN ('davis@jko.mil','johnson@jko.mil','smith@jko.mil')")->fetch_row()[0];
+$sc = $db->query("SELECT COUNT(*) FROM academy_users WHERE email IN ('davis@jko.mil','johnson@jko.mil','smith@jko.mil')")->fetch_row()[0];
 if ($sc < 3) {
     $h1 = password_hash('davis@123',   PASSWORD_BCRYPT);
     $h2 = password_hash('johnson@123', PASSWORD_BCRYPT);
     $h3 = password_hash('smith@123',    PASSWORD_BCRYPT);
-    $db->query("INSERT IGNORE INTO lab1306_users (username, email, password, rank_title, unit) VALUES
+    $db->query("INSERT IGNORE INTO academy_users (username, email, password, rank_title, unit) VALUES
         ('Sgt_Davis',   'davis@jko.mil',   '$h1', 'Staff Sergeant', '101st Airborne Division'),
         ('Cpl_Johnson', 'johnson@jko.mil', '$h2', 'Corporal',       '10th Mountain Division'),
         ('PFC_Smith',   'smith@jko.mil',   '$h3', 'Private',        '3rd Infantry Division')");
@@ -72,9 +85,9 @@ if ($isLogout) { session_destroy(); header('Location: ' . $loginUrl); exit; }
 
 // ── Load session user ──────────────────────────────────────────────────────────
 $currentUser = null;
-if (!empty($_SESSION['lab1306_uid'])) {
-    $st = $db->prepare("SELECT * FROM lab1306_users WHERE id = ?");
-    $st->bind_param('i', $_SESSION['lab1306_uid']);
+if (!empty($_SESSION['academy_uid'])) {
+    $st = $db->prepare("SELECT * FROM academy_users WHERE id = ?");
+    $st->bind_param('i', $_SESSION['academy_uid']);
     $st->execute();
     $currentUser = $st->get_result()->fetch_assoc();
     $st->close();
@@ -177,14 +190,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !$isAnswer && !$isAttack) {
     $email = trim($_POST['email'] ?? '');
     $pwd   = $_POST['password'] ?? '';
     if ($email && $pwd) {
-        $st = $db->prepare("SELECT * FROM lab1306_users WHERE email = ?");
+        $st = $db->prepare("SELECT * FROM academy_users WHERE email = ?");
         $st->bind_param('s', $email);
         $st->execute();
         $row = $st->get_result()->fetch_assoc();
         $st->close();
         if ($row && password_verify($pwd, $row['password'])) {
             session_regenerate_id(true);
-            $_SESSION['lab1306_uid'] = $row['id'];
+            $_SESSION['academy_uid'] = $row['id'];
             header('Location: ' . $dashUrl);
             exit;
         }

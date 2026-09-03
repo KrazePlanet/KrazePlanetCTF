@@ -4,38 +4,52 @@
 //   POST username/email/password and the server updates the profile immediately.
 //   Attacker changes victim's email to attacker-controlled address, then resets password = full ATO.
 // Reporter: br0x1337 | Severity: High | Bounty: None (DoD VDP) | Platform: NPS Microgrid Portal
-// Flag: flag{dod_nps_csrf_profile_edit_account_takeover_2712857}
 
-session_start();
+$isHttps = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off')
+    || (!empty($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https');
 
-$db_hosts = ['krazeplanet', '127.0.0.1', 'localhost', '172.19.0.1', 'host.docker.internal'];
-$db = null;
-foreach ($db_hosts as $h) {
-    $db = @new mysqli($h, 'root', '');
-    if (!$db->connect_error) {
-        $db->query("CREATE DATABASE IF NOT EXISTS `KrazePlanet_DB` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci");
-        $db->select_db('KrazePlanet_DB');
-        break;
+if (session_status() === PHP_SESSION_NONE) {
+    session_set_cookie_params([
+        'lifetime' => 0,
+        'path'     => '/',
+        'secure'   => $isHttps,
+        'httponly' => true,
+        'samesite' => $isHttps ? 'None' : 'Lax',
+    ]);
+    session_start();
+}
+
+mysqli_report(MYSQLI_REPORT_OFF);
+
+$db_host = getenv('DB_HOST') ?: '127.0.0.1';
+$db_user = getenv('DB_USER') ?: 'root';
+$db_pass = getenv('DB_PASS') ?: '';
+$db_name = getenv('DB_NAME') ?: 'KrazePlanet_DB';
+
+$db = @new mysqli($db_host, $db_user, $db_pass, $db_name);
+if ($db->connect_error) {
+    foreach (['localhost', '127.0.0.1', 'krazeplanet'] as $fallback_host) {
+        $db = @new mysqli($fallback_host, $db_user, $db_pass, $db_name);
+        if (!$db->connect_error) break;
     }
 }
-if (!$db || $db->connect_error) { die('DB connection failed: ' . ($db ? $db->connect_error : 'Unable to connect to database')); }
-if ($db->connect_error) {
-    die('<h3 style="padding:32px;font-family:sans-serif;color:#c00">DB error: ' . htmlspecialchars($db->connect_error) . '</h3>');
+
+if (!$db || $db->connect_error) {
+    die('<h3 style="padding:32px;font-family:sans-serif;color:#c00">DB connection error: ' . htmlspecialchars($db ? $db->connect_error : 'Could not connect to database') . '</h3>');
 }
+$db->set_charset('utf8mb4');
 
-$scheme     = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
-$host       = $scheme . '://' . $_SERVER['HTTP_HOST'];
-$loginUrl   = $host . '/index.php';
-$dashUrl    = $host . '/index.php?action=dashboard';
-$profileUrl = $host . '/index.php?action=profile';
-$logoutUrl  = $host . '/index.php?logout=1';
-$attackUrl  = $host . '/index.php?attack=1';
+$baseUri = $_SERVER['SCRIPT_NAME'] ?? '/subdomains/myaccount/index.php';
+$loginUrl   = $baseUri;
+$dashUrl    = $baseUri . '?action=dashboard';
+$profileUrl = $baseUri . '?action=profile';
+$logoutUrl  = $baseUri . '?logout=1';
+$attackUrl  = $baseUri . '?attack=1';
 
-define('LAB_FLAG', 'flag{dod_nps_csrf_profile_edit_account_takeover_2712857}');
 define('VICTIM_EMAIL_ORIGINAL', 'victim@nps.edu');
 
 // ── Tables ─────────────────────────────────────────────────────────────────────
-$db->query("CREATE TABLE IF NOT EXISTS lab1305_users (
+$db->query("CREATE TABLE IF NOT EXISTS myaccount_users (
     id         INT AUTO_INCREMENT PRIMARY KEY,
     username   VARCHAR(100) NOT NULL UNIQUE,
     email      VARCHAR(255) NOT NULL UNIQUE,
@@ -47,12 +61,12 @@ $db->query("CREATE TABLE IF NOT EXISTS lab1305_users (
 )");
 
 // ── Seed ───────────────────────────────────────────────────────────────────────
-$sc = $db->query("SELECT COUNT(*) FROM lab1305_users WHERE email IN ('chen@nps.edu','park@nps.edu','torres@nps.edu')")->fetch_row()[0];
+$sc = $db->query("SELECT COUNT(*) FROM myaccount_users WHERE email IN ('chen@nps.edu','park@nps.edu','torres@nps.edu')")->fetch_row()[0];
 if ($sc < 3) {
     $h1 = password_hash('chen@123',   PASSWORD_BCRYPT);
     $h2 = password_hash('park@123',   PASSWORD_BCRYPT);
     $h3 = password_hash('torres@123', PASSWORD_BCRYPT);
-    $db->query("INSERT IGNORE INTO lab1305_users (username, email, password, first_name, last_name, role) VALUES
+    $db->query("INSERT IGNORE INTO myaccount_users (username, email, password, first_name, last_name, role) VALUES
         ('Dr_Chen',     'chen@nps.edu',   '$h1', 'Wei',     'Chen',   'Researcher'),
         ('Lt_Park',     'park@nps.edu',   '$h2', 'Min-Jun', 'Park',   'Researcher'),
         ('Capt_Torres', 'torres@nps.edu', '$h3', 'Rosa',    'Torres', 'Researcher')");
@@ -73,9 +87,9 @@ if ($isLogout) { session_destroy(); header('Location: ' . $loginUrl); exit; }
 
 // ── Load session user ──────────────────────────────────────────────────────────
 $currentUser = null;
-if (!empty($_SESSION['lab1305_uid'])) {
-    $st = $db->prepare("SELECT * FROM lab1305_users WHERE id = ?");
-    $st->bind_param('i', $_SESSION['lab1305_uid']);
+if (!empty($_SESSION['myaccount_uid'])) {
+    $st = $db->prepare("SELECT * FROM myaccount_users WHERE id = ?");
+    $st->bind_param('i', $_SESSION['myaccount_uid']);
     $st->execute();
     $currentUser = $st->get_result()->fetch_assoc();
     $st->close();
@@ -98,16 +112,16 @@ if ($isProfile && $_SERVER['REQUEST_METHOD'] === 'POST' && $currentUser) {
         $uid = $currentUser['id'];
         if ($newPassword && $newPassword === $newCPassword) {
             $hash = password_hash($newPassword, PASSWORD_BCRYPT);
-            $st = $db->prepare("UPDATE lab1305_users SET username=?, email=?, password=?, first_name=?, last_name=? WHERE id=?");
+            $st = $db->prepare("UPDATE myaccount_users SET username=?, email=?, password=?, first_name=?, last_name=? WHERE id=?");
             $st->bind_param('sssssi', $newUsername, $newEmail, $hash, $newFirstName, $newLastName, $uid);
         } else {
-            $st = $db->prepare("UPDATE lab1305_users SET username=?, email=?, first_name=?, last_name=? WHERE id=?");
+            $st = $db->prepare("UPDATE myaccount_users SET username=?, email=?, first_name=?, last_name=? WHERE id=?");
             $st->bind_param('ssssi', $newUsername, $newEmail, $newFirstName, $newLastName, $uid);
         }
         $st->execute();
         $st->close();
         // Reload user
-        $st = $db->prepare("SELECT * FROM lab1305_users WHERE id = ?");
+        $st = $db->prepare("SELECT * FROM myaccount_users WHERE id = ?");
         $st->bind_param('i', $uid);
         $st->execute();
         $currentUser = $st->get_result()->fetch_assoc();
@@ -126,14 +140,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !$isProfile && !$isAttack) {
     $email = trim($_POST['email'] ?? '');
     $pwd   = $_POST['password'] ?? '';
     if ($email && $pwd) {
-        $st = $db->prepare("SELECT * FROM lab1305_users WHERE email = ?");
+        $st = $db->prepare("SELECT * FROM myaccount_users WHERE email = ?");
         $st->bind_param('s', $email);
         $st->execute();
         $row = $st->get_result()->fetch_assoc();
         $st->close();
         if ($row && password_verify($pwd, $row['password'])) {
             session_regenerate_id(true);
-            $_SESSION['lab1305_uid'] = $row['id'];
+            $_SESSION['myaccount_uid'] = $row['id'];
             header('Location: ' . $dashUrl);
             exit;
         }
@@ -235,7 +249,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Arial,sans-s
 .nps-alert-critical-icon{font-size:1.4rem;flex-shrink:0;margin-top:1px;}
 .nps-alert-critical-body h4{font-size:.92rem;font-weight:800;margin-bottom:4px;letter-spacing:.02em;}
 .nps-alert-critical-body p{font-size:.78rem;opacity:.9;line-height:1.5;}
-.nps-flag-box{background:#000;border:2px solid #00ff88;border-radius:3px;padding:10px 16px;margin-top:10px;font-family:'Courier New',monospace;font-size:.82rem;font-weight:700;color:#00ff88;word-break:break-all;}
+
 
 /* Profile strip */
 .nps-profile-strip{background:#fff;border:1px solid #dde3ec;border-radius:4px;padding:14px 18px;margin-bottom:24px;display:flex;align-items:center;gap:16px;}
@@ -676,7 +690,7 @@ function runPoC() {
           The attacker can now request a password reset to <strong><?= esc($currentUser['email']) ?></strong>
           and gain full access to this account.
         </p>
-        <div class="nps-flag-box"><?= LAB_FLAG ?></div>
+        
       </div>
     </div>
     <?php endif; ?>
