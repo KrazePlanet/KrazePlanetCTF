@@ -2,7 +2,7 @@
 // ============================================================
 // Database Configuration
 // ============================================================
-$dbname = 'KrazePlanet';
+$dbname = 'KrazePlanet_DB';
 $username = 'root';
 $password = '';
 $hosts = ['krazeplanet', '127.0.0.1', 'localhost', '172.19.0.1', 'host.docker.internal'];
@@ -1941,8 +1941,8 @@ if (isset($_SESSION['user_id']) && $user) {
       if (currentCaptcha) {
         drawCaptcha(currentCaptcha);
       }
-      // Automatically refresh Captcha every 10 seconds (10000ms)
-      setInterval(reloadCaptcha, 10000);
+      // Automatically refresh Captcha every 30 seconds (30000ms)
+      setInterval(reloadCaptcha, 30000);
 
       // Load active discussions
       if (discussionsData && discussionsData.length > 0) {

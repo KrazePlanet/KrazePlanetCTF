@@ -3,7 +3,7 @@
 // Database Configuration
 // ============================================================
 $host = 'localhost';
-$dbname = 'KrazePlanet';
+$dbname = 'KrazePlanet_DB';
 $username = 'root';
 $password = '';
 $hosts = ['krazeplanet', '127.0.0.1', 'localhost', '172.19.0.1', 'host.docker.internal'];
@@ -89,56 +89,56 @@ function initializeDatabase($pdo) {
             'QuantumSound ANC Headphones',
             'Industry leading active noise cancelling headphones with premium sound fidelity, 30 hours battery life, and comfortable ergonomic over-ear design.',
             299.99,
-            'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=500&auto=format&fit=crop&q=60',
+            'images.jpg',
             'Electronics'
         ]);
         $stmt->execute([
             'NovaWatch Pro Smartwatch',
             'Track your health, receive notifications, and run native applications with this sleek high-end smartwatch featuring a vibrant AMOLED display.',
             199.99,
-            'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=500&auto=format&fit=crop&q=60',
+            'images2.jpg',
             'Electronics'
         ]);
         $stmt->execute([
             'AeroBook Air Ultra Laptop',
             'Ultra thin, ultra light engineering powerhouse featuring an 8-core CPU, 16GB RAM, 512GB SSD, and stunning 14-inch retina display.',
             999.99,
-            'https://images.unsplash.com/photo-1496181130204-7552cc14ac1b?w=500&auto=format&fit=crop&q=60',
+            'images3.jpg',
             'Electronics'
         ]);
         $stmt->execute([
             'PixelStream 4K Capture Card',
             'Broadcast and record your console gameplay in flawless 4K resolution at 60 FPS. Ultra low latency stream performance with pass-through capability.',
             149.99,
-            'https://images.unsplash.com/photo-1615663245857-ac93bb7c39e7?w=500&auto=format&fit=crop&q=60',
+            'images4.jpg',
             'Electronics'
         ]);
         $stmt->execute([
             'Organix Pure Onion Shampoo',
             'Formulated with organic red onion extract to strengthen hair follicles, minimize breakage, and promote healthy growth. Cruelty-free formula.',
             15.50,
-            'https://images.unsplash.com/photo-1535585209827-a15fcdbc4c2d?w=500&auto=format&fit=crop&q=60',
+            'images5.jpg',
             'Beauty'
         ]);
         $stmt->execute([
             'GlowEssence Hydra-Serum',
             'Premium Hyaluronic Acid serum infused with Vitamin C and Niacinamide. Hydrates, plumps skin cells, and brightens overall skin tone.',
             29.99,
-            'https://images.unsplash.com/photo-1620916566398-39f1143ab7be?w=500&auto=format&fit=crop&q=60',
+            'images6.jpg',
             'Beauty'
         ]);
         $stmt->execute([
             'Classic Leather Chronograph',
             'Waterproof wrist watch featuring a genuine hand-stitched leather strap, black dial with rose gold details, and Japanese quartz movement.',
             125.00,
-            'https://images.unsplash.com/photo-1524592094714-0f0654e20314?w=500&auto=format&fit=crop&q=60',
+            'images7.jpg',
             'Fashion'
         ]);
         $stmt->execute([
             'Ergonomic Mesh Office Chair',
             'Adjustable lumbar support with high-density mesh backrest, 3D armrests, and dynamic tilt-lock mechanism for ultimate comfort.',
             249.99,
-            'https://images.unsplash.com/photo-1505797149-43b0069ec26b?w=500&auto=format&fit=crop&q=60',
+            'shopping.jpg',
             'Home'
         ]);
     }
@@ -156,6 +156,26 @@ function initializeDatabase($pdo) {
     }
 }
 initializeDatabase($pdo);
+
+// Migrate any existing seeded Unsplash URLs to local images
+try {
+    $localImagesByProduct = [
+        'QuantumSound ANC Headphones'   => 'images.jpg',
+        'NovaWatch Pro Smartwatch'      => 'images2.jpg',
+        'AeroBook Air Ultra Laptop'     => 'images3.jpg',
+        'PixelStream 4K Capture Card'   => 'images4.jpg',
+        'Organix Pure Onion Shampoo'    => 'images5.jpg',
+        'GlowEssence Hydra-Serum'       => 'images6.jpg',
+        'Classic Leather Chronograph'   => 'images7.jpg',
+        'Ergonomic Mesh Office Chair'   => 'shopping.jpg',
+    ];
+    $migStmt = $pdo->prepare("UPDATE {$table_products} SET image_url = ? WHERE name = ? AND (image_url LIKE '%unsplash%' OR image_url LIKE 'http%')");
+    foreach ($localImagesByProduct as $prodName => $localFile) {
+        $migStmt->execute([$localFile, $prodName]);
+    }
+} catch (Exception $e) {
+    // non-fatal: ignore migration errors
+}
 
 // Session management
 session_start();
@@ -473,6 +493,7 @@ if ($active_product) {
 
 // Helper: Calculate average rating for product card in grid
 function getProductAverageRating($pdo, $pid) {
+    global $table_reviews;
     $stmt = $pdo->prepare("SELECT AVG(rating) as avg_r, COUNT(*) as cnt FROM {$table_reviews} WHERE product_id = ?");
     $stmt->execute([$pid]);
     $res = $stmt->fetch();

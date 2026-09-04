@@ -1832,7 +1832,7 @@ if (isset($_SESSION['user_id']) && $pdo) {
             <span class="difficulty-tag" style="background:#0D9488;color:#fff;">Training</span>
           </div>
           <div class="lab-title">
-            IMDb: Ratings, Reviews, and Where to Watch the Best Movies & TV Shows
+            DOM XSS - IMDb: Ratings, Reviews, and Where to Watch the Best Movies & TV Shows
           </div>
         </div>
         <div class="lab-action">
@@ -1853,7 +1853,7 @@ if (isset($_SESSION['user_id']) && $pdo) {
             <span class="difficulty-tag" style="background:#0D9488;color:#fff;">Training</span>
           </div>
           <div class="lab-title">
-            AniList: Explore, Track, and Discover Anime &amp; Manga
+            DOM XSS - AniList: Explore, Track, and Discover Anime &amp; Manga
           </div>
         </div>
         <div class="lab-action">
@@ -1874,7 +1874,7 @@ if (isset($_SESSION['user_id']) && $pdo) {
             <span class="difficulty-tag" style="background:#0D9488;color:#fff;">Training</span>
           </div>
           <div class="lab-title">
-            MilesWeb: Fast, Secure &amp; Reliable Web Hosting Built for Indian Websites
+            DOM XSS - MilesWeb: Fast, Secure &amp; Reliable Web Hosting Built for Indian Websites
           </div>
         </div>
         <div class="lab-action">
@@ -1895,7 +1895,7 @@ if (isset($_SESSION['user_id']) && $pdo) {
             <span class="difficulty-tag" style="background:#0D9488;color:#fff;">Training</span>
           </div>
           <div class="lab-title">
-            Censys Search - Internet Intelligence Platform
+            DOM XSS - Censys Search - Internet Intelligence Platform
           </div>
         </div>
         <div class="lab-action">
@@ -2125,7 +2125,7 @@ if (isset($_SESSION['user_id']) && $pdo) {
         </div>
         <div class="lab-content">
           <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
-            <span class="difficulty-tag">Easy</span>
+            <span class="difficulty-tag" style="background:#02a9ff;color:#fff;">Secure</span>
             <span class="difficulty-tag" style="background:#0D9488;color:#fff;">Training</span>
           </div>
           <div class="lab-title">
@@ -2150,7 +2150,7 @@ if (isset($_SESSION['user_id']) && $pdo) {
             <span class="difficulty-tag" style="background:#0D9488;color:#fff;">Training</span>
           </div>
           <div class="lab-title">
-            Stored XSS via Profile Bio &amp; Reflected XSS via Search Bar
+            Reflected XSS to Account Takeover
           </div>
         </div>
         <div class="lab-action">
@@ -5122,6 +5122,27 @@ if (isset($_SESSION['user_id']) && $pdo) {
         </div>
         <div class="lab-action">
           <a href="/subdomains/diagnostics" class="btn-ACCESS" target="blank">
+            <svg viewBox="0 0 24 24"><path d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"></path></svg>
+            ACCESS THE LAB
+          </a>
+        </div>
+      </div>
+      <div class="lab-card">
+        <div class="lab-badge">
+          <svg viewBox="0 0 24 24"><path d="M20 4H4c-1.11 0-2 .89-2 2v12c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V6c0-1.11-.89-2-2-2zm0 14H4v-6h16v6zm0-10H4V6h16v2z"/></svg>
+          LAB
+        </div>
+        <div class="lab-content">
+          <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+          <span class="difficulty-tag hard">Hard</span>
+            <span class="difficulty-tag" style="background:#0D9488;color:#fff;">Training</span>
+          </div>
+          <div class="lab-title">
+            RCE via File Upload
+          </div>
+        </div>
+        <div class="lab-action">
+          <a href="/subdomains/pixeleet" class="btn-ACCESS" target="blank">
             <svg viewBox="0 0 24 24"><path d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"></path></svg>
             ACCESS THE LAB
           </a>

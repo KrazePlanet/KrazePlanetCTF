@@ -28,9 +28,17 @@ $db->query("CREATE TABLE IF NOT EXISTS pixeleet_users (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 )") or die($db->error);
 
-// Add avatar columns to existing installs (idempotent)
-$db->query("ALTER TABLE pixeleet_users ADD COLUMN IF NOT EXISTS avatar_path VARCHAR(255) DEFAULT ''");
-$db->query("ALTER TABLE pixeleet_users ADD COLUMN IF NOT EXISTS avatar_alt TEXT DEFAULT ''");
+// Add avatar columns to existing installs (idempotent, MySQL 8 compatible)
+function ensure_column($db, $table, $column, $definition) {
+    $t = $db->real_escape_string($table);
+    $c = $db->real_escape_string($column);
+    $chk = $db->query("SELECT COUNT(*) AS c FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = '$t' AND COLUMN_NAME = '$c'");
+    if ($chk && (int)$chk->fetch_assoc()['c'] === 0) {
+        $db->query("ALTER TABLE `$t` ADD COLUMN $definition");
+    }
+}
+ensure_column($db, 'pixeleet_users', 'avatar_path', "`avatar_path` VARCHAR(255) DEFAULT ''");
+ensure_column($db, 'pixeleet_users', 'avatar_alt', "`avatar_alt` TEXT DEFAULT ''");
 
 // ── Seed victim user (idempotent) ─────────────────────────────────────────────
 $check = $db->query("SELECT COUNT(*) AS c FROM pixeleet_users");
@@ -56,6 +64,30 @@ if ($check && $check->fetch_assoc()['c'] == 0) {
 
 // ── Helper ────────────────────────────────────────────────────────────────────
 function esc($s) { return htmlspecialchars((string)$s, ENT_QUOTES, 'UTF-8'); }
+
+// Fetch one assoc row from an executed mysqli_stmt.
+// Works with mysqlnd (get_result) and falls back to bind_result/fetch
+// on builds without mysqlnd, where get_result() is undefined.
+function stmt_fetch_assoc($st) {
+    if (method_exists($st, 'get_result')) {
+        $res = $st->get_result();
+        if ($res !== false) return $res->fetch_assoc();
+    }
+    $meta = $st->result_metadata();
+    if (!$meta) return null;
+    $row = [];
+    $refs = [];
+    while ($f = $meta->fetch_field()) { $row[$f->name] = null; }
+    foreach ($row as $k => &$v) { $refs[] = &$v; }
+    unset($v);
+    call_user_func_array([$st, 'bind_result'], $refs);
+    if ($st->fetch()) {
+        $out = [];
+        foreach ($row as $k => $v) { $out[$k] = $v; }
+        return $out;
+    }
+    return null;
+}
 
 // ── Routing ───────────────────────────────────────────────────────────────────
 $action = $_GET['action'] ?? '';
@@ -144,8 +176,7 @@ if (!$isRegister && !$isUpload && $_SERVER['REQUEST_METHOD'] === 'POST') {
     $st = $db->prepare("SELECT * FROM pixeleet_users WHERE email = ?");
     $st->bind_param('s', $email);
     $st->execute();
-    $res = $st->get_result();
-    $user = $res->fetch_assoc();
+    $user = stmt_fetch_assoc($st);
     $st->close();
 
     if ($user && password_verify($pass, $user['password'])) {
@@ -166,8 +197,7 @@ if (!empty($_SESSION['pixeleet_uid'])) {
     $st = $db->prepare("SELECT * FROM pixeleet_users WHERE id = ?");
     $st->bind_param('i', $uid);
     $st->execute();
-    $res = $st->get_result();
-    $currentUser = $res->fetch_assoc();
+    $currentUser = stmt_fetch_assoc($st);
     $st->close();
 }
 
@@ -181,8 +211,7 @@ if ($viewId > 0) {
     $st = $db->prepare("SELECT * FROM pixeleet_users WHERE id = ?");
     $st->bind_param('i', $viewId);
     $st->execute();
-    $res = $st->get_result();
-    $viewUser = $res->fetch_assoc();
+    $viewUser = stmt_fetch_assoc($st);
     $st->close();
 }
 ?>

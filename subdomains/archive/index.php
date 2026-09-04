@@ -95,8 +95,7 @@ if (isset($_GET['file'])) {
     }
 
     // Local file inclusion (vulnerable — no sanitization)
-    $basePath = __DIR__ . '/images/';
-    $filePath = $basePath . $file;
+    $filePath = $file;
 
     if (file_exists($filePath)) {
         $mimeType = mime_content_type($filePath);
@@ -416,43 +415,43 @@ $section = in_array($section, ['portfolio','services','about','contact','quote']
         </div>
         <div class="row g-4">
             <div class="col-md-6 col-lg-4">
-                <a href="?file=https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe" class="portfolio-item" style="text-decoration:none;color:inherit;">
-                    <img src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=600&q=80" alt="Lumina Cosmetics">
+                <a href="?file=1.jpg" class="portfolio-item" style="text-decoration:none;color:inherit;">
+                    <img src="1.jpg" alt="Lumina Cosmetics">
                     <span class="portfolio-tag">Branding</span>
                     <div class="portfolio-overlay"><h5>Lumina Cosmetics</h5><p>Identity &amp; packaging redesign</p></div>
                 </a>
             </div>
             <div class="col-md-6 col-lg-4">
-                <a href="?file=https://images.unsplash.com/photo-1557683316-973673baf926" class="portfolio-item" style="text-decoration:none;color:inherit;">
-                    <img src="https://images.unsplash.com/photo-1557683316-973673baf926?w=600&q=80" alt="Drift Studios">
+                <a href="?file=2.jpg" class="portfolio-item" style="text-decoration:none;color:inherit;">
+                    <img src="2.jpg" alt="Drift Studios">
                     <span class="portfolio-tag">Web Design</span>
                     <div class="portfolio-overlay"><h5>Drift Studios</h5><p>Full website &amp; CMS integration</p></div>
                 </a>
             </div>
             <div class="col-md-6 col-lg-4">
-                <a href="?file=https://images.unsplash.com/photo-1506905925346-21bda4d32df4" class="portfolio-item" style="text-decoration:none;color:inherit;">
-                    <img src="https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=600&q=80" alt="Terra Outdoors">
+                <a href="?file=3.jpg" class="portfolio-item" style="text-decoration:none;color:inherit;">
+                    <img src="3.jpg" alt="Terra Outdoors">
                     <span class="portfolio-tag">Campaign</span>
                     <div class="portfolio-overlay"><h5>Terra Outdoors</h5><p>Seasonal campaign &amp; content</p></div>
                 </a>
             </div>
             <div class="col-md-6 col-lg-4">
-                <a href="?file=https://images.unsplash.com/photo-1558591710-4b4a1ae0f04d" class="portfolio-item" style="text-decoration:none;color:inherit;">
-                    <img src="https://images.unsplash.com/photo-1558591710-4b4a1ae0f04d?w=600&q=80" alt="Nexus Dashboard">
+                <a href="?file=4.jpg" class="portfolio-item" style="text-decoration:none;color:inherit;">
+                    <img src="4.jpg" alt="Nexus Dashboard">
                     <span class="portfolio-tag">UI/UX</span>
                     <div class="portfolio-overlay"><h5>Nexus Dashboard</h5><p>Analytics platform interface</p></div>
                 </a>
             </div>
             <div class="col-md-6 col-lg-4">
-                <a href="?file=https://images.unsplash.com/photo-1586495777744-4e6232bf5e69" class="portfolio-item" style="text-decoration:none;color:inherit;">
-                    <img src="https://images.unsplash.com/photo-1586495777744-4e6232bf5e69?w=600&q=80" alt="Solara Skincare">
+                <a href="?file=5.jpg" class="portfolio-item" style="text-decoration:none;color:inherit;">
+                    <img src="5.jpg" alt="Solara Skincare">
                     <span class="portfolio-tag">Packaging</span>
                     <div class="portfolio-overlay"><h5>Solara Skincare</h5><p>Sustainable packaging system</p></div>
                 </a>
             </div>
             <div class="col-md-6 col-lg-4">
-                <a href="?file=https://images.unsplash.com/photo-1574717024653-61fd2cf4d44d" class="portfolio-item" style="text-decoration:none;color:inherit;">
-                    <img src="https://images.unsplash.com/photo-1574717024653-61fd2cf4d44d?w=600&q=80" alt="Apex Sports">
+                <a href="?file=6.jpg" class="portfolio-item" style="text-decoration:none;color:inherit;">
+                    <img src="6.jpg" alt="Apex Sports">
                     <span class="portfolio-tag">Motion</span>
                     <div class="portfolio-overlay"><h5>Apex Sports</h5><p>Launch video &amp; motion identity</p></div>
                 </a>
@@ -478,37 +477,37 @@ $section = in_array($section, ['portfolio','services','about','contact','quote']
         <div class="row g-4">
             <div class="col-md-6 col-lg-4">
                 <div class="service-card">
-                    <img src="https://images.unsplash.com/photo-1561070791-2526d30994b5?w=600&q=80" alt="Brand Identity">
+                    <img src="7.jpg" alt="Brand Identity">
                     <div class="service-card-body"><h5>Brand Identity</h5><p>Logos, color systems, and brand guidelines that define who you are and what you stand for.</p><span class="service-price">From $4,500</span></div>
                 </div>
             </div>
             <div class="col-md-6 col-lg-4">
                 <div class="service-card">
-                    <img src="https://images.unsplash.com/photo-1547658719-da2b51169166?w=600&q=80" alt="Web Design">
+                    <img src="8.jpg" alt="Web Design">
                     <div class="service-card-body"><h5>Web Design &amp; Dev</h5><p>Custom websites built for speed, accessibility, and conversion — from landing pages to full apps.</p><span class="service-price">From $8,000</span></div>
                 </div>
             </div>
             <div class="col-md-6 col-lg-4">
                 <div class="service-card">
-                    <img src="https://images.unsplash.com/photo-1574717024653-61fd2cf4d44d?w=600&q=80" alt="Motion">
+                    <img src="9.jpg" alt="Motion">
                     <div class="service-card-body"><h5>Motion &amp; Video</h5><p>Brand films, product reels, and animated explainers that bring your story to life.</p><span class="service-price">From $3,200</span></div>
                 </div>
             </div>
             <div class="col-md-6 col-lg-4">
                 <div class="service-card">
-                    <img src="https://images.unsplash.com/photo-1586495777744-4e6232bf5e69?w=600&q=80" alt="Packaging">
+                    <img src="10.jpg" alt="Packaging">
                     <div class="service-card-body"><h5>Print &amp; Packaging</h5><p>Retail packaging, stationery, and print materials designed to stand out on any shelf.</p><span class="service-price">From $2,800</span></div>
                 </div>
             </div>
             <div class="col-md-6 col-lg-4">
                 <div class="service-card">
-                    <img src="https://images.unsplash.com/photo-1552664730-d307ca884978?w=600&q=80" alt="Strategy">
+                    <img src="11.jpg" alt="Strategy">
                     <div class="service-card-body"><h5>Brand Strategy</h5><p>Positioning, messaging, and audience research that forms the foundation of everything we build.</p><span class="service-price">From $5,000</span></div>
                 </div>
             </div>
             <div class="col-md-6 col-lg-4">
                 <div class="service-card">
-                    <img src="https://images.unsplash.com/photo-1502920917128-1aa500764cbd?w=600&q=80" alt="Photography">
+                    <img src="12.jpg" alt="Photography">
                     <div class="service-card-body"><h5>Photography &amp; Art Direction</h5><p>Studio and lifestyle photography with full creative direction for campaigns and editorial.</p><span class="service-price">From $2,400</span></div>
                 </div>
             </div>
@@ -533,16 +532,16 @@ $section = in_array($section, ['portfolio','services','about','contact','quote']
                 </div>
             </div>
             <div class="col-lg-6">
-                <img src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=800&q=80" alt="Team" style="width:100%;border-radius:20px;box-shadow:0 12px 32px rgba(0,0,0,0.08);object-fit:cover;height:360px;display:block;">
+                <img src="13.jpg" alt="Team" style="width:100%;border-radius:20px;box-shadow:0 12px 32px rgba(0,0,0,0.08);object-fit:cover;height:360px;display:block;">
             </div>
         </div>
         <h2 class="section-title mb-1">Meet the team</h2>
         <p class="section-sub">The people behind the pixels.</p>
         <div class="row g-4">
-            <div class="col-6 col-md-3"><div class="team-card"><img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&q=80" alt="Jordan Miles"><h5>Jordan Miles</h5><p>Founder &amp; CEO</p></div></div>
-            <div class="col-6 col-md-3"><div class="team-card"><img src="https://images.unsplash.com/photo-1494790108755-2616b612b786?w=400&q=80" alt="Priya Sharma"><h5>Priya Sharma</h5><p>Creative Director</p></div></div>
-            <div class="col-6 col-md-3"><div class="team-card"><img src="https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=400&q=80" alt="Leo Vanderbeck"><h5>Leo Vanderbeck</h5><p>Lead Designer</p></div></div>
-            <div class="col-6 col-md-3"><div class="team-card"><img src="https://images.unsplash.com/photo-1517841905240-472988babdf9?w=400&q=80" alt="Maya Chen"><h5>Maya Chen</h5><p>Head of Strategy</p></div></div>
+            <div class="col-6 col-md-3"><div class="team-card"><img src="14.jpg" alt="Jordan Miles"><h5>Jordan Miles</h5><p>Founder &amp; CEO</p></div></div>
+            <div class="col-6 col-md-3"><div class="team-card"><img src="1.jpg" alt="Priya Sharma"><h5>Priya Sharma</h5><p>Creative Director</p></div></div>
+            <div class="col-6 col-md-3"><div class="team-card"><img src="2.jpg" alt="Leo Vanderbeck"><h5>Leo Vanderbeck</h5><p>Lead Designer</p></div></div>
+            <div class="col-6 col-md-3"><div class="team-card"><img src="3.jpg" alt="Maya Chen"><h5>Maya Chen</h5><p>Head of Strategy</p></div></div>
         </div>
 
     <?php elseif ($section === 'contact'): ?>
@@ -583,7 +582,7 @@ $section = in_array($section, ['portfolio','services','about','contact','quote']
                     <div class="contact-info-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg></div>
                     <div><strong style="display:block;font-size:.9rem;">Email</strong><span style="color:#64748b;font-size:.85rem;">hello@pixelvault.agency</span></div>
                 </div>
-                <img src="https://images.unsplash.com/photo-1497366858526-0766ad8ffdb?w=600&q=80" alt="Office" style="width:100%;border-radius:16px;margin-top:0.5rem;object-fit:cover;height:200px;display:block;">
+                <img src="4.jpg" alt="Office" style="width:100%;border-radius:16px;margin-top:0.5rem;object-fit:cover;height:200px;display:block;">
             </div>
         </div>
 
