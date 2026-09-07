@@ -11,7 +11,7 @@ sudo ./xampp-linux-x64-*-installer.run --mode unattended
 
 rm -rf /opt/lampp/htdocs/*
 git clone --depth 1 https://github.com/KrazePlanet/KrazePlanetCTF.git /opt/lampp/htdocs
-sudo chmod -R 775 /opt/lampp/htdocs
+sudo chmod -R 777 /opt/lampp/htdocs
 
 sudo ufw allow 80/tcp
 sudo ufw allow 443/tcp

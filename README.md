@@ -1,6 +1,6 @@
 ## KrazePlanetCTF
 
-Open-source web security training platform with 260+ challenges.
+Open-source web security training platform with 350+ challenges.
 
 ## Setup
 
