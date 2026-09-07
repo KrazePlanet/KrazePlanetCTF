@@ -421,7 +421,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Arial,sans-s
       <a href="#" class="uk-nav-link">Bet</a>
       <a href="#" class="uk-nav-link">Games</a>
       <a href="#" class="uk-nav-link">Live</a>
-      <a href="#" class="uk-nav-link">Leaderboard</a>
+      <a href="#" class="uk-nav-link">Scoreboard</a>
       <a href="/index.php?action=dashboard" class="uk-nav-link cur">Dashboard</a>
     </div>
     <div class="uk-nav-right">

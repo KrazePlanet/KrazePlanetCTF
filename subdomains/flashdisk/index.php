@@ -220,7 +220,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                     <a class="nav-link" href="#"><i class="bi bi-trophy me-1"></i> Hacktivity</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="#"><i class="bi bi-bar-chart me-1"></i> Leaderboard</a>
+                    <a class="nav-link" href="#"><i class="bi bi-bar-chart me-1"></i> Scoreboard</a>
                 </li>
             </ul>
         </div>

@@ -1,9 +1,9 @@
 <?php
-// leaderboard.php - KrazePlanet Monthly & Global Cybersecurity Leaderboard
+// scoreboard.php - KrazePlanet Monthly & Global Cybersecurity Scoreboard
 if (session_status() === PHP_SESSION_NONE) { session_start(); }
 require_once __DIR__ . '/../config/db.php';
 
-$current_page = 'leaderboard.php';
+$current_page = 'scoreboard.php';
 $loggedInUserId = $_SESSION['user_id'] ?? null;
 
 // Timeframe parsing
@@ -140,7 +140,7 @@ if ($pdo) {
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Leaderboard - KrazePlanet Web Security</title>
+  <title>Scoreboard - KrazePlanet Web Security</title>
   <link rel="icon" type="image/png" href="https://krazeplanet.com/favicon.png">
   
   <!-- Fonts & Icons -->
@@ -172,11 +172,11 @@ if ($pdo) {
       flex-direction: column;
     }
 
-    .leaderboard-header-section {
+    .scoreboard-header-section {
       padding: 3rem 0 1.5rem;
     }
 
-    .leaderboard-title {
+    .scoreboard-title {
       font-size: 2.2rem;
       font-weight: 800;
       color: #ffffff;
@@ -185,7 +185,7 @@ if ($pdo) {
       margin-bottom: 6px;
     }
 
-    .leaderboard-subtitle {
+    .scoreboard-subtitle {
       color: #94a3b8;
       font-size: 0.95rem;
     }
@@ -299,7 +299,7 @@ if ($pdo) {
     }
 
     /* Table Container */
-    .leaderboard-card {
+    .scoreboard-card {
       background: var(--card-bg);
       border: 1px solid var(--border-color);
       border-radius: 16px;
@@ -308,13 +308,13 @@ if ($pdo) {
       margin-bottom: 2.5rem;
     }
 
-    .leaderboard-table {
+    .scoreboard-table {
       width: 100%;
       margin-bottom: 0;
       border-collapse: collapse;
     }
 
-    .leaderboard-table th {
+    .scoreboard-table th {
       background: var(--table-header-bg);
       color: #94a3b8;
       font-size: 12.5px;
@@ -326,7 +326,7 @@ if ($pdo) {
       border-top: none;
     }
 
-    .leaderboard-table td {
+    .scoreboard-table td {
       padding: 14px 20px;
       border-bottom: 1px solid rgba(255, 255, 255, 0.04);
       vertical-align: middle;
@@ -335,7 +335,7 @@ if ($pdo) {
       transition: background 0.15s ease;
     }
 
-    .leaderboard-table tbody tr:hover td {
+    .scoreboard-table tbody tr:hover td {
       background: var(--table-row-hover);
     }
 
@@ -441,9 +441,9 @@ if ($pdo) {
 <div class="container py-4 flex-grow-1">
   
   <!-- Header Title -->
-  <div class="leaderboard-header-section">
-    <h1 class="leaderboard-title">Highest Points Leaderboard</h1>
-    <p class="leaderboard-subtitle mb-2">Ranking is calculated based on completed laboratories, accuracy signals, and exploit difficulty impact.</p>
+  <div class="scoreboard-header-section">
+    <h1 class="scoreboard-title">Highest Points Scoreboard</h1>
+    <p class="scoreboard-subtitle mb-2">Ranking is calculated based on completed laboratories, accuracy signals, and exploit difficulty impact.</p>
     <div class="d-inline-flex align-items-center gap-2 flex-wrap mb-2">
       <span class="badge bg-success bg-opacity-25 text-light border border-success border-opacity-50 px-3 py-1.5 fw-bold" style="font-size: 12px;">
         <i class="bi bi-shield-check text-success me-1"></i> Easy: <span class="text-success fw-extrabold">20 pts</span>
@@ -462,9 +462,9 @@ if ($pdo) {
     
     <!-- Timeframe Quick Pills -->
     <div class="period-pill-group">
-      <a href="leaderboard.php?period=all&country=<?= urlencode($selectedCountry) ?>" class="period-pill-btn <?= ($isAllTime) ? 'active' : '' ?>">All time</a>
-      <a href="leaderboard.php?year=<?= $prevYear ?>&month=<?= $prevMonth ?>&country=<?= urlencode($selectedCountry) ?>" class="period-pill-btn <?= (!$isAllTime && $selectedMonth == $prevMonth && $selectedYear == $prevYear) ? 'active' : '' ?>"><?= $prevMonthName ?></a>
-      <a href="leaderboard.php?year=<?= $curYear ?>&month=<?= $curMonth ?>&country=<?= urlencode($selectedCountry) ?>" class="period-pill-btn <?= (!$isAllTime && $selectedMonth == $curMonth && $selectedYear == $curYear) ? 'active' : '' ?>">This month</a>
+      <a href="scoreboard.php?period=all&country=<?= urlencode($selectedCountry) ?>" class="period-pill-btn <?= ($isAllTime) ? 'active' : '' ?>">All time</a>
+      <a href="scoreboard.php?year=<?= $prevYear ?>&month=<?= $prevMonth ?>&country=<?= urlencode($selectedCountry) ?>" class="period-pill-btn <?= (!$isAllTime && $selectedMonth == $prevMonth && $selectedYear == $prevYear) ? 'active' : '' ?>"><?= $prevMonthName ?></a>
+      <a href="scoreboard.php?year=<?= $curYear ?>&month=<?= $curMonth ?>&country=<?= urlencode($selectedCountry) ?>" class="period-pill-btn <?= (!$isAllTime && $selectedMonth == $curMonth && $selectedYear == $curYear) ? 'active' : '' ?>">This month</a>
     </div>
 
     <!-- Sleek Custom Rounded Dark Dropdown Selectors -->
@@ -479,7 +479,7 @@ if ($pdo) {
           <?php for ($m = 1; $m <= 12; $m++): ?>
             <?php $isActive = (!$isAllTime && $selectedMonth == $m); ?>
             <li>
-              <a class="dropdown-item custom-dropdown-item <?= $isActive ? 'active' : '' ?>" href="leaderboard.php?year=<?= $selectedYear ?>&month=<?= $m ?>&country=<?= urlencode($selectedCountry) ?>">
+              <a class="dropdown-item custom-dropdown-item <?= $isActive ? 'active' : '' ?>" href="scoreboard.php?year=<?= $selectedYear ?>&month=<?= $m ?>&country=<?= urlencode($selectedCountry) ?>">
                 <span><?= $monthNames[$m] ?></span>
                 <?php if ($isActive): ?><i class="bi bi-check2"></i><?php endif; ?>
               </a>
@@ -497,7 +497,7 @@ if ($pdo) {
           <?php for ($y = 2026; $y >= 2024; $y--): ?>
             <?php $isActive = (!$isAllTime && $selectedYear == $y); ?>
             <li>
-              <a class="dropdown-item custom-dropdown-item <?= $isActive ? 'active' : '' ?>" href="leaderboard.php?year=<?= $y ?>&month=<?= $selectedMonth ?>&country=<?= urlencode($selectedCountry) ?>">
+              <a class="dropdown-item custom-dropdown-item <?= $isActive ? 'active' : '' ?>" href="scoreboard.php?year=<?= $y ?>&month=<?= $selectedMonth ?>&country=<?= urlencode($selectedCountry) ?>">
                 <span><?= $y ?></span>
                 <?php if ($isActive): ?><i class="bi bi-check2"></i><?php endif; ?>
               </a>
@@ -515,7 +515,7 @@ if ($pdo) {
           <?php foreach ($countries as $cCode => $cName): ?>
             <?php $isActive = ($selectedCountry === $cCode); ?>
             <li>
-              <a class="dropdown-item custom-dropdown-item <?= $isActive ? 'active' : '' ?>" href="leaderboard.php?<?= $isAllTime ? 'period=all' : "year={$selectedYear}&month={$selectedMonth}" ?>&country=<?= urlencode($cCode) ?>">
+              <a class="dropdown-item custom-dropdown-item <?= $isActive ? 'active' : '' ?>" href="scoreboard.php?<?= $isAllTime ? 'period=all' : "year={$selectedYear}&month={$selectedMonth}" ?>&country=<?= urlencode($cCode) ?>">
                 <span><?= htmlspecialchars($cName) ?></span>
                 <?php if ($isActive): ?><i class="bi bi-check2"></i><?php endif; ?>
               </a>
@@ -537,10 +537,10 @@ if ($pdo) {
     </div>
   </div>
 
-  <!-- Leaderboard Table -->
-  <div class="leaderboard-card">
+  <!-- Scoreboard Table -->
+  <div class="scoreboard-card">
     <div class="table-responsive">
-      <table class="leaderboard-table">
+      <table class="scoreboard-table">
         <thead>
           <tr>
             <th style="width: 100px;">Rank</th>
@@ -645,7 +645,7 @@ if ($pdo) {
     <!-- PUBLIC RECRUITMENT & MOTIVATION BANNER -->
     <div class="p-4 rounded-4 text-center d-flex flex-column flex-md-row align-items-center justify-content-between gap-3 shadow-lg mb-5" style="background: linear-gradient(135deg, rgba(15, 23, 42, 0.95), rgba(2, 132, 199, 0.2)); border: 1px solid rgba(56, 189, 248, 0.35);">
       <div class="text-md-start">
-        <div class="fw-bold text-white fs-6 mb-1"><i class="bi bi-trophy-fill text-warning me-2"></i> Ready to climb the KrazePlanet Leaderboard?</div>
+        <div class="fw-bold text-white fs-6 mb-1"><i class="bi bi-trophy-fill text-warning me-2"></i> Ready to climb the KrazePlanet Scoreboard?</div>
         <div class="text-secondary small">Create a free account, conquer real-world security challenges, and get ranked among top cybersecurity trainees worldwide.</div>
       </div>
       <div class="d-flex gap-2 flex-shrink-0">

@@ -21,7 +21,7 @@
     </nav>
     <div class="container py-5 text-center">
         <h1 class="fw-bold fs-2 mb-2">Simple, Developer-Friendly Pricing</h1>
-        <p class="text-secondary mb-5">Free for individuals forever. Upgrade for team leaderboards and unlimited dashboard history.</p>
+        <p class="text-secondary mb-5">Free for individuals forever. Upgrade for team scoreboards and unlimited dashboard history.</p>
         <div class="row g-4 justify-content-center text-start">
             <div class="col-md-4">
                 <div class="card bg-dark text-white p-4 border-secondary border-opacity-25 rounded-4 h-100">
@@ -43,7 +43,7 @@
                     <ul class="text-secondary small ps-3 mb-4">
                         <li class="mb-2">Unlimited dashboard metrics history</li>
                         <li class="mb-2">Export stats to CSV, JSON, and BigQuery</li>
-                        <li class="mb-2">Private team leaderboards</li>
+                        <li class="mb-2">Private team scoreboards</li>
                     </ul>
                     <a href="index.php" class="btn btn-info w-100">Start Free Pro Trial</a>
                 </div>

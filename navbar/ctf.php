@@ -358,8 +358,8 @@ foreach ($ctfCategories as $cat) {
       </div>
     </div>
     <div class="col-md-auto text-md-end">
-      <a href="leaderboard.php" class="btn btn-outline-info px-3 py-2 fw-semibold" style="border-radius: 10px; font-size: 13.5px;">
-        <i class="bi bi-trophy-fill me-1 text-warning"></i> View Championship Leaderboard
+      <a href="scoreboard.php" class="btn btn-outline-info px-3 py-2 fw-semibold" style="border-radius: 10px; font-size: 13.5px;">
+        <i class="bi bi-trophy-fill me-1 text-warning"></i> View Championship Scoreboard
       </a>
     </div>
   </div>
@@ -606,7 +606,7 @@ function handleFlagSubmit(e) {
     btn.disabled = false;
     btn.innerHTML = '<i class="bi bi-check-circle-fill me-1"></i> Verify & Claim Points';
     alertBox.className = 'alert alert-success py-2 px-3 small mb-3 border-0';
-    alertBox.innerHTML = '<i class="bi bi-check-circle-fill me-1"></i> <strong>Flag Accepted!</strong> +' + points + ' points will be credited to your leaderboard ranking during the live tournament.';
+    alertBox.innerHTML = '<i class="bi bi-check-circle-fill me-1"></i> <strong>Flag Accepted!</strong> +' + points + ' points will be credited to your scoreboard ranking during the live tournament.';
     alertBox.style.display = 'block';
   }, 600);
 }

@@ -191,7 +191,7 @@ function build_invite_template($u) {
         $nk . " has been wagering on Unikrn since {\$member_since} and is personally inviting you.\n\n" .
         "Create your account and get started:\n" .
         "https://unikrn.com/invite?ref=" . urlencode($nk) . "\n\n" .
-        "See you on the leaderboard,\n" .
+        "See you on the scoreboard,\n" .
         "The Unikrn Team\n" .
         "support@unikrn.com\n\n" .
         "{\$site_disclaimer}";
@@ -542,7 +542,7 @@ footer a:hover{color:#a78bfa;}
   <div class="nav-links">
     <a href="#" class="nav-link">Esports</a>
     <a href="#" class="nav-link">Casino</a>
-    <a href="#" class="nav-link">Leaderboard</a>
+    <a href="#" class="nav-link">Scoreboard</a>
     <?php if ($logged_in_user): ?>
     <div class="user-menu">
       <div class="user-avatar-sm"><?= esc(mb_strtoupper(mb_substr($logged_in_user['nickname'] ?: $logged_in_user['email'], 0, 1, 'UTF-8'))) ?></div>
@@ -654,7 +654,7 @@ footer a:hover{color:#a78bfa;}
             <input type="text" name="nickname" class="form-input"
                    value="<?= esc($logged_in_user['nickname']) ?>"
                    placeholder="Your gamer tag">
-            <span class="form-hint">Shown in invitation emails and on the leaderboard</span>
+            <span class="form-hint">Shown in invitation emails and on the scoreboard</span>
           </div>
           <button type="submit" class="btn-purple">Save profile</button>
         </form>

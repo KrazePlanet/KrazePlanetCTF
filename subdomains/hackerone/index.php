@@ -1103,7 +1103,7 @@ $view_mode = $_GET['view'] ?? 'dashboard';
         &copy; HackerOne 2026. 
         <a href="#">Opportunities</a> 
         <a href="#">Security</a> 
-        <a href="#">Leaderboard</a> 
+        <a href="#">Scoreboard</a> 
         <a href="#">Docs</a> 
         <a href="#">Disclosure Guidelines</a>
       </footer>

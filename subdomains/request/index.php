@@ -210,7 +210,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 </a>
                 <a href="integrations.php" class="nav-link-waka d-none d-md-block">Plugins &amp; IDEs</a>
                 <a href="pricing.php" class="nav-link-waka d-none d-md-block">Pricing</a>
-                <a href="dashboard.php" class="nav-link-waka d-none d-md-block">Leaderboards</a>
+                <a href="dashboard.php" class="nav-link-waka d-none d-md-block">Scoreboards</a>
             </div>
 
             <div class="d-flex align-items-center gap-3">

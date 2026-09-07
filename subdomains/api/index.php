@@ -200,7 +200,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
     <nav class="header-nav">
       <a href="#">Promotions</a>
       <a href="#">How it Works</a>
-      <a href="#">Leaderboard</a>
+      <a href="#">Scoreboard</a>
     </nav>
     <a href="#" class="header-cta">Download App</a>
   </div>

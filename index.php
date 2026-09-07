@@ -892,6 +892,46 @@ if (isset($_SESSION['user_id']) && $pdo) {
           </a>
         </div>
       </div>
+      <div class="lab-card">
+        <div class="lab-badge">
+          <svg viewBox="0 0 24 24"><path d="M20 4H4c-1.11 0-2 .89-2 2v12c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V6c0-1.11-.89-2-2-2zm0 14H4v-6h16v6zm0-10H4V6h16v2z"/></svg>
+          LAB
+        </div>
+        <div class="lab-content">
+          <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+            <span class="difficulty-tag hard">Hard</span>
+            <span class="difficulty-tag" style="background:#0D9488;color:#fff;">Training</span>
+          </div>
+          <div class="lab-title">CloudSync: Sensitive Data Exposure and Credential Leakage</div>
+        </div>
+        <div class="lab-action">
+          <a href="/subdomains/kzlabs" class="btn-ACCESS" target="blank">
+            <svg viewBox="0 0 24 24"><path d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"></path></svg>
+            ACCESS THE LAB
+          </a>
+        </div>
+      </div>
+      <div class="lab-card">
+        <div class="lab-badge">
+          <svg viewBox="0 0 24 24"><path d="M20 4H4c-1.11 0-2 .89-2 2v12c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V6c0-1.11-.89-2-2-2zm0 14H4v-6h16v6zm0-10H4V6h16v2z"/></svg>
+          LAB
+        </div>
+        <div class="lab-content">
+          <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+            <span class="difficulty-tag hard">Hard</span>
+            <span class="difficulty-tag" style="background:#0D9488;color:#fff;">Training</span>
+          </div>
+          <div class="lab-title">
+            WordPress Configuration Security Analysis
+          </div>
+        </div>
+        <div class="lab-action">
+          <a href="/subdomains/blog" class="btn-ACCESS" target="blank">
+            <svg viewBox="0 0 24 24"><path d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"></path></svg>
+            ACCESS THE LAB
+          </a>
+        </div>
+      </div>
     </div>
 
 
@@ -1368,48 +1408,6 @@ if (isset($_SESSION['user_id']) && $pdo) {
           </a>
         </div>
       </div>
-            <div class="lab-card">
-        <div class="lab-badge">
-          <svg viewBox="0 0 24 24"><path d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"></path></svg>
-          LAB
-        </div>
-        <div class="lab-content">
-          <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
-            <span class="difficulty-tag easy">Easy</span>
-            <span class="difficulty-tag" style="background:#059669;color:#fff;">DOM XSS</span>
-          </div>
-          <div class="lab-title">
-            DOM XSS in document.write sink using source location.search
-          </div>
-        </div>
-        <div class="lab-action">
-          <a href="/subdomains/useruploads" class="btn-ACCESS" target="_blank">
-            <svg viewBox="0 0 24 24"><path d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"></path></svg>
-            ACCESS THE LAB
-          </a>
-        </div>
-      </div>
-      <div class="lab-card">
-        <div class="lab-badge">
-          <svg viewBox="0 0 24 24"><path d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"></path></svg>
-          LAB
-        </div>
-        <div class="lab-content">
-          <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
-          <span class="difficulty-tag hard">Hard</span>
-            <span class="difficulty-tag" style="background:#0D9488;color:#fff;">Training</span>
-          </div>
-          <div class="lab-title">
-            Reflected XSS - URL Encoding Context
-          </div>
-        </div>
-        <div class="lab-action">
-          <a href="/subdomains/dashboard" class="btn-ACCESS" target="blank">
-            <svg viewBox="0 0 24 24"><path d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"></path></svg>
-            ACCESS THE LAB
-          </a>
-        </div>
-      </div>
       <div class="lab-card">
         <div class="lab-badge">
           <svg viewBox="0 0 24 24"><path d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"></path></svg>
@@ -1684,48 +1682,6 @@ if (isset($_SESSION['user_id']) && $pdo) {
           LAB
         </div>
         <div class="lab-content">
-          <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
-          <span class="difficulty-tag hard">Hard</span>
-            <span class="difficulty-tag" style="background:#0D9488;color:#fff;">Training</span>
-          </div>
-          <div class="lab-title">
-            CSP Bypass - Unsafe Inline Scripts
-          </div>
-        </div>
-        <div class="lab-action">
-          <a href="/subdomains/48.php" class="btn-ACCESS" target="blank">
-            <svg viewBox="0 0 24 24"><path d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"></path></svg>
-            ACCESS THE LAB
-          </a>
-        </div>
-      </div>
-      <div class="lab-card">
-        <div class="lab-badge">
-          <svg viewBox="0 0 24 24"><path d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"></path></svg>
-          LAB
-        </div>
-        <div class="lab-content">
-          <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
-          <span class="difficulty-tag hard">Hard</span>
-            <span class="difficulty-tag" style="background:#0D9488;color:#fff;">Training</span>
-          </div>
-          <div class="lab-title">
-            CSP Protected Page
-          </div>
-        </div>
-        <div class="lab-action">
-          <a href="/subdomains/49.php" class="btn-ACCESS" target="blank">
-            <svg viewBox="0 0 24 24"><path d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"></path></svg>
-            ACCESS THE LAB
-          </a>
-        </div>
-      </div>
-      <div class="lab-card">
-        <div class="lab-badge">
-          <svg viewBox="0 0 24 24"><path d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"></path></svg>
-          LAB
-        </div>
-        <div class="lab-content">
           <div style="display:flex;align-items:center;gap:6px;">
             <span class="difficulty-tag hard">Hard</span>
             <span class="difficulty-tag" style="background:#6366f1;color:#fff;">Real World</span>
@@ -1900,6 +1856,27 @@ if (isset($_SESSION['user_id']) && $pdo) {
         </div>
         <div class="lab-action">
           <a href="/subdomains/censys" class="btn-ACCESS" target="_blank">
+            <svg viewBox="0 0 24 24"><path d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"></path></svg>
+            ACCESS THE LAB
+          </a>
+        </div>
+      </div>
+      <div class="lab-card">
+        <div class="lab-badge">
+          <svg viewBox="0 0 24 24"><path d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"></path></svg>
+          LAB
+        </div>
+        <div class="lab-content">
+          <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+            <span class="difficulty-tag easy">Easy</span>
+            <span class="difficulty-tag" style="background:#059669;color:#fff;">DOM XSS</span>
+          </div>
+          <div class="lab-title">
+            DOM XSS - document.write sink using source location.search
+          </div>
+        </div>
+        <div class="lab-action">
+          <a href="/subdomains/useruploads" class="btn-ACCESS" target="_blank">
             <svg viewBox="0 0 24 24"><path d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"></path></svg>
             ACCESS THE LAB
           </a>
@@ -2104,6 +2081,48 @@ if (isset($_SESSION['user_id']) && $pdo) {
         </div>
         <div class="lab-content">
           <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+          <span class="difficulty-tag hard">Hard</span>
+            <span class="difficulty-tag" style="background:#0D9488;color:#fff;">Training</span>
+          </div>
+          <div class="lab-title">
+            CSP Bypass - Unsafe Inline Scripts
+          </div>
+        </div>
+        <div class="lab-action">
+          <a href="/subdomains/space" class="btn-ACCESS" target="blank">
+            <svg viewBox="0 0 24 24"><path d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"></path></svg>
+            ACCESS THE LAB
+          </a>
+        </div>
+      </div>
+      <div class="lab-card">
+        <div class="lab-badge">
+          <svg viewBox="0 0 24 24"><path d="M20 4H4c-1.11 0-2 .89-2 2v12c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V6c0-1.11-.89-2-2-2zm0 14H4v-6h16v6zm0-10H4V6h16v2z"/></svg>
+          LAB
+        </div>
+        <div class="lab-content">
+          <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+            <span class="difficulty-tag hard">Hard</span>
+            <span class="difficulty-tag" style="background:#0D9488;color:#fff;">Training</span>
+          </div>
+          <div class="lab-title">
+            Planet - CSP Protected Content Security Bypass
+          </div>
+        </div>
+        <div class="lab-action">
+          <a href="/subdomains/planet" class="btn-ACCESS" target="blank">
+            <svg viewBox="0 0 24 24"><path d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"></path></svg>
+            ACCESS THE LAB
+          </a>
+        </div>
+      </div>
+      <div class="lab-card">
+        <div class="lab-badge">
+          <svg viewBox="0 0 24 24"><path d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"></path></svg>
+          LAB
+        </div>
+        <div class="lab-content">
+          <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
             <span class="difficulty-tag" style="background:#02a9ff;color:#fff;">Secure</span>
             <span class="difficulty-tag" style="background:#0D9488;color:#fff;">Training</span>
           </div>
@@ -2134,6 +2153,27 @@ if (isset($_SESSION['user_id']) && $pdo) {
         </div>
         <div class="lab-action">
           <a href="/subdomains/board" class="btn-ACCESS" target="blank">
+            <svg viewBox="0 0 24 24"><path d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"></path></svg>
+            ACCESS THE LAB
+          </a>
+        </div>
+      </div>
+      <div class="lab-card">
+        <div class="lab-badge">
+          <svg viewBox="0 0 24 24"><path d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"></path></svg>
+          LAB
+        </div>
+        <div class="lab-content">
+          <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+            <span class="difficulty-tag" style="background:#02a9ff;color:#fff;">Secure</span>
+            <span class="difficulty-tag" style="background:#0D9488;color:#fff;">Training</span>
+          </div>
+          <div class="lab-title">
+            Reflected XSS - URL Encoding Context
+          </div>
+        </div>
+        <div class="lab-action">
+          <a href="/subdomains/dashboard" class="btn-ACCESS" target="blank">
             <svg viewBox="0 0 24 24"><path d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"></path></svg>
             ACCESS THE LAB
           </a>
@@ -3056,7 +3096,7 @@ if (isset($_SESSION['user_id']) && $pdo) {
         </div>
         <div class="lab-content">
           <div style="display:flex;align-items:center;gap:6px;">
-            <span class="difficulty-tag" style="background:#ea580c;color:#fff;">Medium</span>
+            <span class="difficulty-tag hard">Hard</span>
             <span class="difficulty-tag" style="background:#6366f1;color:#fff;">Real World</span>
             <a href="https://hackerone.com/reports/2812583" target="_blank" rel="noopener noreferrer" class="report-badge">HackerOne #2812583</a>
           </div>
@@ -3069,11 +3109,6 @@ if (isset($_SESSION['user_id']) && $pdo) {
           </a>
         </div>
       </div>
-    </div>
-
-    <!-- Authentication Bypass -->
-    <h3 class="category-title">Authentication Bypass</h3>
-    <div class="labs-list">
       <div class="lab-card">
         <div class="lab-badge">
           <svg viewBox="0 0 24 24"><path d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
@@ -3081,19 +3116,324 @@ if (isset($_SESSION['user_id']) && $pdo) {
         </div>
         <div class="lab-content">
           <div style="display:flex;align-items:center;gap:6px;">
-            <span class="difficulty-tag medium">Medium</span>
+            <span class="difficulty-tag hard">Hard</span>
             <span class="difficulty-tag" style="background:#6366f1;color:#fff;">Real World</span>
-            <a href="https://hackerone.com/reports/1490470" target="_blank" rel="noopener noreferrer" class="report-badge">HackerOne #1490470</a>
+            <a href="https://hackerone.com/reports/159522" target="_blank" rel="noopener noreferrer" class="report-badge">HackerOne #159522</a>
           </div>
-          <div class="lab-title">Admin Auth Bypass - UPS</div>
+          <div class="lab-title">Open redirect using checkout_url</div>
         </div>
         <div class="lab-action">
-          <a href="/subdomains/adminpanel" class="btn-ACCESS" target="blank">
+          <a href="/subdomains/myshopify" class="btn-ACCESS" target="blank">
             <svg viewBox="0 0 24 24"><path d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"></path></svg>
             ACCESS THE LAB
           </a>
         </div>
       </div>
+      <div class="lab-card">
+        <div class="lab-badge">
+          <svg viewBox="0 0 24 24"><path d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
+          LAB
+        </div>
+        <div class="lab-content">
+          <div style="display:flex;align-items:center;gap:6px;">
+            <span class="difficulty-tag hard">Hard</span>
+            <span class="difficulty-tag" style="background:#6366f1;color:#fff;">Real World</span>
+            <a href="https://hackerone.com/reports/1788006" target="_blank" rel="noopener noreferrer" class="report-badge">HackerOne #1788006</a>
+          </div>
+          <div class="lab-title">Open Redirect in Logout & Login</div>
+        </div>
+        <div class="lab-action">
+          <a href="/subdomains/expedia" class="btn-ACCESS" target="blank">
+            <svg viewBox="0 0 24 24"><path d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"></path></svg>
+            ACCESS THE LAB
+          </a>
+        </div>
+      </div>
+      <div class="lab-card">
+        <div class="lab-badge">
+          <svg viewBox="0 0 24 24"><path d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
+          LAB
+        </div>
+        <div class="lab-content">
+          <div style="display:flex;align-items:center;gap:6px;">
+            <span class="difficulty-tag hard">Hard</span>
+            <span class="difficulty-tag" style="background:#6366f1;color:#fff;">Real World</span>
+            <a href="https://hackerone.com/reports/57163" target="_blank" rel="noopener noreferrer" class="report-badge">HackerOne #57163</a>
+          </div>
+          <div class="lab-title">Open-redirect on HackerOne</div>
+        </div>
+        <div class="lab-action">
+          <a href="/subdomains/stranger" class="btn-ACCESS" target="blank">
+            <svg viewBox="0 0 24 24"><path d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"></path></svg>
+            ACCESS THE LAB
+          </a>
+        </div>
+      </div>
+      <div class="lab-card">
+        <div class="lab-badge">
+          <svg viewBox="0 0 24 24"><path d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
+          LAB
+        </div>
+        <div class="lab-content">
+          <div style="display:flex;align-items:center;gap:6px;">
+            <span class="difficulty-tag hard">Hard</span>
+            <span class="difficulty-tag" style="background:#6366f1;color:#fff;">Real World</span>
+            <a href="https://hackerone.com/reports/76738" target="_blank" rel="noopener noreferrer" class="report-badge">HackerOne #76738</a>
+          </div>
+          <div class="lab-title">Open redirect filter bypass</div>
+        </div>
+        <div class="lab-action">
+          <a href="/subdomains/zaption" class="btn-ACCESS" target="blank">
+            <svg viewBox="0 0 24 24"><path d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"></path></svg>
+            ACCESS THE LAB
+          </a>
+        </div>
+      </div>
+      <div class="lab-card">
+        <div class="lab-badge">
+          <svg viewBox="0 0 24 24"><path d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
+          LAB
+        </div>
+        <div class="lab-content">
+          <div style="display:flex;align-items:center;gap:6px;">
+            <span class="difficulty-tag hard">Hard</span>
+            <span class="difficulty-tag" style="background:#6366f1;color:#fff;">Real World</span>
+            <a href="https://hackerone.com/reports/2265413" target="_blank" rel="noopener noreferrer" class="report-badge">HackerOne #2265413</a>
+          </div>
+          <div class="lab-title">Open Redirect on Fastly VDP</div>
+        </div>
+        <div class="lab-action">
+          <a href="/subdomains/fastly" class="btn-ACCESS" target="blank">
+            <svg viewBox="0 0 24 24"><path d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"></path></svg>
+            ACCESS THE LAB
+          </a>
+        </div>
+      </div>
+      <div class="lab-card">
+        <div class="lab-badge">
+          <svg viewBox="0 0 24 24"><path d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
+          LAB
+        </div>
+        <div class="lab-content">
+          <div style="display:flex;align-items:center;gap:6px;">
+            <span class="difficulty-tag hard">Hard</span>
+            <span class="difficulty-tag" style="background:#6366f1;color:#fff;">Real World</span>
+            <a href="https://hackerone.com/reports/439075" target="_blank" rel="noopener noreferrer" class="report-badge">HackerOne #439075</a>
+          </div>
+          <div class="lab-title">Open redirect vulnerability in index.php</div>
+        </div>
+        <div class="lab-action">
+          <a href="/subdomains/cheers" class="btn-ACCESS" target="blank">
+            <svg viewBox="0 0 24 24"><path d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"></path></svg>
+            ACCESS THE LAB
+          </a>
+        </div>
+      </div>
+      <div class="lab-card">
+        <div class="lab-badge">
+          <svg viewBox="0 0 24 24"><path d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
+          LAB
+        </div>
+        <div class="lab-content">
+          <div style="display:flex;align-items:center;gap:6px;">
+            <span class="difficulty-tag hard">Hard</span>
+            <span class="difficulty-tag" style="background:#6366f1;color:#fff;">Real World</span>
+            <a href="https://hackerone.com/reports/119236" target="_blank" rel="noopener noreferrer" class="report-badge">HackerOne #119236</a>
+          </div>
+          <div class="lab-title">Open Redirection on Uber</div>
+        </div>
+        <div class="lab-action">
+          <a href="/subdomains/calendar" class="btn-ACCESS" target="blank">
+            <svg viewBox="0 0 24 24"><path d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"></path></svg>
+            ACCESS THE LAB
+          </a>
+        </div>
+      </div>
+      <div class="lab-card">
+        <div class="lab-badge">
+          <svg viewBox="0 0 24 24"><path d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
+          LAB
+        </div>
+        <div class="lab-content">
+          <div style="display:flex;align-items:center;gap:6px;">
+            <span class="difficulty-tag hard">Hard</span>
+            <span class="difficulty-tag" style="background:#6366f1;color:#fff;">Real World</span>
+            <a href="https://hackerone.com/reports/1213580" target="_blank" rel="noopener noreferrer" class="report-badge">HackerOne #1213580</a>
+          </div>
+          <div class="lab-title">Open Redirect on Affirm</div>
+        </div>
+        <div class="lab-action">
+          <a href="/subdomains/affirm" class="btn-ACCESS" target="blank">
+            <svg viewBox="0 0 24 24"><path d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"></path></svg>
+            ACCESS THE LAB
+          </a>
+        </div>
+      </div>
+      <div class="lab-card">
+        <div class="lab-badge">
+          <svg viewBox="0 0 24 24"><path d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
+          LAB
+        </div>
+        <div class="lab-content">
+          <div style="display:flex;align-items:center;gap:6px;">
+            <span class="difficulty-tag hard">Hard</span>
+            <span class="difficulty-tag" style="background:#6366f1;color:#fff;">Real World</span>
+            <a href="https://hackerone.com/reports/16718" target="_blank" rel="noopener noreferrer" class="report-badge">HackerOne #16718</a>
+          </div>
+          <div class="lab-title">Open Redirect login account</div>
+        </div>
+        <div class="lab-action">
+          <a href="/subdomains/validation" class="btn-ACCESS" target="blank">
+            <svg viewBox="0 0 24 24"><path d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"></path></svg>
+            ACCESS THE LAB
+          </a>
+        </div>
+      </div>
+      <div class="lab-card">
+        <div class="lab-badge">
+          <svg viewBox="0 0 24 24"><path d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
+          LAB
+        </div>
+        <div class="lab-content">
+          <div style="display:flex;align-items:center;gap:6px;">
+            <span class="difficulty-tag hard">Hard</span>
+            <span class="difficulty-tag" style="background:#6366f1;color:#fff;">Real World</span>
+            <a href="https://hackerone.com/reports/1028345" target="_blank" rel="noopener noreferrer" class="report-badge">HackerOne #1028345</a>
+          </div>
+          <div class="lab-title">Open Redirect on HackerOne Events</div>
+        </div>
+        <div class="lab-action">
+          <a href="/subdomains/validation" class="btn-ACCESS" target="blank">
+            <svg viewBox="0 0 24 24"><path d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"></path></svg>
+            ACCESS THE LAB
+          </a>
+        </div>
+      </div>
+      <div class="lab-card">
+        <div class="lab-badge">
+          <svg viewBox="0 0 24 24"><path d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
+          LAB
+        </div>
+        <div class="lab-content">
+          <div style="display:flex;align-items:center;gap:6px;">
+            <span class="difficulty-tag hard">Hard</span>
+            <span class="difficulty-tag" style="background:#6366f1;color:#fff;">Real World</span>
+            <a href="https://hackerone.com/reports/562417" target="_blank" rel="noopener noreferrer" class="report-badge">HackerOne #562417</a>
+          </div>
+          <div class="lab-title">Open Redirect on HackerOne</div>
+        </div>
+        <div class="lab-action">
+          <a href="/subdomains/reviewing" class="btn-ACCESS" target="blank">
+            <svg viewBox="0 0 24 24"><path d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"></path></svg>
+            ACCESS THE LAB
+          </a>
+        </div>
+      </div>
+      <div class="lab-card">
+        <div class="lab-badge">
+          <svg viewBox="0 0 24 24"><path d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
+          LAB
+        </div>
+        <div class="lab-content">
+          <div style="display:flex;align-items:center;gap:6px;">
+            <span class="difficulty-tag hard">Hard</span>
+            <span class="difficulty-tag" style="background:#6366f1;color:#fff;">Real World</span>
+            <a href="https://hackerone.com/reports/3099816" target="_blank" rel="noopener noreferrer" class="report-badge">HackerOne #3099816</a>
+          </div>
+          <div class="lab-title">Open Redirect Vulnerability in OAuth Flow Leading to Potential Phishing Attack</div>
+        </div>
+        <div class="lab-action">
+          <a href="/subdomains/manipulating" class="btn-ACCESS" target="blank">
+            <svg viewBox="0 0 24 24"><path d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"></path></svg>
+            ACCESS THE LAB
+          </a>
+        </div>
+      </div>
+      <div class="lab-card">
+        <div class="lab-badge">
+          <svg viewBox="0 0 24 24"><path d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
+          LAB
+        </div>
+        <div class="lab-content">
+          <div style="display:flex;align-items:center;gap:6px;">
+            <span class="difficulty-tag hard">Hard</span>
+            <span class="difficulty-tag" style="background:#6366f1;color:#fff;">Real World</span>
+            <a href="https://hackerone.com/reports/52035" target="_blank" rel="noopener noreferrer" class="report-badge">HackerOne #52035</a>
+          </div>
+          <div class="lab-title">Open redirect in "Language change"</div>
+        </div>
+        <div class="lab-action">
+          <a href="/subdomains/language" class="btn-ACCESS" target="blank">
+            <svg viewBox="0 0 24 24"><path d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"></path></svg>
+            ACCESS THE LAB
+          </a>
+        </div>
+      </div>
+      <div class="lab-card">
+        <div class="lab-badge">
+          <svg viewBox="0 0 24 24"><path d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
+          LAB
+        </div>
+        <div class="lab-content">
+          <div style="display:flex;align-items:center;gap:6px;">
+            <span class="difficulty-tag hard">Hard</span>
+            <span class="difficulty-tag" style="background:#6366f1;color:#fff;">Real World</span>
+            <a href="https://hackerone.com/reports/223326" target="_blank" rel="noopener noreferrer" class="report-badge">HackerOne #223326</a>
+          </div>
+          <div class="lab-title">Open Redirect via "next" parameter in third-party authentication</div>
+        </div>
+        <div class="lab-action">
+          <a href="/subdomains/immediately" class="btn-ACCESS" target="blank">
+            <svg viewBox="0 0 24 24"><path d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"></path></svg>
+            ACCESS THE LAB
+          </a>
+        </div>
+      </div>
+      <div class="lab-card">
+        <div class="lab-badge">
+          <svg viewBox="0 0 24 24"><path d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
+          LAB
+        </div>
+        <div class="lab-content">
+          <div style="display:flex;align-items:center;gap:6px;">
+            <span class="difficulty-tag hard">Hard</span>
+            <span class="difficulty-tag" style="background:#6366f1;color:#fff;">Real World</span>
+            <a href="https://hackerone.com/reports/692154" target="_blank" rel="noopener noreferrer" class="report-badge">HackerOne #692154</a>
+          </div>
+          <div class="lab-title">Open Redirect in the Path of Vend VDP</div>
+        </div>
+        <div class="lab-action">
+          <a href="/subdomains/vendhq" class="btn-ACCESS" target="blank">
+            <svg viewBox="0 0 24 24"><path d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"></path></svg>
+            ACCESS THE LAB
+          </a>
+        </div>
+      </div>
+      <div class="lab-card">
+        <div class="lab-badge">
+          <svg viewBox="0 0 24 24"><path d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
+          LAB
+        </div>
+        <div class="lab-content">
+          <div style="display:flex;align-items:center;gap:6px;">
+            <span class="difficulty-tag hard">Hard</span>
+            <span class="difficulty-tag" style="background:#6366f1;color:#fff;">Real World</span>
+            <a href="https://hackerone.com/reports/125791" target="_blank" rel="noopener noreferrer" class="report-badge">HackerOne #125791</a>
+          </div>
+          <div class="lab-title">Reflected XSS via Unvalidated / Open Redirect in Uber</div>
+        </div>
+        <div class="lab-action">
+          <a href="/subdomains/demonstrates" class="btn-ACCESS" target="blank">
+            <svg viewBox="0 0 24 24"><path d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"></path></svg>
+            ACCESS THE LAB
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Authentication Bypass -->
+    <h3 class="category-title">Authentication Bypass</h3>
+    <div class="labs-list">
       <div class="lab-card">
         <div class="lab-badge">
           <svg viewBox="0 0 24 24"><path d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
@@ -3131,6 +3471,187 @@ if (isset($_SESSION['user_id']) && $pdo) {
         </div>
         <div class="lab-action">
           <a href="/subdomains/mobile" class="btn-ACCESS" target="blank">
+            <svg viewBox="0 0 24 24"><path d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"></path></svg>
+            ACCESS THE LAB
+          </a>
+        </div>
+      </div>
+      <div class="lab-card">
+        <div class="lab-badge">
+          <svg viewBox="0 0 24 24"><path d="M20 4H4c-1.11 0-2 .89-2 2v12c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V6c0-1.11-.89-2-2-2zm0 14H4v-6h16v6zm0-10H4V6h16v2z"/></svg>
+          LAB
+        </div>
+        <div class="lab-content">
+          <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+            <span class="difficulty-tag hard">Hard</span>
+            <span class="difficulty-tag" style="background:#0D9488;color:#fff;">Training</span>
+          </div>
+          <div class="lab-title">
+            ControlHub - JSON Response Manipulation Auth Bypass
+          </div>
+        </div>
+        <div class="lab-action">
+          <a href="/subdomains/hub" class="btn-ACCESS" target="blank">
+            <svg viewBox="0 0 24 24"><path d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"></path></svg>
+            ACCESS THE LAB
+          </a>
+        </div>
+      </div>
+      <div class="lab-card">
+        <div class="lab-badge">
+          <svg viewBox="0 0 24 24"><path d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
+          LAB
+        </div>
+        <div class="lab-content">
+          <div style="display:flex;align-items:center;gap:6px;">
+            <span class="difficulty-tag hard">Hard</span>
+            <span class="difficulty-tag" style="background:#6366f1;color:#fff;">Real World</span>
+            <a href="https://hackerone.com/reports/1490470" target="_blank" rel="noopener noreferrer" class="report-badge">HackerOne #1490470</a>
+          </div>
+          <div class="lab-title">Admin Authentication Bypass Lead to Admin Account Takeover</div>
+        </div>
+        <div class="lab-action">
+          <a href="/subdomains/adminpanel" class="btn-ACCESS" target="blank">
+            <svg viewBox="0 0 24 24"><path d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"></path></svg>
+            ACCESS THE LAB
+          </a>
+        </div>
+      </div>
+      <div class="lab-card">
+        <div class="lab-badge">
+          <svg viewBox="0 0 24 24"><path d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
+          LAB
+        </div>
+        <div class="lab-content">
+          <div style="display:flex;align-items:center;gap:6px;">
+            <span class="difficulty-tag hard">Hard</span>
+            <span class="difficulty-tag" style="background:#6366f1;color:#fff;">Real World</span>
+            <a href="https://hackerone.com/reports/1406471" target="_blank" rel="noopener noreferrer" class="report-badge">HackerOne #1406471</a>
+          </div>
+          <div class="lab-title">Email Verification code bypass in account registration process</div>
+        </div>
+        <div class="lab-action">
+          <a href="/subdomains/hackers" class="btn-ACCESS" target="blank">
+            <svg viewBox="0 0 24 24"><path d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"></path></svg>
+            ACCESS THE LAB
+          </a>
+        </div>
+      </div>
+      <div class="lab-card">
+        <div class="lab-badge">
+          <svg viewBox="0 0 24 24"><path d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
+          LAB
+        </div>
+        <div class="lab-content">
+          <div style="display:flex;align-items:center;gap:6px;">
+            <span class="difficulty-tag hard">Hard</span>
+            <span class="difficulty-tag" style="background:#6366f1;color:#fff;">Real World</span>
+            <a href="https://hackerone.com/reports/1709881" target="_blank" rel="noopener noreferrer" class="report-badge">HackerOne #1709881</a>
+          </div>
+          <div class="lab-title">Authentication Bypass Leads To Complete Account TakeveOver</div>
+        </div>
+        <div class="lab-action">
+          <a href="/subdomains/mtnbusiness" class="btn-ACCESS" target="blank">
+            <svg viewBox="0 0 24 24"><path d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"></path></svg>
+            ACCESS THE LAB
+          </a>
+        </div>
+      </div>
+      <div class="lab-card">
+        <div class="lab-badge">
+          <svg viewBox="0 0 24 24"><path d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
+          LAB
+        </div>
+        <div class="lab-content">
+          <div style="display:flex;align-items:center;gap:6px;">
+            <span class="difficulty-tag hard">Hard</span>
+            <span class="difficulty-tag" style="background:#6366f1;color:#fff;">Real World</span>
+            <a href="https://hackerone.com/reports/2337427" target="_blank" rel="noopener noreferrer" class="report-badge">HackerOne #2337427</a>
+          </div>
+          <div class="lab-title">Authentication Bypass with usage of PreSignedURL</div>
+        </div>
+        <div class="lab-action">
+          <a href="/subdomains/presignedurl" class="btn-ACCESS" target="blank">
+            <svg viewBox="0 0 24 24"><path d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"></path></svg>
+            ACCESS THE LAB
+          </a>
+        </div>
+      </div>
+      <div class="lab-card">
+        <div class="lab-badge">
+          <svg viewBox="0 0 24 24"><path d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
+          LAB
+        </div>
+        <div class="lab-content">
+          <div style="display:flex;align-items:center;gap:6px;">
+            <span class="difficulty-tag hard">Hard</span>
+            <span class="difficulty-tag" style="background:#6366f1;color:#fff;">Real World</span>
+            <a href="https://hackerone.com/reports/2529780" target="_blank" rel="noopener noreferrer" class="report-badge">HackerOne #2529780</a>
+          </div>
+          <div class="lab-title">Improper Authentication - 2FA OTP Reusable</div>
+        </div>
+        <div class="lab-action">
+          <a href="/subdomains/authenticator" class="btn-ACCESS" target="blank">
+            <svg viewBox="0 0 24 24"><path d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"></path></svg>
+            ACCESS THE LAB
+          </a>
+        </div>
+      </div>
+      <div class="lab-card">
+        <div class="lab-badge">
+          <svg viewBox="0 0 24 24"><path d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
+          LAB
+        </div>
+        <div class="lab-content">
+          <div style="display:flex;align-items:center;gap:6px;">
+            <span class="difficulty-tag hard">Hard</span>
+            <span class="difficulty-tag" style="background:#6366f1;color:#fff;">Real World</span>
+            <a href="https://hackerone.com/reports/1443211" target="_blank" rel="noopener noreferrer" class="report-badge">HackerOne #1443211</a>
+          </div>
+          <div class="lab-title">Bypass Email Verification in Customer Portal</div>
+        </div>
+        <div class="lab-action">
+          <a href="/subdomains/mattermost" class="btn-ACCESS" target="blank">
+            <svg viewBox="0 0 24 24"><path d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"></path></svg>
+            ACCESS THE LAB
+          </a>
+        </div>
+      </div>
+      <div class="lab-card">
+        <div class="lab-badge">
+          <svg viewBox="0 0 24 24"><path d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
+          LAB
+        </div>
+        <div class="lab-content">
+          <div style="display:flex;align-items:center;gap:6px;">
+            <span class="difficulty-tag hard">Hard</span>
+            <span class="difficulty-tag" style="background:#6366f1;color:#fff;">Real World</span>
+            <a href="https://hackerone.com/reports/1690548" target="_blank" rel="noopener noreferrer" class="report-badge">HackerOne #1690548</a>
+          </div>
+          <div class="lab-title">Authentication bypass leads to Information Disclosure</div>
+        </div>
+        <div class="lab-action">
+          <a href="/subdomains/airforce" class="btn-ACCESS" target="blank">
+            <svg viewBox="0 0 24 24"><path d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"></path></svg>
+            ACCESS THE LAB
+          </a>
+        </div>
+      </div>
+      <div class="lab-card">
+        <div class="lab-badge">
+          <svg viewBox="0 0 24 24"><path d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
+          LAB
+        </div>
+        <div class="lab-content">
+          <div style="display:flex;align-items:center;gap:6px;">
+            <span class="difficulty-tag hard">Hard</span>
+            <span class="difficulty-tag" style="background:#6366f1;color:#fff;">Real World</span>
+            <a href="https://hackerone.com/reports/1747146" target="_blank" rel="noopener noreferrer" class="report-badge">HackerOne #1747146</a>
+          </div>
+          <div class="lab-title">Authentication bypass in MTN Group</div>
+        </div>
+        <div class="lab-action">
+          <a href="/subdomains/mntupload" class="btn-ACCESS" target="blank">
             <svg viewBox="0 0 24 24"><path d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"></path></svg>
             ACCESS THE LAB
           </a>
@@ -3400,6 +3921,48 @@ if (isset($_SESSION['user_id']) && $pdo) {
         </div>
         <div class="lab-action">
           <a href="/subdomains/resend" class="btn-ACCESS" target="blank">
+            <svg viewBox="0 0 24 24"><path d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"></path></svg>
+            ACCESS THE LAB
+          </a>
+        </div>
+      </div>
+      <div class="lab-card">
+        <div class="lab-badge">
+          <svg viewBox="0 0 24 24"><path d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+          LAB
+        </div>
+        <div class="lab-content">
+          <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+            <span class="difficulty-tag hard">Hard</span>
+            <span class="difficulty-tag" style="background:#0D9488;color:#fff;">Training</span>
+          </div>
+          <div class="lab-title">
+            Exploiting Rate Limit Bypass in Email Change Functionality
+          </div>
+        </div>
+        <div class="lab-action">
+          <a href="/subdomains/infomaniak" class="btn-ACCESS" target="blank">
+            <svg viewBox="0 0 24 24"><path d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"></path></svg>
+            ACCESS THE LAB
+          </a>
+        </div>
+      </div>
+      <div class="lab-card">
+        <div class="lab-badge">
+          <svg viewBox="0 0 24 24"><path d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+          LAB
+        </div>
+        <div class="lab-content">
+          <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+            <span class="difficulty-tag hard">Hard</span>
+            <span class="difficulty-tag" style="background:#0D9488;color:#fff;">Training</span>
+          </div>
+          <div class="lab-title">
+            Rate Limit Bypass in Recovery Email Change Functionality.
+          </div>
+        </div>
+        <div class="lab-action">
+          <a href="/subdomains/infomaniak-recovery" class="btn-ACCESS" target="blank">
             <svg viewBox="0 0 24 24"><path d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"></path></svg>
             ACCESS THE LAB
           </a>
@@ -3740,6 +4303,203 @@ if (isset($_SESSION['user_id']) && $pdo) {
           </a>
         </div>
       </div>
+      <div class="lab-card">
+        <div class="lab-badge">
+          <svg viewBox="0 0 24 24"><path d="M20 4H4c-1.11 0-2 .89-2 2v12c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V6c0-1.11-.89-2-2-2zm0 14H4v-6h16v6zm0-10H4V6h16v2z"/></svg>
+          LAB
+        </div>
+        <div class="lab-content">
+          <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+            <span class="difficulty-tag hard">Hard</span>
+            <span class="difficulty-tag" style="background:#0D9488;color:#fff;">Training</span>
+          </div>
+          <div class="lab-title">
+            VaultTech - JWT Token Credential Reuse Across Admin Panels
+          </div>
+        </div>
+        <div class="lab-action">
+          <a href="/subdomains/vault" class="btn-ACCESS" target="blank">
+            <svg viewBox="0 0 24 24"><path d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"></path></svg>
+            ACCESS THE LAB
+          </a>
+        </div>
+      </div>
+      <div class="lab-card">
+        <div class="lab-badge">
+          <svg viewBox="0 0 24 24"><path d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+          LAB
+        </div>
+        <div class="lab-content">
+          <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+            <span class="difficulty-tag hard">Hard</span>
+            <span class="difficulty-tag" style="background:#6366f1;color:#fff;">Real World</span>
+            <a href="https://hackerone.com/reports/1703733" target="_blank" rel="noopener noreferrer" class="report-badge">HackerOne #1703733</a>
+          </div>
+          <div class="lab-title">
+            Exposure Of Admin Username & Password
+          </div>
+        </div>
+        <div class="lab-action">
+          <a href="/subdomains/mtnng" class="btn-ACCESS" target="blank">
+            <svg viewBox="0 0 24 24"><path d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"></path></svg>
+            ACCESS THE LAB
+          </a>
+        </div>
+      </div>
+      <div class="lab-card">
+        <div class="lab-badge">
+          <svg viewBox="0 0 24 24"><path d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+          LAB
+        </div>
+        <div class="lab-content">
+          <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+            <span class="difficulty-tag hard">Hard</span>
+            <span class="difficulty-tag" style="background:#6366f1;color:#fff;">Real World</span>
+            <a href="https://hackerone.com/reports/188719" target="_blank" rel="noopener noreferrer" class="report-badge">HackerOne #188719</a>
+          </div>
+          <div class="lab-title">
+            Information Disclosure in /skills call
+          </div>
+        </div>
+        <div class="lab-action">
+          <a href="/subdomains/skills" class="btn-ACCESS" target="blank">
+            <svg viewBox="0 0 24 24"><path d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"></path></svg>
+            ACCESS THE LAB
+          </a>
+        </div>
+      </div>
+      <div class="lab-card">
+        <div class="lab-badge">
+          <svg viewBox="0 0 24 24"><path d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+          LAB
+        </div>
+        <div class="lab-content">
+          <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+            <span class="difficulty-tag hard">Hard</span>
+            <span class="difficulty-tag" style="background:#6366f1;color:#fff;">Real World</span>
+            <a href="https://hackerone.com/reports/975047" target="_blank" rel="noopener noreferrer" class="report-badge">HackerOne #975047</a>
+          </div>
+          <div class="lab-title">
+            User sensitive information disclosure
+          </div>
+        </div>
+        <div class="lab-action">
+          <a href="/subdomains/wechat" class="btn-ACCESS" target="blank">
+            <svg viewBox="0 0 24 24"><path d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"></path></svg>
+            ACCESS THE LAB
+          </a>
+        </div>
+      </div>
+      <div class="lab-card">
+        <div class="lab-badge">
+          <svg viewBox="0 0 24 24"><path d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+          LAB
+        </div>
+        <div class="lab-content">
+          <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+            <span class="difficulty-tag hard">Hard</span>
+            <span class="difficulty-tag" style="background:#6366f1;color:#fff;">Real World</span>
+            <a href="https://hackerone.com/reports/1886143" target="_blank" rel="noopener noreferrer" class="report-badge">HackerOne #1886143</a>
+          </div>
+          <div class="lab-title">
+            Information disclosure of another company bug on video
+          </div>
+        </div>
+        <div class="lab-action">
+          <a href="/subdomains/company" class="btn-ACCESS" target="blank">
+            <svg viewBox="0 0 24 24"><path d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"></path></svg>
+            ACCESS THE LAB
+          </a>
+        </div>
+      </div>
+      <div class="lab-card">
+        <div class="lab-badge">
+          <svg viewBox="0 0 24 24"><path d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+          LAB
+        </div>
+        <div class="lab-content">
+          <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+            <span class="difficulty-tag hard">Hard</span>
+            <span class="difficulty-tag" style="background:#6366f1;color:#fff;">Real World</span>
+            <a href="https://hackerone.com/reports/1801427" target="_blank" rel="noopener noreferrer" class="report-badge">HackerOne #1801427</a>
+          </div>
+          <div class="lab-title">
+            Information disclosure by sending a GIF
+          </div>
+        </div>
+        <div class="lab-action">
+          <a href="/subdomains/voyager-api" class="btn-ACCESS" target="blank">
+            <svg viewBox="0 0 24 24"><path d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"></path></svg>
+            ACCESS THE LAB
+          </a>
+        </div>
+      </div>
+      <div class="lab-card">
+        <div class="lab-badge">
+          <svg viewBox="0 0 24 24"><path d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+          LAB
+        </div>
+        <div class="lab-content">
+          <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+            <span class="difficulty-tag hard">Hard</span>
+            <span class="difficulty-tag" style="background:#6366f1;color:#fff;">Real World</span>
+            <a href="https://hackerone.com/reports/182358" target="_blank" rel="noopener noreferrer" class="report-badge">HackerOne #182358</a>
+          </div>
+          <div class="lab-title">
+            Partial disclosure of report activity through new "Export as .zip" feature
+          </div>
+        </div>
+        <div class="lab-action">
+          <a href="/subdomains/rawreports" class="btn-ACCESS" target="blank">
+            <svg viewBox="0 0 24 24"><path d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"></path></svg>
+            ACCESS THE LAB
+          </a>
+        </div>
+      </div>
+      <div class="lab-card">
+        <div class="lab-badge">
+          <svg viewBox="0 0 24 24"><path d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+          LAB
+        </div>
+        <div class="lab-content">
+          <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+            <span class="difficulty-tag hard">Hard</span>
+            <span class="difficulty-tag" style="background:#6366f1;color:#fff;">Real World</span>
+            <a href="https://hackerone.com/reports/2421796" target="_blank" rel="noopener noreferrer" class="report-badge">HackerOne #2421796</a>
+          </div>
+          <div class="lab-title">
+            Possible PII Disclosure via Advanced Vetting Process
+          </div>
+        </div>
+        <div class="lab-action">
+          <a href="/subdomains/acceptance" class="btn-ACCESS" target="blank">
+            <svg viewBox="0 0 24 24"><path d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"></path></svg>
+            ACCESS THE LAB
+          </a>
+        </div>
+      </div>
+      <div class="lab-card">
+        <div class="lab-badge">
+          <svg viewBox="0 0 24 24"><path d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+          LAB
+        </div>
+        <div class="lab-content">
+          <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+            <span class="difficulty-tag hard">Hard</span>
+            <span class="difficulty-tag" style="background:#6366f1;color:#fff;">Real World</span>
+            <a href="https://hackerone.com/reports/1072893" target="_blank" rel="noopener noreferrer" class="report-badge">HackerOne #1072893</a>
+          </div>
+          <div class="lab-title">
+            Sensitive information disclosure to shared access user via streamlabs platform api
+          </div>
+        </div>
+        <div class="lab-action">
+          <a href="/subdomains/platform" class="btn-ACCESS" target="blank">
+            <svg viewBox="0 0 24 24"><path d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"></path></svg>
+            ACCESS THE LAB
+          </a>
+        </div>
+      </div>
     </div>
 
 
@@ -3767,12 +4527,6 @@ if (isset($_SESSION['user_id']) && $pdo) {
           </a>
         </div>
       </div>
-    </div>
-
-
-    <!-- Using Default Credentials -->
-    <h3 class="category-title">Using Default Credentials</h3>
-    <div class="labs-list">
       <div class="lab-card">
         <div class="lab-badge">
           <svg viewBox="0 0 24 24"><path d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
@@ -3781,14 +4535,438 @@ if (isset($_SESSION['user_id']) && $pdo) {
         <div class="lab-content">
           <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
           <span class="difficulty-tag">Easy</span>
-            <span class="difficulty-tag" style="background:#0D9488;color:#fff;">Training</span>
+            <span class="difficulty-tag" style="background:#6366f1;color:#fff;">Real World</span>
+            <a href="https://hackerone.com/reports/666722" target="_blank" rel="noopener noreferrer" class="report-badge">HackerOne #666722</a>
           </div>
           <div class="lab-title">
-            Default Credentials
+            Email enumeration at SignUp page
           </div>
         </div>
         <div class="lab-action">
-          <a href="/subdomains/defaultlogin" class="btn-ACCESS" target="blank">
+          <a href="/subdomains/exchange" class="btn-ACCESS" target="blank">
+            <svg viewBox="0 0 24 24"><path d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"></path></svg>
+            ACCESS THE LAB
+          </a>
+        </div>
+      </div>
+      <div class="lab-card">
+        <div class="lab-badge">
+          <svg viewBox="0 0 24 24"><path d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+          LAB
+        </div>
+        <div class="lab-content">
+          <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+          <span class="difficulty-tag">Easy</span>
+            <span class="difficulty-tag" style="background:#6366f1;color:#fff;">Real World</span>
+            <a href="https://hackerone.com/reports/1166054" target="_blank" rel="noopener noreferrer" class="report-badge">HackerOne #1166054</a>
+          </div>
+          <div class="lab-title">
+            User enumeration through forget password
+          </div>
+        </div>
+        <div class="lab-action">
+          <a href="/subdomains/upchieve" class="btn-ACCESS" target="blank">
+            <svg viewBox="0 0 24 24"><path d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"></path></svg>
+            ACCESS THE LAB
+          </a>
+        </div>
+      </div>
+      <div class="lab-card">
+        <div class="lab-badge">
+          <svg viewBox="0 0 24 24"><path d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+          LAB
+        </div>
+        <div class="lab-content">
+          <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+          <span class="difficulty-tag">Easy</span>
+            <span class="difficulty-tag" style="background:#6366f1;color:#fff;">Real World</span>
+            <a href="https://hackerone.com/reports/223531" target="_blank" rel="noopener noreferrer" class="report-badge">HackerOne #223531</a>
+          </div>
+          <div class="lab-title">
+            User Enumeration when adding email to account
+          </div>
+        </div>
+        <div class="lab-action">
+          <a href="/subdomains/weblate" class="btn-ACCESS" target="blank">
+            <svg viewBox="0 0 24 24"><path d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"></path></svg>
+            ACCESS THE LAB
+          </a>
+        </div>
+      </div>
+      <div class="lab-card">
+        <div class="lab-badge">
+          <svg viewBox="0 0 24 24"><path d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+          LAB
+        </div>
+        <div class="lab-content">
+          <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+          <span class="difficulty-tag">Easy</span>
+            <span class="difficulty-tag" style="background:#6366f1;color:#fff;">Real World</span>
+            <a href="https://hackerone.com/reports/806151" target="_blank" rel="noopener noreferrer" class="report-badge">HackerOne #806151</a>
+          </div>
+          <div class="lab-title">
+            Enumeration of username on password reset page
+          </div>
+        </div>
+        <div class="lab-action">
+          <a href="/subdomains/endless" class="btn-ACCESS" target="blank">
+            <svg viewBox="0 0 24 24"><path d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"></path></svg>
+            ACCESS THE LAB
+          </a>
+        </div>
+      </div>
+      <div class="lab-card">
+        <div class="lab-badge">
+          <svg viewBox="0 0 24 24"><path d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+          LAB
+        </div>
+        <div class="lab-content">
+          <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+          <span class="difficulty-tag">Easy</span>
+            <span class="difficulty-tag" style="background:#6366f1;color:#fff;">Real World</span>
+            <a href="https://hackerone.com/reports/280509" target="_blank" rel="noopener noreferrer" class="report-badge">HackerOne #280509</a>
+          </div>
+          <div class="lab-title">
+            User Enumeration on Infogram
+          </div>
+        </div>
+        <div class="lab-action">
+          <a href="/subdomains/infogram" class="btn-ACCESS" target="blank">
+            <svg viewBox="0 0 24 24"><path d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"></path></svg>
+            ACCESS THE LAB
+          </a>
+        </div>
+      </div>
+      <div class="lab-card">
+        <div class="lab-badge">
+          <svg viewBox="0 0 24 24"><path d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+          LAB
+        </div>
+        <div class="lab-content">
+          <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+          <span class="difficulty-tag">Easy</span>
+            <span class="difficulty-tag" style="background:#6366f1;color:#fff;">Real World</span>
+            <a href="https://hackerone.com/reports/123496" target="_blank" rel="noopener noreferrer" class="report-badge">HackerOne #123496</a>
+          </div>
+          <div class="lab-title">
+            User enumeration via error message
+          </div>
+        </div>
+        <div class="lab-action">
+          <a href="/subdomains/veris" class="btn-ACCESS" target="blank">
+            <svg viewBox="0 0 24 24"><path d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"></path></svg>
+            ACCESS THE LAB
+          </a>
+        </div>
+      </div>
+      <div class="lab-card">
+        <div class="lab-badge">
+          <svg viewBox="0 0 24 24"><path d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+          LAB
+        </div>
+        <div class="lab-content">
+          <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+          <span class="difficulty-tag">Easy</span>
+            <span class="difficulty-tag" style="background:#6366f1;color:#fff;">Real World</span>
+            <a href="https://hackerone.com/reports/90308" target="_blank" rel="noopener noreferrer" class="report-badge">HackerOne #90308</a>
+          </div>
+          <div class="lab-title">
+            User email enumuration using Gmail
+          </div>
+        </div>
+        <div class="lab-action">
+          <a href="/subdomains/coinbase" class="btn-ACCESS" target="blank">
+            <svg viewBox="0 0 24 24"><path d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"></path></svg>
+            ACCESS THE LAB
+          </a>
+        </div>
+      </div>
+      <div class="lab-card">
+        <div class="lab-badge">
+          <svg viewBox="0 0 24 24"><path d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+          LAB
+        </div>
+        <div class="lab-content">
+          <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+          <span class="difficulty-tag">Easy</span>
+            <span class="difficulty-tag" style="background:#6366f1;color:#fff;">Real World</span>
+            <a href="https://hackerone.com/reports/1439026" target="_blank" rel="noopener noreferrer" class="report-badge">HackerOne #1439026</a>
+          </div>
+          <div class="lab-title">
+            Discoverability by phone number/email restriction bypass
+          </div>
+        </div>
+        <div class="lab-action">
+          <a href="/subdomains/onboardingflow" class="btn-ACCESS" target="blank">
+            <svg viewBox="0 0 24 24"><path d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"></path></svg>
+            ACCESS THE LAB
+          </a>
+        </div>
+      </div>
+      <div class="lab-card">
+        <div class="lab-badge">
+          <svg viewBox="0 0 24 24"><path d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+          LAB
+        </div>
+        <div class="lab-content">
+          <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+          <span class="difficulty-tag">Easy</span>
+            <span class="difficulty-tag" style="background:#6366f1;color:#fff;">Real World</span>
+            <a href="https://hackerone.com/reports/2032716" target="_blank" rel="noopener noreferrer" class="report-badge">HackerOne #2032716</a>
+          </div>
+          <div class="lab-title">
+            An attacker can view any hacker email
+          </div>
+        </div>
+        <div class="lab-action">
+          <a href="/subdomains/operation" class="btn-ACCESS" target="blank">
+            <svg viewBox="0 0 24 24"><path d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"></path></svg>
+            ACCESS THE LAB
+          </a>
+        </div>
+      </div>
+    </div>
+
+
+    <!-- Using Default Credentials -->
+    <h3 class="category-title">Using Default Credentials</h3>
+    <div class="labs-list">
+      <div class="lab-card">
+        <div class="lab-badge">
+          <svg viewBox="0 0 24 24"><path d="M20 4H4c-1.11 0-2 .89-2 2v12c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V6c0-1.11-.89-2-2-2zm0 14H4v-6h16v6zm0-10H4V6h16v2z"/></svg>
+          LAB
+        </div>
+        <div class="lab-content">
+          <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+          <span class="difficulty-tag">Easy</span>
+            <span class="difficulty-tag" style="background:#0D9488;color:#fff;">Training</span>
+          </div>
+          <div class="lab-title">
+            CBSE - Default Credentials Authentication Bypass
+          </div>
+        </div>
+        <div class="lab-action">
+          <a href="/subdomains/school" class="btn-ACCESS" target="blank">
+            <svg viewBox="0 0 24 24"><path d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"></path></svg>
+            ACCESS THE LAB
+          </a>
+        </div>
+      </div>
+      <div class="lab-card">
+        <div class="lab-badge">
+          <svg viewBox="0 0 24 24"><path d="M20 4H4c-1.11 0-2 .89-2 2v12c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V6c0-1.11-.89-2-2-2zm0 14H4v-6h16v6zm0-10H4V6h16v2z"/></svg>
+          LAB
+        </div>
+        <div class="lab-content">
+          <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+          <span class="difficulty-tag">Easy</span>
+            <span class="difficulty-tag" style="background:#6366f1;color:#fff;">Real World</span>
+            <a href="https://hackerone.com/reports/2160178" target="_blank" rel="noopener noreferrer" class="report-badge">HackerOne #2160178</a>
+          </div>
+          <div class="lab-title">
+            Default Credentials at Trellix
+          </div>
+        </div>
+        <div class="lab-action">
+          <a href="/subdomains/trellix" class="btn-ACCESS" target="blank">
+            <svg viewBox="0 0 24 24"><path d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"></path></svg>
+            ACCESS THE LAB
+          </a>
+        </div>
+      </div>
+      <div class="lab-card">
+        <div class="lab-badge">
+          <svg viewBox="0 0 24 24"><path d="M20 4H4c-1.11 0-2 .89-2 2v12c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V6c0-1.11-.89-2-2-2zm0 14H4v-6h16v6zm0-10H4V6h16v2z"/></svg>
+          LAB
+        </div>
+        <div class="lab-content">
+          <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+          <span class="difficulty-tag">Easy</span>
+            <span class="difficulty-tag" style="background:#6366f1;color:#fff;">Real World</span>
+            <a href="https://hackerone.com/reports/1415241" target="_blank" rel="noopener noreferrer" class="report-badge">HackerOne #1415241</a>
+          </div>
+          <div class="lab-title">
+            Elastic Rundeck Default Password
+          </div>
+        </div>
+        <div class="lab-action">
+          <a href="/subdomains/elastic" class="btn-ACCESS" target="blank">
+            <svg viewBox="0 0 24 24"><path d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"></path></svg>
+            ACCESS THE LAB
+          </a>
+        </div>
+      </div>
+      <div class="lab-card">
+        <div class="lab-badge">
+          <svg viewBox="0 0 24 24"><path d="M20 4H4c-1.11 0-2 .89-2 2v12c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V6c0-1.11-.89-2-2-2zm0 14H4v-6h16v6zm0-10H4V6h16v2z"/></svg>
+          LAB
+        </div>
+        <div class="lab-content">
+          <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+          <span class="difficulty-tag">Easy</span>
+            <span class="difficulty-tag" style="background:#6366f1;color:#fff;">Real World</span>
+            <a href="https://hackerone.com/reports/1938693" target="_blank" rel="noopener noreferrer" class="report-badge">HackerOne #1938693</a>
+          </div>
+          <div class="lab-title">
+            Default Credentials on Kinetic Core System Console
+          </div>
+        </div>
+        <div class="lab-action">
+          <a href="/subdomains/kinetic" class="btn-ACCESS" target="blank">
+            <svg viewBox="0 0 24 24"><path d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"></path></svg>
+            ACCESS THE LAB
+          </a>
+        </div>
+      </div>
+      <div class="lab-card">
+        <div class="lab-badge">
+          <svg viewBox="0 0 24 24"><path d="M20 4H4c-1.11 0-2 .89-2 2v12c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V6c0-1.11-.89-2-2-2zm0 14H4v-6h16v6zm0-10H4V6h16v2z"/></svg>
+          LAB
+        </div>
+        <div class="lab-content">
+          <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+          <span class="difficulty-tag">Easy</span>
+            <span class="difficulty-tag" style="background:#6366f1;color:#fff;">Real World</span>
+            <a href="https://hackerone.com/reports/1267174" target="_blank" rel="noopener noreferrer" class="report-badge">HackerOne #1267174</a>
+          </div>
+          <div class="lab-title">
+            Access to tomcat-manager with default creds
+          </div>
+        </div>
+        <div class="lab-action">
+          <a href="/subdomains/jetblue" class="btn-ACCESS" target="blank">
+            <svg viewBox="0 0 24 24"><path d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"></path></svg>
+            ACCESS THE LAB
+          </a>
+        </div>
+      </div>
+      <div class="lab-card">
+        <div class="lab-badge">
+          <svg viewBox="0 0 24 24"><path d="M20 4H4c-1.11 0-2 .89-2 2v12c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V6c0-1.11-.89-2-2-2zm0 14H4v-6h16v6zm0-10H4V6h16v2z"/></svg>
+          LAB
+        </div>
+        <div class="lab-content">
+          <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+          <span class="difficulty-tag">Easy</span>
+            <span class="difficulty-tag" style="background:#6366f1;color:#fff;">Real World</span>
+            <a href="https://hackerone.com/reports/1397786" target="_blank" rel="noopener noreferrer" class="report-badge">HackerOne #1397786</a>
+          </div>
+          <div class="lab-title">
+            Default Admin Username and Password on MTN Group
+          </div>
+        </div>
+        <div class="lab-action">
+          <a href="/subdomains/remedysso" class="btn-ACCESS" target="blank">
+            <svg viewBox="0 0 24 24"><path d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"></path></svg>
+            ACCESS THE LAB
+          </a>
+        </div>
+      </div>
+      <div class="lab-card">
+        <div class="lab-badge">
+          <svg viewBox="0 0 24 24"><path d="M20 4H4c-1.11 0-2 .89-2 2v12c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V6c0-1.11-.89-2-2-2zm0 14H4v-6h16v6zm0-10H4V6h16v2z"/></svg>
+          LAB
+        </div>
+        <div class="lab-content">
+          <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+          <span class="difficulty-tag">Easy</span>
+            <span class="difficulty-tag" style="background:#6366f1;color:#fff;">Real World</span>
+            <a href="https://hackerone.com/reports/753602" target="_blank" rel="noopener noreferrer" class="report-badge">HackerOne #753602</a>
+          </div>
+          <div class="lab-title">
+            Staging Rabbitmq instance is exposed to the internet with default credentials
+          </div>
+        </div>
+        <div class="lab-action">
+          <a href="/subdomains/rabbitmq" class="btn-ACCESS" target="blank">
+            <svg viewBox="0 0 24 24"><path d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"></path></svg>
+            ACCESS THE LAB
+          </a>
+        </div>
+      </div>
+      <div class="lab-card">
+        <div class="lab-badge">
+          <svg viewBox="0 0 24 24"><path d="M20 4H4c-1.11 0-2 .89-2 2v12c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V6c0-1.11-.89-2-2-2zm0 14H4v-6h16v6zm0-10H4V6h16v2z"/></svg>
+          LAB
+        </div>
+        <div class="lab-content">
+          <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+          <span class="difficulty-tag">Easy</span>
+            <span class="difficulty-tag" style="background:#6366f1;color:#fff;">Real World</span>
+            <a href="https://hackerone.com/reports/1297480" target="_blank" rel="noopener noreferrer" class="report-badge">HackerOne #1297480</a>
+          </div>
+          <div class="lab-title">
+            Default Login Credentials on MTN Group
+          </div>
+        </div>
+        <div class="lab-action">
+          <a href="/subdomains/broadbandmaps" class="btn-ACCESS" target="blank">
+            <svg viewBox="0 0 24 24"><path d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"></path></svg>
+            ACCESS THE LAB
+          </a>
+        </div>
+      </div>
+      <div class="lab-card">
+        <div class="lab-badge">
+          <svg viewBox="0 0 24 24"><path d="M20 4H4c-1.11 0-2 .89-2 2v12c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V6c0-1.11-.89-2-2-2zm0 14H4v-6h16v6zm0-10H4V6h16v2z"/></svg>
+          LAB
+        </div>
+        <div class="lab-content">
+          <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+          <span class="difficulty-tag">Easy</span>
+            <span class="difficulty-tag" style="background:#6366f1;color:#fff;">Real World</span>
+            <a href="https://hackerone.com/reports/1700896" target="_blank" rel="noopener noreferrer" class="report-badge">HackerOne #1700896</a>
+          </div>
+          <div class="lab-title">
+            Access nagios dashboard using default credentials in U.S. General Services Administration
+          </div>
+        </div>
+        <div class="lab-action">
+          <a href="/subdomains/nagios" class="btn-ACCESS" target="blank">
+            <svg viewBox="0 0 24 24"><path d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"></path></svg>
+            ACCESS THE LAB
+          </a>
+        </div>
+      </div>
+      <div class="lab-card">
+        <div class="lab-badge">
+          <svg viewBox="0 0 24 24"><path d="M20 4H4c-1.11 0-2 .89-2 2v12c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V6c0-1.11-.89-2-2-2zm0 14H4v-6h16v6zm0-10H4V6h16v2z"/></svg>
+          LAB
+        </div>
+        <div class="lab-content">
+          <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+          <span class="difficulty-tag">Easy</span>
+            <span class="difficulty-tag" style="background:#6366f1;color:#fff;">Real World</span>
+            <a href="https://hackerone.com/reports/2262365" target="_blank" rel="noopener noreferrer" class="report-badge">HackerOne #2262365</a>
+          </div>
+          <div class="lab-title">
+            Default Admin Username and Password on U.S. Dept Of Defense
+          </div>
+        </div>
+        <div class="lab-action">
+          <a href="/subdomains/geoportal" class="btn-ACCESS" target="blank">
+            <svg viewBox="0 0 24 24"><path d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"></path></svg>
+            ACCESS THE LAB
+          </a>
+        </div>
+      </div>
+      <div class="lab-card">
+        <div class="lab-badge">
+          <svg viewBox="0 0 24 24"><path d="M20 4H4c-1.11 0-2 .89-2 2v12c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V6c0-1.11-.89-2-2-2zm0 14H4v-6h16v6zm0-10H4V6h16v2z"/></svg>
+          LAB
+        </div>
+        <div class="lab-content">
+          <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+          <span class="difficulty-tag">Easy</span>
+            <span class="difficulty-tag" style="background:#6366f1;color:#fff;">Real World</span>
+            <a href="https://hackerone.com/reports/684758" target="_blank" rel="noopener noreferrer" class="report-badge">HackerOne #684758</a>
+          </div>
+          <div class="lab-title">
+            Default Credentials on Cisco TelePresence SX80
+          </div>
+        </div>
+        <div class="lab-action">
+          <a href="/subdomains/telepresence" class="btn-ACCESS" target="blank">
             <svg viewBox="0 0 24 24"><path d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"></path></svg>
             ACCESS THE LAB
           </a>
@@ -4493,7 +5671,7 @@ if (isset($_SESSION['user_id']) && $pdo) {
             <span class="difficulty-tag" style="background:#6366f1;color:#fff;">Real World</span>
             <a href="https://hackerone.com/reports/834366" target="_blank" rel="noopener noreferrer" class="report-badge">HackerOne #834366</a>
           </div>
-          <div class="lab-title">Login CSRF - HackerOne</div>
+          <div class="lab-title">Login CSRF vulnerability on  HackerOne</div>
         </div>
         <div class="lab-action">
           <a href="/subdomains/session" class="btn-ACCESS" target="blank">
@@ -4513,7 +5691,7 @@ if (isset($_SESSION['user_id']) && $pdo) {
             <span class="difficulty-tag" style="background:#6366f1;color:#fff;">Real World</span>
             <a href="https://hackerone.com/reports/339352" target="_blank" rel="noopener noreferrer" class="report-badge">HackerOne #339352</a>
           </div>
-          <div class="lab-title">Login CSRF - Unikrn</div>
+          <div class="lab-title">CSRF logs the victim into attacker's account</div>
         </div>
         <div class="lab-action">
           <a href="/subdomains/identity" class="btn-ACCESS" target="blank">
@@ -4533,7 +5711,7 @@ if (isset($_SESSION['user_id']) && $pdo) {
             <span class="difficulty-tag" style="background:#6366f1;color:#fff;">Real World</span>
             <a href="https://hackerone.com/reports/1122408" target="_blank" rel="noopener noreferrer" class="report-badge">HackerOne #1122408</a>
           </div>
-          <div class="lab-title">CSRF - GitLab</div>
+          <div class="lab-title">CSRF on /api/graphql allows executing mutations through GET requests</div>
         </div>
         <div class="lab-action">
           <a href="/subdomains/graphql" class="btn-ACCESS" target="blank">
@@ -4553,7 +5731,7 @@ if (isset($_SESSION['user_id']) && $pdo) {
             <span class="difficulty-tag" style="background:#6366f1;color:#fff;">Real World</span>
             <a href="https://hackerone.com/reports/177508" target="_blank" rel="noopener noreferrer" class="report-badge">HackerOne #177508</a>
           </div>
-          <div class="lab-title">CSRF - Starbucks</div>
+          <div class="lab-title">Reflected XSS by exploiting CSRF vulnerability on Starbucks</div>
         </div>
         <div class="lab-action">
           <a href="/subdomains/wishlist" class="btn-ACCESS" target="blank">
@@ -4573,7 +5751,7 @@ if (isset($_SESSION['user_id']) && $pdo) {
             <span class="difficulty-tag" style="background:#6366f1;color:#fff;">Real World</span>
             <a href="https://hackerone.com/reports/2712857" target="_blank" rel="noopener noreferrer" class="report-badge">HackerOne #2712857</a>
           </div>
-          <div class="lab-title">CSRF - U.S. Dept of Defense</div>
+          <div class="lab-title">CSRF leads to Account takeover</div>
         </div>
         <div class="lab-action">
           <a href="/subdomains/myaccount" class="btn-ACCESS" target="blank">
@@ -4593,7 +5771,7 @@ if (isset($_SESSION['user_id']) && $pdo) {
             <span class="difficulty-tag" style="background:#6366f1;color:#fff;">Real World</span>
             <a href="https://hackerone.com/reports/1118521" target="_blank" rel="noopener noreferrer" class="report-badge">HackerOne #1118521</a>
           </div>
-          <div class="lab-title">CSRF - U.S. Dept of Defense</div>
+          <div class="lab-title">CSRF to Cross-site Scripting (XSS)</div>
         </div>
         <div class="lab-action">
           <a href="/subdomains/academy" class="btn-ACCESS" target="blank">
@@ -4698,7 +5876,7 @@ if (isset($_SESSION['user_id']) && $pdo) {
         </div>
         <div class="lab-content">
           <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
-            <span class="difficulty-tag medium">Medium</span>
+          <span class="difficulty-tag hard">Hard</span>
             <span class="difficulty-tag" style="background:#6366f1;color:#fff;">Real World</span>
             <a href="https://hackerone.com/reports/150095" target="_blank" rel="noopener noreferrer" class="report-badge">HackerOne #150095</a>
           </div>
@@ -4708,6 +5886,358 @@ if (isset($_SESSION['user_id']) && $pdo) {
         </div>
         <div class="lab-action">
           <a href="/subdomains/driver" class="btn-ACCESS" target="blank">
+            <svg viewBox="0 0 24 24"><path d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"></path></svg>
+            ACCESS THE LAB
+          </a>
+        </div>
+      </div>
+      <div class="lab-card">
+        <div class="lab-badge">
+          <svg viewBox="0 0 24 24"><path d="M14 10l-2 1m0 0l-2-1m2 1v2.5M20 7l-2 1m2-1l-2-1m2 1v2.5M14 4l-2-1-2 1M4 7l2-1M4 7l2 1M4 7v2.5M12 21l-2-1m2 1l2-1m-2 1v-2.5M6 18l-2-1v-2.5M20 18l2-1v-2.5"></path></svg>
+          LAB
+        </div>
+        <div class="lab-content">
+          <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+          <span class="difficulty-tag hard">Hard</span>
+            <span class="difficulty-tag" style="background:#6366f1;color:#fff;">Real World</span>
+            <a href="https://hackerone.com/reports/2487889" target="_blank" rel="noopener noreferrer" class="report-badge">HackerOne #2487889</a>
+          </div>
+          <div class="lab-title">
+            Allows Viewing Private Report Details via /bugs.json Endpoint
+          </div>
+        </div>
+        <div class="lab-action">
+          <a href="/subdomains/subject" class="btn-ACCESS" target="blank">
+            <svg viewBox="0 0 24 24"><path d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"></path></svg>
+            ACCESS THE LAB
+          </a>
+        </div>
+      </div>
+      <div class="lab-card">
+        <div class="lab-badge">
+          <svg viewBox="0 0 24 24"><path d="M14 10l-2 1m0 0l-2-1m2 1v2.5M20 7l-2 1m2-1l-2-1m2 1v2.5M14 4l-2-1-2 1M4 7l2-1M4 7l2 1M4 7v2.5M12 21l-2-1m2 1l2-1m-2 1v-2.5M6 18l-2-1v-2.5M20 18l2-1v-2.5"></path></svg>
+          LAB
+        </div>
+        <div class="lab-content">
+          <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+          <span class="difficulty-tag hard">Hard</span>
+            <span class="difficulty-tag" style="background:#6366f1;color:#fff;">Real World</span>
+            <a href="https://hackerone.com/reports/3154983" target="_blank" rel="noopener noreferrer" class="report-badge">HackerOne #3154983</a>
+          </div>
+          <div class="lab-title">
+            Account Deletion via Session Misbinding - Attacker Can Delete Victim Account
+          </div>
+        </div>
+        <div class="lab-action">
+          <a href="/subdomains/destroy" class="btn-ACCESS" target="blank">
+            <svg viewBox="0 0 24 24"><path d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"></path></svg>
+            ACCESS THE LAB
+          </a>
+        </div>
+      </div>
+      <div class="lab-card">
+        <div class="lab-badge">
+          <svg viewBox="0 0 24 24"><path d="M14 10l-2 1m0 0l-2-1m2 1v2.5M20 7l-2 1m2-1l-2-1m2 1v2.5M14 4l-2-1-2 1M4 7l2-1M4 7l2 1M4 7v2.5M12 21l-2-1m2 1l2-1m-2 1v-2.5M6 18l-2-1v-2.5M20 18l2-1v-2.5"></path></svg>
+          LAB
+        </div>
+        <div class="lab-content">
+          <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+          <span class="difficulty-tag hard">Hard</span>
+            <span class="difficulty-tag" style="background:#6366f1;color:#fff;">Real World</span>
+            <a href="https://hackerone.com/reports/950881" target="_blank" rel="noopener noreferrer" class="report-badge">HackerOne #950881</a>
+          </div>
+          <div class="lab-title">
+            IDOR when editing email leads to Account Takeover on Atavist
+          </div>
+        </div>
+        <div class="lab-action">
+          <a href="/subdomains/atavist" class="btn-ACCESS" target="blank">
+            <svg viewBox="0 0 24 24"><path d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"></path></svg>
+            ACCESS THE LAB
+          </a>
+        </div>
+      </div>
+      <div class="lab-card">
+        <div class="lab-badge">
+          <svg viewBox="0 0 24 24"><path d="M14 10l-2 1m0 0l-2-1m2 1v2.5M20 7l-2 1m2-1l-2-1m2 1v2.5M14 4l-2-1-2 1M4 7l2-1M4 7l2 1M4 7v2.5M12 21l-2-1m2 1l2-1m-2 1v-2.5M6 18l-2-1v-2.5M20 18l2-1v-2.5"></path></svg>
+          LAB
+        </div>
+        <div class="lab-content">
+          <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+          <span class="difficulty-tag hard">Hard</span>
+            <span class="difficulty-tag" style="background:#6366f1;color:#fff;">Real World</span>
+            <a href="https://hackerone.com/reports/2528293" target="_blank" rel="noopener noreferrer" class="report-badge">HackerOne #2528293</a>
+          </div>
+          <div class="lab-title">
+            IDOR Exposes All Machine Learning Models
+          </div>
+        </div>
+        <div class="lab-action">
+          <a href="/subdomains/experiment" class="btn-ACCESS" target="blank">
+            <svg viewBox="0 0 24 24"><path d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"></path></svg>
+            ACCESS THE LAB
+          </a>
+        </div>
+      </div>
+      <div class="lab-card">
+        <div class="lab-badge">
+          <svg viewBox="0 0 24 24"><path d="M14 10l-2 1m0 0l-2-1m2 1v2.5M20 7l-2 1m2-1l-2-1m2 1v2.5M14 4l-2-1-2 1M4 7l2-1M4 7l2 1M4 7v2.5M12 21l-2-1m2 1l2-1m-2 1v-2.5M6 18l-2-1v-2.5M20 18l2-1v-2.5"></path></svg>
+          LAB
+        </div>
+        <div class="lab-content">
+          <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+          <span class="difficulty-tag hard">Hard</span>
+            <span class="difficulty-tag" style="background:#6366f1;color:#fff;">Real World</span>
+            <a href="https://hackerone.com/reports/1403176" target="_blank" rel="noopener noreferrer" class="report-badge">HackerOne #1403176</a>
+          </div>
+          <div class="lab-title">
+            IDOR vulnerability (Price manipulation)
+          </div>
+        </div>
+        <div class="lab-action">
+          <a href="/subdomains/produkt" class="btn-ACCESS" target="blank">
+            <svg viewBox="0 0 24 24"><path d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"></path></svg>
+            ACCESS THE LAB
+          </a>
+        </div>
+      </div>
+      <div class="lab-card">
+        <div class="lab-badge">
+          <svg viewBox="0 0 24 24"><path d="M14 10l-2 1m0 0l-2-1m2 1v2.5M20 7l-2 1m2-1l-2-1m2 1v2.5M14 4l-2-1-2 1M4 7l2-1M4 7l2 1M4 7v2.5M12 21l-2-1m2 1l2-1m-2 1v-2.5M6 18l-2-1v-2.5M20 18l2-1v-2.5"></path></svg>
+          LAB
+        </div>
+        <div class="lab-content">
+          <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+          <span class="difficulty-tag hard">Hard</span>
+            <span class="difficulty-tag" style="background:#6366f1;color:#fff;">Real World</span>
+            <a href="https://hackerone.com/reports/1323406" target="_blank" rel="noopener noreferrer" class="report-badge">HackerOne #1323406</a>
+          </div>
+          <div class="lab-title">
+            IDOR to view order information of users and personal information
+          </div>
+        </div>
+        <div class="lab-action">
+          <a href="/subdomains/razer" class="btn-ACCESS" target="blank">
+            <svg viewBox="0 0 24 24"><path d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"></path></svg>
+            ACCESS THE LAB
+          </a>
+        </div>
+      </div>
+      <div class="lab-card">
+        <div class="lab-badge">
+          <svg viewBox="0 0 24 24"><path d="M14 10l-2 1m0 0l-2-1m2 1v2.5M20 7l-2 1m2-1l-2-1m2 1v2.5M14 4l-2-1-2 1M4 7l2-1M4 7l2 1M4 7v2.5M12 21l-2-1m2 1l2-1m-2 1v-2.5M6 18l-2-1v-2.5M20 18l2-1v-2.5"></path></svg>
+          LAB
+        </div>
+        <div class="lab-content">
+          <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+          <span class="difficulty-tag hard">Hard</span>
+            <span class="difficulty-tag" style="background:#6366f1;color:#fff;">Real World</span>
+            <a href="https://hackerone.com/reports/1372216" target="_blank" rel="noopener noreferrer" class="report-badge">HackerOne #1372216</a>
+          </div>
+          <div class="lab-title">
+            IDOR in "external status check" API leaks data about any status check on the instance
+          </div>
+        </div>
+        <div class="lab-action">
+          <a href="/subdomains/external" class="btn-ACCESS" target="blank">
+            <svg viewBox="0 0 24 24"><path d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"></path></svg>
+            ACCESS THE LAB
+          </a>
+        </div>
+      </div>
+      <div class="lab-card">
+        <div class="lab-badge">
+          <svg viewBox="0 0 24 24"><path d="M14 10l-2 1m0 0l-2-1m2 1v2.5M20 7l-2 1m2-1l-2-1m2 1v2.5M14 4l-2-1-2 1M4 7l2-1M4 7l2 1M4 7v2.5M12 21l-2-1m2 1l2-1m-2 1v-2.5M6 18l-2-1v-2.5M20 18l2-1v-2.5"></path></svg>
+          LAB
+        </div>
+        <div class="lab-content">
+          <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+          <span class="difficulty-tag hard">Hard</span>
+            <span class="difficulty-tag" style="background:#6366f1;color:#fff;">Real World</span>
+            <a href="https://hackerone.com/reports/2483666" target="_blank" rel="noopener noreferrer" class="report-badge">HackerOne #2483666</a>
+          </div>
+          <div class="lab-title">
+            [IDOR] Improper Access Control on Embedded Submission Form
+          </div>
+        </div>
+        <div class="lab-action">
+          <a href="/subdomains/pinoywhitehat" class="btn-ACCESS" target="blank">
+            <svg viewBox="0 0 24 24"><path d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"></path></svg>
+            ACCESS THE LAB
+          </a>
+        </div>
+      </div>
+      <div class="lab-card">
+        <div class="lab-badge">
+          <svg viewBox="0 0 24 24"><path d="M14 10l-2 1m0 0l-2-1m2 1v2.5M20 7l-2 1m2-1l-2-1m2 1v2.5M14 4l-2-1-2 1M4 7l2-1M4 7l2 1M4 7v2.5M12 21l-2-1m2 1l2-1m-2 1v-2.5M6 18l-2-1v-2.5M20 18l2-1v-2.5"></path></svg>
+          LAB
+        </div>
+        <div class="lab-content">
+          <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+          <span class="difficulty-tag hard">Hard</span>
+            <span class="difficulty-tag" style="background:#6366f1;color:#fff;">Real World</span>
+            <a href="https://hackerone.com/reports/1695454" target="_blank" rel="noopener noreferrer" class="report-badge">HackerOne #1695454</a>
+          </div>
+          <div class="lab-title">
+            IDOR in API applications (able to see any API token, leads to account takeover)
+          </div>
+        </div>
+        <div class="lab-action">
+          <a href="/subdomains/pressable" class="btn-ACCESS" target="blank">
+            <svg viewBox="0 0 24 24"><path d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"></path></svg>
+            ACCESS THE LAB
+          </a>
+        </div>
+      </div>
+      <div class="lab-card">
+        <div class="lab-badge">
+          <svg viewBox="0 0 24 24"><path d="M14 10l-2 1m0 0l-2-1m2 1v2.5M20 7l-2 1m2-1l-2-1m2 1v2.5M14 4l-2-1-2 1M4 7l2-1M4 7l2 1M4 7v2.5M12 21l-2-1m2 1l2-1m-2 1v-2.5M6 18l-2-1v-2.5M20 18l2-1v-2.5"></path></svg>
+          LAB
+        </div>
+        <div class="lab-content">
+          <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+          <span class="difficulty-tag hard">Hard</span>
+            <span class="difficulty-tag" style="background:#6366f1;color:#fff;">Real World</span>
+            <a href="https://hackerone.com/reports/974222" target="_blank" rel="noopener noreferrer" class="report-badge">HackerOne #974222</a>
+          </div>
+          <div class="lab-title">
+            IDOR leads to Edit Anyone's Blogs / Websites
+          </div>
+        </div>
+        <div class="lab-action">
+          <a href="/subdomains/intensedebate" class="btn-ACCESS" target="blank">
+            <svg viewBox="0 0 24 24"><path d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"></path></svg>
+            ACCESS THE LAB
+          </a>
+        </div>
+      </div>
+      <div class="lab-card">
+        <div class="lab-badge">
+          <svg viewBox="0 0 24 24"><path d="M14 10l-2 1m0 0l-2-1m2 1v2.5M20 7l-2 1m2-1l-2-1m2 1v2.5M14 4l-2-1-2 1M4 7l2-1M4 7l2 1M4 7v2.5M12 21l-2-1m2 1l2-1m-2 1v-2.5M6 18l-2-1v-2.5M20 18l2-1v-2.5"></path></svg>
+          LAB
+        </div>
+        <div class="lab-content">
+          <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+          <span class="difficulty-tag hard">Hard</span>
+            <span class="difficulty-tag" style="background:#6366f1;color:#fff;">Real World</span>
+            <a href="https://hackerone.com/reports/2207248" target="_blank" rel="noopener noreferrer" class="report-badge">HackerOne #2207248</a>
+          </div>
+          <div class="lab-title">
+            IDOR on GraphQL queries BillingDocumentDownload and BillDetails
+          </div>
+        </div>
+        <div class="lab-action">
+          <a href="/subdomains/billinginvoice" class="btn-ACCESS" target="blank">
+            <svg viewBox="0 0 24 24"><path d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"></path></svg>
+            ACCESS THE LAB
+          </a>
+        </div>
+      </div>
+      <div class="lab-card">
+        <div class="lab-badge">
+          <svg viewBox="0 0 24 24"><path d="M14 10l-2 1m0 0l-2-1m2 1v2.5M20 7l-2 1m2-1l-2-1m2 1v2.5M14 4l-2-1-2 1M4 7l2-1M4 7l2 1M4 7v2.5M12 21l-2-1m2 1l2-1m-2 1v-2.5M6 18l-2-1v-2.5M20 18l2-1v-2.5"></path></svg>
+          LAB
+        </div>
+        <div class="lab-content">
+          <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+          <span class="difficulty-tag hard">Hard</span>
+            <span class="difficulty-tag" style="background:#6366f1;color:#fff;">Real World</span>
+            <a href="https://hackerone.com/reports/1608735" target="_blank" rel="noopener noreferrer" class="report-badge">HackerOne #1608735</a>
+          </div>
+          <div class="lab-title">
+            IDOR allows an attacker to delete anyone's featured photo
+          </div>
+        </div>
+        <div class="lab-action">
+          <a href="/subdomains/voyager" class="btn-ACCESS" target="blank">
+            <svg viewBox="0 0 24 24"><path d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"></path></svg>
+            ACCESS THE LAB
+          </a>
+        </div>
+      </div>
+      <div class="lab-card">
+        <div class="lab-badge">
+          <svg viewBox="0 0 24 24"><path d="M14 10l-2 1m0 0l-2-1m2 1v2.5M20 7l-2 1m2-1l-2-1m2 1v2.5M14 4l-2-1-2 1M4 7l2-1M4 7l2 1M4 7v2.5M12 21l-2-1m2 1l2-1m-2 1v-2.5M6 18l-2-1v-2.5M20 18l2-1v-2.5"></path></svg>
+          LAB
+        </div>
+        <div class="lab-content">
+          <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+          <span class="difficulty-tag hard">Hard</span>
+            <span class="difficulty-tag" style="background:#6366f1;color:#fff;">Real World</span>
+            <a href="https://hackerone.com/reports/1272478" target="_blank" rel="noopener noreferrer" class="report-badge">HackerOne #1272478</a>
+          </div>
+          <div class="lab-title">
+            IDOR Leads To Account Takeover Without User Interaction
+          </div>
+        </div>
+        <div class="lab-action">
+          <a href="/subdomains/mtnmobad" class="btn-ACCESS" target="blank">
+            <svg viewBox="0 0 24 24"><path d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"></path></svg>
+            ACCESS THE LAB
+          </a>
+        </div>
+      </div>
+      <div class="lab-card">
+        <div class="lab-badge">
+          <svg viewBox="0 0 24 24"><path d="M14 10l-2 1m0 0l-2-1m2 1v2.5M20 7l-2 1m2-1l-2-1m2 1v2.5M14 4l-2-1-2 1M4 7l2-1M4 7l2 1M4 7v2.5M12 21l-2-1m2 1l2-1m-2 1v-2.5M6 18l-2-1v-2.5M20 18l2-1v-2.5"></path></svg>
+          LAB
+        </div>
+        <div class="lab-content">
+          <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+          <span class="difficulty-tag hard">Hard</span>
+            <span class="difficulty-tag" style="background:#6366f1;color:#fff;">Real World</span>
+            <a href="https://hackerone.com/reports/2586641" target="_blank" rel="noopener noreferrer" class="report-badge">HackerOne #2586641</a>
+          </div>
+          <div class="lab-title">
+            IDOR leads to view other user Biographical details (Possible PII LEAK)
+          </div>
+        </div>
+        <div class="lab-action">
+          <a href="/subdomains/joinonline" class="btn-ACCESS" target="blank">
+            <svg viewBox="0 0 24 24"><path d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"></path></svg>
+            ACCESS THE LAB
+          </a>
+        </div>
+      </div>
+      <div class="lab-card">
+        <div class="lab-badge">
+          <svg viewBox="0 0 24 24"><path d="M14 10l-2 1m0 0l-2-1m2 1v2.5M20 7l-2 1m2-1l-2-1m2 1v2.5M14 4l-2-1-2 1M4 7l2-1M4 7l2 1M4 7v2.5M12 21l-2-1m2 1l2-1m-2 1v-2.5M6 18l-2-1v-2.5M20 18l2-1v-2.5"></path></svg>
+          LAB
+        </div>
+        <div class="lab-content">
+          <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+          <span class="difficulty-tag hard">Hard</span>
+            <span class="difficulty-tag" style="background:#6366f1;color:#fff;">Real World</span>
+            <a href="https://hackerone.com/reports/287789" target="_blank" rel="noopener noreferrer" class="report-badge">HackerOne #287789</a>
+          </div>
+          <div class="lab-title">
+            IDOR to view User Order Information
+          </div>
+        </div>
+        <div class="lab-action">
+          <a href="/subdomains/bistudio" class="btn-ACCESS" target="blank">
+            <svg viewBox="0 0 24 24"><path d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"></path></svg>
+            ACCESS THE LAB
+          </a>
+        </div>
+      </div>
+      <div class="lab-card">
+        <div class="lab-badge">
+          <svg viewBox="0 0 24 24"><path d="M14 10l-2 1m0 0l-2-1m2 1v2.5M20 7l-2 1m2-1l-2-1m2 1v2.5M14 4l-2-1-2 1M4 7l2-1M4 7l2 1M4 7v2.5M12 21l-2-1m2 1l2-1m-2 1v-2.5M6 18l-2-1v-2.5M20 18l2-1v-2.5"></path></svg>
+          LAB
+        </div>
+        <div class="lab-content">
+          <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+          <span class="difficulty-tag hard">Hard</span>
+            <span class="difficulty-tag" style="background:#6366f1;color:#fff;">Real World</span>
+            <a href="https://hackerone.com/reports/1182465" target="_blank" rel="noopener noreferrer" class="report-badge">HackerOne #1182465</a>
+          </div>
+          <div class="lab-title">
+            IDOR on Acronis API lead to steal private business user information
+          </div>
+        </div>
+        <div class="lab-action">
+          <a href="/subdomains/acronis" class="btn-ACCESS" target="blank">
             <svg viewBox="0 0 24 24"><path d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"></path></svg>
             ACCESS THE LAB
           </a>
@@ -5101,6 +6631,50 @@ if (isset($_SESSION['user_id']) && $pdo) {
           </a>
         </div>
       </div>
+      <div class="lab-card">
+        <div class="lab-badge">
+          <svg viewBox="0 0 24 24"><path d="M20 4H4c-1.11 0-2 .89-2 2v12c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V6c0-1.11-.89-2-2-2zm0 14H4v-6h16v6zm0-10H4V6h16v2z"/></svg>
+          LAB
+        </div>
+        <div class="lab-content">
+          <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+            <span class="difficulty-tag hard">Hard</span>
+            <span class="difficulty-tag" style="background:#6366f1;color:#fff;">Real World</span>
+            <a href="https://hackerone.com/reports/1542734" target="_blank" rel="noopener noreferrer" class="report-badge">HackerOne #1542734</a>
+          </div>
+          <div class="lab-title">
+            LFI in filePathDownload Parameter
+          </div>
+        </div>
+        <div class="lab-action">
+          <a href="/subdomains/filepath" class="btn-ACCESS" target="blank">
+            <svg viewBox="0 0 24 24"><path d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"></path></svg>
+            ACCESS THE LAB
+          </a>
+        </div>
+      </div>
+      <div class="lab-card">
+        <div class="lab-badge">
+          <svg viewBox="0 0 24 24"><path d="M20 4H4c-1.11 0-2 .89-2 2v12c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V6c0-1.11-.89-2-2-2zm0 14H4v-6h16v6zm0-10H4V6h16v2z"/></svg>
+          LAB
+        </div>
+        <div class="lab-content">
+          <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+            <span class="difficulty-tag hard">Hard</span>
+            <span class="difficulty-tag" style="background:#6366f1;color:#fff;">Real World</span>
+            <a href="https://hackerone.com/reports/1626210" target="_blank" rel="noopener noreferrer" class="report-badge">HackerOne #1626210</a>
+          </div>
+          <div class="lab-title">
+            LFI in filePathDownload Parameter Bypass
+          </div>
+        </div>
+        <div class="lab-action">
+          <a href="/subdomains/products" class="btn-ACCESS" target="blank">
+            <svg viewBox="0 0 24 24"><path d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"></path></svg>
+            ACCESS THE LAB
+          </a>
+        </div>
+      </div>
     </div>
 
     <!-- Remote Code Execution -->
@@ -5143,6 +6717,28 @@ if (isset($_SESSION['user_id']) && $pdo) {
         </div>
         <div class="lab-action">
           <a href="/subdomains/pixeleet" class="btn-ACCESS" target="blank">
+            <svg viewBox="0 0 24 24"><path d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"></path></svg>
+            ACCESS THE LAB
+          </a>
+        </div>
+      </div>
+      <div class="lab-card">
+        <div class="lab-badge">
+          <svg viewBox="0 0 24 24"><path d="M20 4H4c-1.11 0-2 .89-2 2v12c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V6c0-1.11-.89-2-2-2zm0 14H4v-6h16v6zm0-10H4V6h16v2z"/></svg>
+          LAB
+        </div>
+        <div class="lab-content">
+          <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+          <span class="difficulty-tag hard">Hard</span>
+            <span class="difficulty-tag" style="background:#6366f1;color:#fff;">Real World</span>
+            <a href="https://hackerone.com/reports/1164452" target="_blank" rel="noopener noreferrer" class="report-badge">HackerOne #1164452</a>
+          </div>
+          <div class="lab-title">
+            Unrestricted File Upload - PHP Profile Picture Leads to Remote Code Execution
+          </div>
+        </div>
+        <div class="lab-action">
+          <a href="/subdomains/avatar" class="btn-ACCESS" target="blank">
             <svg viewBox="0 0 24 24"><path d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"></path></svg>
             ACCESS THE LAB
           </a>
@@ -5470,6 +7066,182 @@ if (isset($_SESSION['user_id']) && $pdo) {
           </a>
         </div>
       </div>
+      <div class="lab-card">
+        <div class="lab-badge">
+          <svg viewBox="0 0 24 24"><path d="M14 10l-2 1m0 0l-2-1m2 1v2.5M20 7l-2 1m2-1l-2-1m2 1v2.5M14 4l-2-1-2 1M4 7l2-1M4 7l2 1M4 7v2.5M12 21l-2-1m2 1l2-1m-2 1v-2.5M6 18l-2-1v-2.5M20 18l2-1v-2.5"></path></svg>
+          LAB
+        </div>
+        <div class="lab-content">
+          <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+            <span class="difficulty-tag hard">Hard</span>
+            <span class="difficulty-tag" style="background:#6366f1;color:#fff;">Real World</span>
+            <a href="https://hackerone.com/reports/514224" target="_blank" rel="noopener noreferrer" class="report-badge">HackerOne #514224</a>
+          </div>
+          <div class="lab-title">
+            SSRF in GSA Bounty via ?url= parameter
+          </div>
+        </div>
+        <div class="lab-action">
+          <a href="/subdomains/gsa" class="btn-ACCESS" target="blank">
+            <svg viewBox="0 0 24 24"><path d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"></path></svg>
+            ACCESS THE LAB
+          </a>
+        </div>
+      </div>
+      <div class="lab-card">
+        <div class="lab-badge">
+          <svg viewBox="0 0 24 24"><path d="M14 10l-2 1m0 0l-2-1m2 1v2.5M20 7l-2 1m2-1l-2-1m2 1v2.5M14 4l-2-1-2 1M4 7l2-1M4 7l2 1M4 7v2.5M12 21l-2-1m2 1l2-1m-2 1v-2.5M6 18l-2-1v-2.5M20 18l2-1v-2.5"></path></svg>
+          LAB
+        </div>
+        <div class="lab-content">
+          <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+            <span class="difficulty-tag hard">Hard</span>
+            <span class="difficulty-tag" style="background:#6366f1;color:#fff;">Real World</span>
+            <a href="https://hackerone.com/reports/530974" target="_blank" rel="noopener noreferrer" class="report-badge">HackerOne #530974</a>
+          </div>
+          <div class="lab-title">
+            Server-Side Request Forgery using Javascript allows to exfill data from Google Metadata
+          </div>
+        </div>
+        <div class="lab-action">
+          <a href="/subdomains/topsnap" class="btn-ACCESS" target="blank">
+            <svg viewBox="0 0 24 24"><path d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"></path></svg>
+            ACCESS THE LAB
+          </a>
+        </div>
+      </div>
+      <div class="lab-card">
+        <div class="lab-badge">
+          <svg viewBox="0 0 24 24"><path d="M14 10l-2 1m0 0l-2-1m2 1v2.5M20 7l-2 1m2-1l-2-1m2 1v2.5M14 4l-2-1-2 1M4 7l2-1M4 7l2 1M4 7v2.5M12 21l-2-1m2 1l2-1m-2 1v-2.5M6 18l-2-1v-2.5M20 18l2-1v-2.5"></path></svg>
+          LAB
+        </div>
+        <div class="lab-content">
+          <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+            <span class="difficulty-tag hard">Hard</span>
+            <span class="difficulty-tag" style="background:#6366f1;color:#fff;">Real World</span>
+            <a href="https://hackerone.com/reports/1300585" target="_blank" rel="noopener noreferrer" class="report-badge">HackerOne #1300585</a>
+          </div>
+          <div class="lab-title">
+            blind Server-Side Request Forgery (SSRF) allows scanning internal ports
+          </div>
+        </div>
+        <div class="lab-action">
+          <a href="/subdomains/fleet" class="btn-ACCESS" target="blank">
+            <svg viewBox="0 0 24 24"><path d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"></path></svg>
+            ACCESS THE LAB
+          </a>
+        </div>
+      </div>
+      <div class="lab-card">
+        <div class="lab-badge">
+          <svg viewBox="0 0 24 24"><path d="M14 10l-2 1m0 0l-2-1m2 1v2.5M20 7l-2 1m2-1l-2-1m2 1v2.5M14 4l-2-1-2 1M4 7l2-1M4 7l2 1M4 7v2.5M12 21l-2-1m2 1l2-1m-2 1v-2.5M6 18l-2-1v-2.5M20 18l2-1v-2.5"></path></svg>
+          LAB
+        </div>
+        <div class="lab-content">
+          <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+            <span class="difficulty-tag hard">Hard</span>
+            <span class="difficulty-tag" style="background:#6366f1;color:#fff;">Real World</span>
+            <a href="https://hackerone.com/reports/386292" target="_blank" rel="noopener noreferrer" class="report-badge">HackerOne #386292</a>
+          </div>
+          <div class="lab-title">
+            Bypass of the SSRF protection in Event Subscriptions parameter
+          </div>
+        </div>
+        <div class="lab-action">
+          <a href="/subdomains/subscriptions" class="btn-ACCESS" target="blank">
+            <svg viewBox="0 0 24 24"><path d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"></path></svg>
+            ACCESS THE LAB
+          </a>
+        </div>
+      </div>
+      <div class="lab-card">
+        <div class="lab-badge">
+          <svg viewBox="0 0 24 24"><path d="M14 10l-2 1m0 0l-2-1m2 1v2.5M20 7l-2 1m2-1l-2-1m2 1v2.5M14 4l-2-1-2 1M4 7l2-1M4 7l2 1M4 7v2.5M12 21l-2-1m2 1l2-1m-2 1v-2.5M6 18l-2-1v-2.5M20 18l2-1v-2.5"></path></svg>
+          LAB
+        </div>
+        <div class="lab-content">
+          <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+            <span class="difficulty-tag hard">Hard</span>
+            <span class="difficulty-tag" style="background:#6366f1;color:#fff;">Real World</span>
+            <a href="https://hackerone.com/reports/508459" target="_blank" rel="noopener noreferrer" class="report-badge">HackerOne #508459</a>
+          </div>
+          <div class="lab-title">
+            SSRF in webhooks leads to AWS private keys disclosure
+          </div>
+        </div>
+        <div class="lab-action">
+          <a href="/subdomains/webhooks" class="btn-ACCESS" target="blank">
+            <svg viewBox="0 0 24 24"><path d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"></path></svg>
+            ACCESS THE LAB
+          </a>
+        </div>
+      </div>
+      <div class="lab-card">
+        <div class="lab-badge">
+          <svg viewBox="0 0 24 24"><path d="M14 10l-2 1m0 0l-2-1m2 1v2.5M20 7l-2 1m2-1l-2-1m2 1v2.5M14 4l-2-1-2 1M4 7l2-1M4 7l2 1M4 7v2.5M12 21l-2-1m2 1l2-1m-2 1v-2.5M6 18l-2-1v-2.5M20 18l2-1v-2.5"></path></svg>
+          LAB
+        </div>
+        <div class="lab-content">
+          <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+            <span class="difficulty-tag hard">Hard</span>
+            <span class="difficulty-tag" style="background:#6366f1;color:#fff;">Real World</span>
+            <a href="https://hackerone.com/reports/228377" target="_blank" rel="noopener noreferrer" class="report-badge">HackerOne #228377</a>
+          </div>
+          <div class="lab-title">
+            SSRF in upload IMG through URL
+          </div>
+        </div>
+        <div class="lab-action">
+          <a href="/subdomains/discourse" class="btn-ACCESS" target="blank">
+            <svg viewBox="0 0 24 24"><path d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"></path></svg>
+            ACCESS THE LAB
+          </a>
+        </div>
+      </div>
+      <div class="lab-card">
+        <div class="lab-badge">
+          <svg viewBox="0 0 24 24"><path d="M14 10l-2 1m0 0l-2-1m2 1v2.5M20 7l-2 1m2-1l-2-1m2 1v2.5M14 4l-2-1-2 1M4 7l2-1M4 7l2 1M4 7v2.5M12 21l-2-1m2 1l2-1m-2 1v-2.5M6 18l-2-1v-2.5M20 18l2-1v-2.5"></path></svg>
+          LAB
+        </div>
+        <div class="lab-content">
+          <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+            <span class="difficulty-tag hard">Hard</span>
+            <span class="difficulty-tag" style="background:#6366f1;color:#fff;">Real World</span>
+            <a href="https://hackerone.com/reports/643622" target="_blank" rel="noopener noreferrer" class="report-badge">HackerOne #643622</a>
+          </div>
+          <div class="lab-title">
+            SSRF In Get Video Contents
+          </div>
+        </div>
+        <div class="lab-action">
+          <a href="/subdomains/semrush" class="btn-ACCESS" target="blank">
+            <svg viewBox="0 0 24 24"><path d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"></path></svg>
+            ACCESS THE LAB
+          </a>
+        </div>
+      </div>
+      <div class="lab-card">
+        <div class="lab-badge">
+          <svg viewBox="0 0 24 24"><path d="M14 10l-2 1m0 0l-2-1m2 1v2.5M20 7l-2 1m2-1l-2-1m2 1v2.5M14 4l-2-1-2 1M4 7l2-1M4 7l2 1M4 7v2.5M12 21l-2-1m2 1l2-1m-2 1v-2.5M6 18l-2-1v-2.5M20 18l2-1v-2.5"></path></svg>
+          LAB
+        </div>
+        <div class="lab-content">
+          <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+            <span class="difficulty-tag hard">Hard</span>
+            <span class="difficulty-tag" style="background:#6366f1;color:#fff;">Real World</span>
+            <a href="https://hackerone.com/reports/2301565" target="_blank" rel="noopener noreferrer" class="report-badge">HackerOne #2301565</a>
+          </div>
+          <div class="lab-title">
+            Server Side Request Forgery (SSRF) in webhook functionality
+          </div>
+        </div>
+        <div class="lab-action">
+          <a href="/subdomains/threadcreate" class="btn-ACCESS" target="blank">
+            <svg viewBox="0 0 24 24"><path d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"></path></svg>
+            ACCESS THE LAB
+          </a>
+        </div>
+      </div>
     </div>
 
     <!-- XML External Entity -->
@@ -5672,8 +7444,8 @@ if (isset($_SESSION['user_id']) && $pdo) {
       </div>
     </div>
 
-    <!-- Business Logic Vulnerabilities -->
-    <h3 class="category-title">Business Logic Vulnerabilities</h3>
+    <!-- Business Logic Errors -->
+    <h3 class="category-title">Business Logic Errors</h3>
     <div class="labs-list">
       <div class="lab-card">
         <div class="lab-badge">
@@ -5686,11 +7458,37 @@ if (isset($_SESSION['user_id']) && $pdo) {
             <span class="difficulty-tag" style="background:#0D9488;color:#fff;">Training</span>
           </div>
           <div class="lab-title">
-            Business Logic Vulnerability
+            Business Logic Errors
           </div>
         </div>
         <div class="lab-action">
           <a href="/subdomains/image-api" class="btn-ACCESS" target="blank">
+            <svg viewBox="0 0 24 24"><path d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"></path></svg>
+            ACCESS THE LAB
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Improper Access Control -->
+    <h3 class="category-title">Improper Access Control</h3>
+    <div class="labs-list">
+      <div class="lab-card">
+        <div class="lab-badge">
+          <svg viewBox="0 0 24 24"><path d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+          LAB
+        </div>
+        <div class="lab-content">
+          <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+          <span class="difficulty-tag">Easy</span>
+            <span class="difficulty-tag" style="background:#0D9488;color:#fff;">Training</span>
+          </div>
+          <div class="lab-title">
+            Improper Access Control
+          </div>
+        </div>
+        <div class="lab-action">
+          <a href="/subdomains/improper" class="btn-ACCESS" target="blank">
             <svg viewBox="0 0 24 24"><path d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"></path></svg>
             ACCESS THE LAB
           </a>
@@ -5724,7 +7522,6 @@ if (isset($_SESSION['user_id']) && $pdo) {
       </div>
     </div>
 
-
     <!-- Subdomain Takeovers -->
     <h3 class="category-title">Subdomain Takeovers</h3>
     <div class="labs-list">
@@ -5739,7 +7536,7 @@ if (isset($_SESSION['user_id']) && $pdo) {
             <span class="difficulty-tag" style="background:#0D9488;color:#fff;">Training</span>
           </div>
           <div class="lab-title">
-            Subdomain Takeovers
+            Subdomain Takeovers on Github
           </div>
         </div>
         <div class="lab-action">
@@ -5771,26 +7568,6 @@ if (isset($_SESSION['user_id']) && $pdo) {
         </div>
         <div class="lab-action">
           <a href="/subdomains/include" class="btn-ACCESS" target="blank">
-            <svg viewBox="0 0 24 24"><path d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"></path></svg>
-            ACCESS THE LAB
-          </a>
-        </div>
-      </div>
-      <div class="lab-card">
-        <div class="lab-badge">
-          <svg viewBox="0 0 24 24"><path d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
-          LAB
-        </div>
-        <div class="lab-content">
-          <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
-            <span class="difficulty-tag medium">Medium</span>
-            <span class="difficulty-tag" style="background:#6366f1;color:#fff;">Real World</span>
-            <a href="https://hackerone.com/reports/192940" target="_blank" rel="noopener noreferrer" class="report-badge">HackerOne #192940</a>
-          </div>
-          <div class="lab-title">RFI + XSS + SSRF via Unvalidated URL Proxy in GIS Portal (U.S. DoD)</div>
-        </div>
-        <div class="lab-action">
-          <a href="/subdomains/maps" class="btn-ACCESS" target="blank">
             <svg viewBox="0 0 24 24"><path d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"></path></svg>
             ACCESS THE LAB
           </a>
@@ -5854,6 +7631,26 @@ if (isset($_SESSION['user_id']) && $pdo) {
         </div>
         <div class="lab-action">
           <a href="/subdomains/origin" class="btn-ACCESS" target="blank">
+            <svg viewBox="0 0 24 24"><path d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"></path></svg>
+            ACCESS THE LAB
+          </a>
+        </div>
+      </div>
+      <div class="lab-card">
+        <div class="lab-badge">
+          <svg viewBox="0 0 24 24"><path d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+          LAB
+        </div>
+        <div class="lab-content">
+          <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+            <span class="difficulty-tag medium">Medium</span>
+            <span class="difficulty-tag" style="background:#6366f1;color:#fff;">Real World</span>
+            <a href="https://hackerone.com/reports/192940" target="_blank" rel="noopener noreferrer" class="report-badge">HackerOne #192940</a>
+          </div>
+          <div class="lab-title">RFI + XSS + SSRF via Unvalidated URL Proxy in GIS Portal (U.S. DoD)</div>
+        </div>
+        <div class="lab-action">
+          <a href="/subdomains/maps" class="btn-ACCESS" target="blank">
             <svg viewBox="0 0 24 24"><path d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"></path></svg>
             ACCESS THE LAB
           </a>
@@ -6376,27 +8173,6 @@ if (isset($_SESSION['user_id']) && $pdo) {
         </div>
         <div class="lab-content">
           <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
-            <span class="difficulty-tag hard">Hard</span>
-            <span class="difficulty-tag" style="background:#0D9488;color:#fff;">Training</span>
-          </div>
-          <div class="lab-title">
-            Planet - CSP Protected Content Security Bypass
-          </div>
-        </div>
-        <div class="lab-action">
-          <a href="/subdomains/planet" class="btn-ACCESS" target="blank">
-            <svg viewBox="0 0 24 24"><path d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"></path></svg>
-            ACCESS THE LAB
-          </a>
-        </div>
-      </div>
-      <div class="lab-card">
-        <div class="lab-badge">
-          <svg viewBox="0 0 24 24"><path d="M20 4H4c-1.11 0-2 .89-2 2v12c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V6c0-1.11-.89-2-2-2zm0 14H4v-6h16v6zm0-10H4V6h16v2z"/></svg>
-          LAB
-        </div>
-        <div class="lab-content">
-          <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
             <span class="difficulty-tag easy">Easy</span>
             <span class="difficulty-tag" style="background:#0D9488;color:#fff;">Training</span>
           </div>
@@ -6469,27 +8245,6 @@ if (isset($_SESSION['user_id']) && $pdo) {
         </div>
         <div class="lab-action">
           <a href="/subdomains/restaurant" class="btn-ACCESS" target="blank">
-            <svg viewBox="0 0 24 24"><path d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"></path></svg>
-            ACCESS THE LAB
-          </a>
-        </div>
-      </div>
-      <div class="lab-card">
-        <div class="lab-badge">
-          <svg viewBox="0 0 24 24"><path d="M20 4H4c-1.11 0-2 .89-2 2v12c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V6c0-1.11-.89-2-2-2zm0 14H4v-6h16v6zm0-10H4V6h16v2z"/></svg>
-          LAB
-        </div>
-        <div class="lab-content">
-          <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
-            <span class="difficulty-tag hard">Hard</span>
-            <span class="difficulty-tag" style="background:#0D9488;color:#fff;">Training</span>
-          </div>
-          <div class="lab-title">
-            Space - Content Security Policy (CSP) Bypass Lab
-          </div>
-        </div>
-        <div class="lab-action">
-          <a href="/subdomains/space" class="btn-ACCESS" target="blank">
             <svg viewBox="0 0 24 24"><path d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"></path></svg>
             ACCESS THE LAB
           </a>
@@ -6653,50 +8408,6 @@ if (isset($_SESSION['user_id']) && $pdo) {
             <span class="difficulty-tag" style="background:#0D9488;color:#fff;">Training</span>
           </div>
           <div class="lab-title">
-            ControlHub - JSON Response Manipulation Auth Bypass
-          </div>
-        </div>
-        <div class="lab-action">
-          <a href="/subdomains/hub" class="btn-ACCESS" target="blank">
-            <svg viewBox="0 0 24 24"><path d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"></path></svg>
-            ACCESS THE LAB
-          </a>
-        </div>
-      </div>
-      <!-- LAB 15 -- VaultTech JWT Credential Reuse -->
-      <div class="lab-card">
-        <div class="lab-badge">
-          <svg viewBox="0 0 24 24"><path d="M20 4H4c-1.11 0-2 .89-2 2v12c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V6c0-1.11-.89-2-2-2zm0 14H4v-6h16v6zm0-10H4V6h16v2z"/></svg>
-          LAB
-        </div>
-        <div class="lab-content">
-          <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
-          <span class="difficulty-tag hard">Hard</span>
-            <span class="difficulty-tag" style="background:#0D9488;color:#fff;">Training</span>
-          </div>
-          <div class="lab-title">
-            VaultTech - JWT Token Credential Reuse Across Admin Panels
-          </div>
-        </div>
-        <div class="lab-action">
-          <a href="/subdomains/vault" class="btn-ACCESS" target="blank">
-            <svg viewBox="0 0 24 24"><path d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"></path></svg>
-            ACCESS THE LAB
-          </a>
-        </div>
-      </div>
-      <!-- LAB 16 -- CloudSync PII Leaked on Unauthorized File -->
-      <div class="lab-card">
-        <div class="lab-badge">
-          <svg viewBox="0 0 24 24"><path d="M20 4H4c-1.11 0-2 .89-2 2v12c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V6c0-1.11-.89-2-2-2zm0 14H4v-6h16v6zm0-10H4V6h16v2z"/></svg>
-          LAB
-        </div>
-        <div class="lab-content">
-          <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
-          <span class="difficulty-tag hard">Hard</span>
-            <span class="difficulty-tag" style="background:#0D9488;color:#fff;">Training</span>
-          </div>
-          <div class="lab-title">
             CloudSync - PII Leaked on Unauthorized File
           </div>
         </div>
@@ -6707,110 +8418,30 @@ if (isset($_SESSION['user_id']) && $pdo) {
           </a>
         </div>
       </div>
-      <!-- LAB 17 -- CBSE Portal Default Credentials -->
+
+    <!-- Prompt Injection -->
+    <h3 class="category-title">Prompt Injection</h3>
+    <div class="labs-list">
       <div class="lab-card">
         <div class="lab-badge">
-          <svg viewBox="0 0 24 24"><path d="M20 4H4c-1.11 0-2 .89-2 2v12c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V6c0-1.11-.89-2-2-2zm0 14H4v-6h16v6zm0-10H4V6h16v2z"/></svg>
+          <svg viewBox="0 0 24 24"><path d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
           LAB
         </div>
         <div class="lab-content">
           <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
-          <span class="difficulty-tag hard">Hard</span>
+          <span class="difficulty-tag">Easy</span>
             <span class="difficulty-tag" style="background:#0D9488;color:#fff;">Training</span>
           </div>
           <div class="lab-title">
-            CBSE - Default Credentials Authentication Bypass
+            Prompt Injection
           </div>
         </div>
         <div class="lab-action">
-          <a href="/subdomains/school" class="btn-ACCESS" target="blank">
+          <a href="/subdomains/ai-prompt" class="btn-ACCESS" target="blank">
             <svg viewBox="0 0 24 24"><path d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"></path></svg>
             ACCESS THE LAB
           </a>
         </div>
-      </div>
-      <div class="lab-card">
-        <div class="lab-badge">
-          <svg viewBox="0 0 24 24"><path d="M20 4H4c-1.11 0-2 .89-2 2v12c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V6c0-1.11-.89-2-2-2zm0 14H4v-6h16v6zm0-10H4V6h16v2z"/></svg>
-          LAB
-        </div>
-        <div class="lab-content">
-          <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
-            <span class="difficulty-tag hard">Hard</span>
-            <span class="difficulty-tag" style="background:#0D9488;color:#fff;">Training</span>
-          </div>
-          <div class="lab-title">
-            Aliyun WAF Bypass - Bypass WAF Rules
-          </div>
-        </div>
-        <div class="lab-action">
-          <a href="/subdomains/shield" class="btn-ACCESS" target="blank">
-            <svg viewBox="0 0 24 24"><path d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"></path></svg>
-            ACCESS THE LAB
-          </a>
-        </div>
-      </div>
-      <div class="lab-card">
-        <div class="lab-badge">
-          <svg viewBox="0 0 24 24"><path d="M20 4H4c-1.11 0-2 .89-2 2v12c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V6c0-1.11-.89-2-2-2zm0 14H4v-6h16v6zm0-10H4V6h16v2z"/></svg>
-          LAB
-        </div>
-        <div class="lab-content">
-          <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
-            <span class="difficulty-tag hard">Hard</span>
-            <span class="difficulty-tag" style="background:#0D9488;color:#fff;">Training</span>
-          </div>
-          <div class="lab-title">
-            Aliyun WAF Bypass - Bypass WAF Rules
-          </div>
-        </div>
-        <div class="lab-action">
-          <a href="/subdomains/blog" class="btn-ACCESS" target="blank">
-            <svg viewBox="0 0 24 24"><path d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"></path></svg>
-            ACCESS THE LAB
-          </a>
-        </div>
-      </div>
-      <div class="lab-card">
-        <div class="lab-badge">
-          <svg viewBox="0 0 24 24"><path d="M20 4H4c-1.11 0-2 .89-2 2v12c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V6c0-1.11-.89-2-2-2zm0 14H4v-6h16v6zm0-10H4V6h16v2z"/></svg>
-          LAB
-        </div>
-        <div class="lab-content">
-          <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
-            <span class="difficulty-tag hard">Hard</span>
-            <span class="difficulty-tag" style="background:#0D9488;color:#fff;">Training</span>
-          </div>
-          <div class="lab-title">Aliyun WAF Bypass</div>
-        </div>
-        <div class="lab-action">
-          <a href="/subdomains/kzlabs" class="btn-ACCESS" target="blank">
-            <svg viewBox="0 0 24 24"><path d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"></path></svg>
-            ACCESS THE LAB
-          </a>
-        </div>
-      </div>
-      <!-- LAB 23 -- Unrestricted File Upload: PHP Profile Picture RCE -->
-      <div class="lab-card">
-        <div class="lab-badge">
-          <svg viewBox="0 0 24 24"><path d="M20 4H4c-1.11 0-2 .89-2 2v12c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V6c0-1.11-.89-2-2-2zm0 14H4v-6h16v6zm0-10H4V6h16v2z"/></svg>
-          LAB
-        </div>
-        <div class="lab-content">
-          <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
-          <span class="difficulty-tag hard">Hard</span>
-            <span class="difficulty-tag" style="background:#0D9488;color:#fff;">Training</span>
-            <a href="https://hackerone.com/reports/1164452" target="_blank" rel="noopener noreferrer" class="report-badge">HackerOne #1164452</a>
-          </div>
-          <div class="lab-title">
-            Unrestricted File Upload - PHP Profile Picture Leads to Remote Code Execution
-          </div>
-        </div>
-        <div class="lab-action">
-          <a href="/subdomains/avatar" class="btn-ACCESS" target="blank">
-            <svg viewBox="0 0 24 24"><path d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"></path></svg>
-            ACCESS THE LAB
-          </a>
       </div>
     </div>
   </main>
