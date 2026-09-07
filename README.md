@@ -3,9 +3,13 @@
 Open-source web security training platform with 350+ challenges.
 
 ## Setup
-
 ```console
 curl -s "https://raw.githubusercontent.com/KrazePlanet/KrazePlanetCTF/refs/heads/main/setup.sh" | bash
+```
+
+## Update
+```console
+curl -s "https://raw.githubusercontent.com/KrazePlanet/KrazePlanetCTF/refs/heads/main/update.sh" | bash
 ```
 
 ### Demo
