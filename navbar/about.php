@@ -153,7 +153,7 @@
     <div class="row g-3 mb-5">
       <div class="col-6 col-md-3">
         <div class="stat-badge">
-          <div class="stat-number">260+</div>
+          <div class="stat-number">350+</div>
           <div class="text-secondary small fw-medium">Active Labs</div>
         </div>
       </div>
@@ -220,7 +220,7 @@
     <!-- Call to Action Banner -->
     <div class="p-4 p-md-5 rounded-4 text-center" style="background: linear-gradient(135deg, rgba(15, 23, 42, 0.9), rgba(30, 41, 59, 0.9)); border: 1px solid rgba(56, 189, 248, 0.2);">
       <h3 class="fw-bold text-white mb-2">Ready to Start Hunting?</h3>
-      <p class="text-secondary small mb-4">Choose from over 260 interactive vulnerability labs and elevate your testing methodology today.</p>
+      <p class="text-secondary small mb-4">Choose from over 350 interactive vulnerability labs and elevate your testing methodology today.</p>
       <div class="d-flex justify-content-center gap-3">
         <a href="index.php" class="btn-cta">
           <i class="bi bi-play-circle me-2"></i> Explore All Labs

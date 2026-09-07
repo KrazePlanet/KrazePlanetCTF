@@ -69,7 +69,7 @@ $avatarUrl = !empty($user['avatar']) ? $user['avatar'] : (!empty($_SESSION['avat
 $solvedCount = count($solvedLabs);
 $bookmarkCount = count($bookmarkedLabs);
 $continueCount = count($continueLabs);
-$totalLabsAvailable = 260;
+$totalLabsAvailable = 350;
 
 // Stats calculation - Sum exact points from solved labs (Easy=20, Medium=50, Hard=100)
 $totalXP = 0;

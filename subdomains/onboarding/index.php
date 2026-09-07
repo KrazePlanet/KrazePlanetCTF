@@ -5,16 +5,27 @@
 // Payload: {{7*7}} → subject becomes "49, welcome to Glovo!"
 // Flag via: {{config['FLAG']}} or {{config.FLAG}}
 
-session_start();
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
 // Resilient PHPMailer & Composer Loader
 if (file_exists(__DIR__ . '/vendor/autoload.php')) {
     require_once __DIR__ . '/vendor/autoload.php';
 } elseif (file_exists(__DIR__ . '/../codeshackio/vendor/autoload.php')) {
     require_once __DIR__ . '/../codeshackio/vendor/autoload.php';
+} elseif (file_exists(__DIR__ . '/../PHPMailer/PHPMailer.php')) {
+    require_once __DIR__ . '/../PHPMailer/Exception.php';
+    require_once __DIR__ . '/../PHPMailer/PHPMailer.php';
+    require_once __DIR__ . '/../PHPMailer/SMTP.php';
 } elseif (file_exists(__DIR__ . '/PHPMailer/PHPMailer.php')) {
     require_once __DIR__ . '/PHPMailer/Exception.php';
     require_once __DIR__ . '/PHPMailer/PHPMailer.php';
     require_once __DIR__ . '/PHPMailer/SMTP.php';
+} elseif (file_exists('/opt/lampp/htdocs/subdomains/PHPMailer/PHPMailer.php')) {
+    require_once '/opt/lampp/htdocs/subdomains/PHPMailer/Exception.php';
+    require_once '/opt/lampp/htdocs/subdomains/PHPMailer/PHPMailer.php';
+    require_once '/opt/lampp/htdocs/subdomains/PHPMailer/SMTP.php';
 } elseif (file_exists('/opt/lampp/htdocs/PHPMailer/PHPMailer.php')) {
     require_once '/opt/lampp/htdocs/PHPMailer/Exception.php';
     require_once '/opt/lampp/htdocs/PHPMailer/PHPMailer.php';
@@ -24,7 +35,55 @@ if (file_exists(__DIR__ . '/vendor/autoload.php')) {
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
 
-require_once __DIR__ . '/../../config/mail.php';
+if (file_exists(__DIR__ . '/../../config/mail.php')) {
+    require_once __DIR__ . '/../../config/mail.php';
+}
+
+// ── Database Connection ───────────────────────────────────────────────────
+if (file_exists(__DIR__ . '/../../config/db.php')) {
+    require_once __DIR__ . '/../../config/db.php';
+}
+
+// Fallback PDO connection if config/db.php did not initialize $pdo
+if (!isset($pdo) || !$pdo) {
+    $db_host = getenv('DB_HOST') ?: '127.0.0.1';
+    $db_user = getenv('DB_USER') ?: 'root';
+    $db_pass = getenv('DB_PASS') !== false ? getenv('DB_PASS') : '';
+    $db_name = getenv('DB_NAME') ?: 'KrazePlanet';
+
+    $targets = [
+        "mysql:host={$db_host};dbname={$db_name};charset=utf8mb4",
+        "mysql:unix_socket=/var/run/mysqld/mysqld.sock;dbname={$db_name};charset=utf8mb4",
+        "mysql:host=localhost;dbname={$db_name};charset=utf8mb4",
+        "mysql:host=127.0.0.1;dbname=KrazePlanet_DB;charset=utf8mb4",
+        "mysql:host=localhost;dbname=KrazePlanet_DB;charset=utf8mb4"
+    ];
+
+    foreach ($targets as $dsn) {
+        try {
+            $pdo = new PDO($dsn, $db_user, $db_pass, [
+                PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
+                PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+                PDO::ATTR_EMULATE_PREPARES   => false,
+            ]);
+            break;
+        } catch (\Throwable $e) {
+            // Try next target
+        }
+    }
+
+    if (!$pdo) {
+        try {
+            $sqlite_path = sys_get_temp_dir() . '/lab802_glovo.sqlite';
+            $pdo = new PDO('sqlite:' . $sqlite_path, null, null, [
+                PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
+                PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+            ]);
+        } catch (\Throwable $e) {
+            $pdo = null;
+        }
+    }
+}
 
 // ── App config (exposed to template context — SSTI data exfil target) ─────
 $config = [
@@ -72,32 +131,39 @@ function twig_render($template, $context = []) {
 
 function esc($s) { return htmlspecialchars((string)$s, ENT_QUOTES, 'UTF-8'); }
 
-// ── MySQL connection + table bootstrap ────────────────────────────────────
-$db_hosts = ['krazeplanet', '127.0.0.1', 'localhost', '172.19.0.1', 'host.docker.internal'];
-$db = null;
-foreach ($db_hosts as $h) {
-    $db = @new mysqli($h, 'root', '');
-    if (!$db->connect_error) {
-        $db->query("CREATE DATABASE IF NOT EXISTS `KrazePlanet_DB` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci");
-        $db->select_db('KrazePlanet_DB');
-        break;
+// ── Database Table Bootstrap ──────────────────────────────────────────────
+if ($pdo) {
+    try {
+        $driver = $pdo->getAttribute(PDO::ATTR_DRIVER_NAME);
+        if ($driver === 'sqlite') {
+            $pdo->exec("CREATE TABLE IF NOT EXISTS lab802_users (
+                id            INTEGER PRIMARY KEY AUTOINCREMENT,
+                first_name    VARCHAR(255) NOT NULL,
+                last_name     VARCHAR(255) DEFAULT '',
+                email         VARCHAR(255) NOT NULL UNIQUE,
+                password      VARCHAR(255) NOT NULL,
+                city          VARCHAR(100) DEFAULT 'Bishkek',
+                email_subject TEXT,
+                email_body    TEXT,
+                registered_at DATETIME DEFAULT CURRENT_TIMESTAMP
+            )");
+        } else {
+            $pdo->exec("CREATE TABLE IF NOT EXISTS lab802_users (
+                id            INT AUTO_INCREMENT PRIMARY KEY,
+                first_name    VARCHAR(255) NOT NULL,
+                last_name     VARCHAR(255) DEFAULT '',
+                email         VARCHAR(255) NOT NULL UNIQUE,
+                password      VARCHAR(255) NOT NULL,
+                city          VARCHAR(100) DEFAULT 'Bishkek',
+                email_subject TEXT,
+                email_body    TEXT,
+                registered_at DATETIME DEFAULT CURRENT_TIMESTAMP
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
+        }
+    } catch (\Throwable $e) {
+        // Table may already exist
     }
 }
-if (!$db || $db->connect_error) { die('DB connection failed: ' . ($db ? $db->connect_error : 'Unable to connect to database')); }
-if ($db->connect_error) {
-    die('<p style="padding:32px;font-family:sans-serif">DB error: ' . esc($db->connect_error) . '</p>');
-}
-$db->query("CREATE TABLE IF NOT EXISTS lab802_users (
-    id            INT AUTO_INCREMENT PRIMARY KEY,
-    first_name    VARCHAR(255) NOT NULL,
-    last_name     VARCHAR(255) DEFAULT '',
-    email         VARCHAR(255) NOT NULL UNIQUE,
-    password      VARCHAR(255) NOT NULL,
-    city          VARCHAR(100) DEFAULT 'Bishkek',
-    email_subject TEXT,
-    email_body    TEXT,
-    registered_at DATETIME DEFAULT CURRENT_TIMESTAMP
-)");
 
 // ── Logout ─────────────────────────────────────────────────────────────────
 if (isset($_GET['logout'])) {
@@ -113,25 +179,27 @@ $raw_subject_tpl = '%s, welcome to Glovo!'; // %s = first_name concatenated at r
 $raw_body_tpl    = "Hi %s,\n\nThank you for joining Glovo in {{city}}! Your account has been successfully created with email {{user['email']}}.\n\nStart ordering from the best restaurants and shops near you.\n\nYour profile details:\n  Name: %s {{last_name}}\n  City: {{city}}\n  Member since: 2021\n\nHappy ordering,\nThe Glovo Team";
 
 // ── State ──────────────────────────────────────────────────────────────────
-$errors      = [];
-$reg_errors  = [];
+$errors       = [];
+$reg_errors   = [];
 $login_errors = [];
-$form        = [];
-$mode        = 'register'; // active tab when not logged in
+$form         = [];
+$mode         = 'register'; // active tab when not logged in
 
 // ── Load session user ──────────────────────────────────────────────────────
 $logged_in_user = null;
-if (!empty($_SESSION['user802_id'])) {
-    $sid  = (int)$_SESSION['user802_id'];
-    $stmt = $db->prepare("SELECT * FROM lab802_users WHERE id = ?");
-    $stmt->bind_param('i', $sid);
-    $stmt->execute();
-    $logged_in_user = $stmt->get_result()->fetch_assoc();
-    $stmt->close();
+if (!empty($_SESSION['user802_id']) && $pdo) {
+    try {
+        $sid  = (int)$_SESSION['user802_id'];
+        $stmt = $pdo->prepare('SELECT * FROM lab802_users WHERE id = ?');
+        $stmt->execute([$sid]);
+        $logged_in_user = $stmt->fetch();
+    } catch (\Throwable $e) {
+        $logged_in_user = null;
+    }
 }
 
 // ── POST handlers ──────────────────────────────────────────────────────────
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
     $action = $_POST['action'] ?? 'register';
 
     // ── Register ────────────────────────────────────────────────────────────
@@ -147,16 +215,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if ($email === '')      $reg_errors[] = 'Email is required.';
         if (strlen($password) < 6) $reg_errors[] = 'Password must be at least 6 characters.';
 
-        if (empty($reg_errors)) {
-            // Check duplicate email
-            $chk = $db->prepare("SELECT id FROM lab802_users WHERE email = ?");
-            $chk->bind_param('s', $email);
-            $chk->execute();
-            $chk->store_result();
-            if ($chk->num_rows > 0) {
-                $reg_errors[] = 'Email already registered. <a href="#" onclick="switchTab(\'login\');return false;">Sign in instead</a>.';
+        if (empty($reg_errors) && $pdo) {
+            try {
+                // Check duplicate email
+                $chk = $pdo->prepare('SELECT id FROM lab802_users WHERE email = ?');
+                $chk->execute([$email]);
+                if ($chk->fetch()) {
+                    $reg_errors[] = 'Email already registered. <a href="#" onclick="switchTab(\'login\');return false;">Sign in instead</a>.';
+                }
+            } catch (\Throwable $e) {
+                // Proceed
             }
-            $chk->close();
         }
 
         if (empty($reg_errors)) {
@@ -175,16 +244,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $email_body     = twig_render($body_tpl, $context);
             $pw_hash        = password_hash($password, PASSWORD_BCRYPT);
 
-            $ins = $db->prepare("INSERT INTO lab802_users (first_name,last_name,email,password,city,email_subject,email_body) VALUES (?,?,?,?,?,?,?)");
-            $ins->bind_param('sssssss', $first_name, $last_name, $email, $pw_hash, $city, $email_subject, $email_body);
-            $ins->execute();
-            $new_id = $db->insert_id;
-            $ins->close();
-
-            $_SESSION['user802_id'] = $new_id;
+            if ($pdo) {
+                try {
+                    $ins = $pdo->prepare('INSERT INTO lab802_users (first_name,last_name,email,password,city,email_subject,email_body) VALUES (?,?,?,?,?,?,?)');
+                    $ins->execute([$first_name, $last_name, $email, $pw_hash, $city, $email_subject, $email_body]);
+                    $new_id = (int)$pdo->lastInsertId();
+                    $_SESSION['user802_id'] = $new_id;
+                } catch (\Throwable $e) {
+                    $reg_errors[] = 'Registration failed: ' . $e->getMessage();
+                }
+            }
 
             // Send Welcome Email via SMTP
-            if ($email) {
+            if (empty($reg_errors) && $email && class_exists('PHPMailer\PHPMailer\PHPMailer') && function_exists('configureKrazeMailer')) {
                 $mail = new PHPMailer(true);
                 try {
                     configureKrazeMailer($mail, 'noreply@krazeplanet.com', 'Glovo');
@@ -215,13 +287,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $mail->Body = $htmlMailBody;
                     $mail->send();
                     $_SESSION['mail_sent'] = true;
-                } catch (Exception $e) {
-                    $_SESSION['mail_error'] = 'Mail Error: ' . $mail->ErrorInfo;
+                } catch (\Throwable $e) {
+                    $_SESSION['mail_error'] = 'Mail Error: ' . (isset($mail) ? $mail->ErrorInfo : $e->getMessage());
                 }
             }
 
-            header('Location: index.php');
-            exit;
+            if (empty($reg_errors)) {
+                header('Location: index.php');
+                exit;
+            }
         }
         $form = compact('first_name','last_name','email','city');
     }
@@ -234,19 +308,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         if ($email === '' || $password === '') {
             $login_errors[] = 'Please enter your email and password.';
-        } else {
-            $stmt = $db->prepare("SELECT * FROM lab802_users WHERE email = ?");
-            $stmt->bind_param('s', $email);
-            $stmt->execute();
-            $row = $stmt->get_result()->fetch_assoc();
-            $stmt->close();
+        } elseif ($pdo) {
+            try {
+                $stmt = $pdo->prepare('SELECT * FROM lab802_users WHERE email = ?');
+                $stmt->execute([$email]);
+                $row = $stmt->fetch();
 
-            if ($row && password_verify($password, $row['password'])) {
-                $_SESSION['user802_id'] = $row['id'];
-                header('Location: index.php');
-                exit;
-            } else {
-                $login_errors[] = 'Invalid email or password.';
+                if ($row && password_verify($password, $row['password'])) {
+                    $_SESSION['user802_id'] = $row['id'];
+                    header('Location: index.php');
+                    exit;
+                } else {
+                    $login_errors[] = 'Invalid email or password.';
+                }
+            } catch (\Throwable $e) {
+                $login_errors[] = 'Login error: ' . $e->getMessage();
             }
         }
     }

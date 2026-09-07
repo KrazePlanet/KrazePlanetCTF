@@ -2,7 +2,7 @@
 
 # Install required utilities
 sudo apt-get update -y
-sudo apt-get install -y wget curl unzip net-tools git
+sudo apt-get install -y wget curl unzip net-tools git python3-pip tornado ruby-full openjdk-21-jre
 
 # Download XAMPP
 wget https://sourceforge.net/projects/xampp/files/XAMPP%20Linux/8.2.12/xampp-linux-x64-8.2.12-0-installer.run

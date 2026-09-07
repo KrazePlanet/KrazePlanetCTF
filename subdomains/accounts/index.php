@@ -5,7 +5,9 @@
 // Payload: {{ '7'*7 }} → name becomes '7777777' in account update email
 // Flag via: {{ config['FLAG'] }} or {{ config.FLAG }}
 
-session_start();
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
 // Resilient PHPMailer & Composer Loader
 if (file_exists(__DIR__ . '/vendor/autoload.php')) {
     require_once __DIR__ . '/vendor/autoload.php';
@@ -15,6 +17,10 @@ if (file_exists(__DIR__ . '/vendor/autoload.php')) {
     require_once __DIR__ . '/PHPMailer/Exception.php';
     require_once __DIR__ . '/PHPMailer/PHPMailer.php';
     require_once __DIR__ . '/PHPMailer/SMTP.php';
+} elseif (file_exists('/opt/lampp/htdocs/subdomains/PHPMailer/PHPMailer.php')) {
+    require_once '/opt/lampp/htdocs/subdomains/PHPMailer/Exception.php';
+    require_once '/opt/lampp/htdocs/subdomains/PHPMailer/PHPMailer.php';
+    require_once '/opt/lampp/htdocs/subdomains/PHPMailer/SMTP.php';
 } elseif (file_exists('/opt/lampp/htdocs/PHPMailer/PHPMailer.php')) {
     require_once '/opt/lampp/htdocs/PHPMailer/Exception.php';
     require_once '/opt/lampp/htdocs/PHPMailer/PHPMailer.php';
@@ -24,41 +30,47 @@ if (file_exists(__DIR__ . '/vendor/autoload.php')) {
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
 
-require_once __DIR__ . '/../../config/mail.php';
+if (file_exists(__DIR__ . '/../../config/mail.php')) {
+    require_once __DIR__ . '/../../config/mail.php';
+}
 
 function send_uber_email($recipient_email, $recipient_name, $subject, $body_text) {
     if (!$recipient_email) return false;
-    $mail = new PHPMailer(true);
     try {
-        configureKrazeMailer($mail, 'noreply@krazeplanet.com', 'Uber');
-        $mail->addAddress($recipient_email, $recipient_name);
-        $mail->isHTML(true);
-        $mail->Subject = $subject;
+        if (class_exists('PHPMailer\PHPMailer\PHPMailer')) {
+            $mail = new PHPMailer(true);
+            if (function_exists('configureKrazeMailer')) {
+                @configureKrazeMailer($mail, 'noreply@krazeplanet.com', 'Uber');
+            }
+            $mail->addAddress($recipient_email, $recipient_name);
+            $mail->isHTML(true);
+            $mail->Subject = $subject;
 
-        $htmlMailBody = '
-        <!DOCTYPE html>
-        <html>
-        <head><meta charset="utf-8"></head>
-        <body style="font-family:Arial,sans-serif;background:#f6f6f6;padding:20px;margin:0;">
-        <div style="max-width:540px;margin:0 auto;background:#ffffff;border-radius:8px;border:1px solid #e0e0e0;overflow:hidden;box-shadow:0 2px 10px rgba(0,0,0,0.05);">
-          <div style="background:#000000;padding:20px;text-align:center;">
-            <h2 style="color:#ffffff;margin:0;font-size:22px;font-weight:800;letter-spacing:-0.5px;">Uber</h2>
-          </div>
-          <div style="padding:28px 24px;color:#1a1a1a;font-size:15px;line-height:1.7;">
-            ' . nl2br($body_text) . '
-          </div>
-          <div style="background:#f9f9f9;padding:16px;text-align:center;font-size:12px;color:#888888;border-top:1px solid #eeeeee;">
-            © 2016 Uber Technologies, Inc. · San Francisco, CA
-          </div>
-        </div>
-        </body>
-        </html>
-        ';
+            $htmlMailBody = '
+            <!DOCTYPE html>
+            <html>
+            <head><meta charset="utf-8"></head>
+            <body style="font-family:Arial,sans-serif;background:#0d0d17;color:#ffffff;padding:20px;margin:0;">
+            <div style="max-width:540px;margin:0 auto;background:#151525;border-radius:12px;border:1px solid #2d2d44;overflow:hidden;box-shadow:0 4px 16px rgba(0,0,0,0.5);">
+              <div style="background:#000000;padding:24px;text-align:center;border-bottom:1px solid #222;">
+                <h2 style="color:#ffffff;margin:0;font-size:24px;font-weight:800;letter-spacing:-0.5px;">UBER</h2>
+              </div>
+              <div style="padding:28px 24px;color:#e2e8f0;font-size:15px;line-height:1.7;">
+                ' . nl2br($body_text) . '
+              </div>
+              <div style="background:#0d0d17;padding:16px;text-align:center;font-size:12px;color:#94a3b8;border-top:1px solid #2d2d44;">
+                © Uber Technologies Inc.
+              </div>
+            </div>
+            </body>
+            </html>
+            ';
 
-        $mail->Body = $htmlMailBody;
-        $mail->send();
+            $mail->Body = $htmlMailBody;
+            @$mail->send();
+        }
         return true;
-    } catch (Exception $e) {
+    } catch (\Throwable $e) {
         return false;
     }
 }
@@ -115,31 +127,83 @@ function jinja2_render($template, $context = []) {
 
 function esc($s) { return htmlspecialchars((string)$s, ENT_QUOTES, 'UTF-8'); }
 
-// ── MySQL connection + table bootstrap ────────────────────────────────────
-$db_hosts = ['krazeplanet', '127.0.0.1', 'localhost', '172.19.0.1', 'host.docker.internal'];
-$db = null;
-foreach ($db_hosts as $h) {
-    $db = @new mysqli($h, 'root', '');
-    if (!$db->connect_error) {
-        $db->query("CREATE DATABASE IF NOT EXISTS `KrazePlanet_DB` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci");
-        $db->select_db('KrazePlanet_DB');
-        break;
+// ── Database Connection ───────────────────────────────────────────────────
+if (file_exists(__DIR__ . '/../../config/db.php')) {
+    require_once __DIR__ . '/../../config/db.php';
+}
+
+// Fallback PDO connection if config/db.php did not initialize $pdo
+if (!isset($pdo) || !$pdo) {
+    $db_host = getenv('DB_HOST') ?: '127.0.0.1';
+    $db_user = getenv('DB_USER') ?: 'root';
+    $db_pass = getenv('DB_PASS') !== false ? getenv('DB_PASS') : '';
+    $db_name = getenv('DB_NAME') ?: 'KrazePlanet';
+
+    $targets = [
+        "mysql:host={$db_host};dbname={$db_name};charset=utf8mb4",
+        "mysql:unix_socket=/var/run/mysqld/mysqld.sock;dbname={$db_name};charset=utf8mb4",
+        "mysql:host=localhost;dbname={$db_name};charset=utf8mb4",
+        "mysql:host=127.0.0.1;dbname=KrazePlanet_DB;charset=utf8mb4",
+        "mysql:host=localhost;dbname=KrazePlanet_DB;charset=utf8mb4",
+    ];
+
+    foreach ($targets as $dsn) {
+        try {
+            $pdo = new PDO($dsn, $db_user, $db_pass, [
+                PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
+                PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+                PDO::ATTR_EMULATE_PREPARES   => false,
+            ]);
+            break;
+        } catch (\Throwable $e) {
+            // Try next target
+        }
+    }
+
+    if (!$pdo) {
+        try {
+            $sqlite_path = sys_get_temp_dir() . '/lab803_uber.sqlite';
+            $pdo = new PDO('sqlite:' . $sqlite_path, null, null, [
+                PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
+                PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+            ]);
+        } catch (\Throwable $e) {
+            $pdo = null;
+        }
     }
 }
-if (!$db || $db->connect_error) { die('DB connection failed: ' . ($db ? $db->connect_error : 'Unable to connect to database')); }
-if ($db->connect_error) {
-    die('<p style="padding:32px;font-family:sans-serif">DB error: ' . esc($db->connect_error) . '</p>');
+
+// ── Database Table Bootstrap ──────────────────────────────────────────────
+if ($pdo) {
+    try {
+        $driver = $pdo->getAttribute(PDO::ATTR_DRIVER_NAME);
+        if ($driver === 'sqlite') {
+            $pdo->exec("CREATE TABLE IF NOT EXISTS lab803_users (
+                id            INTEGER PRIMARY KEY AUTOINCREMENT,
+                name          VARCHAR(255) NOT NULL,
+                email         VARCHAR(255) NOT NULL UNIQUE,
+                password      VARCHAR(255) NOT NULL,
+                name_rendered TEXT,
+                email_body    TEXT,
+                updated_at    DATETIME DEFAULT CURRENT_TIMESTAMP,
+                created_at    DATETIME DEFAULT CURRENT_TIMESTAMP
+            )");
+        } else {
+            $pdo->exec("CREATE TABLE IF NOT EXISTS lab803_users (
+                id            INT AUTO_INCREMENT PRIMARY KEY,
+                name          VARCHAR(255) NOT NULL,
+                email         VARCHAR(255) NOT NULL UNIQUE,
+                password      VARCHAR(255) NOT NULL,
+                name_rendered TEXT,
+                email_body    TEXT,
+                updated_at    DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+                created_at    DATETIME DEFAULT CURRENT_TIMESTAMP
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
+        }
+    } catch (\Throwable $e) {
+        // Table may already exist
+    }
 }
-$db->query("CREATE TABLE IF NOT EXISTS lab803_users (
-    id            INT AUTO_INCREMENT PRIMARY KEY,
-    name          VARCHAR(255) NOT NULL,
-    email         VARCHAR(255) NOT NULL UNIQUE,
-    password      VARCHAR(255) NOT NULL,
-    name_rendered TEXT,
-    email_body    TEXT,
-    updated_at    DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    created_at    DATETIME DEFAULT CURRENT_TIMESTAMP
-)");
 
 // ── Logout ─────────────────────────────────────────────────────────────────
 if (isset($_GET['logout'])) {
@@ -164,17 +228,19 @@ $mode          = 'register';
 
 // ── Load session user ──────────────────────────────────────────────────────
 $logged_in_user = null;
-if (!empty($_SESSION['user803_id'])) {
-    $sid  = (int)$_SESSION['user803_id'];
-    $stmt = $db->prepare("SELECT * FROM lab803_users WHERE id = ?");
-    $stmt->bind_param('i', $sid);
-    $stmt->execute();
-    $logged_in_user = $stmt->get_result()->fetch_assoc();
-    $stmt->close();
+if (!empty($_SESSION['user803_id']) && $pdo) {
+    try {
+        $sid  = (int)$_SESSION['user803_id'];
+        $stmt = $pdo->prepare('SELECT * FROM lab803_users WHERE id = ?');
+        $stmt->execute([$sid]);
+        $logged_in_user = $stmt->fetch();
+    } catch (\Throwable $e) {
+        $logged_in_user = null;
+    }
 }
 
 // ── POST handlers ──────────────────────────────────────────────────────────
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
     $action = $_POST['action'] ?? 'register';
 
     // ── Register ────────────────────────────────────────────────────────────
@@ -188,15 +254,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if ($email === '')    $reg_errors[] = 'Email is required.';
         if (strlen($pw) < 6) $reg_errors[] = 'Password must be at least 6 characters.';
 
-        if (empty($reg_errors)) {
-            $chk = $db->prepare("SELECT id FROM lab803_users WHERE email = ?");
-            $chk->bind_param('s', $email);
-            $chk->execute();
-            $chk->store_result();
-            if ($chk->num_rows > 0) {
-                $reg_errors[] = 'Email already registered. <a href="#" onclick="switchTab(\'login\');return false;">Sign in instead</a>.';
+        if (empty($reg_errors) && $pdo) {
+            try {
+                $chk = $pdo->prepare('SELECT id FROM lab803_users WHERE email = ?');
+                $chk->execute([$email]);
+                if ($chk->fetch()) {
+                    $reg_errors[] = 'Email already registered. <a href="#" onclick="switchTab(\'login\');return false;">Sign in instead</a>.';
+                }
+            } catch (\Throwable $e) {
+                // Proceed
             }
-            $chk->close();
         }
 
         if (empty($reg_errors)) {
@@ -212,13 +279,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $email_body    = jinja2_render($body_tpl, $context);
             $pw_hash       = password_hash($pw, PASSWORD_BCRYPT);
 
-            $ins = $db->prepare("INSERT INTO lab803_users (name, email, password, name_rendered, email_body) VALUES (?,?,?,?,?)");
-            $ins->bind_param('sssss', $name, $email, $pw_hash, $name_rendered, $email_body);
-            $ins->execute();
-            $new_id = $db->insert_id;
-            $ins->close();
-
-            $_SESSION['user803_id'] = $new_id;
+            if ($pdo) {
+                try {
+                    $ins = $pdo->prepare('INSERT INTO lab803_users (name,email,password,name_rendered,email_body) VALUES (?,?,?,?,?)');
+                    $ins->execute([$name, $email, $pw_hash, $name_rendered, $email_body]);
+                    $new_id = (int)$pdo->lastInsertId();
+                    $_SESSION['user803_id'] = $new_id;
+                } catch (\Throwable $e) {
+                    $reg_errors[] = 'Registration failed: ' . $e->getMessage();
+                }
+            }
             send_uber_email($email, $name_rendered, 'Account Notification - Uber', $email_body);
             header('Location: index.php');
             exit;
@@ -234,14 +304,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         if ($email === '' || $pw === '') {
             $login_errors[] = 'Please enter your email and password.';
-        } else {
-            $stmt = $db->prepare("SELECT * FROM lab803_users WHERE email = ?");
-            $stmt->bind_param('s', $email);
-            $stmt->execute();
-            $row = $stmt->get_result()->fetch_assoc();
-            $stmt->close();
-
-            if ($row && password_verify($pw, $row['password'])) {
+        } elseif ($pdo) {
+            {
+                try {
+                    $stmt = $pdo->prepare('SELECT * FROM lab803_users WHERE email = ?');
+                    $stmt->execute([$email]);
+                    $row = $stmt->fetch();
+                } catch (\Throwable $e) {
+                    $login_errors[] = 'Login error: ' . $e->getMessage();
+                    $row = null;
+                }
+            }
+            if (isset($row) && $row && password_verify($pw, $row['password'])) {
                 $_SESSION['user803_id'] = $row['id'];
                 header('Location: index.php');
                 exit;
@@ -268,19 +342,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $body_tpl      = sprintf($raw_body_tpl, $name, $name);
             $email_body    = jinja2_render($body_tpl, $context);
 
-            $upd = $db->prepare("UPDATE lab803_users SET name = ?, name_rendered = ?, email_body = ?, updated_at = NOW() WHERE id = ?");
-            $upd->bind_param('sssi', $name, $name_rendered, $email_body, $logged_in_user['id']);
-            $upd->execute();
-            $upd->close();
+            if ($pdo) {
+                try {
+                    $upd = $pdo->prepare('UPDATE lab803_users SET name=?, name_rendered=?, email_body=? WHERE id=?');
+                    $upd->execute([$name, $name_rendered, $email_body, $logged_in_user['id']]);
+                } catch (\Throwable $e) {
+                    $update_errors[] = 'Update failed: ' . $e->getMessage();
+                }
+            }
 
             send_uber_email($logged_in_user['email'], $name_rendered, 'Uber Account Information Updated', $email_body);
 
             // Reload from DB
-            $stmt = $db->prepare("SELECT * FROM lab803_users WHERE id = ?");
-            $stmt->bind_param('i', $logged_in_user['id']);
-            $stmt->execute();
-            $logged_in_user = $stmt->get_result()->fetch_assoc();
-            $stmt->close();
+            if ($pdo) {
+                $stmt = $pdo->prepare('SELECT * FROM lab803_users WHERE id = ?');
+                $stmt->execute([$logged_in_user['id']]);
+                $logged_in_user = $stmt->fetch();
+            }
             $update_ok = true;
         }
     }
@@ -291,6 +369,7 @@ $ssti_detected = $logged_in_user
     && isset($logged_in_user['name_rendered'])
     && $logged_in_user['name_rendered'] !== $logged_in_user['name'];
 ?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -460,8 +539,8 @@ footer a:hover{color:#fff;}
     <a href="#" class="nav-link">Safety</a>
     <?php if ($logged_in_user): ?>
     <div class="user-menu">
-      <div class="user-avatar-sm"><?= esc(mb_strtoupper(mb_substr($logged_in_user['name'],0,1,'UTF-8'))) ?></div>
-      <span class="user-name-nav"><?= esc($logged_in_user['name']) ?></span>
+      <div class="user-avatar-sm"><?= esc(mb_strtoupper(mb_substr($logged_in_user['name_rendered'] ?: $logged_in_user['name'],0,1,'UTF-8'))) ?></div>
+      <span class="user-name-nav"><?= esc($logged_in_user['name_rendered'] ?: $logged_in_user['name']) ?></span>
       <a href="index.php?logout=1" class="logout-btn">Log out</a>
     </div>
     <?php else: ?>
@@ -491,7 +570,7 @@ footer a:hover{color:#fff;}
 
     <!-- Sidebar -->
     <div class="sidebar">
-      <div class="sidebar-avatar"><?= esc(mb_strtoupper(mb_substr($logged_in_user['name'],0,1,'UTF-8'))) ?></div>
+      <div class="sidebar-avatar"><?= esc(mb_strtoupper(mb_substr($logged_in_user['name_rendered'] ?: $logged_in_user['name'],0,1,'UTF-8'))) ?></div>
       <div class="sidebar-name"><?= esc($logged_in_user['name_rendered'] ?: $logged_in_user['name']) ?></div>
       <div class="sidebar-email"><?= esc($logged_in_user['email']) ?></div>
       <div class="sidebar-divider"></div>

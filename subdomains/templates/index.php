@@ -1,5 +1,7 @@
 <?php
-session_start();
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
 // Resilient PHPMailer & Composer Loader
 if (file_exists(__DIR__ . '/vendor/autoload.php')) {
     require_once __DIR__ . '/vendor/autoload.php';
@@ -9,6 +11,10 @@ if (file_exists(__DIR__ . '/vendor/autoload.php')) {
     require_once __DIR__ . '/PHPMailer/Exception.php';
     require_once __DIR__ . '/PHPMailer/PHPMailer.php';
     require_once __DIR__ . '/PHPMailer/SMTP.php';
+} elseif (file_exists('/opt/lampp/htdocs/subdomains/PHPMailer/PHPMailer.php')) {
+    require_once '/opt/lampp/htdocs/subdomains/PHPMailer/Exception.php';
+    require_once '/opt/lampp/htdocs/subdomains/PHPMailer/PHPMailer.php';
+    require_once '/opt/lampp/htdocs/subdomains/PHPMailer/SMTP.php';
 } elseif (file_exists('/opt/lampp/htdocs/PHPMailer/PHPMailer.php')) {
     require_once '/opt/lampp/htdocs/PHPMailer/Exception.php';
     require_once '/opt/lampp/htdocs/PHPMailer/PHPMailer.php';
@@ -18,7 +24,9 @@ if (file_exists(__DIR__ . '/vendor/autoload.php')) {
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
 
-require_once __DIR__ . '/../../config/mail.php';
+if (file_exists(__DIR__ . '/../../config/mail.php')) {
+    require_once __DIR__ . '/../../config/mail.php';
+}
 
 $message = '';
 $template_output = '';
@@ -50,7 +58,7 @@ function render_template($template, $data = []) {
 }
 
 // Handle template rendering and email sending
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['render_template'])) {
+if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST' && isset($_POST['render_template'])) {
     $user_input = $_POST['template'] ?? '';
     $name = $_POST['name'] ?? 'User';
     $email = trim($_POST['email'] ?? '');
@@ -65,9 +73,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['render_template'])) {
         
         $template_output = render_template($user_input, $data);
 
-        if ($email) {
+        if ($email && function_exists('configureKrazeMailer') && class_exists('PHPMailer\PHPMailer\PHPMailer')) {
             $mail = new PHPMailer(true);
             try {
+                $mail->Timeout = 3;
+                $mail->Timelimit = 3;
                 configureKrazeMailer($mail, 'noreply@krazeplanet.com', 'SendStack');
                 $mail->addAddress($email, $name);
                 $mail->isHTML(true);
@@ -469,31 +479,80 @@ The SendStack Team"); ?></textarea>
                         </form>
                     </div>
 
-                    <!-- RIGHT: Status Result -->
+                    <!-- RIGHT: Status Result & Email Preview -->
                     <div class="email-frame">
-                        <div class="email-frame-head">
-                            <i class="fas fa-paper-plane"></i>
-                            <span>Email Delivery Status</span>
+                        <div class="email-frame-head d-flex justify-content-between align-items-center">
+                            <div class="d-flex align-items-center gap-2">
+                                <i class="fas fa-envelope-open-text"></i>
+                                <span>Email Preview & Delivery Status</span>
+                            </div>
+                            <?php if ($template_output !== ''): ?>
+                            <span class="badge bg-primary" style="font-size:11px;font-weight:600;letter-spacing:0.5px;">SSTI EVALUATED</span>
+                            <?php endif; ?>
                         </div>
                         <div class="email-frame-body">
-                            <?php if ($mailSent): ?>
-                                <div style="background:#ecfdf5;border:1px solid #a7f3d0;color:#065f46;padding:16px;border-radius:8px;margin-bottom:16px;">
-                                    <h5 style="margin-bottom:6px;font-weight:700;"><i class="fas fa-check-circle"></i> Email Sent Successfully!</h5>
-                                    <p style="margin:0;font-size:13px;">Campaign email sent via SMTP to <strong><?php echo htmlspecialchars($email); ?></strong>.</p>
+                            <?php if ($template_output !== ''): ?>
+                                <?php if ($mailSent): ?>
+                                    <div style="background:#ecfdf5;border:1px solid #a7f3d0;color:#065f46;padding:12px 16px;border-radius:8px;margin-bottom:18px;">
+                                        <div style="font-weight:700;font-size:14px;margin-bottom:3px;"><i class="fas fa-check-circle"></i> Email Dispatched via SMTP</div>
+                                        <div style="font-size:12px;opacity:0.9;">Delivered to <strong><?php echo htmlspecialchars($email); ?></strong>.</div>
+                                    </div>
+                                <?php elseif ($mailError): ?>
+                                    <div style="background:#fffbeb;border:1px solid #fde68a;color:#92400e;padding:14px 16px;border-radius:8px;margin-bottom:18px;">
+                                        <div class="d-flex align-items-center gap-2" style="font-weight:700;font-size:13px;margin-bottom:4px;">
+                                            <i class="fas fa-shield-alt text-warning"></i>
+                                            <span>SMTP Notice: Outbound Port Restricted by Host</span>
+                                        </div>
+                                        <div style="font-size:12px;line-height:1.5;">
+                                            DigitalOcean blocks outbound SMTP ports (25/465/587). The template was <strong>successfully evaluated on the server</strong> and the rendered email preview is displayed below.
+                                        </div>
+                                        <details style="margin-top:8px;font-size:11px;">
+                                            <summary style="cursor:pointer;color:#b45309;font-weight:600;">View SMTP Error Log</summary>
+                                            <div style="background:rgba(0,0,0,0.04);padding:8px;border-radius:4px;margin-top:6px;font-family:monospace;word-break:break-all;">
+                                                <?php echo htmlspecialchars($mailError); ?>
+                                            </div>
+                                        </details>
+                                    </div>
+                                <?php endif; ?>
+
+                                <!-- Simulated Email Inbox Viewer -->
+                                <div style="border:1px solid #e5e7eb;border-radius:8px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.04);background:#ffffff;">
+                                    <div style="background:#f8fafc;border-bottom:1px solid #e2e8f0;padding:12px 16px;font-size:13px;">
+                                        <div style="display:flex;margin-bottom:6px;gap:8px;">
+                                            <span style="color:#64748b;min-width:60px;font-weight:600;">From:</span>
+                                            <span style="color:#0f172a;font-weight:500;">SendStack &lt;noreply@sendstack.io&gt;</span>
+                                        </div>
+                                        <div style="display:flex;margin-bottom:6px;gap:8px;">
+                                            <span style="color:#64748b;min-width:60px;font-weight:600;">To:</span>
+                                            <span style="color:#0f172a;font-weight:500;"><?php echo htmlspecialchars($name); ?> &lt;<?php echo htmlspecialchars($email); ?>&gt;</span>
+                                        </div>
+                                        <div style="display:flex;gap:8px;">
+                                            <span style="color:#64748b;min-width:60px;font-weight:600;">Subject:</span>
+                                            <span style="color:#0f172a;font-weight:600;">Your SendStack Personalized Campaign Message</span>
+                                        </div>
+                                    </div>
+
+                                    <!-- Rendered Content -->
+                                    <div style="padding:22px 20px;font-size:14px;line-height:1.75;color:#1e293b;background:#ffffff;">
+                                        <?php echo nl2br(htmlspecialchars($template_output)); ?>
+                                    </div>
+
+                                    <!-- Raw Evaluated Output Box -->
+                                    <div style="border-top:1px dashed #e2e8f0;background:#f8fafc;padding:12px 16px;">
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <span style="font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:0.5px;">
+                                                <i class="fas fa-terminal me-1"></i> Raw Template Engine Output
+                                            </span>
+                                        </div>
+                                        <pre style="margin:8px 0 0;font-size:12px;background:#0f172a;color:#f8fafc;padding:12px;border-radius:6px;overflow-x:auto;max-height:220px;white-space:pre-wrap;font-family:SFMono-Regular,Menlo,Monaco,Consolas,'Liberation Mono',monospace;"><?php echo htmlspecialchars($template_output); ?></pre>
+                                    </div>
                                 </div>
-                                <div style="border:1px solid #e5e7eb;border-radius:8px;padding:16px;background:#f9fafb;">
-                                    <strong style="display:block;margin-bottom:8px;font-size:12px;color:#6b7280;text-transform:uppercase;">Evaluated Email Content Delivered:</strong>
-                                    <div style="font-family:monospace;white-space:pre-wrap;font-size:13px;color:#1f2937;"><?php echo htmlspecialchars($template_output); ?></div>
-                                </div>
-                            <?php elseif ($mailError): ?>
-                                <div style="background:#fef2f2;border:1px solid #fecaca;color:#dc2626;padding:16px;border-radius:8px;">
-                                    <h5 style="margin-bottom:6px;font-weight:700;"><i class="fas fa-exclamation-triangle"></i> Delivery Warning</h5>
-                                    <p style="margin:0;font-size:13px;"><?php echo htmlspecialchars($mailError); ?></p>
-                                </div>
+
                             <?php else: ?>
-                                <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:280px;color:#6b7280;text-align:center;">
+                                <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:300px;color:#6b7280;text-align:center;">
                                     <i class="fas fa-paper-plane" style="font-size:44px;opacity:0.25;margin-bottom:14px;"></i>
-                                    <p>Fill in the campaign details and click <strong>Send Email Campaign</strong> to send the email via SMTP.</p>
+                                    <h6 style="color:#374151;font-weight:700;margin-bottom:6px;">No Campaign Sent Yet</h6>
+                                    <p style="max-width:320px;font-size:13px;color:#9ca3af;">Fill in the template variables and click <strong>Send Email Campaign</strong> to evaluate the template and view the live email preview.</p>
                                 </div>
                             <?php endif; ?>
                         </div>

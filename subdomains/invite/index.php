@@ -8,7 +8,9 @@
 // RCE:        {php}echo $smarty['FLAG'];{/php}
 // Flag via:   {$smarty.FLAG}  or  {php}echo $smarty['FLAG'];{/php}
 
-session_start();
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
 // Resilient PHPMailer & Composer Loader
 if (file_exists(__DIR__ . '/vendor/autoload.php')) {
     require_once __DIR__ . '/vendor/autoload.php';
@@ -18,6 +20,10 @@ if (file_exists(__DIR__ . '/vendor/autoload.php')) {
     require_once __DIR__ . '/PHPMailer/Exception.php';
     require_once __DIR__ . '/PHPMailer/PHPMailer.php';
     require_once __DIR__ . '/PHPMailer/SMTP.php';
+} elseif (file_exists('/opt/lampp/htdocs/subdomains/PHPMailer/PHPMailer.php')) {
+    require_once '/opt/lampp/htdocs/subdomains/PHPMailer/Exception.php';
+    require_once '/opt/lampp/htdocs/subdomains/PHPMailer/PHPMailer.php';
+    require_once '/opt/lampp/htdocs/subdomains/PHPMailer/SMTP.php';
 } elseif (file_exists('/opt/lampp/htdocs/PHPMailer/PHPMailer.php')) {
     require_once '/opt/lampp/htdocs/PHPMailer/Exception.php';
     require_once '/opt/lampp/htdocs/PHPMailer/PHPMailer.php';
@@ -27,7 +33,9 @@ if (file_exists(__DIR__ . '/vendor/autoload.php')) {
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
 
-require_once __DIR__ . '/../../config/mail.php';
+if (file_exists(__DIR__ . '/../../config/mail.php')) {
+    require_once __DIR__ . '/../../config/mail.php';
+}
 
 function send_unikrn_invite_email($recipient_email, $sender_name, $subject, $body_text) {
     if (!$recipient_email) return false;
@@ -140,34 +148,87 @@ function smarty_render($template, $context = []) {
 
 function esc($s) { return htmlspecialchars((string)$s, ENT_QUOTES, 'UTF-8'); }
 
-// ── MySQL connection + table bootstrap ────────────────────────────────────
-$db_hosts = ['krazeplanet', '127.0.0.1', 'localhost', '172.19.0.1', 'host.docker.internal'];
-$db = null;
-foreach ($db_hosts as $h) {
-    $db = @new mysqli($h, 'root', '');
-    if (!$db->connect_error) {
-        $db->query("CREATE DATABASE IF NOT EXISTS `KrazePlanet_DB` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci");
-        $db->select_db('KrazePlanet_DB');
-        break;
+// ── Database Connection (PDO) ─────────────────────────────────────────────
+if (file_exists(__DIR__ . '/../../config/db.php')) {
+    require_once __DIR__ . '/../../config/db.php';
+}
+
+if (!isset($pdo) || !$pdo) {
+    $db_host = getenv('DB_HOST') ?: '127.0.0.1';
+    $db_user = getenv('DB_USER') ?: 'root';
+    $db_pass = getenv('DB_PASS') !== false ? getenv('DB_PASS') : '';
+    $db_name = getenv('DB_NAME') ?: 'KrazePlanet';
+
+    $targets = [
+        "mysql:host={$db_host};dbname={$db_name};charset=utf8mb4",
+        "mysql:unix_socket=/var/run/mysqld/mysqld.sock;dbname={$db_name};charset=utf8mb4",
+        "mysql:host=localhost;dbname={$db_name};charset=utf8mb4",
+        "mysql:host=127.0.0.1;dbname=KrazePlanet_DB;charset=utf8mb4",
+        "mysql:host=localhost;dbname=KrazePlanet_DB;charset=utf8mb4",
+    ];
+
+    foreach ($targets as $dsn) {
+        try {
+            $pdo = new PDO($dsn, $db_user, $db_pass, [
+                PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
+                PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+                PDO::ATTR_EMULATE_PREPARES   => false,
+            ]);
+            break;
+        } catch (\Throwable $e) {
+            // Try next target
+        }
+    }
+
+    if (!$pdo) {
+        try {
+            $sqlite_path = sys_get_temp_dir() . '/lab804_unikrn.sqlite';
+            $pdo = new PDO('sqlite:' . $sqlite_path, null, null, [
+                PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
+                PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+            ]);
+        } catch (\Throwable $e) {
+            $pdo = null;
+        }
     }
 }
-if (!$db || $db->connect_error) { die('DB connection failed: ' . ($db ? $db->connect_error : 'Unable to connect to database')); }
-if ($db->connect_error) {
-    die('<p style="padding:32px;font-family:sans-serif">DB error: ' . esc($db->connect_error) . '</p>');
+
+if ($pdo) {
+    try {
+        $driver = $pdo->getAttribute(PDO::ATTR_DRIVER_NAME);
+        if ($driver === 'sqlite') {
+            $pdo->exec("CREATE TABLE IF NOT EXISTS lab804_users (
+                id               INTEGER PRIMARY KEY AUTOINCREMENT,
+                first_name       VARCHAR(255) NOT NULL DEFAULT '',
+                last_name        VARCHAR(255) NOT NULL DEFAULT '',
+                nickname         VARCHAR(255) NOT NULL DEFAULT '',
+                email            VARCHAR(255) NOT NULL UNIQUE,
+                password         VARCHAR(255) NOT NULL,
+                invite_to_email  VARCHAR(255) DEFAULT NULL,
+                invite_rendered  TEXT DEFAULT NULL,
+                ssti_detected    INTEGER DEFAULT 0,
+                updated_at       DATETIME DEFAULT CURRENT_TIMESTAMP,
+                created_at       DATETIME DEFAULT CURRENT_TIMESTAMP
+            )");
+        } else {
+            $pdo->exec("CREATE TABLE IF NOT EXISTS lab804_users (
+                id               INT AUTO_INCREMENT PRIMARY KEY,
+                first_name       VARCHAR(255) NOT NULL DEFAULT '',
+                last_name        VARCHAR(255) NOT NULL DEFAULT '',
+                nickname         VARCHAR(255) NOT NULL DEFAULT '',
+                email            VARCHAR(255) NOT NULL UNIQUE,
+                password         VARCHAR(255) NOT NULL,
+                invite_to_email  VARCHAR(255) DEFAULT NULL,
+                invite_rendered  TEXT DEFAULT NULL,
+                ssti_detected    TINYINT(1) DEFAULT 0,
+                updated_at       DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+                created_at       DATETIME DEFAULT CURRENT_TIMESTAMP
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
+        }
+    } catch (\Throwable $e) {
+        // Table exists
+    }
 }
-$db->query("CREATE TABLE IF NOT EXISTS lab804_users (
-    id               INT AUTO_INCREMENT PRIMARY KEY,
-    first_name       VARCHAR(255) NOT NULL DEFAULT '',
-    last_name        VARCHAR(255) NOT NULL DEFAULT '',
-    nickname         VARCHAR(255) NOT NULL DEFAULT '',
-    email            VARCHAR(255) NOT NULL UNIQUE,
-    password         VARCHAR(255) NOT NULL,
-    invite_to_email  VARCHAR(255) DEFAULT NULL,
-    invite_rendered  TEXT DEFAULT NULL,
-    ssti_detected    TINYINT(1) DEFAULT 0,
-    updated_at       DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    created_at       DATETIME DEFAULT CURRENT_TIMESTAMP
-)");
 
 // ── Logout ─────────────────────────────────────────────────────────────────
 if (isset($_GET['logout'])) {
@@ -209,17 +270,19 @@ $mode           = 'register';
 
 // ── Load session user ──────────────────────────────────────────────────────
 $logged_in_user = null;
-if (!empty($_SESSION['user804_id'])) {
-    $sid  = (int)$_SESSION['user804_id'];
-    $stmt = $db->prepare("SELECT * FROM lab804_users WHERE id = ?");
-    $stmt->bind_param('i', $sid);
-    $stmt->execute();
-    $logged_in_user = $stmt->get_result()->fetch_assoc();
-    $stmt->close();
+if (!empty($_SESSION['user804_id']) && $pdo) {
+    try {
+        $sid  = (int)$_SESSION['user804_id'];
+        $stmt = $pdo->prepare('SELECT * FROM lab804_users WHERE id = ?');
+        $stmt->execute([$sid]);
+        $logged_in_user = $stmt->fetch();
+    } catch (\Throwable $e) {
+        $logged_in_user = null;
+    }
 }
 
 // ── POST handlers ──────────────────────────────────────────────────────────
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
     $action = $_POST['action'] ?? 'register';
 
     // ── Register ────────────────────────────────────────────────────────────
@@ -233,28 +296,30 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if ($email    === '')  $reg_errors[] = 'Email is required.';
         if (strlen($pw) < 6)  $reg_errors[] = 'Password must be at least 6 characters.';
 
-        if (empty($reg_errors)) {
-            $chk = $db->prepare("SELECT id FROM lab804_users WHERE email = ?");
-            $chk->bind_param('s', $email);
-            $chk->execute();
-            $chk->store_result();
-            if ($chk->num_rows > 0) {
-                $reg_errors[] = 'Email already registered. <a href="#" onclick="switchTab(\'login\');return false;" style="color:#a78bfa;">Sign in instead</a>.';
+        if (empty($reg_errors) && $pdo) {
+            try {
+                $chk = $pdo->prepare('SELECT id FROM lab804_users WHERE email = ?');
+                $chk->execute([$email]);
+                if ($chk->fetch()) {
+                    $reg_errors[] = 'Email already registered. <a href="#" onclick="switchTab(\'login\');return false;" style="color:#a78bfa;">Sign in instead</a>.';
+                }
+            } catch (\Throwable $e) {
+                // Proceed
             }
-            $chk->close();
         }
 
-        if (empty($reg_errors)) {
-            $pw_hash = password_hash($pw, PASSWORD_BCRYPT);
-            $ins = $db->prepare("INSERT INTO lab804_users (nickname, email, password) VALUES (?,?,?)");
-            $ins->bind_param('sss', $nickname, $email, $pw_hash);
-            $ins->execute();
-            $new_id = $db->insert_id;
-            $ins->close();
-
-            $_SESSION['user804_id'] = $new_id;
-            header('Location: index.php');
-            exit;
+        if (empty($reg_errors) && $pdo) {
+            try {
+                $pw_hash = password_hash($pw, PASSWORD_BCRYPT);
+                $ins = $pdo->prepare('INSERT INTO lab804_users (nickname, email, password) VALUES (?,?,?)');
+                $ins->execute([$nickname, $email, $pw_hash]);
+                $new_id = (int)$pdo->lastInsertId();
+                $_SESSION['user804_id'] = $new_id;
+                header('Location: index.php');
+                exit;
+            } catch (\Throwable $e) {
+                $reg_errors[] = 'Registration failed: ' . $e->getMessage();
+            }
         }
         $form = compact('nickname', 'email');
     }
@@ -267,19 +332,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         if ($email === '' || $pw === '') {
             $login_errors[] = 'Please enter your email and password.';
-        } else {
-            $stmt = $db->prepare("SELECT * FROM lab804_users WHERE email = ?");
-            $stmt->bind_param('s', $email);
-            $stmt->execute();
-            $row = $stmt->get_result()->fetch_assoc();
-            $stmt->close();
-
-            if ($row && password_verify($pw, $row['password'])) {
-                $_SESSION['user804_id'] = $row['id'];
-                header('Location: index.php');
-                exit;
-            } else {
-                $login_errors[] = 'Invalid email or password.';
+        } elseif ($pdo) {
+            try {
+                $stmt = $pdo->prepare('SELECT * FROM lab804_users WHERE email = ?');
+                $stmt->execute([$email]);
+                $row = $stmt->fetch();
+                if ($row && password_verify($pw, $row['password'])) {
+                    $_SESSION['user804_id'] = $row['id'];
+                    header('Location: index.php');
+                    exit;
+                } else {
+                    $login_errors[] = 'Invalid email or password.';
+                }
+            } catch (\Throwable $e) {
+                $login_errors[] = 'Login error: ' . $e->getMessage();
             }
         }
     }
@@ -292,19 +358,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         if ($nickname === '') $profile_errors[] = 'Nickname is required.';
 
-        if (empty($profile_errors)) {
-            $upd = $db->prepare("UPDATE lab804_users SET first_name=?, last_name=?, nickname=?, updated_at=NOW() WHERE id=?");
-            $upd->bind_param('sssi', $first_name, $last_name, $nickname, $logged_in_user['id']);
-            $upd->execute();
-            $upd->close();
+        if (empty($profile_errors) && $pdo) {
+            try {
+                $upd = $pdo->prepare('UPDATE lab804_users SET first_name=?, last_name=?, nickname=? WHERE id=?');
+                $upd->execute([$first_name, $last_name, $nickname, $logged_in_user['id']]);
 
-            // Reload from DB
-            $stmt = $db->prepare("SELECT * FROM lab804_users WHERE id = ?");
-            $stmt->bind_param('i', $logged_in_user['id']);
-            $stmt->execute();
-            $logged_in_user = $stmt->get_result()->fetch_assoc();
-            $stmt->close();
-            $profile_ok = true;
+                $stmt = $pdo->prepare('SELECT * FROM lab804_users WHERE id = ?');
+                $stmt->execute([$logged_in_user['id']]);
+                $logged_in_user = $stmt->fetch();
+                $profile_ok = true;
+            } catch (\Throwable $e) {
+                $profile_errors[] = 'Profile update failed: ' . $e->getMessage();
+            }
         }
     }
 
@@ -315,46 +380,42 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if ($invite_email === '') {
             $invite_errors[] = "Friend's email is required.";
         } else {
-            // Reload fresh user data
-            $stmt = $db->prepare("SELECT * FROM lab804_users WHERE id = ?");
-            $stmt->bind_param('i', $logged_in_user['id']);
-            $stmt->execute();
-            $u = $stmt->get_result()->fetch_assoc();
-            $stmt->close();
+            if ($pdo) {
+                try {
+                    $stmt = $pdo->prepare('SELECT * FROM lab804_users WHERE id = ?');
+                    $stmt->execute([$logged_in_user['id']]);
+                    $u = $stmt->fetch();
 
-            $context = [
-                'smarty'           => $smarty_config,
-                'config'           => $smarty_config,
-                'flag'             => $smarty_config['FLAG'],
-                'member_since'     => date('F Y', strtotime($u['created_at'])),
-                'site_disclaimer'  => 'Unikrn is licensed and regulated. Gamble responsibly.',
-                'site_name'        => 'Unikrn',
-            ];
+                    $context = [
+                        'smarty'           => $smarty_config,
+                        'config'           => $smarty_config,
+                        'flag'             => $smarty_config['FLAG'],
+                        'member_since'     => date('F Y', strtotime($u['created_at'] ?? 'now')),
+                        'site_disclaimer'  => 'Unikrn is licensed and regulated. Gamble responsibly.',
+                        'site_name'        => 'Unikrn',
+                    ];
 
-            // VULNERABLE: template is built by string concatenation with raw profile fields
-            $body_tpl = build_invite_template($u);
-            $invite_rendered = smarty_render($body_tpl, $context);
+                    $body_tpl = build_invite_template($u);
+                    $invite_rendered = smarty_render($body_tpl, $context);
 
-            // SSTI detection: any { } in profile fields means Smarty syntax was present
-            $had_smarty = (
-                strpos($u['first_name'] . $u['last_name'] . $u['nickname'], '{') !== false
-            );
-            $ssti = $had_smarty ? 1 : 0;
+                    $had_smarty = (
+                        strpos($u['first_name'] . $u['last_name'] . $u['nickname'], '{') !== false
+                    );
+                    $ssti = $had_smarty ? 1 : 0;
 
-            $upd = $db->prepare("UPDATE lab804_users SET invite_to_email=?, invite_rendered=?, ssti_detected=?, updated_at=NOW() WHERE id=?");
-            $upd->bind_param('ssii', $invite_email, $invite_rendered, $ssti, $u['id']);
-            $upd->execute();
-            $upd->close();
+                    $upd = $pdo->prepare('UPDATE lab804_users SET invite_to_email=?, invite_rendered=?, ssti_detected=? WHERE id=?');
+                    $upd->execute([$invite_email, $invite_rendered, $ssti, $u['id']]);
 
-            send_unikrn_invite_email($invite_email, $u['nickname'], 'You have been invited to join Unikrn!', $invite_rendered);
+                    send_unikrn_invite_email($invite_email, $u['nickname'], 'You have been invited to join Unikrn!', $invite_rendered);
 
-            // Reload
-            $stmt = $db->prepare("SELECT * FROM lab804_users WHERE id = ?");
-            $stmt->bind_param('i', $u['id']);
-            $stmt->execute();
-            $logged_in_user = $stmt->get_result()->fetch_assoc();
-            $stmt->close();
-            $invite_ok = true;
+                    $stmt = $pdo->prepare('SELECT * FROM lab804_users WHERE id = ?');
+                    $stmt->execute([$u['id']]);
+                    $logged_in_user = $stmt->fetch();
+                    $invite_ok = true;
+                } catch (\Throwable $e) {
+                    $invite_errors[] = 'Sending invite failed: ' . $e->getMessage();
+                }
+            }
         }
     }
 }
