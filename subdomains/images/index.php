@@ -1,17 +1,74 @@
-﻿<?php
+<?php
 session_start();
-$db_hosts = ['krazeplanet', '127.0.0.1', 'localhost', '172.19.0.1', 'host.docker.internal'];
+// Robust Multi-Environment Database Connection
+@mysqli_report(MYSQLI_REPORT_OFF);
+if (file_exists(__DIR__ . '/../../config/database.php')) {
+    include_once __DIR__ . '/../../config/database.php';
+}
+
+$target_db = 'KrazePlanet_DB';
+$db_user   = getenv('DB_USER') ?: ($db_user ?? 'root');
+$db_pass   = getenv('DB_PASS') !== false ? getenv('DB_PASS') : ($db_pass ?? '');
+$env_host  = getenv('DB_HOST') ?: ($db_host ?? null);
+
+$candidate_hosts = array_values(array_unique(array_filter([
+    $env_host,
+    '127.0.0.1',
+    'localhost',
+    'krazeplanet',
+    '172.19.0.1',
+    'host.docker.internal'
+])));
+
 $db = null;
-foreach ($db_hosts as $h) {
-    $db = @new mysqli($h, 'root', '');
-    if (!$db->connect_error) {
-        $db->query("CREATE DATABASE IF NOT EXISTS `KrazePlanet_DB` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci");
-        $db->select_db('KrazePlanet_DB');
-        break;
+
+// 1. Try unix socket if available (Linux / standard LAMPP)
+$socket_paths = ['/var/run/mysqld/mysqld.sock', '/opt/lampp/var/mysql/mysql.sock', '/tmp/mysql.sock'];
+foreach ($socket_paths as $sock) {
+    if (file_exists($sock)) {
+        try {
+            $conn = @new mysqli('localhost', $db_user, $db_pass, '', 0, $sock);
+            if ($conn && !$conn->connect_error) {
+                $db = $conn;
+                break;
+            }
+        } catch (Throwable $e) {}
     }
 }
-if (!$db || $db->connect_error) { die('DB connection failed: ' . ($db ? $db->connect_error : 'Unable to connect to database')); }
-if($db->connect_error)die('<h3 style="padding:32px;font-family:sans-serif;color:#c00">DB: '.htmlspecialchars($db->connect_error).'</h3>');
+
+// 2. Try candidate TCP hosts with configured credentials
+if (!$db) {
+    foreach ($candidate_hosts as $h) {
+        try {
+            $conn = @new mysqli($h, $db_user, $db_pass);
+            if ($conn && !$conn->connect_error) {
+                $db = $conn;
+                break;
+            }
+        } catch (Throwable $e) {}
+    }
+}
+
+// 3. Fallback: try root with empty password if distinct from configured
+if (!$db && ($db_user !== 'root' || $db_pass !== '')) {
+    foreach ($candidate_hosts as $h) {
+        try {
+            $conn = @new mysqli($h, 'root', '');
+            if ($conn && !$conn->connect_error) {
+                $db = $conn;
+                break;
+            }
+        } catch (Throwable $e) {}
+    }
+}
+
+if ($db && !$db->connect_error) {
+    @$db->query("CREATE DATABASE IF NOT EXISTS `{$target_db}` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci");
+    @$db->select_db($target_db);
+    @$db->set_charset('utf8mb4');
+} else {
+    die('<h3 style="padding:32px;font-family:sans-serif;color:#c00">DB connection failed: ' . htmlspecialchars($db ? $db->connect_error : 'Unable to connect to database') . '</h3>');
+}
 $db->query("CREATE TABLE IF NOT EXISTS lab1404_users(id INT AUTO_INCREMENT PRIMARY KEY,name VARCHAR(100)NOT NULL,email VARCHAR(255)NOT NULL UNIQUE,password VARCHAR(255)NOT NULL,role VARCHAR(100)DEFAULT'Engineer',avatar VARCHAR(4)DEFAULT'U',created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP)");
 $chk=$db->query("SELECT id FROM lab1404_users WHERE email='alex.m@nexushub.io'");
 if($chk&&$chk->num_rows===0){$seeds=[['Alex Morgan','alex.m@nexushub.io','alex@123','Platform Engineer','AM'],['Maya Chen','maya.c@nexushub.io','maya@123','Design Lead','MC'],['Chris Park','chris.p@nexushub.io','chris@123','Backend Dev','CP']];$st=$db->prepare("INSERT INTO lab1404_users(name,email,password,role,avatar)VALUES(?,?,?,?,?)");foreach($seeds as $s){$h=password_hash($s[2],PASSWORD_BCRYPT);$st->bind_param('sssss',$s[0],$s[1],$h,$s[3],$s[4]);$st->execute();}$st->close();}

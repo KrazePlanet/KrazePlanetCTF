@@ -3,7 +3,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>PulseFeedback Settings — Apache FreeMarker Engine</title>
+    <title>Verified Survey Submissions — PulseFeedback</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -29,25 +29,27 @@
             <div class="nav-section-title">Onboarding & Feedback</div>
             <a href="index.php" class="sidebar-link"><i class="bi bi-card-checklist"></i> Survey & Receipt Studio</a>
             <a href="receipt.php" class="sidebar-link"><i class="bi bi-receipt-cutoff"></i> Customer Receipt View</a>
-            <a href="responses.php" class="sidebar-link"><i class="bi bi-inbox-fill"></i> Verified Submissions</a>
+            <a href="responses.php" class="sidebar-link active"><i class="bi bi-inbox-fill"></i> Verified Submissions</a>
             <a href="analytics.php" class="sidebar-link"><i class="bi bi-graph-up"></i> Satisfaction Analytics</a>
             <div class="nav-section-title mt-3">Settings</div>
-            <a href="settings.php" class="sidebar-link active"><i class="bi bi-sliders"></i> Engine Settings</a>
+            <a href="settings.php" class="sidebar-link"><i class="bi bi-sliders"></i> Engine Settings</a>
         </div>
     </aside>
 
     <main class="app-workspace">
         <header class="app-topbar">
-            <h1 class="fs-5 fw-bold mb-0">Apache FreeMarker Template Engine Settings</h1>
+            <h1 class="fs-5 fw-bold mb-0">Verified Customer Submissions</h1>
             <a href="index.php" class="btn btn-sm btn-warning text-dark fw-bold">&larr; Back to Survey Studio</a>
         </header>
 
-        <div class="p-4" style="max-width: 800px;">
-            <div class="card bg-dark border-secondary p-4 mb-4">
-                <h5 class="fw-bold text-white mb-3">FreeMarker 2.3.32 Integration</h5>
-                <p class="text-secondary small">PulseFeedback compiles customer acknowledgment receipts using Apache FreeMarker 2.3.32. Variables in <code>${...}</code> syntax are bound to survey response models.</p>
-                <div class="alert alert-warning small mb-0">
-                    <i class="bi bi-exclamation-triangle-fill me-1"></i> Security Note: FreeMarker models that allow execution utilities (such as <code>freemarker.template.utility.Execute</code>) permit arbitrary operating system command execution.
+        <div class="p-4" style="max-width: 900px;">
+            <div class="card bg-dark border-secondary p-3 mb-3">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="fw-bold text-white mb-1">Alex Morgan — Apex Global Systems</h6>
+                        <div class="small text-secondary">Ticket Ref: <code>FBK-2026-9042</code> &bull; Rating: 10/10 Promoter</div>
+                    </div>
+                    <a href="receipt.php" class="btn btn-sm btn-outline-warning">View Receipt</a>
                 </div>
             </div>
         </div>

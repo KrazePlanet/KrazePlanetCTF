@@ -23,48 +23,41 @@ public class FreeMarkerEvaluator {
             cfg.setWrapUncheckedExceptions(true);
             cfg.setNumberFormat("computer");
             
-            // Rich enterprise SaaS Data Model
+            // Rich Customer Feedback & Onboarding Survey Context
             Map<String, Object> data = new HashMap<>();
             
             Map<String, Object> user = new HashMap<>();
             user.put("name", "Alex Morgan");
             user.put("firstName", "Alex");
             user.put("lastName", "Morgan");
-            user.put("email", "alex.morgan@apexcorp.internal");
-            user.put("role", "Senior Marketing Director");
-            user.put("loyaltyTier", "Platinum Executive");
-            user.put("points", 14500);
+            user.put("email", "alex.morgan@apexsystems.internal");
+            user.put("role", "VP of Customer Operations");
+            user.put("company", "Apex Global Systems");
+            user.put("loyaltyTier", "Platinum Enterprise");
+            user.put("points", 18500);
             data.put("user", user);
 
+            Map<String, Object> survey = new HashMap<>();
+            survey.put("id", "FBK-2026-9042");
+            survey.put("product", "PulseCloud Enterprise Suite");
+            survey.put("status", "Verified & Dispatched");
+            survey.put("score", "NPS 10/10 Promoter");
+            survey.put("submittedAt", "September 2026");
+            data.put("survey", survey);
+
             Map<String, Object> company = new HashMap<>();
-            company.put("name", "PulseMail Enterprise Inc.");
-            company.put("supportEmail", "support@pulsemail.io");
-            company.put("website", "https://pulsemail.io");
-            company.put("address", "742 Evergreen Terrace, San Francisco, CA 94107");
+            company.put("name", "PulseCloud Technologies");
+            company.put("supportEmail", "feedback@pulsecloud.io");
+            company.put("portalUrl", "https://portal.pulsecloud.io");
+            company.put("discountVoucher", "NPS-VIP-THANKYOU-2026");
             data.put("company", company);
 
-            Map<String, Object> order = new HashMap<>();
-            order.put("id", "ORD-2026-98421");
-            order.put("date", "August 17, 2026");
-            order.put("total", "$349.50");
-            order.put("status", "Confirmed");
-            order.put("itemsCount", 3);
-            data.put("order", order);
-
-            data.put("campaignName", "Q3 Customer Appreciation & Product Keynote");
-            data.put("currentYear", "2026");
-            data.put("discountCode", "SUMMER2026-VIP");
-            
-            // Legacy flat variables for backward compatibility
-            data.put("name", "Alex Morgan");
-            data.put("email", "alex.morgan@apexcorp.internal");
-            
-            Template t = new Template("marketing_template", new StringReader(templateStr), cfg);
+            Template t = new Template("feedback_receipt", new StringReader(templateStr), cfg);
             StringWriter out = new StringWriter();
             t.process(data, out);
             System.out.print(out.toString());
         } catch (Exception e) {
-            System.out.print("Template Compilation Error: " + e.getMessage());
+            System.out.print("FreeMarker Template Compilation Error: " + e.getMessage());
         }
     }
 }

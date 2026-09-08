@@ -1,38 +1,29 @@
-import sys, base64
+﻿import sys, base64
 from tornado.template import Template
 
 def eval_tornado(template_str):
     try:
         t = Template(template_str)
         context = {
-            'user': {
+            'wiki': {
+                'space': 'DevOps & SRE Knowledge Base',
+                'title': 'Production Disaster Recovery & Ingress Runbook',
+                'category': 'Architecture & Runbooks',
+                'version': 'v2.4.0',
+                'last_updated': 'September 2026',
+                'views': 4310
+            },
+            'author': {
                 'name': 'Elena Rostova',
-                'email': 'elena.rostova@tornado-cloud.io',
-                'role': 'Principal SRE',
-                'team': 'Core Infrastructure Platform',
-                'on_call': True
+                'role': 'Lead Site Reliability Engineer',
+                'email': 'elena.rostova@devwiki.internal',
+                'team': 'Platform Resilience'
             },
-            'node': {
-                'hostname': 'edge-gw-08.us-east.prod',
-                'region': 'us-east-1 (N. Virginia)',
-                'ip': '10.240.18.94',
-                'status': 'DEGRADED',
-                'connections': 14280,
-                'uptime': '99.995%'
-            },
-            'metric': {
-                'throughput': '2.14M req/sec',
-                'latency_p99': '142.5ms',
-                'cpu_load': '89.4%',
-                'error_rate': '4.12%'
-            },
-            'incident': {
-                'id': 'INC-2026-8942',
-                'severity': 'SEV-1 Critical',
-                'summary': 'Edge Proxy Ingress Connection Pool Saturation',
-                'timestamp': '2026-08-17 11:45:00 UTC'
-            },
-            'app_title': 'TornadoAsync Cloud Monitoring'
+            'system': {
+                'engine': 'Tornado Template Engine 6.4',
+                'node': 'wiki-worker-node-04',
+                'region': 'eu-central-1'
+            }
         }
         res = t.generate(**context)
         return res.decode('utf-8', errors='ignore')

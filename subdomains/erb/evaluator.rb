@@ -1,4 +1,4 @@
-require 'erb'
+﻿require 'erb'
 require 'base64'
 require 'json'
 require 'ostruct'
@@ -6,36 +6,41 @@ require 'ostruct'
 template_b64 = ARGV[0] || ''
 template_str = Base64.decode64(template_b64)
 
-# Realistic SaaS Data Model / Binding Context
-class TemplateContext
-  attr_accessor :user, :account, :invoice, :server_time, :app_name
+# Realistic Headless CMS & Landing Page Context
+class CMSContext
+  attr_accessor :brand, :campaign, :metrics, :author, :site
 
   def initialize
-    @user = OpenStruct.new(
+    @brand = OpenStruct.new(
+      name: "CloudScale Engine",
+      slug: "cloudscale-io",
+      tagline: "Ultra-low latency serverless edge compute",
+      support_email: "hello@cloudscale.io",
+      founded_year: "2024"
+    )
+    @campaign = OpenStruct.new(
+      code: "LAUNCH2026",
+      discount: "30% OFF Annual Tier",
+      expiry: "September 30, 2026",
+      cta_text: "Claim Your Cloud Credits",
+      tier: "Enterprise Scale"
+    )
+    @metrics = OpenStruct.new(
+      active_deployments: "128,450+",
+      global_regions: "42 Edge PoPs",
+      customers_count: "14,200",
+      uptime: "99.999%"
+    )
+    @author = OpenStruct.new(
       name: "Marcus Vance",
-      first_name: "Marcus",
-      last_name: "Vance",
-      email: "marcus.vance@rubycorp.internal",
-      role: "Lead DevOps Architect",
-      tier: "Enterprise Tier",
-      avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb"
+      role: "Head of Growth & Developer Marketing",
+      email: "marcus.vance@cloudscale.io"
     )
-    @account = OpenStruct.new(
-      id: "ACC-892301",
-      plan: "RubyCloud Pro Dedicated",
-      status: "Active",
-      billing_cycle: "Monthly",
-      created_at: "2026-01-15"
+    @site = OpenStruct.new(
+      theme: "Cyber Slate Dark",
+      version: "v3.6.0-cms",
+      cdn_endpoint: "https://assets.cloudscale.internal"
     )
-    @invoice = OpenStruct.new(
-      number: "INV-2026-0817",
-      amount: "$1,250.00",
-      due_date: "August 30, 2026",
-      status: "Pending Payment",
-      items_count: 5
-    )
-    @app_name = "CloudMatrix — Ruby Infrastructure Cloud"
-    @server_time = Time.now.strftime("%Y-%m-%d %H:%M:%S UTC")
   end
 
   def get_binding
@@ -44,7 +49,7 @@ class TemplateContext
 end
 
 begin
-  context = TemplateContext.new
+  context = CMSContext.new
   renderer = ERB.new(template_str, trim_mode: '-')
   output = renderer.result(context.get_binding)
   print output

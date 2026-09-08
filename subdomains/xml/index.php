@@ -1,46 +1,39 @@
-﻿<?php
+<?php
 session_start();
 
-// ── Database ────────────────────────────────────────────────────────────────
-$db_hosts = ['krazeplanet', '127.0.0.1', 'localhost', '172.19.0.1', 'host.docker.internal'];
-$db = null;
-foreach ($db_hosts as $h) {
-    $db = @new mysqli($h, 'root', '');
-    if (!$db->connect_error) {
-        $db->query("CREATE DATABASE IF NOT EXISTS `KrazePlanet_DB` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci");
-        $db->select_db('KrazePlanet_DB');
-        break;
-    }
-}
-if (!$db || $db->connect_error) { die('DB connection failed: ' . ($db ? $db->connect_error : 'Unable to connect to database')); }
-if ($db->connect_error) { die('<h3 style="padding:32px;font-family:sans-serif;color:#c00">DB error: '.htmlspecialchars($db->connect_error).'</h3>'); }
+// Database (shared config)
+$db_name = 'KrazePlanet_DB';
+require_once __DIR__ . '/../../config/db.php';
+if (!$pdo) { die('<h3 style="padding:32px;font-family:sans-serif;color:#c00">DB connection failed: ' . htmlspecialchars($db_error ?? 'unknown error') . '</h3>'); }
 
-$db->query("CREATE TABLE IF NOT EXISTS lab1401_users (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    name VARCHAR(100) NOT NULL,
-    email VARCHAR(255) NOT NULL UNIQUE,
-    password VARCHAR(255) NOT NULL,
-    role VARCHAR(100) DEFAULT 'Employee',
-    dept VARCHAR(50) DEFAULT 'General',
-    avatar VARCHAR(4) DEFAULT 'U',
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-)");
+// Ensure lab table exists
+try {
+    $pdo->exec("CREATE TABLE IF NOT EXISTS lab1401_users (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        name VARCHAR(100) NOT NULL,
+        email VARCHAR(255) NOT NULL UNIQUE,
+        password VARCHAR(255) NOT NULL,
+        role VARCHAR(100) DEFAULT 'Employee',
+        dept VARCHAR(50) DEFAULT 'General',
+        avatar VARCHAR(4) DEFAULT 'U',
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )");
+} catch (Exception $ex) {}
 
-$check = $db->query("SELECT id FROM lab1401_users WHERE email='sarah.chen@globaltech.io'");
-if ($check && $check->num_rows === 0) {
+// Seed default accounts
+$check = $pdo->query("SELECT id FROM lab1401_users WHERE email='sarah.chen@globaltech.io'");
+if ($check && $check->rowCount() === 0) {
     $seeds = [
         ['Sarah Chen','sarah.chen@globaltech.io','sarah@123','Lead Developer','Engineering','SC'],
         ['Marcus Rivera','marcus.r@globaltech.io','marcus@123','Brand Manager','Marketing','MR'],
         ['Aisha Patel','aisha.p@globaltech.io','aisha@123','HR Director','HR','AP'],
         ['James OConnor','james.oc@globaltech.io','james@123','CFO','Finance','JO'],
     ];
-    $st = $db->prepare("INSERT INTO lab1401_users (name,email,password,role,dept,avatar) VALUES (?,?,?,?,?,?)");
+    $st = $pdo->prepare('INSERT INTO lab1401_users (name,email,password,role,dept,avatar) VALUES (?,?,?,?,?,?)');
     foreach ($seeds as $s) {
         $h = password_hash($s[2], PASSWORD_BCRYPT);
-        $st->bind_param('ssssss', $s[0], $s[1], $h, $s[3], $s[4], $s[5]);
-        $st->execute();
+        $st->execute([$s[0], $s[1], $h, $s[3], $s[4], $s[5]]);
     }
-    $st->close();
 }
 
 function esc($s) { return htmlspecialchars((string)$s, ENT_QUOTES, 'UTF-8'); }
@@ -58,7 +51,7 @@ $employees = [
     ['id'=>'EMP010','name'=>'Emma Wilson','dept'=>'Engineering','email'=>'ewilson@globaltech.io','role'=>'QA Engineer','ext'=>'4220','joined'=>'2024-09-03'],
 ];
 
-// ── Routes ──────────────────────────────────────────────────────────────────
+// Routes
 $action = $_GET['action'] ?? '';
 $error  = '';
 
@@ -67,11 +60,9 @@ if ($action === 'logout') { session_destroy(); header('Location: '.$_SERVER['PHP
 // Load user from session
 $me = null;
 if (!empty($_SESSION['lab1401_uid'])) {
-    $st = $db->prepare("SELECT * FROM lab1401_users WHERE id=?");
-    $st->bind_param('i', $_SESSION['lab1401_uid']);
-    $st->execute();
-    $me = $st->get_result()->fetch_assoc();
-    $st->close();
+    $st = $pdo->prepare('SELECT * FROM lab1401_users WHERE id=?');
+    $st->execute([$_SESSION['lab1401_uid']]);
+    $me = $st->fetch(PDO::FETCH_ASSOC);
 }
 
 // POST: Register
@@ -83,11 +74,14 @@ if ($action === 'register' && $_SERVER['REQUEST_METHOD'] === 'POST') {
     if ($n && $e && $p) {
         $h = password_hash($p, PASSWORD_BCRYPT);
         $av = strtoupper(substr($n,0,1).(strpos($n,' ')!==false?substr($n,strpos($n,' ')+1,1):substr($n,1,1)));
-        $st = $db->prepare("INSERT INTO lab1401_users (name,email,password,role,dept,avatar) VALUES (?,?,?,'Employee',?,?)");
-        $st->bind_param('sssss', $n, $e, $h, $d, $av);
-        if ($st->execute()) { $_SESSION['lab1401_uid'] = $db->insert_id; header('Location: '.$_SERVER['PHP_SELF']); exit; }
-        $error = 'Email already registered.';
-        $st->close();
+        $st = $pdo->prepare('INSERT INTO lab1401_users (name,email,password,role,dept,avatar) VALUES (?,?,?,?,?,?)');
+        try {
+            $st->execute([$n, $e, $h, 'Employee', $d, $av]);
+            $_SESSION['lab1401_uid'] = $pdo->lastInsertId();
+            header('Location: '.$_SERVER['PHP_SELF']); exit;
+        } catch (Exception $ex) {
+            $error = 'Email already registered.';
+        }
     } else { $error = 'All fields are required.'; }
 }
 
@@ -96,11 +90,9 @@ if ($action !== 'register' && !$me && $_SERVER['REQUEST_METHOD'] === 'POST' && i
     $e = trim($_POST['email']);
     $p = $_POST['password'] ?? '';
     if ($e && $p) {
-        $st = $db->prepare("SELECT * FROM lab1401_users WHERE email=?");
-        $st->bind_param('s', $e);
-        $st->execute();
-        $u = $st->get_result()->fetch_assoc();
-        $st->close();
+        $st = $pdo->prepare('SELECT * FROM lab1401_users WHERE email=?');
+        $st->execute([$e]);
+        $u = $st->fetch(PDO::FETCH_ASSOC);
         if ($u && password_verify($p, $u['password'])) { $_SESSION['lab1401_uid'] = $u['id']; header('Location: '.$_SERVER['PHP_SELF']); exit; }
         $error = 'Invalid email or password.';
     }
@@ -139,7 +131,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $me) {
 
 $loggedIn = (bool)$me;
 $testAccounts = [];
-if (!$loggedIn) { $r = $db->query("SELECT name,email,dept FROM lab1401_users ORDER BY id LIMIT 4"); while($row=$r->fetch_assoc()) $testAccounts[]=$row; }
+if (!$loggedIn) {
+    $r = $pdo->query('SELECT name,email,dept FROM lab1401_users ORDER BY id LIMIT 4');
+    $testAccounts = $r->fetchAll(PDO::FETCH_ASSOC);
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">

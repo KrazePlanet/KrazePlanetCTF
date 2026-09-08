@@ -6777,11 +6777,11 @@ if (isset($_SESSION['user_id']) && $pdo) {
         </div>
         <div class="lab-content">
           <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
-            <span class="difficulty-tag hard">Hard</span>
+            <span class="difficulty-tag medium">Medium</span>
             <span class="difficulty-tag" style="background:#0D9488;color:#fff;">Training</span>
           </div>
           <div class="lab-title">
-            CloudGuard - Enterprise Compliance &amp; Security Report Engine Code Execution
+            DevSpace - Developer Profile Personalization &amp; Custom Bio SSTI (Jinja2)
           </div>
         </div>
         <div class="lab-action">
@@ -6798,11 +6798,11 @@ if (isset($_SESSION['user_id']) && $pdo) {
         </div>
         <div class="lab-content">
           <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
-            <span class="difficulty-tag hard">Hard</span>
+            <span class="difficulty-tag medium">Medium</span>
             <span class="difficulty-tag" style="background:#0D9488;color:#fff;">Training</span>
           </div>
           <div class="lab-title">
-            TornadoAlert - Python SRE Incident &amp; Webhook Notification Code Execution
+            DevWiki - DevOps Team Knowledge Base &amp; Markdown Macro SSTI (Tornado)
           </div>
         </div>
         <div class="lab-action">
@@ -6819,11 +6819,11 @@ if (isset($_SESSION['user_id']) && $pdo) {
         </div>
         <div class="lab-content">
           <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
-            <span class="difficulty-tag hard">Hard</span>
+            <span class="difficulty-tag medium">Medium</span>
             <span class="difficulty-tag" style="background:#0D9488;color:#fff;">Training</span>
           </div>
           <div class="lab-title">
-            DocuCraft - Cloud Invoice &amp; Billing Template Engine Code Execution
+            PageCraft - Modular CMS Landing Page &amp; Hero Studio SSTI (Ruby ERB)
           </div>
         </div>
         <div class="lab-action">
@@ -6840,11 +6840,11 @@ if (isset($_SESSION['user_id']) && $pdo) {
         </div>
         <div class="lab-content">
           <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
-            <span class="difficulty-tag hard">Hard</span>
+            <span class="difficulty-tag medium">Medium</span>
             <span class="difficulty-tag" style="background:#0D9488;color:#fff;">Training</span>
           </div>
           <div class="lab-title">
-            PulseMail - Marketing Campaign Template Studio Code Execution
+            PulseFeedback - Customer Onboarding &amp; Survey Receipt SSTI (FreeMarker)
           </div>
         </div>
         <div class="lab-action">
@@ -6861,11 +6861,11 @@ if (isset($_SESSION['user_id']) && $pdo) {
         </div>
         <div class="lab-content">
           <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
-            <span class="difficulty-tag medium">Medium</span>
+            <span class="difficulty-tag hard">Hard</span>
             <span class="difficulty-tag" style="background:#6366f1;color:#fff;">Real World</span>
             <a href="https://hackerone.com/reports/1104349" target="_blank" rel="noopener noreferrer" class="report-badge">HackerOne #1104349</a>
           </div>
-          <div class="lab-title">SSTI - Glovo</div>
+          <div class="lab-title">Server Side Template Injection on Name parameter during Sign Up process</div>
         </div>
         <div class="lab-action">
           <a href="/subdomains/onboarding" class="btn-ACCESS" target="blank">
@@ -6881,11 +6881,11 @@ if (isset($_SESSION['user_id']) && $pdo) {
         </div>
         <div class="lab-content">
           <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
-            <span class="difficulty-tag medium">Medium</span>
+            <span class="difficulty-tag hard">Hard</span>
             <span class="difficulty-tag" style="background:#6366f1;color:#fff;">Real World</span>
             <a href="https://hackerone.com/reports/125980" target="_blank" rel="noopener noreferrer" class="report-badge">HackerOne #125980</a>
           </div>
-          <div class="lab-title">SSTI - Uber</div>
+          <div class="lab-title">Uber may RCE by Flask Jinja2 Template Injection</div>
         </div>
         <div class="lab-action">
           <a href="/subdomains/accounts" class="btn-ACCESS" target="blank">
@@ -6905,7 +6905,7 @@ if (isset($_SESSION['user_id']) && $pdo) {
             <span class="difficulty-tag" style="background:#6366f1;color:#fff;">Real World</span>
             <a href="https://hackerone.com/reports/164224" target="_blank" rel="noopener noreferrer" class="report-badge">HackerOne #164224</a>
           </div>
-          <div class="lab-title">SSTI - Unikrn</div>
+          <div class="lab-title">Urgent: Server side template injection via Smarty template allows for RCE</div>
         </div>
         <div class="lab-action">
           <a href="/subdomains/invite" class="btn-ACCESS" target="blank">

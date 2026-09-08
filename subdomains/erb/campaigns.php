@@ -3,7 +3,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>PageCraft CMS Settings — Ruby ERB Engine</title>
+    <title>Marketing Campaigns — PageCraft CMS</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -30,26 +30,37 @@
             <a href="index.php" class="sidebar-link"><i class="bi bi-layout-text-window-reverse"></i> Landing Studio</a>
             <a href="landing.php" class="sidebar-link"><i class="bi bi-browser-chrome"></i> Live Public Page</a>
             <a href="modules.php" class="sidebar-link"><i class="bi bi-boxes"></i> Modular Page Blocks</a>
-            <a href="campaigns.php" class="sidebar-link"><i class="bi bi-tag-fill"></i> Marketing Campaigns</a>
+            <a href="campaigns.php" class="sidebar-link active"><i class="bi bi-tag-fill"></i> Marketing Campaigns</a>
             <div class="nav-section-title mt-3">Settings</div>
-            <a href="settings.php" class="sidebar-link active"><i class="bi bi-sliders"></i> Engine Settings</a>
+            <a href="settings.php" class="sidebar-link"><i class="bi bi-sliders"></i> Engine Settings</a>
         </div>
     </aside>
 
     <main class="app-workspace">
         <header class="app-topbar">
-            <h1 class="fs-5 fw-bold mb-0">Ruby ERB Template Engine Settings</h1>
+            <h1 class="fs-5 fw-bold mb-0">Active Marketing Campaigns</h1>
             <a href="index.php" class="btn btn-sm btn-danger fw-bold">&larr; Back to Landing Studio</a>
         </header>
 
-        <div class="p-4" style="max-width: 800px;">
-            <div class="card bg-dark border-secondary p-4 mb-4">
-                <h5 class="fw-bold text-white mb-3">ERB Template Renderer</h5>
-                <p class="text-secondary small">PageCraft CMS compiles landing page modules using Ruby 3.2 ERB. Embedded Ruby tags (`<%= ... %>`) are bound to CMSContext.</p>
-                <div class="alert alert-warning small mb-0">
-                    <i class="bi bi-exclamation-triangle-fill me-1"></i> Security Note: ERB templates have access to Ruby Kernel methods. Without isolation, arbitrary shell commands can be executed via backticks or `%x(...)`.
-                </div>
-            </div>
+        <div class="p-4" style="max-width: 900px;">
+            <table class="table table-dark table-bordered">
+                <thead>
+                    <tr>
+                        <th>Campaign Code</th>
+                        <th>Offer</th>
+                        <th>Target Tier</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code>LAUNCH2026</code></td>
+                        <td>30% OFF Annual Tier</td>
+                        <td>Enterprise Scale</td>
+                        <td><span class="badge bg-success">Active</span></td>
+                    </tr>
+                </tbody>
+            </table>
         </div>
     </main>
 </body>

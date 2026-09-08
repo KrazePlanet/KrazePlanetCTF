@@ -1,119 +1,89 @@
-<?php
+﻿<?php
 session_start();
 
-$default_subject = '[{{incident["severity"]}}] {{incident["summary"]}} on {{node["hostname"]}}';
-$default_body = '<!DOCTYPE html>
-<html>
-<head>
-<style>
-  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #0f172a; padding: 20px; color: #e2e8f0; margin: 0; }
-  .alert-card { max-width: 650px; margin: 0 auto; background: #1e293b; border-radius: 12px; border: 1px solid #334155; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
-  .alert-header { background: #dc2626; color: #ffffff; padding: 20px 24px; display: flex; justify-content: space-between; align-items: center; }
-  .alert-title { font-size: 16px; font-weight: 800; letter-spacing: -0.3px; }
-  .alert-body { padding: 24px; }
-  .metric-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin: 20px 0; }
-  .metric-card { background: #0f172a; border: 1px solid #334155; border-radius: 8px; padding: 12px; }
-  .metric-label { font-size: 11px; font-weight: 700; color: #94a3b8; text-transform: uppercase; margin-bottom: 4px; }
-  .metric-val { font-size: 16px; font-weight: 700; color: #f8fafc; font-family: monospace; }
-  .info-table { width: 100%; border-collapse: collapse; font-size: 13px; margin-top: 14px; }
-  .info-table td { padding: 8px 0; border-bottom: 1px solid #334155; }
-  .info-table td:first-child { color: #94a3b8; width: 130px; font-weight: 600; }
-  .btn-ack { display: inline-block; background: #2563eb; color: #ffffff !important; padding: 10px 22px; border-radius: 6px; font-weight: 600; text-decoration: none; font-size: 13px; margin-top: 18px; }
-  .alert-footer { background: #0f172a; padding: 14px 24px; font-size: 11px; color: #64748b; border-top: 1px solid #334155; text-align: center; }
-</style>
-</head>
-<body>
-  <div class="alert-card">
-    <div class="alert-header">
-      <div class="alert-title"><i class="bi bi-exclamation-triangle-fill me-2"></i> {{incident["severity"]}} Alert</div>
-      <div style="font-size: 12px; opacity: 0.9; font-family: monospace;">{{incident["id"]}}</div>
-    </div>
+$default_title = 'Production Cluster Ingress Recovery Runbook';
+$default_category = 'Infrastructure & Runbooks';
+$default_tags = 'sre, ingress, failover, disaster-recovery';
+$default_summary = 'Standard operating procedure for edge proxy failover and BGP route redirection during traffic spikes.';
+$default_content = '<div class="wiki-callout info">
+    <div class="callout-title"><i class="bi bi-info-circle-fill me-2"></i> Document Notice</div>
+    <p class="mb-0">Maintained by <strong>{{author["name"]}}</strong> ({{author["role"]}}) for the <strong>{{wiki["space"]}}</strong> team. Version: <code>{{wiki["version"]}}</code>.</p>
+</div>
 
-    <div class="alert-body">
-      <h3 style="margin: 0 0 8px 0; font-size: 18px; color: #f8fafc;">{{incident["summary"]}}</h3>
-      <p style="font-size: 13px; color: #94a3b8; margin: 0 0 16px 0;">Automated trigger dispatched to on-call engineer <strong>{{user["name"]}}</strong> ({{user["role"]}}).</p>
+<h3>1. Architecture Overview</h3>
+<p>When external ingress proxies experience latency degradation exceeding 120ms, automatic failover diverts traffic to the secondary edge cluster in <strong>{{wiki["space"]}}</strong>.</p>
 
-      <div class="metric-grid">
-        <div class="metric-card">
-          <div class="metric-label">P99 Latency</div>
-          <div class="metric-val" style="color: #f87171;">{{metric["latency_p99"]}}</div>
-        </div>
-        <div class="metric-card">
-          <div class="metric-label">Throughput</div>
-          <div class="metric-val" style="color: #38bdf8;">{{metric["throughput"]}}</div>
-        </div>
-        <div class="metric-card">
-          <div class="metric-label">CPU Load</div>
-          <div class="metric-val" style="color: #fbbf24;">{{metric["cpu_load"]}}</div>
-        </div>
-      </div>
+<div class="code-block-preview">
+# Verify current ingress connection health
+kubectl get ingress -n production -o wide
+curl -I -s -o /dev/null -w "%{http_code}" https://ingress.edge.internal/healthz
+</div>
 
-      <table class="info-table">
+<h3>2. Automated Escalation Matrix</h3>
+<table class="table table-dark table-bordered table-sm my-3">
+    <thead>
         <tr>
-          <td>Affected Node</td>
-          <td><strong>{{node["hostname"]}}</strong> ({{node["ip"]}})</td>
+            <th>Severity</th>
+            <th>Trigger Condition</th>
+            <th>On-Call Contact</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td><span class="badge bg-danger">SEV-1</span></td>
+            <td>Packet loss &gt; 5% across edge nodes</td>
+            <td>{{author["email"]}}</td>
         </tr>
         <tr>
-          <td>Cloud Region</td>
-          <td>{{node["region"]}}</td>
+            <td><span class="badge bg-warning text-dark">SEV-2</span></td>
+            <td>p99 Latency &gt; 250ms for 3 minutes</td>
+            <td>Secondary SRE Pager</td>
         </tr>
-        <tr>
-          <td>Status &amp; Uptime</td>
-          <td><span style="color: #f87171; font-weight: bold;">{{node["status"]}}</span> &bull; {{node["uptime"]}}</td>
-        </tr>
-        <tr>
-          <td>Event Timestamp</td>
-          <td>{{incident["timestamp"]}}</td>
-        </tr>
-      </table>
+    </tbody>
+</table>
 
-      <center>
-        <a href="#" class="btn-ack">Acknowledge Incident in PagerDuty &rarr;</a>
-      </center>
-    </div>
+<h3>3. Verification & Metrics Verification</h3>
+<p>Ensure that connection pools have returned to nominal capacity before resolving the PagerDuty incident record.</p>';
 
-    <div class="alert-footer">
-      Generated by {{app_title}} &bull; Python Async Microservice Event Pipeline
-    </div>
-  </div>
-</body>
-</html>';
+$title_input = $_POST['title'] ?? $default_title;
+$category_input = $_POST['category'] ?? $default_category;
+$tags_input = $_POST['tags'] ?? $default_tags;
+$summary_input = $_POST['summary'] ?? $default_summary;
+$content_input = $_POST['content'] ?? $default_content;
 
-$subject_input = $_POST['subject'] ?? $default_subject;
-$body_input = $_POST['body'] ?? $default_body;
-
-$rendered_subject = '';
-$rendered_body = '';
+$rendered_title = '';
+$rendered_summary = '';
+$rendered_content = '';
 $render_time = null;
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' || isset($_GET['preview'])) {
     $start = microtime(true);
     
-    // Evaluate Subject
-    $b64_sub = base64_encode($subject_input);
-    $cmd_sub = sprintf(
-        'python3 %s %s 2>&1',
-        escapeshellarg(__DIR__ . '/evaluator.py'),
-        escapeshellarg($b64_sub)
-    );
-    $rendered_subject = shell_exec($cmd_sub);
+    // Evaluate Title with Tornado
+    $b64_title = base64_encode($title_input);
+    $cmd_title = sprintf('python3 %s %s 2>&1', escapeshellarg(__DIR__ . '/evaluator.py'), escapeshellarg($b64_title));
+    $rendered_title = shell_exec($cmd_title);
 
-    // Evaluate Body
-    $b64_body = base64_encode($body_input);
-    $cmd_body = sprintf(
-        'python3 %s %s 2>&1',
-        escapeshellarg(__DIR__ . '/evaluator.py'),
-        escapeshellarg($b64_body)
-    );
-    $rendered_body = shell_exec($cmd_body);
+    // Evaluate Summary with Tornado
+    $b64_sum = base64_encode($summary_input);
+    $cmd_sum = sprintf('python3 %s %s 2>&1', escapeshellarg(__DIR__ . '/evaluator.py'), escapeshellarg($b64_sum));
+    $rendered_summary = shell_exec($cmd_sum);
+
+    // Evaluate Content with Tornado
+    $b64_body = base64_encode($content_input);
+    $cmd_body = sprintf('python3 %s %s 2>&1', escapeshellarg(__DIR__ . '/evaluator.py'), escapeshellarg($b64_body));
+    $rendered_content = shell_exec($cmd_body);
     
     $render_time = round((microtime(true) - $start) * 1000, 2);
 } else {
-    $b64_sub = base64_encode($default_subject);
-    $rendered_subject = shell_exec(sprintf('python3 %s %s 2>&1', escapeshellarg(__DIR__ . '/evaluator.py'), escapeshellarg($b64_sub)));
+    $b64_title = base64_encode($default_title);
+    $rendered_title = shell_exec(sprintf('python3 %s %s 2>&1', escapeshellarg(__DIR__ . '/evaluator.py'), escapeshellarg($b64_title)));
 
-    $b64_body = base64_encode($default_body);
-    $rendered_body = shell_exec(sprintf('python3 %s %s 2>&1', escapeshellarg(__DIR__ . '/evaluator.py'), escapeshellarg($b64_body)));
+    $b64_sum = base64_encode($default_summary);
+    $rendered_summary = shell_exec(sprintf('python3 %s %s 2>&1', escapeshellarg(__DIR__ . '/evaluator.py'), escapeshellarg($b64_sum)));
+
+    $b64_body = base64_encode($default_content);
+    $rendered_content = shell_exec(sprintf('python3 %s %s 2>&1', escapeshellarg(__DIR__ . '/evaluator.py'), escapeshellarg($b64_body)));
 }
 ?>
 <!DOCTYPE html>
@@ -121,21 +91,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' || isset($_GET['preview'])) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TornadoAlert — Python SRE Incident & Webhook Dispatch Studio</title>
+    <title>DevWiki — Engineering Knowledge Base & Markdown Macro SSTI (Tornado)</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
-    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
     <style>
         :root {
-            --primary: #06b6d4;
-            --primary-dark: #0891b2;
+            --primary: #6366f1;
+            --primary-light: #818cf8;
+            --primary-dark: #4f46e5;
             --sidebar-bg: #090d16;
             --card-border: #1e293b;
-            --app-bg: #0f172a;
+            --app-bg: #050811;
+            --surface-bg: #0e1526;
         }
 
         body {
-            font-family: 'Space Grotesk', sans-serif;
+            font-family: 'Plus Jakarta Sans', sans-serif;
             background-color: var(--app-bg);
             color: #f1f5f9;
             margin: 0;
@@ -146,28 +118,28 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' || isset($_GET['preview'])) {
         }
 
         .app-sidebar {
-            width: 260px;
+            width: 270px;
             background: var(--sidebar-bg);
             color: #94a3b8;
             display: flex;
             flex-direction: column;
             flex-shrink: 0;
-            border-right: 1px solid #1e293b;
+            border-right: 1px solid var(--card-border);
         }
 
         .sidebar-brand {
             padding: 20px 24px;
             font-size: 18px;
-            font-weight: 700;
+            font-weight: 800;
             color: #ffffff;
             display: flex;
             align-items: center;
             gap: 10px;
-            border-bottom: 1px solid #1e293b;
+            border-bottom: 1px solid var(--card-border);
         }
 
         .sidebar-brand i {
-            color: #06b6d4;
+            color: var(--primary-light);
             font-size: 22px;
         }
 
@@ -207,14 +179,37 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' || isset($_GET['preview'])) {
 
         .sidebar-link.active {
             color: #ffffff;
-            background: rgba(6, 182, 212, 0.15);
-            border: 1px solid rgba(6, 182, 212, 0.3);
+            background: rgba(99, 102, 241, 0.18);
+            border: 1px solid rgba(99, 102, 241, 0.35);
             font-weight: 600;
+        }
+
+        .doc-item {
+            padding: 7px 12px 7px 28px;
+            font-size: 13px;
+            color: #94a3b8;
+            display: block;
+            text-decoration: none;
+            border-radius: 6px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .doc-item:hover {
+            color: #ffffff;
+            background: rgba(255, 255, 255, 0.04);
+        }
+
+        .doc-item.active {
+            color: var(--primary-light);
+            font-weight: 600;
+            background: rgba(99, 102, 241, 0.12);
         }
 
         .sidebar-footer {
             padding: 16px 20px;
-            border-top: 1px solid #1e293b;
+            border-top: 1px solid var(--card-border);
             display: flex;
             align-items: center;
             gap: 12px;
@@ -224,12 +219,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' || isset($_GET['preview'])) {
             width: 36px;
             height: 36px;
             border-radius: 50%;
-            background: #0891b2;
+            background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
             color: #ffffff;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-weight: 700;
+            font-weight: 800;
             font-size: 13px;
         }
 
@@ -238,12 +233,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' || isset($_GET['preview'])) {
             display: flex;
             flex-direction: column;
             overflow: hidden;
-            background: #0b1120;
+            background: #050811;
         }
 
         .app-topbar {
             height: 64px;
-            background: #0f172a;
+            background: #090d16;
             border-bottom: 1px solid var(--card-border);
             display: flex;
             align-items: center;
@@ -274,14 +269,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' || isset($_GET['preview'])) {
         }
 
         .editor-panel {
-            flex: 1;
-            background: #111827;
+            flex: 1.1;
+            background: var(--surface-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 12px;
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.35);
+        }
+
+        .preview-panel {
+            flex: 1.1;
+            background: var(--surface-bg);
             border: 1px solid var(--card-border);
             border-radius: 12px;
             display: flex;
             flex-direction: column;
             overflow: hidden;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.35);
         }
 
         .panel-header {
@@ -290,7 +296,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' || isset($_GET['preview'])) {
             display: flex;
             align-items: center;
             justify-content: space-between;
-            background: #0d1322;
+            background: #070b14;
+            flex-shrink: 0;
         }
 
         .panel-header h2 {
@@ -305,80 +312,88 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' || isset($_GET['preview'])) {
 
         .code-textarea {
             width: 100%;
-            flex-grow: 1;
-            border: none;
+            border: 1px solid var(--card-border);
+            border-radius: 8px;
             outline: none;
-            padding: 16px;
+            padding: 14px;
             font-family: 'JetBrains Mono', monospace;
             font-size: 13px;
             line-height: 1.6;
             color: #e2e8f0;
-            background: #111827;
-            resize: none;
+            background: #050811;
+            resize: vertical;
+            min-height: 280px;
         }
 
-        .preview-panel {
-            flex: 1;
-            background: #111827;
-            border: 1px solid var(--card-border);
-            border-radius: 12px;
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+        .code-textarea:focus {
+            border-color: var(--primary-light);
+            box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2);
         }
 
         .preview-viewport {
             flex-grow: 1;
-            background: #090d16;
+            background: #050811;
             overflow-y: auto;
-            padding: 24px;
+            padding: 28px;
             display: flex;
             flex-direction: column;
+            gap: 20px;
         }
 
-        .email-meta-header {
-            background: #1e293b;
-            border: 1px solid var(--card-border);
-            border-radius: 8px;
-            padding: 14px 18px;
-            margin-bottom: 18px;
-            font-size: 13px;
+        .wiki-article-view {
+            background: #0a0f1e;
+            border: 1px solid #1a233a;
+            border-radius: 14px;
+            padding: 32px;
+            line-height: 1.7;
         }
 
-        .email-meta-row {
+        .wiki-breadcrumb {
+            font-size: 12px;
+            color: #64748b;
+            margin-bottom: 14px;
             display: flex;
-            margin-bottom: 6px;
+            align-items: center;
+            gap: 8px;
         }
 
-        .email-meta-row:last-child {
-            margin-bottom: 0;
-        }
-
-        .email-meta-label {
-            width: 85px;
+        .wiki-meta-row {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding-bottom: 18px;
+            margin-bottom: 22px;
+            border-bottom: 1px solid #1e293b;
+            font-size: 13px;
             color: #94a3b8;
-            font-weight: 600;
+            flex-wrap: wrap;
         }
 
-        .email-meta-value {
-            color: #f8fafc;
-            font-weight: 500;
+        .wiki-callout {
+            border-left: 4px solid var(--primary-light);
+            background: rgba(99, 102, 241, 0.08);
+            border-radius: 0 8px 8px 0;
+            padding: 14px 18px;
+            margin: 18px 0;
+            font-size: 13.5px;
         }
 
-        .rendered-container {
-            background: #1e293b;
-            border: 1px solid var(--card-border);
+        .code-block-preview {
+            background: #03060d;
+            border: 1px solid #1e293b;
             border-radius: 8px;
-            padding: 20px;
-            flex-grow: 1;
-            min-height: 400px;
+            padding: 14px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 12.5px;
+            color: #38bdf8;
+            margin: 16px 0;
+            white-space: pre-wrap;
         }
 
         .tag-pill {
-            background: #1e293b;
-            color: #38bdf8;
-            border: 1px solid #334155;
+            background: #090d16;
+            color: var(--primary-light);
+            border: 1px solid #1e293b;
             font-size: 11px;
             font-family: 'JetBrains Mono', monospace;
             padding: 2px 8px;
@@ -388,7 +403,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' || isset($_GET['preview'])) {
         }
 
         .tag-pill:hover {
-            background: #0284c7;
+            background: var(--primary);
             color: #ffffff;
         }
     </style>
@@ -398,25 +413,31 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' || isset($_GET['preview'])) {
     <!-- Left App Sidebar -->
     <aside class="app-sidebar">
         <div class="sidebar-brand">
-            <i class="bi bi-lightning-charge-fill"></i> TornadoAlert
+            <i class="bi bi-journal-bookmark-fill"></i> DevWiki
         </div>
 
         <div class="sidebar-menu">
-            <div class="nav-section-title">Telemetry & Incident Response</div>
+            <div class="nav-section-title">Knowledge Base</div>
             <a href="index.php" class="sidebar-link active">
-                <i class="bi bi-bell-fill text-cyan"></i> Alert Studio
+                <i class="bi bi-pencil-square"></i> Article Editor
             </a>
-            <a href="incidents.php" class="sidebar-link">
-                <i class="bi bi-activity"></i> Active Incidents
+            <a href="article.php" class="sidebar-link">
+                <i class="bi bi-file-earmark-text"></i> Documentation View
             </a>
-            <a href="nodes.php" class="sidebar-link">
-                <i class="bi bi-hdd-network"></i> Edge Nodes
+            <a href="search.php" class="sidebar-link">
+                <i class="bi bi-search"></i> Wiki Search & Tags
             </a>
-            <a href="metrics.php" class="sidebar-link">
-                <i class="bi bi-speedometer2"></i> Telemetry & Metrics
+            <a href="spaces.php" class="sidebar-link">
+                <i class="bi bi-collection"></i> Team Spaces
             </a>
 
-            <div class="nav-section-title mt-3">Platform Configuration</div>
+            <div class="nav-section-title mt-3">Documentation Tree</div>
+            <a href="#" class="doc-item active">📖 Ingress Recovery Runbook</a>
+            <a href="#" class="doc-item">📄 Pod Autoscaling Playbook</a>
+            <a href="#" class="doc-item">📄 Zero-Trust Mesh Guide</a>
+            <a href="#" class="doc-item">📄 Post-Mortem Template</a>
+
+            <div class="nav-section-title mt-3">Settings</div>
             <a href="settings.php" class="sidebar-link">
                 <i class="bi bi-sliders"></i> Engine Settings
             </a>
@@ -424,9 +445,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' || isset($_GET['preview'])) {
 
         <div class="sidebar-footer">
             <div class="user-avatar">ER</div>
-            <div>
-                <div class="text-white fw-bold small">Elena Rostova</div>
-                <div class="text-secondary small" style="font-size: 11px;">Principal SRE (On-Call)</div>
+            <div style="overflow: hidden;">
+                <div class="text-white fw-bold small text-truncate">Elena Rostova</div>
+                <div class="text-secondary small text-truncate" style="font-size: 11px;">Lead SRE</div>
             </div>
         </div>
     </aside>
@@ -434,23 +455,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' || isset($_GET['preview'])) {
     <!-- Main Workspace -->
     <main class="app-workspace">
         
-        <!-- Top Navigation -->
+        <!-- Top App Navigation -->
         <header class="app-topbar">
             <div class="topbar-title">
-                <i class="bi bi-broadcast text-cyan fs-5"></i>
-                <h1>Webhook & Incident Notification Template Studio</h1>
-                <span class="badge bg-info bg-opacity-10 text-info border border-info border-opacity-25" style="font-size: 11px;">Tornado 6.4 Async</span>
+                <i class="bi bi-journal-text text-indigo fs-5" style="color: #818cf8;"></i>
+                <h1>Knowledge Base Runbook & Wiki Macro Editor</h1>
+                <span class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25" style="font-size: 11px;">Python Tornado</span>
             </div>
 
             <div class="d-flex align-items-center gap-3">
-                <button type="button" class="btn btn-sm btn-outline-secondary d-flex align-items-center gap-2" onclick="document.getElementById('tornadoForm').reset();">
-                    <i class="bi bi-arrow-counterclockwise"></i> Reset
-                </button>
-                <button type="button" class="btn btn-sm btn-outline-info d-flex align-items-center gap-2" onclick="alert('Synthetic test alert fired to PagerDuty!');">
-                    <i class="bi bi-send-check"></i> Fire Synthetic Alert
-                </button>
-                <button type="submit" form="tornadoForm" class="btn btn-sm btn-info text-white d-flex align-items-center gap-2 px-3 fw-semibold">
-                    <i class="bi bi-play-circle-fill"></i> Render & Preview
+                <a href="article.php" target="_blank" class="btn btn-sm btn-outline-secondary d-flex align-items-center gap-2">
+                    <i class="bi bi-box-arrow-up-right"></i> Open Clean Doc View
+                </a>
+                <a href="search.php" class="btn btn-sm btn-outline-secondary d-flex align-items-center gap-2">
+                    <i class="bi bi-search"></i> Search Docs
+                </a>
+                <button type="submit" form="wikiForm" class="btn btn-sm text-white d-flex align-items-center gap-2 px-3 fw-bold" style="background: #6366f1;">
+                    <i class="bi bi-play-circle-fill"></i> Compile & Preview Runbook
                 </button>
             </div>
         </header>
@@ -458,76 +479,131 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' || isset($_GET['preview'])) {
         <!-- Studio Body -->
         <div class="studio-body">
             
-            <!-- Left Form & Code Editor -->
+            <!-- Left Form: Wiki Editor -->
             <div class="editor-panel">
-                <form id="tornadoForm" method="POST" action="" style="display: flex; flex-direction: column; height: 100%;">
-                    <div class="panel-header">
-                        <h2><i class="bi bi-code-square text-info"></i> Tornado Template Source & Tokens</h2>
-                        <div class="d-flex align-items-center gap-1 flex-wrap">
-                            <span class="small text-muted me-1" style="font-size: 11px;">Tokens:</span>
-                            <span class="tag-pill" onclick="insertTag('{{user["name"]}}')">{{user["name"]}}</span>
-                            <span class="tag-pill" onclick="insertTag('{{node["hostname"]}}')">{{node["hostname"]}}</span>
-                            <span class="tag-pill" onclick="insertTag('{{metric["latency_p99"]}}')">{{metric["latency_p99"]}}</span>
+                <div class="panel-header">
+                    <h2><i class="bi bi-code-square text-indigo" style="color: #818cf8;"></i> Article Content & Tornado Macro Tags</h2>
+                    <div class="d-flex align-items-center gap-1 flex-wrap">
+                        <span class="small text-muted me-1" style="font-size: 11px;">Macros:</span>
+                        <span class="tag-pill" onclick="insertMacro('{{wiki[\'space\']}}')">{{wiki.space}}</span>
+                        <span class="tag-pill" onclick="insertMacro('{{author[\'name\']}}')">{{author.name}}</span>
+                        <span class="tag-pill" onclick="insertMacro('{{wiki[\'version\']}}')">{{wiki.version}}</span>
+                    </div>
+                </div>
+
+                <form id="wikiForm" method="POST" action="" class="p-4 d-flex flex-column gap-3">
+                    
+                    <div>
+                        <label class="form-label small fw-bold text-muted mb-1">Article Title (Dynamic Macro Supported)</label>
+                        <input type="text" name="title" id="titleInput" class="form-control bg-dark text-white border-secondary font-monospace" value="<?= htmlspecialchars($title_input) ?>" required>
+                    </div>
+
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold text-muted mb-1">Documentation Space / Category</label>
+                            <input type="text" name="category" class="form-control bg-dark text-white border-secondary" value="<?= htmlspecialchars($category_input) ?>">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold text-muted mb-1">Index Tags (Comma-separated)</label>
+                            <input type="text" name="tags" class="form-control bg-dark text-white border-secondary" value="<?= htmlspecialchars($tags_input) ?>">
                         </div>
                     </div>
 
-                    <!-- Subject / Header Bar -->
-                    <div class="p-3 border-bottom border-dark bg-black bg-opacity-25">
-                        <label class="form-label small fw-bold text-muted mb-1">Alert Headline / Push Notification Title</label>
-                        <div class="input-group input-group-sm">
-                            <span class="input-group-text bg-dark text-muted border-secondary"><i class="bi bi-chat-left-dots"></i></span>
-                            <input type="text" name="subject" id="subjectInput" class="form-control bg-dark text-white border-secondary font-monospace" value="<?= htmlspecialchars($subject_input) ?>" placeholder="Enter alert subject with Tornado {{...}} tokens...">
+                    <!-- Summary Callout (Dynamic Tornado Template Input) -->
+                    <div class="border rounded-3 p-3" style="background: rgba(99, 102, 241, 0.08); border-color: rgba(99, 102, 241, 0.25) !important;">
+                        <div class="d-flex justify-content-between align-items-center mb-1">
+                            <label class="form-label small fw-bold mb-0" style="color: #818cf8;">
+                                <i class="bi bi-chat-left-quote-fill me-1"></i> Executive Runbook Summary Header
+                            </label>
+                            <span class="badge bg-dark font-monospace" style="color: #818cf8; border: 1px solid rgba(99, 102, 241, 0.3); font-size: 10px;">Tornado Evaluated</span>
                         </div>
+                        <input type="text" name="summary" id="summaryInput" class="form-control bg-dark text-white border-secondary font-monospace mt-1" value="<?= htmlspecialchars($summary_input) ?>" placeholder="e.g. SRE SOP for {{wiki['space']}}">
                     </div>
 
-                    <!-- Template Code Area -->
-                    <div class="d-flex flex-column flex-grow-1">
-                        <textarea name="body" id="bodyInput" class="code-textarea" placeholder="Write dynamic Tornado template code..."><?= htmlspecialchars($body_input) ?></textarea>
+                    <!-- Article Markdown / Macro Content -->
+                    <div>
+                        <div class="d-flex justify-content-between align-items-center mb-1">
+                            <label class="form-label small fw-bold text-muted mb-0">
+                                <i class="bi bi-file-earmark-richtext me-1"></i> Wiki Layout & Macro Body (HTML & Tornado Code)
+                            </label>
+                            <span class="badge bg-dark text-muted border border-secondary font-monospace" style="font-size: 10px;">Tornado Engine</span>
+                        </div>
+                        <textarea name="content" id="contentInput" class="code-textarea" placeholder="Write documentation body with Tornado syntax..."><?= htmlspecialchars($content_input) ?></textarea>
                     </div>
 
-                    <div class="p-3 border-top border-dark bg-black bg-opacity-25 d-flex justify-content-between align-items-center">
+                    <div class="d-flex justify-content-between align-items-center pt-2 border-top border-secondary border-opacity-25">
                         <div class="small text-muted">
-                            <i class="bi bi-cpu me-1 text-info"></i> Engine: <strong>Python 3.12 (Tornado Template Parser)</strong>
+                            <i class="bi bi-cpu me-1" style="color: #818cf8;"></i> Template Engine: <strong>Python 3.12 (Tornado Template 6.4)</strong>
                         </div>
-                        <button type="submit" class="btn btn-sm btn-info text-white px-3 fw-semibold">
-                            <i class="bi bi-arrow-repeat me-1"></i> Re-Render Notification
+                        <button type="submit" class="btn btn-sm text-white px-3 fw-bold" style="background: #6366f1;">
+                            <i class="bi bi-arrow-repeat me-1"></i> Render Documentation
                         </button>
                     </div>
                 </form>
             </div>
 
-            <!-- Right Preview Panel -->
+            <!-- Right Panel: Live Published Documentation Preview -->
             <div class="preview-panel">
                 <div class="panel-header">
-                    <h2><i class="bi bi-eye text-info"></i> Dispatch Simulation View</h2>
-                    <div class="btn-group btn-group-sm" role="group">
-                        <button type="button" class="btn btn-outline-secondary active"><i class="bi bi-slack me-1"></i> Webhook View</button>
-                        <button type="button" class="btn btn-outline-secondary"><i class="bi bi-envelope me-1"></i> Email View</button>
-                    </div>
+                    <h2><i class="bi bi-eye text-indigo" style="color: #818cf8;"></i> Live Documentation Runbook View</h2>
+                    <?php if ($render_time !== null): ?>
+                        <span class="badge bg-success bg-opacity-20 text-success border border-success border-opacity-25 font-monospace" style="font-size: 11px;">
+                            <i class="bi bi-lightning-charge-fill me-1"></i> Compiled in <?= $render_time ?> ms
+                        </span>
+                    <?php endif; ?>
                 </div>
 
                 <div class="preview-viewport">
                     
-                    <!-- Simulated Dispatch Headers -->
-                    <div class="email-meta-header">
-                        <div class="email-meta-row">
-                            <div class="email-meta-label">Origin:</div>
-                            <div class="email-meta-value">TornadoAlert Telemetry Daemon &lt;alerts@tornado-cloud.io&gt;</div>
+                    <article class="wiki-article-view">
+                        <div class="wiki-breadcrumb">
+                            <span>Docs</span>
+                            <i class="bi bi-chevron-right" style="font-size: 10px;"></i>
+                            <span><?= htmlspecialchars($category_input) ?></span>
+                            <i class="bi bi-chevron-right" style="font-size: 10px;"></i>
+                            <span class="text-white">Runbook</span>
                         </div>
-                        <div class="email-meta-row">
-                            <div class="email-meta-label">Subscriber:</div>
-                            <div class="email-meta-value">Elena Rostova (On-Call SRE)</div>
+
+                        <!-- Rendered Article Title -->
+                        <h1 class="fw-bold text-white mb-2 fs-3">
+                            <?= $rendered_title ?>
+                        </h1>
+
+                        <div class="wiki-meta-row">
+                            <div><i class="bi bi-person-fill me-1" style="color: #818cf8;"></i> Elena Rostova</div>
+                            <div><i class="bi bi-clock me-1"></i> Last revised September 2026</div>
+                            <div><i class="bi bi-eye me-1"></i> 4,310 reads</div>
+                            <div><span class="badge bg-dark text-muted border border-secondary"><?= htmlspecialchars($category_input) ?></span></div>
                         </div>
-                        <div class="email-meta-row">
-                            <div class="email-meta-label">Headline:</div>
-                            <div class="email-meta-value fw-bold text-info"><?= htmlspecialchars($rendered_subject) ?></div>
+
+                        <!-- Rendered Summary -->
+                        <div class="p-3 mb-4 rounded-2" style="background: rgba(255,255,255,0.03); border: 1px solid #1e293b; font-size: 14px; color: #cbd5e1;">
+                            <strong>Summary:</strong> <?= $rendered_summary ?>
+                        </div>
+
+                        <!-- Rendered Content Body -->
+                        <div class="rendered-wiki-body">
+                            <?= $rendered_content ?>
+                        </div>
+                    </article>
+
+                    <!-- Testing / Educational Context Callout -->
+                    <div class="card bg-dark bg-opacity-50 border-secondary border-opacity-50 p-3">
+                        <div class="d-flex align-items-center gap-2 mb-1">
+                            <i class="bi bi-lightbulb text-warning"></i>
+                            <span class="small fw-bold text-white">How SSTI occurs in Wikis & Blogs:</span>
+                        </div>
+                        <p class="small text-muted mb-2">
+                            Many internal wikis, documentation hubs, or CMS platforms allow dynamic macros (e.g. <code>{{wiki['space']}}</code>). When user articles or titles are passed directly into the template compiler, attackers can inject arbitrary Python statements like:
+                        </p>
+                        <div class="small font-monospace text-primary mb-1">
+                            Expression test: <code>{{ 7*7 }}</code>
+                        </div>
+                        <div class="small font-monospace" style="color: #818cf8;">
+                            Arbitrary execution: <code>{% import os %}{{ os.popen('id').read() }}</code>
                         </div>
                     </div>
 
-                    <!-- Rendered HTML Payload Canvas -->
-                    <div class="rendered-container">
-                        <?= $rendered_body ?>
-                    </div>
                 </div>
             </div>
 
@@ -535,8 +611,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' || isset($_GET['preview'])) {
     </main>
 
     <script>
-        function insertTag(tag) {
-            const textarea = document.getElementById('bodyInput');
+        function insertMacro(tag) {
+            const textarea = document.getElementById('contentInput');
             const start = textarea.selectionStart;
             const end = textarea.selectionEnd;
             const text = textarea.value;

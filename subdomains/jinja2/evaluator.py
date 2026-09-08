@@ -1,4 +1,4 @@
-import sys, base64
+﻿import sys, base64
 from jinja2 import Environment
 
 def eval_jinja2(template_str):
@@ -7,32 +7,24 @@ def eval_jinja2(template_str):
         template = env.from_string(template_str)
         context = {
             'user': {
+                'username': 'sophia_sec',
                 'name': 'Sophia Chen',
                 'first_name': 'Sophia',
                 'last_name': 'Chen',
-                'email': 'sophia.chen@apex-security.internal',
-                'role': 'Director of SecOps',
-                'department': 'Cloud Architecture',
-                'tier': 'Enterprise Elite'
+                'role': 'Principal Security Architect',
+                'company': 'Nexus Cyber Systems',
+                'email': 'sophia@nexus-cyber.internal',
+                'location': 'Seattle, WA',
+                'followers': 1420,
+                'reputation': 8950,
+                'skills': 'Python, Kubernetes, Cloud Security, DevSecOps',
+                'joined': 'October 2023',
+                'tier': 'Verified Staff Contributor'
             },
-            'project': {
-                'id': 'PRJ-2026-904',
-                'name': 'CloudGuard Compliance Auditing Platform',
-                'status': 'Deployment In Progress',
-                'build_version': 'v4.18.2-release',
-                'environment': 'Production (AWS us-west-2)'
-            },
-            'report': {
-                'id': 'REP-89421',
-                'security_score': '98.5%',
-                'critical_vulns': 0,
-                'compliance_status': 'SOC2 Type II Certified',
-                'generated_at': '2026-08-17 11:50:00 UTC'
-            },
-            'company': {
-                'name': 'CloudGuard Security & Compliance SaaS',
-                'support_email': 'security-support@cloudguard.io',
-                'portal_url': 'https://portal.cloudguard.io'
+            'platform': {
+                'name': 'DevSpace Profile Studio',
+                'version': 'v4.2.1-prod',
+                'environment': 'production'
             }
         }
         return template.render(**context)

@@ -3,7 +3,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>DevWiki Settings — Tornado Template Engine</title>
+    <title>DevWiki Team Spaces — Documentation Spaces</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -19,6 +19,7 @@
         .sidebar-link.active { color: #ffffff; background: rgba(99, 102, 241, 0.18); border: 1px solid rgba(99, 102, 241, 0.35); font-weight: 600; }
         .app-workspace { flex-grow: 1; overflow-y: auto; background: #050811; }
         .app-topbar { height: 64px; background: #090d16; border-bottom: 1px solid #1e293b; display: flex; align-items: center; justify-content: space-between; padding: 0 28px; }
+        .space-card { background: #0a0f1e; border: 1px solid #1a233a; border-radius: 12px; padding: 24px; margin-bottom: 16px; }
     </style>
 </head>
 <body>
@@ -29,25 +30,35 @@
             <a href="index.php" class="sidebar-link"><i class="bi bi-pencil-square"></i> Article Editor</a>
             <a href="article.php" class="sidebar-link"><i class="bi bi-file-earmark-text"></i> Documentation View</a>
             <a href="search.php" class="sidebar-link"><i class="bi bi-search"></i> Wiki Search & Tags</a>
-            <a href="spaces.php" class="sidebar-link"><i class="bi bi-collection"></i> Team Spaces</a>
+            <a href="spaces.php" class="sidebar-link active"><i class="bi bi-collection"></i> Team Spaces</a>
             <div class="nav-section-title mt-3">Settings</div>
-            <a href="settings.php" class="sidebar-link active"><i class="bi bi-sliders"></i> Engine Settings</a>
+            <a href="settings.php" class="sidebar-link"><i class="bi bi-sliders"></i> Engine Settings</a>
         </div>
     </aside>
 
     <main class="app-workspace">
         <header class="app-topbar">
-            <h1 class="fs-5 fw-bold mb-0">Wiki Engine & Macro Configuration</h1>
+            <h1 class="fs-5 fw-bold mb-0">Documentation Spaces</h1>
             <a href="index.php" class="btn btn-sm text-white fw-bold" style="background: #6366f1;">&larr; Back to Wiki Editor</a>
         </header>
 
-        <div class="p-4" style="max-width: 800px;">
-            <div class="card bg-dark border-secondary p-4 mb-4">
-                <h5 class="fw-bold text-white mb-3">Tornado Template Compiler</h5>
-                <p class="text-secondary small">DevWiki compiles dynamic documentation layout blocks using Python Tornado 6.4. Macro evaluation allows template expressions and Python statements.</p>
-                <div class="alert alert-warning small mb-0">
-                    <i class="bi bi-exclamation-triangle-fill me-1"></i> SSTI Warning: Unrestricted Tornado template rendering permits Python statement execution using <code>{% ... %}</code> blocks.
+        <div class="p-4" style="max-width: 900px;">
+            <div class="space-card">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <h5 class="fw-bold mb-0 text-white"><i class="bi bi-hdd-network me-2" style="color: #818cf8;"></i> Architecture & Runbooks</h5>
+                    <span class="badge bg-primary">48 Articles</span>
                 </div>
+                <p class="text-secondary small mb-3">Operational playbooks, disaster recovery strategies, and ingress gateway architectures for production services.</p>
+                <a href="index.php" class="btn btn-sm btn-outline-light">Browse Space Articles &rarr;</a>
+            </div>
+
+            <div class="space-card">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <h5 class="fw-bold mb-0 text-white"><i class="bi bi-shield-lock me-2 text-warning"></i> Security Policies & Threat Models</h5>
+                    <span class="badge bg-secondary">32 Articles</span>
+                </div>
+                <p class="text-secondary small mb-3">Enterprise threat modeling, perimeter ingress firewall rules, and zero-trust authentication guidelines.</p>
+                <a href="index.php" class="btn btn-sm btn-outline-light">Browse Space Articles &rarr;</a>
             </div>
         </div>
     </main>
