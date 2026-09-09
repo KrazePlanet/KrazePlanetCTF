@@ -1,0 +1,11 @@
+<?php require __DIR__.'/config.php'; $msg=flash(); ?>
+<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title><?=SITE_NAME?> — Customer support</title><link rel="stylesheet" href="assets/style.css"></head><body>
+<nav><a class="brand" href="index.php"><span class="logo">S</span> SupportHub</a><div class="navlinks"><a href="index.php">Help Center</a><a href="submit.php">Contact support</a><a href="status.php">Check a request</a><a class="adminlink" href="admin/login.php">Admin</a></div></nav>
+<header class="hero"><div class="eyebrow">SUPPORT CENTER</div><h1>How can we help?</h1><p>Find answers, contact our support team, or check the status of an existing request.</p><form class="search" action="status.php"><input name="q" placeholder="Search your request by ticket number or email"><button>Search</button></form></header>
+<main class="wrap"><section class="cards">
+<a class="card" href="submit.php"><span class="icon">✦</span><h3>Contact support</h3><p>Tell us what you need and our team will get back to you.</p><b>Send a request →</b></a>
+<a class="card" href="status.php"><span class="icon">◷</span><h3>Track a request</h3><p>Check the latest status and support notes for your ticket.</p><b>View request →</b></a>
+<a class="card" href="#articles"><span class="icon">?</span><h3>Quick answers</h3><p>Browse common questions before reaching out to support.</p><b>Browse topics →</b></a>
+</section>
+<section id="articles" class="articles"><div><span class="eyebrow">POPULAR TOPICS</span><h2>Answers for the things you ask most.</h2></div><div class="articlegrid"><article><strong>Account & access</strong><p>Sign-in, profile and account questions.</p></article><article><strong>Billing & plans</strong><p>Payments, invoices and subscription help.</p></article><article><strong>Technical issues</strong><p>Troubleshooting and product assistance.</p></article><article><strong>General questions</strong><p>Anything else? We are happy to help.</p></article></div></section></main>
+<footer>© <?=date('Y')?> SupportHub · Customer support made simple.</footer></body></html>

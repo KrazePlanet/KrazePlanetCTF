@@ -1,0 +1,6 @@
+<?php require 'config.php';verify_csrf();if($_SERVER['REQUEST_METHOD']!=='POST')exit;
+$req=['company_name','contact_name','email','partner_type','services','goals'];foreach($req as $x)if(trim($_POST[$x]??'')==='')exit('Please complete all required fields.');
+$email=trim($_POST['email']);if(!filter_var($email,FILTER_VALIDATE_EMAIL))exit('Invalid email.');
+$no=app_no();$p=db();$s=$p->prepare("INSERT INTO applications(application_no,company_name,website,contact_name,email,phone,country,company_size,partner_type,regions,services,experience,goals) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?)");
+$s->execute([$no,trim($_POST['company_name']),trim($_POST['website']??'')?:null,trim($_POST['contact_name']),$email,trim($_POST['phone']??'')?:null,trim($_POST['country']??'')?:null,trim($_POST['company_size']??''),trim($_POST['partner_type']),trim($_POST['regions']??'')?:null,trim($_POST['services']),trim($_POST['experience']??'')?:null,trim($_POST['goals'])]);
+$id=$p->lastInsertId();$p->prepare("INSERT INTO application_events(application_id,event_text) VALUES(?,?)")->execute([$id,'Application submitted and queued for review']);header('Location:submitted.php?application='.urlencode($no));exit;

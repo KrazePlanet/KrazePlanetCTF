@@ -1,0 +1,3 @@
+<?php require_once __DIR__.'/config.php'; ?>
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title><?=e($title??SITE_NAME)?> · PartnerHub</title><link rel="stylesheet" href="assets/style.css"></head><body>
+<header class="top"><a class="logo" href="index.php"><span class="logo-mark">P</span>PartnerHub</a><nav><a href="program.php">Program</a><a href="partners.php">Partner types</a><a href="track.php">Application status</a><a class="outline" href="apply.php">Become a partner</a><a href="admin/login.php">Admin dashboard</a></nav></header>

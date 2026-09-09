@@ -1,0 +1,10 @@
+<?php
+$id=(int)($_GET['job']??$_POST['job_id']??0); $stmt=db()->prepare("SELECT * FROM jobs WHERE id=? AND status='open'"); $stmt->bind_param('i',$id); $stmt->execute(); $job=stmt_one($stmt); if(!$job) die('Role not found.');
+$title='Apply · '.$job['title']; require 'header.php'; ?>
+<main class="container form-page"><div class="form-intro"><span class="eyebrow">APPLICATION</span><h1><?=e($job['title'])?></h1><p><?=e($job['location'])?> · <?=e($job['work_mode'])?> · <?=e($job['employment_type'])?></p></div>
+<form class="application-form" method="post" action="submit.php" enctype="multipart/form-data">
+<input type="hidden" name="csrf" value="<?=csrf()?>"><input type="hidden" name="job_id" value="<?=$job['id']?>">
+<div class="form-section"><h2>About you</h2><div class="two"><label>First name*<input name="first_name" required></label><label>Last name*<input name="last_name" required></label></div><div class="two"><label>Email*<input type="email" name="email" required></label><label>Phone<input name="phone"></label></div><label>Current location<input name="location" placeholder="City, country"></label></div>
+<div class="form-section"><h2>Your work</h2><div class="two"><label>LinkedIn<input name="linkedin" type="url" placeholder="https://…"></label><label>Portfolio / website<input name="portfolio" type="url" placeholder="https://…"></label></div><div class="two"><label>Experience<input name="experience" placeholder="e.g. 4 years"></label><label>Notice period<input name="notice_period" placeholder="e.g. 30 days"></label></div><label>Resume*<input type="file" name="resume" accept=".pdf,.doc,.docx" required><small>PDF, DOC or DOCX · max 5 MB</small></label></div>
+<div class="form-section"><h2>Tell us more</h2><label>Cover letter*<textarea name="cover_letter" rows="9" required placeholder="Why this role, and why now?"></textarea></label></div>
+<button class="btn dark" type="submit">Submit application</button></form></main><?php require 'footer.php'; ?>

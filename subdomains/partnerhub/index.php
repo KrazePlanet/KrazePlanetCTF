@@ -1,0 +1,10 @@
+<?php $title='Partner ecosystem';require 'header.php';?>
+<main>
+<section class="hero">
+ <div class="hero-copy"><span class="kicker">PARTNER ECOSYSTEM</span><h1>Turn great products into <span>shared growth.</span></h1><p>PartnerHub connects agencies, technology companies, consultants and resellers with a practical program built around enablement, referrals and joint opportunities.</p><div class="actions"><a class="btn primary" href="apply.php">Apply to partner <b>→</b></a><a class="under" href="program.php">Explore the program</a></div></div>
+ <div class="hero-panel"><div class="panel-top"><span>PARTNER MOTION</span><b>2026</b></div><div class="rings"><i></i><i></i><i></i><div class="hub">PH</div></div><div class="mini-grid"><div><b>04</b><span>partner paths</span></div><div><b>01</b><span>application</span></div><div><b>∞</b><span>ways to grow</span></div></div></div>
+</section>
+<section class="logos"><span>BUILT FOR</span><b>AGENCIES</b><b>CONSULTANTS</b><b>ISVs</b><b>RESELLERS</b><b>INTEGRATORS</b></section>
+<section class="program-tease"><div><span class="kicker">WHY PARTNER</span><h2>More than a badge.</h2><p>A strong partner program should help you win, deliver and grow—not just put a logo on your website.</p></div><div class="benefits"><article><strong>01</strong><h3>Go to market</h3><p>Co-marketing resources, partner stories and joint campaign opportunities.</p></article><article><strong>02</strong><h3>Enable your team</h3><p>Training, product guidance and a clear path from application to activation.</p></article><article><strong>03</strong><h3>Grow revenue</h3><p>Referral and reseller motions designed around measurable opportunities.</p></article></div></section>
+<section class="cta"><div><span class="kicker">READY WHEN YOU ARE</span><h2>Tell us how you want to partner.</h2></div><a class="btn light" href="apply.php">Start application →</a></section>
+</main><?php require 'footer.php';?>

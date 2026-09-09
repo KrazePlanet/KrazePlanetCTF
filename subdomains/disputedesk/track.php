@@ -1,0 +1,10 @@
+<?php
+$title='Track a case';require 'header.php';$ref=trim($_GET['case']??'');$case=null;$events=[];$files=[];
+if($ref){$st=db()->prepare("SELECT * FROM disputes WHERE case_no=?");$st->bind_param('s',$ref);$st->execute();$case=one($st);if($case){$x=db()->prepare("SELECT * FROM dispute_events WHERE dispute_id=? ORDER BY created_at ASC");$x->bind_param('i',$case['id']);$x->execute();$events=rows($x);$f=db()->prepare("SELECT * FROM evidence WHERE dispute_id=? ORDER BY created_at ASC");$f->bind_param('i',$case['id']);$f->execute();$files=rows($f);}}
+?>
+<main class="track-wrap"><div class="form-title"><div class="kicker"><span></span> CASE LOOKUP</div><h1>Follow the record.</h1><p>Enter your case number to see the current status and public timeline.</p></div>
+<form class="lookup"><input name="case" value="<?=h($ref)?>" placeholder="DD-XXXXXXXX" required><button class="btn orange">View case</button></form>
+<?php if($ref && !$case):?><div class="alert">No case was found for that reference.</div><?php elseif($case):?>
+<section class="case-header"><div><span class="mono"><?=h($case['case_no'])?></span><h2><?=h($case['dispute_type'])?></h2><p><?=h($case['claimant_name'])?> · <?=h($case['claimant_email'])?></p></div><span class="status <?=h($case['status'])?>"><?=h(label($case['status']))?></span></section>
+<div class="case-grid"><section><div class="timeline"><?php foreach($events as $e):?><div class="event"><i></i><div><b><?=h($e['event_text'])?></b><p><?=h($e['public_note'])?></p><small><?=h(date('M j, Y · g:i A',strtotime($e['created_at'])))?></small></div></div><?php endforeach;?></div></section><aside class="side-card"><span>CASE SUMMARY</span><dl><dt>Amount</dt><dd><?=h($case['currency'])?> <?=number_format((float)$case['amount'],2)?></dd><dt>Reference</dt><dd><?=h($case['transaction_ref']?:'Not provided')?></dd><dt>Requested</dt><dd><?=h($case['desired_resolution']?:'Not specified')?></dd><dt>Evidence</dt><dd><?=count($files)?> file(s)</dd></dl><?php if($case['admin_response']):?><hr><span>REVIEWER NOTE</span><p><?=nl2br(h($case['admin_response']))?></p><?php endif;?></aside></div>
+<?php endif;?></main><?php require 'footer.php'; ?>

@@ -1,0 +1,4 @@
+<?php require __DIR__.'/config.php'; if($_SERVER['REQUEST_METHOD']!=='POST'){header('Location: submit.php');exit;} verify_csrf();
+$name=trim($_POST['name']??'');$email=trim($_POST['email']??'');$subject=trim($_POST['subject']??'');$category=trim($_POST['category']??'General question');$priority=$_POST['priority']??'normal';$message=trim($_POST['message']??'');
+if(!$name||!filter_var($email,FILTER_VALIDATE_EMAIL)||!$subject||!$message||!in_array($priority,['low','normal','high','urgent'],true)){exit('Please complete all required fields.');}
+$no=ticket_no(); $s=db()->prepare("INSERT INTO tickets(ticket_no,name,email,subject,category,priority,message) VALUES(?,?,?,?,?,?,?)");$s->execute([$no,$name,$email,$subject,$category,$priority,$message]); header('Location: success.php?ticket='.urlencode($no));

@@ -1,0 +1,1 @@
+<footer class="footer"><div><strong>HireFlow</strong><span> · Better hiring, less friction.</span></div><div>Candidate-first recruiting workspace</div></footer></body></html>

@@ -1,0 +1,2 @@
+<?php $ref=trim($_GET['ref']??''); $title='Application received'; require 'header.php'; ?>
+<main class="success-page"><div class="success-mark">✓</div><span class="eyebrow">APPLICATION RECEIVED</span><h1>You're officially in.</h1><p>Thanks for applying. Keep this application number for checking progress.</p><div class="ref-code"><?=e($ref)?></div><a class="btn dark" href="status.php?ref=<?=urlencode($ref)?>">Track application</a><a class="text-link" href="jobs.php">Browse more roles →</a></main><?php require 'footer.php'; ?>

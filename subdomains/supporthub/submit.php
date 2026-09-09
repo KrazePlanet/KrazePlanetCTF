@@ -1,0 +1,10 @@
+<?php require __DIR__.'/config.php'; ?>
+<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Contact support — SupportHub</title><link rel="stylesheet" href="assets/style.css"></head><body>
+<nav><a class="brand" href="index.php"><span class="logo">S</span> SupportHub</a><div class="navlinks"><a href="index.php">Help Center</a><a class="active" href="submit.php">Contact support</a><a href="status.php">Check a request</a><a class="adminlink" href="admin/login.php">Admin</a></div></nav>
+<main class="formwrap"><div class="formintro"><span class="eyebrow">CONTACT SUPPORT</span><h1>Tell us what’s going on.</h1><p>Give us a few details and a member of our support team will review your request.</p></div>
+<form class="panel" method="post" action="submit_ticket.php"><input type="hidden" name="csrf" value="<?=e(csrf())?>">
+<div class="two"><label>Name<input required name="name" placeholder="Your name"></label><label>Email<input required type="email" name="email" placeholder="you@example.com"></label></div>
+<label>Subject<input required name="subject" placeholder="What can we help with?"></label>
+<div class="two"><label>Category<select name="category"><option>Account & access</option><option>Billing & plans</option><option>Technical issue</option><option>General question</option><option>Other</option></select></label><label>Priority<select name="priority"><option value="normal">Normal</option><option value="low">Low</option><option value="high">High</option><option value="urgent">Urgent</option></select></label></div>
+<label>Message<textarea required name="message" rows="8" placeholder="Describe the issue or question in as much detail as possible..."></textarea></label>
+<button class="primary">Submit request</button><p class="fine">By submitting, you agree that our support team may contact you about this request.</p></form></main></body></html>

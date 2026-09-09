@@ -1,0 +1,5 @@
+<?php
+$adminFlash=flash('success'); $adminError=flash('error');
+?><!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><link rel="stylesheet" href="../assets/css/style.css"><link rel="stylesheet" href="../assets/css/admin.css"><title>Admin — <?= e(SITE_NAME) ?></title></head><body class="admin-shell">
+<aside class="sidebar"><a class="brand" href="../index.php">YourName<span>.dev</span></a><div class="side-user"><?= e($_SESSION['admin_name']) ?></div><nav><a href="index.php">▦ Dashboard</a><a href="inquiries.php">✉ Inquiries</a><a href="../index.php">↗ Website</a><a href="logout.php">↪ Logout</a></nav></aside>
+<div class="admin-main"><header class="admin-top"><span>Admin panel</span><a href="../index.php">View website ↗</a></header><div class="admin-content"><?php if($adminFlash): ?><div class="alert success"><?= e($adminFlash) ?></div><?php endif; ?><?php if($adminError): ?><div class="alert error"><?= e($adminError) ?></div><?php endif; ?>

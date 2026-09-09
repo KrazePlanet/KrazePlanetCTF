@@ -1,0 +1,1 @@
+<?php require '../config.php';need_admin();if($_SERVER['REQUEST_METHOD']!=='POST')exit('Invalid');check_csrf();$id=(int)$_POST['id'];db()->prepare('DELETE FROM features WHERE id=?')->execute([$id]);flash('Feature request deleted.');header('Location:index.php');

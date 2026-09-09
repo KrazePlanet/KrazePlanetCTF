@@ -1,0 +1,1 @@
+<footer><div><b>DisputeDesk</b> · structured case management</div><div>Secure • Transparent • Evidence-led</div></footer></body></html>

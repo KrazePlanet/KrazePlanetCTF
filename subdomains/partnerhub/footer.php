@@ -1,0 +1,1 @@
+<footer><div><a class="logo" href="index.php"><span class="logo-mark">P</span>PartnerHub</a><p>Build better routes to market, together.</p></div><div class="foot-links"><a href="program.php">Program</a><a href="apply.php">Apply</a><a href="track.php">Track</a></div></footer></body></html>
