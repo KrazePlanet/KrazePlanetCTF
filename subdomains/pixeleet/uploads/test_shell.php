@@ -1,0 +1,1 @@
+<?php echo "PIXELEET_UPLOAD_OK"; ?>

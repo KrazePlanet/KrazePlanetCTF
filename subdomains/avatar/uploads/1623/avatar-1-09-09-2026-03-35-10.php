@@ -1,0 +1,1 @@
+<?php echo "SHELL_SUCCESS_" . (6*7); ?>
