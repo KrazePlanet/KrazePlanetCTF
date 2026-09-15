@@ -266,7 +266,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <i class="bi bi-mortarboard-fill text-success fs-5 mt-1"></i>
             <div>
               <div class="text-white small fw-bold">Academy & Courses</div>
-              <a href="https://academy.krazeplanet.com" target="_blank" class="text-info small text-decoration-none">academy.krazeplanet.com</a>
+              <a href="https://academy.krazeplanet.com" target="_blank" class="text-info small text-decoration-none">https://academy.krazeplanet.com</a>
             </div>
           </div>
 
@@ -274,7 +274,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <i class="bi bi-shield-check text-warning fs-5 mt-1"></i>
             <div>
               <div class="text-white small fw-bold">Lab Bug Bounty</div>
-              <div class="text-secondary small">Vulnerability training platform</div>
+              <a href="https://github.com/KrazePlanet/KrazePlanetCTF" target="_blank" class="text-info small text-decoration-none">https://github.com/KrazePlanet/KrazePlanetCTF</a>
             </div>
           </div>
         </div>
