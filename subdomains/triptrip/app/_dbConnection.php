@@ -20,17 +20,23 @@
 
 class Database
 {
-    private $db_host = "localhost";
-    private $db_user = "root";
-    private $db_password = "";
+    private $db_host;
+    private $db_user;
+    private $db_password;
     private $db_name = "triptrip";
     protected $conn;
+
+    public function __construct() {
+        $this->db_host = getenv('DB_HOST') ?: 'localhost';
+        $this->db_user = getenv('DB_USER') ?: 'root';
+        $this->db_password = getenv('DB_PASS') ?: '';
+    }
 
     protected function connect()
     {
         try {
             // 1. Ensure Database Exists
-            $hosts = ['krazeplanet', '127.0.0.1', 'localhost', '172.19.0.1', 'host.docker.internal'];
+            $hosts   = [getenv('DB_HOST') ?: 'localhost'];
             foreach ($hosts as $h) {
                 $init = @new mysqli($h, $this->db_user, $this->db_password);
                 if ($init && !$init->connect_error) {

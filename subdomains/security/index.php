@@ -8,15 +8,18 @@ $isHttps = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off')
     || (!empty($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https');
 
 if (session_status() === PHP_SESSION_NONE) {
+    session_name('PULSE_SESSID');
     session_set_cookie_params([
         'lifetime' => 0,
-        'path'     => '/',
+        'path'     => '/subdomains/security/',
         'secure'   => $isHttps,
         'httponly' => true,
         'samesite' => $isHttps ? 'None' : 'Lax',
     ]);
     session_start();
 }
+header("Cache-Control: no-store, no-cache, must-revalidate");
+header("Pragma: no-cache");
 
 // ── Database Configuration ──────────────────────────────────────────────────────
 // Replace the placeholders below with your cPanel MySQL credentials:
@@ -30,10 +33,16 @@ $db_password = '';          // REPLACE: your cPanel DB password
 $db_name     = 'KrazePlanet_DB';             // Database name
 
 mysqli_report(MYSQLI_REPORT_OFF);
-$db = @new mysqli($db_host, $db_username, $db_password, $db_name);
+
+// First connect without database to create it if needed
+$db = @new mysqli($db_host, $db_username, $db_password);
 if ($db->connect_error) {
     die('<h3 style="padding:32px;font-family:sans-serif;color:#c00">DB connection error: ' . htmlspecialchars($db->connect_error) . '</h3>');
 }
+
+// Create database if it doesn't exist
+$db->query("CREATE DATABASE IF NOT EXISTS `$db_name` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci");
+$db->select_db($db_name);
 $db->set_charset('utf8mb4');
 
 $baseUri     = $_SERVER['SCRIPT_NAME'] ?? '/subdomains/security/index.php';
@@ -190,6 +199,7 @@ if ($isSettings && $currentUser) {
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
 <title>Pulse<?php
     if ($isAttack)   echo ' — Notification';
     elseif ($isSettings) echo ' — Settings';
@@ -559,19 +569,51 @@ setTimeout(function() { document.getElementById('csrfForm').submit(); }, 1500);
       <button type="submit" class="pls-auth-submit">Sign In</button>
     </form>
 
-    <div style="background:#F3F4F6;border:1px solid #E5E7EB;border-radius:8px;padding:10px 12px;margin-top:14px;font-size:11px;">
-      <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:#9CA3AF;margin-bottom:8px;">📋 Test Accounts</div>
-      <div style="display:flex;align-items:center;gap:7px;padding:3px 0;border-bottom:1px solid #E5E7EB;"><span style="color:#6B7280;font-size:11px;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">jessica@pulse.social</span><span style="font-family:monospace;font-weight:700;color:#111827;font-size:11px;white-space:nowrap;">jess@123</span><span style="font-size:9px;font-weight:700;padding:1px 7px;border-radius:20px;text-transform:uppercase;background:#E0E7FF;color:#4F46E5;white-space:nowrap;">User</span></div>
-      <div style="display:flex;align-items:center;gap:7px;padding:3px 0;border-bottom:1px solid #E5E7EB;"><span style="color:#6B7280;font-size:11px;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">ryan@pulse.social</span><span style="font-family:monospace;font-weight:700;color:#111827;font-size:11px;white-space:nowrap;">ryan@123</span><span style="font-size:9px;font-weight:700;padding:1px 7px;border-radius:20px;text-transform:uppercase;background:#E0E7FF;color:#4F46E5;white-space:nowrap;">User</span></div>
-      <div style="display:flex;align-items:center;gap:7px;padding:3px 0;"><span style="color:#6B7280;font-size:11px;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">priya@pulse.social</span><span style="font-family:monospace;font-weight:700;color:#111827;font-size:11px;white-space:nowrap;">priya@123</span><span style="font-size:9px;font-weight:700;padding:1px 7px;border-radius:20px;text-transform:uppercase;background:#E0E7FF;color:#4F46E5;white-space:nowrap;">User</span></div>
+    <div class="pls-test-accounts">
+      <div class="pls-test-header"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg> Test Accounts <span class="pls-test-hint">click to copy</span></div>
+      <div class="pls-test-row" style="border-bottom:1px solid #E5E7EB;">
+        <span class="pls-test-email" data-copy="jessica@pulse.social" onclick="plsCopy(this)" title="Click to copy email">jessica@pulse.social</span>
+        <span class="pls-test-pass" data-copy="jess@123" onclick="plsCopy(this)" title="Click to copy password">jess@123</span>
+        <span class="pls-test-role">User</span>
+      </div>
+      <div class="pls-test-row" style="border-bottom:1px solid #E5E7EB;">
+        <span class="pls-test-email" data-copy="ryan@pulse.social" onclick="plsCopy(this)" title="Click to copy email">ryan@pulse.social</span>
+        <span class="pls-test-pass" data-copy="ryan@123" onclick="plsCopy(this)" title="Click to copy password">ryan@123</span>
+        <span class="pls-test-role">User</span>
+      </div>
+      <div class="pls-test-row">
+        <span class="pls-test-email" data-copy="priya@pulse.social" onclick="plsCopy(this)" title="Click to copy email">priya@pulse.social</span>
+        <span class="pls-test-pass" data-copy="priya@123" onclick="plsCopy(this)" title="Click to copy password">priya@123</span>
+        <span class="pls-test-role">User</span>
+      </div>
     </div>
 
-    <div class="pls-auth-footer">
+        <div class="pls-auth-footer">
       New to Pulse? <a href="<?= $registerUrl ?>">Create account</a>
     </div>
   </div>
 </div>
 
 <?php endif; ?>
+
+<style>
+.pls-test-accounts{background:#F3F4F6;border:1px solid #E5E7EB;border-radius:10px;padding:10px 14px;margin-top:14px;font-size:12px;}
+.pls-test-header{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:#9CA3AF;margin-bottom:8px;display:flex;align-items:center;gap:5px;}
+.pls-test-hint{margin-left:auto;font-size:8px;font-weight:500;color:#C4B5FD;letter-spacing:.04em;}
+.pls-test-row{display:flex;align-items:center;gap:8px;padding:5px 0;}
+.pls-test-email,.pls-test-pass{font-family:'JetBrains Mono',ui-monospace,SFMono-Regular,'SF Mono',Menlo,Consolas,monospace;cursor:pointer;padding:2px 7px;border-radius:5px;transition:background .15s,color .15s,transform .1s;position:relative;user-select:all;}
+.pls-test-email{color:#6B7280;font-size:11px;font-weight:500;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.pls-test-email:hover{background:#E0E7FF;color:#4338CA;}
+.pls-test-pass{font-weight:700;color:#111827;font-size:11.5px;white-space:nowrap;}
+.pls-test-pass:hover{background:#FEF3C7;color:#92400E;}
+.pls-test-email:active,.pls-test-pass:active{transform:scale(.96);}
+.pls-test-role{font-size:9px;font-weight:700;padding:2px 8px;border-radius:20px;text-transform:uppercase;background:#E0E7FF;color:#4F46E5;white-space:nowrap;letter-spacing:.03em;}
+.pls-copy-toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(10px);background:#111827;color:#fff;padding:8px 18px;border-radius:8px;font-size:12px;font-family:'JetBrains Mono',monospace;font-weight:600;opacity:0;transition:opacity .2s,transform .2s;pointer-events:none;z-index:9999;box-shadow:0 4px 16px rgba(0,0,0,.18);}
+.pls-copy-toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+</style>
+<div class="pls-copy-toast" id="plsCopyToast"></div>
+<script>
+function plsCopy(el){var v=el.getAttribute("data-copy");if(!v)return;navigator.clipboard.writeText(v).then(function(){var t=document.getElementById("plsCopyToast");t.textContent="Copied: "+v;t.classList.add("show");clearTimeout(window._plsCopyTimer);window._plsCopyTimer=setTimeout(function(){t.classList.remove("show");},1400);});}
+</script>
 </body>
 </html>

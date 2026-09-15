@@ -16,10 +16,13 @@ if (session_status() === PHP_SESSION_NONE) {
 }
 
 mysqli_report(MYSQLI_REPORT_OFF);
-$db_hosts = ['krazeplanet', '127.0.0.1', 'localhost', '172.19.0.1', 'host.docker.internal'];
+$hosts   = [getenv('DB_HOST') ?: 'localhost'];
+$db_user = getenv('DB_USER') ?: 'root';
+$db_pass = getenv('DB_PASS') ?: '';
+$db_name = getenv('DB_NAME') ?: 'KrazePlanet_DB';
 $db = null;
 foreach ($db_hosts as $h) {
-    $db = @new mysqli($h, 'root', '', 'KrazePlanet_DB');
+    $db = @new mysqli($h, $db_user, $db_pass, $db_name);
     if (!$db->connect_error) {
         break;
     }

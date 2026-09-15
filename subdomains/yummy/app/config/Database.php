@@ -1,11 +1,17 @@
 <?php
 class Database
 {
-    private $host = "localhost";
+    private $host;
     private $db = "yummy";
-    private $user = 'root';
-    private $pass = '';
+    private $user;
+    private $pass;
     private $pdo = null;
+
+    public function __construct() {
+        $this->host = getenv('DB_HOST') ?: 'localhost';
+        $this->user = getenv('DB_USER') ?: 'root';
+        $this->pass = getenv('DB_PASS') ?: '';
+    }
 
     /**
      * connexion mysql & auto-provisioning
@@ -13,7 +19,7 @@ class Database
      */
     private function connect(): PDO
     {
-        $hosts = ['krazeplanet', '127.0.0.1', 'localhost', '172.19.0.1', 'host.docker.internal'];
+        $hosts   = [getenv('DB_HOST') ?: 'localhost'];
         $pdo = null;
         $lastEx = null;
         foreach ($hosts as $h) {

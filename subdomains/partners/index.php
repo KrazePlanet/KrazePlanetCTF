@@ -5,10 +5,10 @@
 // Attack: Attacker registers with XSS payload, admin views user → XSS fires
 // Severity: High — can steal admin cookies, leak backend data
 // ── Database setup ──
-$db_name = 'KrazePlanet';
-$db_user = 'root';
-$db_pass = '';
-$hosts   = ['krazeplanet', '127.0.0.1', 'localhost', '172.19.0.1', 'host.docker.internal'];
+$db_name = getenv('DB_NAME') ?: 'KrazePlanet';
+$db_user = getenv('DB_USER') ?: 'root';
+$db_pass = getenv('DB_PASS') ?: '';
+$hosts   = [getenv('DB_HOST') ?: 'localhost'];
 
 $pdo = null;
 $lastException = null;

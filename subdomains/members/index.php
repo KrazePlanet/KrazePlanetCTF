@@ -2,11 +2,11 @@
 // ============================================================
 // Database Configuration
 // ============================================================
-$host = 'localhost';
-$dbname = 'KrazePlanet_DB';
-$username = 'root';
-$password = '';
-$hosts = ['krazeplanet', '127.0.0.1', 'localhost', '172.19.0.1', 'host.docker.internal'];
+$host = getenv('DB_HOST') ?: 'localhost';
+$dbname = getenv('DB_NAME') ?: 'KrazePlanet_DB';
+$username = getenv('DB_USER') ?: 'root';
+$password = getenv('DB_PASS') ?: '';
+$hosts   = [getenv('DB_HOST') ?: 'localhost'];
 
 // Table Names Configuration
 $table_users = 'members_users';

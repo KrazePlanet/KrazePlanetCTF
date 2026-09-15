@@ -4,10 +4,10 @@
 // Vulnerability: Profile Signature field stored raw, rendered via innerHTML in every forum post
 // Attack: Any user who views a thread where the attacker has posted triggers the XSS payload
 // ── Database setup ──
-$db_name = 'KrazePlanet';
-$db_user = 'root';
-$db_pass = '';
-$hosts   = ['krazeplanet', '127.0.0.1', 'localhost', '172.19.0.1', 'host.docker.internal'];
+$db_name = getenv('DB_NAME') ?: 'KrazePlanet';
+$db_user = getenv('DB_USER') ?: 'root';
+$db_pass = getenv('DB_PASS') ?: '';
+$hosts   = [getenv('DB_HOST') ?: 'localhost'];
 
 $pdo = null;
 $lastException = null;

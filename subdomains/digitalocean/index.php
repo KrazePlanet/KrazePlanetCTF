@@ -2,10 +2,10 @@
 // ============================================================
 // Database Configuration
 // ============================================================
-$dbname = 'KrazePlanet';
-$username = 'root';
-$password = '';
-$hosts = ['krazeplanet', '127.0.0.1', 'localhost', '172.19.0.1', 'host.docker.internal'];
+$dbname = getenv('DB_NAME') ?: 'KrazePlanet';
+$username = getenv('DB_USER') ?: 'root';
+$password = getenv('DB_PASS') ?: '';
+$hosts   = [getenv('DB_HOST') ?: 'localhost'];
 
 // Table Names Configuration
 $table_users = 'digitalocean_users';

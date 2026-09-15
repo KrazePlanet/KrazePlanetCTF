@@ -2,15 +2,23 @@
 session_start();
 $flag = "flag{idor_banking_support_ticket_disclosure_705}";
 
-$host = (getenv('DB_HOST') ?: (file_exists('/.dockerenv') ? 'krazeplanet' : '127.0.0.1'));
-$db = 'KrazePlanet';
-$user = 'root';
-$pass = '';
+$db_host = getenv('DB_HOST') ?: 'localhost';
+$db_username = getenv('DB_USER') ?: 'root';
+$db_password = getenv('DB_PASS') ?: '';
+$db_name = getenv('DB_NAME') ?: 'KrazePlanet_DB';
 
-$conn = new mysqli($host, $user, $pass, $db);
+mysqli_report(MYSQLI_REPORT_OFF);
+
+// First connect without database to create it if needed
+$conn = @new mysqli($db_host, $db_username, $db_password);
 if ($conn->connect_error) {
-    die("Connection failed: " . $conn->connect_error);
+    die('DB connection error: ' . htmlspecialchars($conn->connect_error));
 }
+
+// Create database if it doesn't exist
+$conn->query("CREATE DATABASE IF NOT EXISTS `$db_name` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci");
+$conn->select_db($db_name);
+$conn->set_charset('utf8mb4');
 
 function esc($s) {
     return htmlspecialchars($s, ENT_QUOTES | ENT_HTML5, 'UTF-8');

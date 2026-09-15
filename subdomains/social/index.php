@@ -12,18 +12,23 @@ session_start();
 define('LAB_FLAG', 'flag{idor_friendzone_message_disclosure_704}');
 
 // ── Database ──────────────────────────────────────────────────────────────────
-$db_hosts = ['krazeplanet', '127.0.0.1', 'localhost', '172.19.0.1', 'host.docker.internal'];
-$db = null;
-foreach ($db_hosts as $h) {
-    $db = @new mysqli($h, 'root', '');
-    if (!$db->connect_error) {
-        $db->query("CREATE DATABASE IF NOT EXISTS `KrazePlanet_DB` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci");
-        $db->select_db('KrazePlanet_DB');
-        break;
-    }
+$db_host = getenv('DB_HOST') ?: 'localhost';
+$db_username = getenv('DB_USER') ?: 'root';
+$db_password = getenv('DB_PASS') ?: '';
+$db_name = getenv('DB_NAME') ?: 'KrazePlanet_DB';
+
+mysqli_report(MYSQLI_REPORT_OFF);
+
+// First connect without database to create it if needed
+$db = @new mysqli($db_host, $db_username, $db_password);
+if ($db->connect_error) {
+    die('DB connection error: ' . htmlspecialchars($db->connect_error));
 }
-if (!$db || $db->connect_error) { die('DB connection failed: ' . ($db ? $db->connect_error : 'Unable to connect to database')); }
-if ($db->connect_error) { die('DB connection failed'); }
+
+// Create database if it doesn't exist
+$db->query("CREATE DATABASE IF NOT EXISTS `$db_name` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci");
+$db->select_db($db_name);
+$db->set_charset('utf8mb4');
 
 // ── Tables ────────────────────────────────────────────────────────────────────
 $db->query("CREATE TABLE IF NOT EXISTS lab704_users (
