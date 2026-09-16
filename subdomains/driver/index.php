@@ -2,8 +2,8 @@
 // Lab 702 — IDOR: Uber Driver Portal — Trip & Earnings Disclosure
 // Platform: "Uber" ride-share driver portal (simulated)
 // Vulnerability:
-//   1) GET /index.php?action=trip&id=X has NO ownership check on driver_id.
-//   2) GET /index.php?action=earnings_detail&driver_uuid=DRV-XXXX has NO ownership check.
+//   1) GET index.php?action=trip&id=X has NO ownership check on driver_id.
+//   2) GET index.php?action=earnings_detail&driver_uuid=DRV-XXXX has NO ownership check.
 // Real World: Anand Prakash | Uber partners.uber.com | $6,500 | HackerOne #150095
 // Difficulty: Medium | Pure black-box — no hints in UI
 
@@ -136,7 +136,7 @@ $error      = '';
 // ── Logout ────────────────────────────────────────────────────────────────────
 if ($isLogout) {
     session_destroy();
-    header('Location: /index.php');
+    header('Location: index.php');
     exit;
 }
 
@@ -166,7 +166,7 @@ if ($isRegister && $_SERVER['REQUEST_METHOD'] === 'POST') {
             ($newUserId, DATE_SUB(CURDATE(), INTERVAL 1 DAY), DATE_ADD(CURDATE(), INTERVAL 5 DAY), 76.50, 61.20, 3, 0.00, 'Visa ending in 1111', NULL)
         ") or die($db->error);
     }
-    header('Location: /index.php');
+    header('Location: index.php');
     exit;
 }
 
@@ -183,7 +183,7 @@ if (!$isRegister && $_SERVER['REQUEST_METHOD'] === 'POST') {
         $st->close();
         if ($user && password_verify($pass, $user['password'])) {
             $_SESSION['lab702_user'] = $user['id'];
-            header('Location: /index.php?action=dashboard');
+            header('Location: index.php?action=dashboard');
             exit;
         } else {
             $error = 'Invalid email or password.';
@@ -203,7 +203,7 @@ if (!empty($_SESSION['lab702_user'])) {
 }
 
 if ($currentUser && !$action && !$isLogout) {
-    header('Location: /index.php?action=dashboard');
+    header('Location: index.php?action=dashboard');
     exit;
 }
 
@@ -345,7 +345,7 @@ tr:hover td{background:#0f0f0f}
       <h2>Become a Driver</h2>
       <p>Start earning with Uber today.</p>
       <?php if ($error): ?><div class="error-msg"><?=esc($error)?></div><?php endif; ?>
-      <form method="POST" action="/index.php?action=register">
+      <form method="POST" action="index.php?action=register">
         <input class="auth-input" name="name" placeholder="Full name" required>
         <input class="auth-input" name="email" type="email" placeholder="Email address" required>
         <input class="auth-input" name="password" type="password" placeholder="Password (min 4 chars)" minlength="4" required>
@@ -353,17 +353,17 @@ tr:hover td{background:#0f0f0f}
         <input class="auth-input" name="city" placeholder="City" value="San Francisco">
         <button class="auth-btn" type="submit">Sign up to drive</button>
       </form>
-      <div class="auth-switch">Already have an account? <a href="/index.php">Sign in</a></div>
+      <div class="auth-switch">Already have an account? <a href="index.php">Sign in</a></div>
     <?php else: ?>
       <h2>Welcome back, Driver</h2>
       <p>Sign in to your partner account.</p>
       <?php if ($error): ?><div class="error-msg"><?=esc($error)?></div><?php endif; ?>
-      <form method="POST" action="/index.php">
+      <form method="POST" action="index.php">
         <input class="auth-input" name="email" type="email" placeholder="Email address" required>
         <input class="auth-input" name="password" type="password" placeholder="Password" required>
         <button class="auth-btn" type="submit">Sign in</button>
       </form>
-      <div class="auth-switch">New to Uber? <a href="/index.php?action=register">Sign up to drive</a></div>
+      <div class="auth-switch">New to Uber? <a href="index.php?action=register">Sign up to drive</a></div>
       <div style="margin-top:24px;padding-top:16px;border-top:1px solid #222;font-size:.75rem;color:#555">
         <strong>Demo accounts:</strong><br>
         james.miller@driver.com / victim123<br>
@@ -382,10 +382,10 @@ tr:hover td{background:#0f0f0f}
       Uber Driver
     </div>
     <nav class="sidebar-nav">
-      <a href="/index.php?action=dashboard" class="<?=$action==='dashboard'||!$action?'active':''?>">Dashboard</a>
-      <a href="/index.php?action=trips" class="<?=$isTrips||$isTrip?'active':''?>">Trip History</a>
-      <a href="/index.php?action=earnings" class="<?=$isEarnings||$isEarningsDetail?'active':''?>">Earnings</a>
-      <a href="/index.php?logout=1">Sign Out</a>
+      <a href="index.php?action=dashboard" class="<?=$action==='dashboard'||!$action?'active':''?>">Dashboard</a>
+      <a href="index.php?action=trips" class="<?=$isTrips||$isTrip?'active':''?>">Trip History</a>
+      <a href="index.php?action=earnings" class="<?=$isEarnings||$isEarningsDetail?'active':''?>">Earnings</a>
+      <a href="index.php?logout=1">Sign Out</a>
     </nav>
     <div class="sidebar-footer">
       &copy; Uber Technologies Inc.<br>
@@ -444,7 +444,7 @@ tr:hover td{background:#0f0f0f}
           <td style="color:#06C167;font-weight:600">$<?=esc(number_format($e['net'],2))?></td>
           <td><?=$e['bonus']>0?'+$'.esc(number_format($e['bonus'],2)):'—'?></td>
           <td><span class="badge badge-green">Paid</span></td>
-          <td><a class="btn btn-ghost" style="padding:4px 10px;font-size:.75rem" href="/index.php?action=earnings_detail&driver_uuid=<?=esc($currentUser['driver_uuid'])?>">View</a></td>
+          <td><a class="btn btn-ghost" style="padding:4px 10px;font-size:.75rem" href="index.php?action=earnings_detail&driver_uuid=<?=esc($currentUser['driver_uuid'])?>">View</a></td>
         </tr>
         <?php endforeach; ?>
       </table>
@@ -468,12 +468,12 @@ tr:hover td{background:#0f0f0f}
           <td><?=esc($t['dropoff'])?></td>
           <td style="color:#06C167;font-weight:600">$<?=esc(number_format($t['fare'],2))?></td>
           <td><span class="badge badge-green"><?=esc($t['status'])?></span></td>
-          <td><a class="btn btn-ghost" style="padding:4px 10px;font-size:.75rem" href="/index.php?action=trip&id=<?=esc($t['id'])?>">Details</a></td>
+          <td><a class="btn btn-ghost" style="padding:4px 10px;font-size:.75rem" href="index.php?action=trip&id=<?=esc($t['id'])?>">Details</a></td>
         </tr>
         <?php endforeach; ?>
       </table>
       <?php if (count($myTrips)>5): ?>
-        <div style="margin-top:12px"><a href="/index.php?action=trips" class="btn btn-ghost">View all trips &rarr;</a></div>
+        <div style="margin-top:12px"><a href="index.php?action=trips" class="btn btn-ghost">View all trips &rarr;</a></div>
       <?php endif; ?>
       <?php else: ?>
         <p style="color:#888">No trips yet.</p>
@@ -499,7 +499,7 @@ tr:hover td{background:#0f0f0f}
           <td style="color:#06C167;font-weight:600">$<?=esc(number_format($t['fare'],2))?></td>
           <td>$<?=esc(number_format($t['tip'],2))?></td>
           <td><span class="badge badge-green"><?=esc($t['status'])?></span></td>
-          <td><a class="btn btn-primary" style="padding:4px 12px;font-size:.75rem" href="/index.php?action=trip&id=<?=esc($t['id'])?>">View Details</a></td>
+          <td><a class="btn btn-primary" style="padding:4px 12px;font-size:.75rem" href="index.php?action=trip&id=<?=esc($t['id'])?>">View Details</a></td>
         </tr>
         <?php endforeach; ?>
       </table>
@@ -563,7 +563,7 @@ tr:hover td{background:#0f0f0f}
         </div>
       </div>
     </div>
-    <a href="/index.php?action=trips" class="btn btn-ghost">&larr; Back to trips</a>
+    <a href="index.php?action=trips" class="btn btn-ghost">&larr; Back to trips</a>
 
 <?php elseif ($isTrip): ?>
     <div class="card"><p style="color:#888">Trip not found.</p></div>
@@ -586,7 +586,7 @@ tr:hover td{background:#0f0f0f}
           <td style="color:#06C167;font-weight:600">$<?=esc(number_format($e['net'],2))?></td>
           <td><?=$e['bonus']>0?'+$'.esc(number_format($e['bonus'],2)):'—'?></td>
           <td><?=esc($e['payment_method'])?></td>
-          <td><a class="btn btn-primary" style="padding:4px 12px;font-size:.75rem" href="/index.php?action=earnings_detail&driver_uuid=<?=esc($currentUser['driver_uuid'])?>">View Statement</a></td>
+          <td><a class="btn btn-primary" style="padding:4px 12px;font-size:.75rem" href="index.php?action=earnings_detail&driver_uuid=<?=esc($currentUser['driver_uuid'])?>">View Statement</a></td>
         </tr>
         <?php endforeach; ?>
       </table>
@@ -643,7 +643,7 @@ tr:hover td{background:#0f0f0f}
       <div class="flag-banner"><?=LAB_FLAG?></div>
       <?php endif; ?>
     </div>
-    <a href="/index.php?action=earnings" class="btn btn-ghost">&larr; Back to earnings</a>
+    <a href="index.php?action=earnings" class="btn btn-ghost">&larr; Back to earnings</a>
 
 <?php elseif ($isEarningsDetail): ?>
     <div class="card"><p style="color:#888">Earnings statement not found.</p></div>

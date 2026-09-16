@@ -1,20 +1,18 @@
 <?php
 // Pulse — Social Media Platform
 
-// SameSite=None allows cross-origin requests to include the session cookie,
-// which is required for CSRF attacks to work in modern browsers.
-// Secure=true is mandatory when SameSite=None (requires HTTPS).
-$isHttps = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off')
-    || (!empty($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https');
-
+// Configure session to work with both HTTP and HTTPS
+// Secure=false allows cookies to work on both protocols
+// SameSite=Lax allows CSRF attacks while maintaining browser compatibility
 if (session_status() === PHP_SESSION_NONE) {
     session_name('PULSE_SESSID');
     session_set_cookie_params([
         'lifetime' => 0,
-        'path'     => '/subdomains/security/',
-        'secure'   => $isHttps,
+        'path'     => '/',  // Root path to ensure cookies work across all subdomains
+        'domain'   => '',  // Empty domain allows current domain
+        'secure'   => false,  // Allow cookies on both HTTP and HTTPS
         'httponly' => true,
-        'samesite' => $isHttps ? 'None' : 'Lax',
+        'samesite' => 'Lax',  // Works with both protocols and allows CSRF
     ]);
     session_start();
 }
@@ -45,7 +43,7 @@ $db->query("CREATE DATABASE IF NOT EXISTS `$db_name` CHARACTER SET utf8mb4 COLLA
 $db->select_db($db_name);
 $db->set_charset('utf8mb4');
 
-$baseUri     = $_SERVER['SCRIPT_NAME'] ?? '/subdomains/security/index.php';
+$baseUri     = $_SERVER['SCRIPT_NAME'] ?? '';
 $loginUrl    = $baseUri;
 $registerUrl = $baseUri . '?action=register';
 $profileUrl  = $baseUri . '?action=profile';

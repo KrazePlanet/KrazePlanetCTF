@@ -35,7 +35,7 @@ if (!$db || $db->connect_error) {
 }
 $db->set_charset('utf8mb4');
 
-$baseUri     = $_SERVER['SCRIPT_NAME'] ?? '/subdomains/preferences/index.php';
+$baseUri     = $_SERVER['SCRIPT_NAME'] ?? '';
 $loginUrl    = $baseUri;
 $registerUrl = $baseUri . '?action=register';
 $dashUrl     = $baseUri . '?action=dashboard';

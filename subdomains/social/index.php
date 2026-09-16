@@ -136,7 +136,7 @@ $error      = '';
 // ── Logout ────────────────────────────────────────────────────────────────────
 if ($isLogout) {
     session_destroy();
-    header('Location: /index.php');
+    header('Location: index.php');
     exit;
 }
 
@@ -161,7 +161,7 @@ if ($isRegister && $_SERVER['REQUEST_METHOD'] === 'POST') {
         $st->execute();
         $st->close();
     }
-    header('Location: /index.php');
+    header('Location: index.php');
     exit;
 }
 
@@ -178,7 +178,7 @@ if (!$isRegister && $_SERVER['REQUEST_METHOD'] === 'POST') {
         $st->close();
         if ($user && password_verify($pass, $user['password'])) {
             $_SESSION['lab704_user'] = $user['id'];
-            header('Location: /index.php?action=dashboard');
+            header('Location: index.php?action=dashboard');
             exit;
         } else {
             $error = 'Invalid email or password.';
@@ -198,7 +198,7 @@ if (!empty($_SESSION['lab704_user'])) {
 }
 
 if ($currentUser && !$action && !$isLogout) {
-    header('Location: /index.php?action=dashboard');
+    header('Location: index.php?action=dashboard');
     exit;
 }
 
@@ -469,7 +469,7 @@ a{color:#7C3AED;text-decoration:none}a:hover{text-decoration:underline}
     <div class="error-msg"><?= esc($error) ?></div>
     <?php endif; ?>
 
-    <form method="POST" action="<?= $isRegister ? '/index.php?action=register' : '/index.php' ?>">
+    <form method="POST" action="<?= $isRegister ? 'index.php?action=register' : 'index.php' ?>">
       <?php if ($isRegister): ?>
       <input type="text" name="name" class="auth-input" placeholder="Full name" required>
       <input type="text" name="bio" class="auth-input" placeholder="Short bio (e.g. Cat lover & coffee addict)">
@@ -481,7 +481,7 @@ a{color:#7C3AED;text-decoration:none}a:hover{text-decoration:underline}
     </form>
 
     <div class="auth-switch">
-      <?= $isRegister ? 'Already have an account? <a href="/index.php">Sign in</a>' : 'New here? <a href="/index.php?action=register">Join FriendZone</a>' ?>
+      <?= $isRegister ? 'Already have an account? <a href="index.php">Sign in</a>' : 'New here? <a href="index.php?action=register">Join FriendZone</a>' ?>
     </div>
 
     <?php if (!$isRegister): ?>
@@ -503,23 +503,23 @@ a{color:#7C3AED;text-decoration:none}a:hover{text-decoration:underline}
       <span class="brand-text">FriendZone</span>
     </div>
     <nav class="sidebar-nav">
-      <a href="/index.php?action=dashboard" class="<?= $isDash ? 'active' : '' ?>">
+      <a href="index.php?action=dashboard" class="<?= $isDash ? 'active' : '' ?>">
         <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
         Home
       </a>
-      <a href="/index.php?action=explore" class="<?= $isExplr ? 'active' : '' ?>">
+      <a href="index.php?action=explore" class="<?= $isExplr ? 'active' : '' ?>">
         <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg>
         Explore
       </a>
-      <a href="/index.php?action=messages" class="<?= $isMsgs || $isMsg ? 'active' : '' ?>">
+      <a href="index.php?action=messages" class="<?= $isMsgs || $isMsg ? 'active' : '' ?>">
         <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
         Messages<?php if ($unreadCount > 0): ?><span class="badge-count"><?= (int)$unreadCount ?></span><?php endif; ?>
       </a>
-      <a href="/index.php?action=profile&uuid=<?= urlencode($currentUser['user_uuid']) ?>" class="<?= $isProfile ? 'active' : '' ?>">
+      <a href="index.php?action=profile&uuid=<?= urlencode($currentUser['user_uuid']) ?>" class="<?= $isProfile ? 'active' : '' ?>">
         <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
         My Profile
       </a>
-      <a href="/index.php?logout=1" style="margin-top:auto;color:#6B7280;">
+      <a href="index.php?logout=1" style="margin-top:auto;color:#6B7280;">
         <svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
         Sign Out
       </a>
@@ -573,7 +573,7 @@ a{color:#7C3AED;text-decoration:none}a:hover{text-decoration:underline}
                 <span class="activity-uuid">📌 UUID: <?= esc($act['photo_uuid']) ?></span>
               </div>
               <div style="text-align:right;flex-shrink:0;">
-                <a href="/index.php?action=photo&uuid=<?= urlencode($act['photo_uuid']) ?>" class="btn btn-ghost btn-small">View</a>
+                <a href="index.php?action=photo&uuid=<?= urlencode($act['photo_uuid']) ?>" class="btn btn-ghost btn-small">View</a>
                 <div class="activity-time" style="margin-top:4px;"><?= date('M j', strtotime($act['created_at'])) ?></div>
               </div>
             </div>
@@ -594,7 +594,7 @@ a{color:#7C3AED;text-decoration:none}a:hover{text-decoration:underline}
                 <div class="photo-caption" style="font-size:.75rem"><?= esc(mb_strimwidth($p['caption'], 0, 40, '…')) ?></div>
                 <div class="photo-meta">
                   <span><?= $p['is_private'] ? '<span class="badge badge-private">Private</span>' : '<span class="badge badge-public">Public</span>' ?></span>
-                  <a href="/index.php?action=photo&uuid=<?= urlencode($p['photo_uuid']) ?>" class="btn btn-ghost btn-small">View</a>
+                  <a href="index.php?action=photo&uuid=<?= urlencode($p['photo_uuid']) ?>" class="btn btn-ghost btn-small">View</a>
                 </div>
               </div>
             </div>
@@ -617,7 +617,7 @@ a{color:#7C3AED;text-decoration:none}a:hover{text-decoration:underline}
               <div class="suggest-bio"><?= esc(mb_strimwidth($s['bio'] ?? '', 0, 50, '…')) ?></div>
               <div class="suggest-uuid">UUID: <?= esc($s['user_uuid']) ?></div>
             </div>
-            <a href="/index.php?action=profile&uuid=<?= urlencode($s['user_uuid']) ?>" class="btn btn-ghost btn-small" style="flex-shrink:0">View</a>
+            <a href="index.php?action=profile&uuid=<?= urlencode($s['user_uuid']) ?>" class="btn btn-ghost btn-small" style="flex-shrink:0">View</a>
           </div>
           <?php endforeach; ?>
         </div>
@@ -651,7 +651,7 @@ a{color:#7C3AED;text-decoration:none}a:hover{text-decoration:underline}
             </div>
             <div class="photo-uuid-display">UUID: <?= esc($p['photo_uuid']) ?></div>
             <div style="margin-top:8px;">
-              <a href="/index.php?action=photo&uuid=<?= urlencode($p['photo_uuid']) ?>" class="btn btn-primary btn-small">View Photo</a>
+              <a href="index.php?action=photo&uuid=<?= urlencode($p['photo_uuid']) ?>" class="btn btn-primary btn-small">View Photo</a>
             </div>
           </div>
         </div>
@@ -664,8 +664,8 @@ a{color:#7C3AED;text-decoration:none}a:hover{text-decoration:underline}
 
 <?php elseif ($isPhoto && $photoDetail): ?>
     <div class="back-row">
-      <a href="/index.php?action=explore" class="btn btn-ghost">&larr; Gallery</a>
-      <a href="/index.php?action=dashboard" class="btn btn-ghost">Home</a>
+      <a href="index.php?action=explore" class="btn btn-ghost">&larr; Gallery</a>
+      <a href="index.php?action=dashboard" class="btn btn-ghost">Home</a>
     </div>
 
     <?php if ($photoDetail['is_private'] && $photoDetail['user_id'] !== $currentUser['id']): ?>
@@ -712,7 +712,7 @@ a{color:#7C3AED;text-decoration:none}a:hover{text-decoration:underline}
           $otherEmoji = ($m['from_user_id'] == $currentUser['id']) ? $m['to_emoji'] : $m['from_emoji'];
           $isIncoming = ($m['to_user_id'] == $currentUser['id']);
         ?>
-        <a href="/index.php?action=message&uuid=<?= urlencode($m['msg_uuid']) ?>" style="text-decoration:none;color:inherit;">
+        <a href="index.php?action=message&uuid=<?= urlencode($m['msg_uuid']) ?>" style="text-decoration:none;color:inherit;">
           <div class="msg-item">
             <div class="msg-avatar"><?= esc($otherEmoji) ?></div>
             <div class="msg-body">
@@ -734,7 +734,7 @@ a{color:#7C3AED;text-decoration:none}a:hover{text-decoration:underline}
 
 <?php elseif ($isMsg && $msgDetail): ?>
     <div class="back-row">
-      <a href="/index.php?action=messages" class="btn btn-ghost">&larr; All Messages</a>
+      <a href="index.php?action=messages" class="btn btn-ghost">&larr; All Messages</a>
     </div>
 
     <?php
@@ -789,7 +789,7 @@ a{color:#7C3AED;text-decoration:none}a:hover{text-decoration:underline}
     if ($r) { while ($row = $r->fetch_assoc()) $profPhotos[] = $row; }
     ?>
     <div class="back-row">
-      <a href="/index.php?action=dashboard" class="btn btn-ghost">&larr; Home</a>
+      <a href="index.php?action=dashboard" class="btn btn-ghost">&larr; Home</a>
     </div>
 
     <div class="detail-card">
@@ -837,7 +837,7 @@ a{color:#7C3AED;text-decoration:none}a:hover{text-decoration:underline}
               <div class="photo-caption" style="font-size:.72rem"><?= esc(mb_strimwidth($p['caption'], 0, 40, '…')) ?></div>
               <div class="photo-meta">
                 <?= $p['is_private'] ? '<span class="badge badge-private">Private</span>' : '<span class="badge badge-public">Public</span>' ?>
-                <a href="/index.php?action=photo&uuid=<?= urlencode($p['photo_uuid']) ?>" class="btn btn-ghost btn-small">View</a>
+                <a href="index.php?action=photo&uuid=<?= urlencode($p['photo_uuid']) ?>" class="btn btn-ghost btn-small">View</a>
               </div>
             </div>
           </div>

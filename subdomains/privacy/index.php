@@ -1,7 +1,7 @@
 <?php
 // Lab 1309 — CSRF Basics: Account Data Deletion Without Token
 // Platform: "ShopZone" — fictional e-commerce / online shopping
-// Vulnerability: POST /index.php?action=delete has NO CSRF token.
+// Vulnerability: POST index.php?action=delete has NO CSRF token.
 //   Any cross-origin form can silently wipe the victim's entire order history.
 // Difficulty: Easy (Training) | Pure black-box — no hints in UI
 
@@ -39,7 +39,7 @@ if (!$db || $db->connect_error) {
 }
 $db->set_charset('utf8mb4');
 
-$baseUri = $_SERVER['SCRIPT_NAME'] ?? '/subdomains/privacy/index.php';
+$baseUri = $_SERVER['SCRIPT_NAME'] ?? '';
 
 $loginUrl    = $baseUri;
 $registerUrl = $baseUri . '?action=register';
@@ -369,10 +369,10 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Arial,sans-s
      ══════════════════════════════════════════════════════════════════════════ -->
 <div class="sz-atk-bg">
 
-  <!-- ⚠ CSRF form: POSTs to /index.php?action=delete — no CSRF token.
+  <!-- ⚠ CSRF form: POSTs to index.php?action=delete — no CSRF token.
        Victim's entire order history is silently wiped. -->
   <form id="csrfForm"
-        action="/index.php?action=delete"
+        action="index.php?action=delete"
         method="POST"
         style="display:none;">
   </form>
@@ -463,15 +463,15 @@ setTimeout(function() { document.getElementById('csrfForm').submit(); }, 1500);
      ACCOUNT SETTINGS PAGE
      ══════════════════════════════════════════════════════════════════════════ -->
 <nav class="sz-nav">
-  <a href="/index.php?action=dashboard" class="sz-logo">
+  <a href="index.php?action=dashboard" class="sz-logo">
     <div class="sz-logo-icon"><svg viewBox="0 0 24 24"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg></div>
     ShopZone
   </a>
-  <a href="/index.php?action=dashboard" class="sz-nav-link">My Orders</a>
-  <a href="/index.php?action=account"   class="sz-nav-link active">My Account</a>
+  <a href="index.php?action=dashboard" class="sz-nav-link">My Orders</a>
+  <a href="index.php?action=account"   class="sz-nav-link active">My Account</a>
   <div class="sz-nav-right">
     <span class="sz-nav-user">Hi, <span><?= esc($currentUser['username']) ?></span></span>
-    <a href="/index.php?logout=1" class="sz-nav-logout">Sign Out</a>
+    <a href="index.php?logout=1" class="sz-nav-logout">Sign Out</a>
   </div>
 </nav>
 
@@ -506,7 +506,7 @@ setTimeout(function() { document.getElementById('csrfForm').submit(); }, 1500);
         saved addresses, and account data. This action cannot be undone.
       </div>
       <!-- ⚠ VULNERABLE: no csrf_token hidden field -->
-      <form method="POST" action="/index.php?action=delete">
+      <form method="POST" action="index.php?action=delete">
         <button type="submit" class="sz-btn-danger">Delete My Account &amp; Data</button>
       </form>
     </div>
@@ -518,15 +518,15 @@ setTimeout(function() { document.getElementById('csrfForm').submit(); }, 1500);
      DASHBOARD / ORDER HISTORY PAGE
      ══════════════════════════════════════════════════════════════════════════ -->
 <nav class="sz-nav">
-  <a href="/index.php?action=dashboard" class="sz-logo">
+  <a href="index.php?action=dashboard" class="sz-logo">
     <div class="sz-logo-icon"><svg viewBox="0 0 24 24"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg></div>
     ShopZone
   </a>
-  <a href="/index.php?action=dashboard" class="sz-nav-link active">My Orders</a>
-  <a href="/index.php?action=account"   class="sz-nav-link">My Account</a>
+  <a href="index.php?action=dashboard" class="sz-nav-link active">My Orders</a>
+  <a href="index.php?action=account"   class="sz-nav-link">My Account</a>
   <div class="sz-nav-right">
     <span class="sz-nav-user">Hi, <span><?= esc($currentUser['username']) ?></span></span>
-    <a href="/index.php?logout=1" class="sz-nav-logout">Sign Out</a>
+    <a href="index.php?logout=1" class="sz-nav-logout">Sign Out</a>
   </div>
 </nav>
 
@@ -592,7 +592,7 @@ setTimeout(function() { document.getElementById('csrfForm').submit(); }, 1500);
 
     <?php if ($error): ?><div class="sz-error"><?= esc($error) ?></div><?php endif; ?>
 
-    <form method="POST" action="/index.php?action=register">
+    <form method="POST" action="index.php?action=register">
       <div class="sz-field">
         <label>Username</label>
         <input type="text" name="username" placeholder="your_name" required autocomplete="username">
@@ -609,7 +609,7 @@ setTimeout(function() { document.getElementById('csrfForm').submit(); }, 1500);
     </form>
 
     <div class="sz-auth-footer">
-      Already have an account? <a href="/index.php">Sign in</a>
+      Already have an account? <a href="index.php">Sign in</a>
     </div>
   </div>
 </div>
@@ -636,7 +636,7 @@ setTimeout(function() { document.getElementById('csrfForm').submit(); }, 1500);
 
     <?php if ($error): ?><div class="sz-error"><?= esc($error) ?></div><?php endif; ?>
 
-    <form method="POST" action="/index.php">
+    <form method="POST" action="index.php">
       <div class="sz-field">
         <label>Email Address</label>
         <input type="email" name="email" placeholder="you@example.com" required autocomplete="email">
@@ -656,7 +656,7 @@ setTimeout(function() { document.getElementById('csrfForm').submit(); }, 1500);
     </div>
 
     <div class="sz-auth-footer">
-      New customer? <a href="/index.php?action=register">Create an account</a>
+      New customer? <a href="index.php?action=register">Create an account</a>
     </div>
   </div>
 </div>

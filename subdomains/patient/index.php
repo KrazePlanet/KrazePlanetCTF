@@ -2,9 +2,9 @@
 // Lab 703 — IDOR: MediCare+ Healthcare Portal — Patient Appointments & Records Disclosure
 // Platform: "MediCare+" — fictional healthcare patient portal / telemedicine platform
 // Vulnerability:
-//   1) GET /index.php?action=appointment&id=X — No ownership check. Any patient can view ANY appointment.
-//   2) GET /index.php?action=lab_result&id=X — No ownership check. Any patient can view ANY lab result.
-//   3) GET /index.php?action=prescription&id=X — No ownership check. Any patient can view ANY prescription.
+//   1) GET index.php?action=appointment&id=X — No ownership check. Any patient can view ANY appointment.
+//   2) GET index.php?action=lab_result&id=X — No ownership check. Any patient can view ANY lab result.
+//   3) GET index.php?action=prescription&id=X — No ownership check. Any patient can view ANY prescription.
 // Real World: Common healthcare portal IDOR — patient record enumeration via sequential IDs
 // Difficulty: Easy (Training) | Pure black-box — no hints in UI
 
@@ -163,7 +163,7 @@ $error      = '';
 // ── Logout ────────────────────────────────────────────────────────────────────
 if ($isLogout) {
     session_destroy();
-    header('Location: /index.php');
+    header('Location: index.php');
     exit;
 }
 
@@ -192,7 +192,7 @@ if ($isRegister && $_SERVER['REQUEST_METHOD'] === 'POST') {
             ($newUserId, 'Complete Blood Count (CBC)', CURDATE(), 'Pending', 'N/A', 'Pending', 'Awaiting results from lab', 'Dr. Emily Carter')
         ") or die($db->error);
     }
-    header('Location: /index.php');
+    header('Location: index.php');
     exit;
 }
 
@@ -209,7 +209,7 @@ if (!$isRegister && $_SERVER['REQUEST_METHOD'] === 'POST') {
         $st->close();
         if ($user && password_verify($pass, $user['password'])) {
             $_SESSION['lab703_user'] = $user['id'];
-            header('Location: /index.php?action=dashboard');
+            header('Location: index.php?action=dashboard');
             exit;
         } else {
             $error = 'Invalid email or password.';
@@ -230,7 +230,7 @@ if (!empty($_SESSION['lab703_user'])) {
 
 // Redirect logged-in users from login page
 if ($currentUser && !$action && !$isLogout) {
-    header('Location: /index.php?action=dashboard');
+    header('Location: index.php?action=dashboard');
     exit;
 }
 
@@ -433,7 +433,7 @@ tr:hover td{background:#F8FAFC}
     <div class="error-msg"><?= esc($error) ?></div>
     <?php endif; ?>
 
-    <form method="POST" action="<?= $isRegister ? '/index.php?action=register' : '/index.php' ?>">
+    <form method="POST" action="<?= $isRegister ? 'index.php?action=register' : 'index.php' ?>">
       <?php if ($isRegister): ?>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:0 14px;">
         <input type="text" name="name" class="auth-input" placeholder="Full name" required>
@@ -449,7 +449,7 @@ tr:hover td{background:#F8FAFC}
     </form>
 
     <div class="auth-switch">
-      <?= $isRegister ? 'Already have an account? <a href="/index.php">Sign in</a>' : 'New patient? <a href="/index.php?action=register">Create an account</a>' ?>
+      <?= $isRegister ? 'Already have an account? <a href="index.php">Sign in</a>' : 'New patient? <a href="index.php?action=register">Create an account</a>' ?>
     </div>
 
     <?php if (!$isRegister): ?>
@@ -472,23 +472,23 @@ tr:hover td{background:#F8FAFC}
       <span>MediCare+</span>
     </div>
     <nav class="sidebar-nav">
-      <a href="/index.php?action=dashboard" class="<?= $isDash ? 'active' : '' ?>">
+      <a href="index.php?action=dashboard" class="<?= $isDash ? 'active' : '' ?>">
         <svg viewBox="0 0 24 24"><path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z"/></svg>
         Dashboard
       </a>
-      <a href="/index.php?action=appointments" class="<?= $isAppts || $isAppt ? 'active' : '' ?>">
+      <a href="index.php?action=appointments" class="<?= $isAppts || $isAppt ? 'active' : '' ?>">
         <svg viewBox="0 0 24 24"><path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V10h14v10zm0-12H5V6h14v2zM9 14H7v-2h2v2zm4 0h-2v-2h2v2zm4 0h-2v-2h2v2zm-8 4H7v-2h2v2zm4 0h-2v-2h2v2zm4 0h-2v-2h2v2z"/></svg>
         Appointments
       </a>
-      <a href="/index.php?action=lab_results" class="<?= $isResults || $isResult ? 'active' : '' ?>">
+      <a href="index.php?action=lab_results" class="<?= $isResults || $isResult ? 'active' : '' ?>">
         <svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-1 11h-4v4h-4v-4H6v-4h4V6h4v4h4v4z"/></svg>
         Lab Results
       </a>
-      <a href="/index.php?action=prescriptions" class="<?= $isScripts || $isScript ? 'active' : '' ?>">
+      <a href="index.php?action=prescriptions" class="<?= $isScripts || $isScript ? 'active' : '' ?>">
         <svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-1 11h-4v4h-4v-4H6v-4h4V6h4v4h4v4z"/></svg>
         Prescriptions
       </a>
-      <a href="/index.php?action=profile" class="<?= $isProfile ? 'active' : '' ?>">
+      <a href="index.php?action=profile" class="<?= $isProfile ? 'active' : '' ?>">
         <svg viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
         Profile
       </a>
@@ -512,7 +512,7 @@ tr:hover td{background:#F8FAFC}
         <span class="dot"></span>
         <?= esc($currentUser['name']) ?>
         <span style="color:#94A3B8;font-size:.75rem;">&middot; Patient #<?= (int)$currentUser['id'] ?></span>
-        <a href="/index.php?logout=1" style="color:#94A3B8;font-size:.75rem;margin-left:8px;">Sign Out</a>
+        <a href="index.php?logout=1" style="color:#94A3B8;font-size:.75rem;margin-left:8px;">Sign Out</a>
       </div>
     </div>
 
@@ -525,7 +525,7 @@ tr:hover td{background:#F8FAFC}
         </div>
         <div class="stat-label">Upcoming Appointments</div>
         <div class="stat-value"><?= (int)$upcomingAppts ?></div>
-        <div class="stat-sub"><a href="/index.php?action=appointments">View all &rarr;</a></div>
+        <div class="stat-sub"><a href="index.php?action=appointments">View all &rarr;</a></div>
       </div>
       <div class="stat-card">
         <div class="stat-icon" style="background:#FEF3C7">
@@ -533,7 +533,7 @@ tr:hover td{background:#F8FAFC}
         </div>
         <div class="stat-label">Pending Lab Results</div>
         <div class="stat-value"><?= (int)$pendingResults ?></div>
-        <div class="stat-sub"><a href="/index.php?action=lab_results">View all &rarr;</a></div>
+        <div class="stat-sub"><a href="index.php?action=lab_results">View all &rarr;</a></div>
       </div>
       <div class="stat-card">
         <div class="stat-icon" style="background:#ECFDF5">
@@ -541,7 +541,7 @@ tr:hover td{background:#F8FAFC}
         </div>
         <div class="stat-label">Active Prescriptions</div>
         <div class="stat-value"><?= (int)$activeScripts ?></div>
-        <div class="stat-sub"><a href="/index.php?action=prescriptions">View all &rarr;</a></div>
+        <div class="stat-sub"><a href="index.php?action=prescriptions">View all &rarr;</a></div>
       </div>
       <div class="stat-card">
         <div class="stat-icon" style="background:#F0F4F8">
@@ -568,7 +568,7 @@ tr:hover td{background:#F8FAFC}
           <td style="font-weight:500"><?= esc($a['doctor_name']) ?></td>
           <td><?= esc($a['department']) ?></td>
           <td><span class="badge badge-<?= strtolower($a['status']) ?>"><?= esc($a['status']) ?></span></td>
-          <td><a href="/index.php?action=appointment&id=<?= (int)$a['id'] ?>" class="btn btn-ghost" style="padding:4px 10px;font-size:.75rem">View</a></td>
+          <td><a href="index.php?action=appointment&id=<?= (int)$a['id'] ?>" class="btn btn-ghost" style="padding:4px 10px;font-size:.75rem">View</a></td>
         </tr>
         <?php endforeach; ?>
       </table>
@@ -591,7 +591,7 @@ tr:hover td{background:#F8FAFC}
           <td style="font-weight:500"><?= esc($r['test_name']) ?></td>
           <td><?= esc($r['test_date']) ?></td>
           <td><span class="badge badge-<?= strtolower($r['status']) ?>"><?= esc($r['status']) ?></span></td>
-          <td><a href="/index.php?action=lab_result&id=<?= (int)$r['id'] ?>" class="btn btn-ghost" style="padding:4px 10px;font-size:.75rem">View</a></td>
+          <td><a href="index.php?action=lab_result&id=<?= (int)$r['id'] ?>" class="btn btn-ghost" style="padding:4px 10px;font-size:.75rem">View</a></td>
         </tr>
         <?php endforeach; ?>
       </table>
@@ -618,7 +618,7 @@ tr:hover td{background:#F8FAFC}
           <td style="font-weight:500"><?= esc($a['doctor_name']) ?></td>
           <td><?= esc($a['department']) ?></td>
           <td><span class="badge badge-<?= strtolower($a['status']) ?>"><?= esc($a['status']) ?></span></td>
-          <td><a href="/index.php?action=appointment&id=<?= (int)$a['id'] ?>" class="btn btn-primary" style="padding:5px 12px;font-size:.75rem">View Details</a></td>
+          <td><a href="index.php?action=appointment&id=<?= (int)$a['id'] ?>" class="btn btn-primary" style="padding:5px 12px;font-size:.75rem">View Details</a></td>
         </tr>
         <?php endforeach; ?>
       </table>
@@ -630,7 +630,7 @@ tr:hover td{background:#F8FAFC}
 <?php elseif ($isAppt && $apptDetail): ?>
     <!-- ══════════════ APPOINTMENT DETAIL ══════════════════════════ -->
     <div style="margin-bottom:14px;">
-      <a href="/index.php?action=appointments" class="btn btn-ghost" style="padding:6px 12px;font-size:.8rem">&larr; Back to Appointments</a>
+      <a href="index.php?action=appointments" class="btn btn-ghost" style="padding:6px 12px;font-size:.8rem">&larr; Back to Appointments</a>
     </div>
 
     <?php if ($apptDetail['doctor_notes'] && str_starts_with($apptDetail['doctor_notes'], 'flag{')): ?>
@@ -702,7 +702,7 @@ tr:hover td{background:#F8FAFC}
           <td><?= esc($r['test_date']) ?></td>
           <td><?= esc(mb_strimwidth($r['result_value'], 0, 30, '…')) ?></td>
           <td><span class="badge badge-<?= strtolower($r['status']) ?>"><?= esc($r['status']) ?></span></td>
-          <td><a href="/index.php?action=lab_result&id=<?= (int)$r['id'] ?>" class="btn btn-primary" style="padding:5px 12px;font-size:.75rem">View Details</a></td>
+          <td><a href="index.php?action=lab_result&id=<?= (int)$r['id'] ?>" class="btn btn-primary" style="padding:5px 12px;font-size:.75rem">View Details</a></td>
         </tr>
         <?php endforeach; ?>
       </table>
@@ -714,7 +714,7 @@ tr:hover td{background:#F8FAFC}
 <?php elseif ($isResult && $resultDetail): ?>
     <!-- ══════════════ LAB RESULT DETAIL ══════════════════════════ -->
     <div style="margin-bottom:14px;">
-      <a href="/index.php?action=lab_results" class="btn btn-ghost" style="padding:6px 12px;font-size:.8rem">&larr; Back to Lab Results</a>
+      <a href="index.php?action=lab_results" class="btn btn-ghost" style="padding:6px 12px;font-size:.8rem">&larr; Back to Lab Results</a>
     </div>
 
     <div class="card">
@@ -775,7 +775,7 @@ tr:hover td{background:#F8FAFC}
           <td><?= esc($p['prescribed_by']) ?></td>
           <td><?= esc($p['prescribed_date']) ?></td>
           <td><?= (int)$p['refills'] ?></td>
-          <td><a href="/index.php?action=prescription&id=<?= (int)$p['id'] ?>" class="btn btn-primary" style="padding:5px 12px;font-size:.75rem">View Details</a></td>
+          <td><a href="index.php?action=prescription&id=<?= (int)$p['id'] ?>" class="btn btn-primary" style="padding:5px 12px;font-size:.75rem">View Details</a></td>
         </tr>
         <?php endforeach; ?>
       </table>
@@ -787,7 +787,7 @@ tr:hover td{background:#F8FAFC}
 <?php elseif ($isScript && $scriptDetail): ?>
     <!-- ══════════════ PRESCRIPTION DETAIL ════════════════════════ -->
     <div style="margin-bottom:14px;">
-      <a href="/index.php?action=prescriptions" class="btn btn-ghost" style="padding:6px 12px;font-size:.8rem">&larr; Back to Prescriptions</a>
+      <a href="index.php?action=prescriptions" class="btn btn-ghost" style="padding:6px 12px;font-size:.8rem">&larr; Back to Prescriptions</a>
     </div>
 
     <div class="card">

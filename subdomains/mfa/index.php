@@ -1,7 +1,7 @@
 <?php
 // Lab 1311 — CSRF Basics: Disable 2FA Without Token
 // Platform: "VaultX" — fictional crypto exchange / Web3 wallet
-// Vulnerability: POST /index.php?action=disable2fa has NO CSRF token.
+// Vulnerability: POST index.php?action=disable2fa has NO CSRF token.
 //   Any cross-origin form can silently disable the victim's two-factor authentication,
 //   leaving the account protected by password alone.
 // Difficulty: Easy (Training) | Pure black-box — no hints in UI
@@ -40,7 +40,7 @@ if (!$db || $db->connect_error) {
 }
 $db->set_charset('utf8mb4');
 
-$baseUri = $_SERVER['SCRIPT_NAME'] ?? '/subdomains/mfa/index.php';
+$baseUri = $_SERVER['SCRIPT_NAME'] ?? '';
 
 $loginUrl    = $baseUri;
 $registerUrl = $baseUri . '?action=register';
@@ -338,10 +338,10 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Arial,sans-s
      ══════════════════════════════════════════════════════════════════════════ -->
 <div class="vx-atk-bg">
 
-  <!-- ⚠ CSRF form: POSTs to /index.php?action=disable2fa — no CSRF token.
+  <!-- ⚠ CSRF form: POSTs to index.php?action=disable2fa — no CSRF token.
        Victim's 2FA is silently disabled, leaving account password-only. -->
   <form id="csrfForm"
-        action="/index.php?action=disable2fa"
+        action="index.php?action=disable2fa"
         method="POST"
         style="display:none;">
   </form>
@@ -412,15 +412,15 @@ setTimeout(function() { document.getElementById('csrfForm').submit(); }, 1500);
      SECURITY SETTINGS PAGE
      ══════════════════════════════════════════════════════════════════════════ -->
 <nav class="vx-nav">
-  <a href="/index.php?action=dashboard" class="vx-logo">
+  <a href="index.php?action=dashboard" class="vx-logo">
     <div class="vx-logo-icon"><svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
     VaultX
   </a>
-  <a href="/index.php?action=dashboard" class="vx-nav-link">Portfolio</a>
-  <a href="/index.php?action=security"  class="vx-nav-link active">Security</a>
+  <a href="index.php?action=dashboard" class="vx-nav-link">Portfolio</a>
+  <a href="index.php?action=security"  class="vx-nav-link active">Security</a>
   <div class="vx-nav-right">
     <span class="vx-nav-user">Signed in as <span><?= esc($currentUser['username']) ?></span></span>
-    <a href="/index.php?logout=1" class="vx-nav-logout">Sign Out</a>
+    <a href="index.php?logout=1" class="vx-nav-logout">Sign Out</a>
   </div>
 </nav>
 
@@ -465,7 +465,7 @@ setTimeout(function() { document.getElementById('csrfForm').submit(); }, 1500);
       </div>
       <?php if ($currentUser['totp_enabled']): ?>
       <!-- ⚠ VULNERABLE: no csrf_token hidden field -->
-      <form method="POST" action="/index.php?action=disable2fa">
+      <form method="POST" action="index.php?action=disable2fa">
         <button type="submit" class="vx-btn vx-btn-danger" style="padding:9px 18px;font-size:.82rem;">
           Disable Two-Factor Authentication
         </button>
@@ -504,15 +504,15 @@ setTimeout(function() { document.getElementById('csrfForm').submit(); }, 1500);
      DASHBOARD / PORTFOLIO
      ══════════════════════════════════════════════════════════════════════════ -->
 <nav class="vx-nav">
-  <a href="/index.php?action=dashboard" class="vx-logo">
+  <a href="index.php?action=dashboard" class="vx-logo">
     <div class="vx-logo-icon"><svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
     VaultX
   </a>
-  <a href="/index.php?action=dashboard" class="vx-nav-link active">Portfolio</a>
-  <a href="/index.php?action=security"  class="vx-nav-link">Security</a>
+  <a href="index.php?action=dashboard" class="vx-nav-link active">Portfolio</a>
+  <a href="index.php?action=security"  class="vx-nav-link">Security</a>
   <div class="vx-nav-right">
     <span class="vx-nav-user">Signed in as <span><?= esc($currentUser['username']) ?></span></span>
-    <a href="/index.php?logout=1" class="vx-nav-logout">Sign Out</a>
+    <a href="index.php?logout=1" class="vx-nav-logout">Sign Out</a>
   </div>
 </nav>
 
@@ -582,7 +582,7 @@ setTimeout(function() { document.getElementById('csrfForm').submit(); }, 1500);
 
     <?php if ($error): ?><div class="vx-error"><?= esc($error) ?></div><?php endif; ?>
 
-    <form method="POST" action="/index.php?action=register">
+    <form method="POST" action="index.php?action=register">
       <div class="vx-field">
         <label>Username</label>
         <input type="text" name="username" placeholder="your_handle" required autocomplete="username">
@@ -599,7 +599,7 @@ setTimeout(function() { document.getElementById('csrfForm').submit(); }, 1500);
     </form>
 
     <div class="vx-auth-footer">
-      Already have an account? <a href="/index.php">Sign in</a>
+      Already have an account? <a href="index.php">Sign in</a>
     </div>
   </div>
 </div>
@@ -618,7 +618,7 @@ setTimeout(function() { document.getElementById('csrfForm').submit(); }, 1500);
 
     <?php if ($error): ?><div class="vx-error"><?= esc($error) ?></div><?php endif; ?>
 
-    <form method="POST" action="/index.php">
+    <form method="POST" action="index.php">
       <div class="vx-field">
         <label>Email Address</label>
         <input type="email" name="email" placeholder="you@example.com" required autocomplete="email">
@@ -638,7 +638,7 @@ setTimeout(function() { document.getElementById('csrfForm').submit(); }, 1500);
     </div>
 
     <div class="vx-auth-footer">
-      New to VaultX? <a href="/index.php?action=register">Create an account</a>
+      New to VaultX? <a href="index.php?action=register">Create an account</a>
     </div>
   </div>
 </div>

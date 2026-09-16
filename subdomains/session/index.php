@@ -39,7 +39,7 @@ if (!$db || $db->connect_error) {
 }
 $db->set_charset('utf8mb4');
 
-$baseUri = $_SERVER['SCRIPT_NAME'] ?? '/subdomains/session/index.php';
+$baseUri = $_SERVER['SCRIPT_NAME'] ?? '';
 $labBase = $baseUri;
 
 // ── Auto-create table (self-contained, no external SQL needed) ────────────────

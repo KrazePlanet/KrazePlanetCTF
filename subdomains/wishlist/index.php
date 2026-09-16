@@ -21,8 +21,8 @@ $db_user = getenv('DB_USER') ?: 'root';
 $db_pass = getenv('DB_PASS') ?: '';
 $db_name = getenv('DB_NAME') ?: 'KrazePlanet_DB';
 $db = null;
-foreach ($db_hosts as $h) {
-    $db = @new mysqli($h, $db_user, $db_pass, $db_name);
+foreach ($hosts as $h) {
+    $db = @new mysqli($h, $db_user, $db_pass);
     if (!$db->connect_error) {
         break;
     }
@@ -30,9 +30,12 @@ foreach ($db_hosts as $h) {
 if (!$db || $db->connect_error) {
     die('<h3 style="padding:32px;font-family:sans-serif;color:#c00">DB connection error: ' . htmlspecialchars($db ? $db->connect_error : 'Unable to connect to database') . '</h3>');
 }
+// Create database if it doesn't exist
+$db->query("CREATE DATABASE IF NOT EXISTS `$db_name` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci");
+$db->select_db($db_name);
 $db->set_charset('utf8mb4');
 
-$baseUri   = $_SERVER['SCRIPT_NAME'] ?? '/subdomains/wishlist/index.php';
+$baseUri   = $_SERVER['SCRIPT_NAME'] ?? '';
 $loginUrl  = $baseUri;
 $wishUrl   = $baseUri . '?action=wishlist';
 $logoutUrl = $baseUri . '?logout=1';

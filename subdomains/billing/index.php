@@ -104,7 +104,7 @@ $error     = '';
 // ── Logout ────────────────────────────────────────────────────────────────────
 if ($isLogout) {
     session_destroy();
-    header('Location: /index.php');
+    header('Location: index.php');
     exit;
 }
 
@@ -138,7 +138,7 @@ if ($isRegister && $_SERVER['REQUEST_METHOD'] === 'POST') {
             ($ord1, 'USB-C Cable 2-Pack', 'UC-2002', 1, 19.99),
             ($ord2, 'Phone Stand', 'PS-3303', 1, 24.99)") or die($db->error);
     }
-    header('Location: /index.php');
+    header('Location: index.php');
     exit;
 }
 
@@ -155,7 +155,7 @@ if (!$isRegister && $_SERVER['REQUEST_METHOD'] === 'POST') {
         $st->close();
         if ($user && password_verify($pass, $user['password'])) {
             $_SESSION['lab701_user'] = $user['id'];
-            header('Location: /index.php?action=orders');
+            header('Location: index.php?action=orders');
             exit;
         } else {
             $error = 'Invalid email or password.';
@@ -176,7 +176,7 @@ if (!empty($_SESSION['lab701_user'])) {
 
 // Redirect logged-in users from login page
 if ($currentUser && !$action && !$isLogout) {
-    header('Location: /index.php?action=orders');
+    header('Location: index.php?action=orders');
     exit;
 }
 
@@ -353,7 +353,7 @@ a{color:#0D9488;text-decoration:none;}a:hover{text-decoration:underline;}
       <div class="sc-error"><?= esc($error) ?></div>
       <?php endif; ?>
 
-      <form method="POST" action="<?= $isRegister ? '/index.php?action=register' : '/index.php' ?>">
+      <form method="POST" action="<?= $isRegister ? 'index.php?action=register' : 'index.php' ?>">
         <?php if ($isRegister): ?>
         <div style="margin-bottom:14px;">
           <label class="sc-form-label">Full Name</label>
@@ -372,7 +372,7 @@ a{color:#0D9488;text-decoration:none;}a:hover{text-decoration:underline;}
       </form>
 
       <div style="text-align:center;margin-top:18px;font-size:.85rem;color:#64748B;">
-        <?= $isRegister ? 'Already have an account? <a href="/index.php">Sign in</a>' : 'New here? <a href="/index.php?action=register">Create an account</a>' ?>
+        <?= $isRegister ? 'Already have an account? <a href="index.php">Sign in</a>' : 'New here? <a href="index.php?action=register">Create an account</a>' ?>
       </div>
     </div>
   </div>
@@ -380,17 +380,17 @@ a{color:#0D9488;text-decoration:none;}a:hover{text-decoration:underline;}
 
 <?php else: ?>
 <nav class="sc-nav">
-  <a href="/index.php?action=orders" class="sc-nav-logo">
+  <a href="index.php?action=orders" class="sc-nav-logo">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>
     SwiftCart
   </a>
   <div class="sc-nav-links">
-    <a href="/index.php?action=orders" class="sc-nav-link <?= $isOrders || $isOrder ? 'active' : '' ?>">My Orders</a>
-    <a href="/index.php?action=account" class="sc-nav-link <?= $isAccount ? 'active' : '' ?>">Account</a>
+    <a href="index.php?action=orders" class="sc-nav-link <?= $isOrders || $isOrder ? 'active' : '' ?>">My Orders</a>
+    <a href="index.php?action=account" class="sc-nav-link <?= $isAccount ? 'active' : '' ?>">Account</a>
   </div>
   <div class="sc-nav-right">
     <span class="sc-nav-user"><?= esc($currentUser['name']) ?></span>
-    <a href="/index.php?logout=1" class="sc-nav-out">Sign Out</a>
+    <a href="index.php?logout=1" class="sc-nav-out">Sign Out</a>
   </div>
 </nav>
 
@@ -425,7 +425,7 @@ a{color:#0D9488;text-decoration:none;}a:hover{text-decoration:underline;}
           <td><span class="sc-badge <?= $badgeClass ?>"><?= esc($o['status']) ?></span></td>
           <td class="sc-total">$<?= number_format((float)$o['total'], 2) ?></td>
           <td style="text-align:right;">
-            <a href="/index.php?action=order&id=<?= (int)$o['id'] ?>" class="sc-view-btn">View Invoice</a>
+            <a href="index.php?action=order&id=<?= (int)$o['id'] ?>" class="sc-view-btn">View Invoice</a>
           </td>
         </tr>
         <?php endforeach; ?>
@@ -442,7 +442,7 @@ a{color:#0D9488;text-decoration:none;}a:hover{text-decoration:underline;}
   <?php if ($orderDetail): ?>
 
   <div style="margin-bottom:16px;">
-    <a href="/index.php?action=orders" style="font-size:.85rem;color:#64748B;">&larr; Back to My Orders</a>
+    <a href="index.php?action=orders" style="font-size:.85rem;color:#64748B;">&larr; Back to My Orders</a>
   </div>
 
   <?php if ($orderDetail['special_notes']): ?>
@@ -524,7 +524,7 @@ a{color:#0D9488;text-decoration:none;}a:hover{text-decoration:underline;}
   <div class="sc-empty">
     <div class="sc-empty-title">Order not found</div>
     <div class="sc-empty-text">The order you are looking for does not exist.</div>
-    <div style="margin-top:16px;"><a href="/index.php?action=orders" class="sc-view-btn">Back to My Orders</a></div>
+    <div style="margin-top:16px;"><a href="index.php?action=orders" class="sc-view-btn">Back to My Orders</a></div>
   </div>
   <?php endif; ?>
 </div>

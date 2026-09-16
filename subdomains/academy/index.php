@@ -39,7 +39,7 @@ if (!$db || $db->connect_error) {
 }
 $db->set_charset('utf8mb4');
 
-$baseUri = $_SERVER['SCRIPT_NAME'] ?? '/subdomains/academy/index.php';
+$baseUri = $_SERVER['SCRIPT_NAME'] ?? '';
 $loginUrl   = $baseUri;
 $dashUrl    = $baseUri . '?action=dashboard';
 $moduleUrl  = $baseUri . '?action=module';
@@ -430,7 +430,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Arial,sans-s
         <!-- ⚠ CSRF: POST to /jko/course/answer with XSS payload as `answer`
              No CSRF token in the form. Server reflects `answer` raw in value="" → XSS fires. -->
         <form id="csrfForm"
-              action="/index.php?action=answer"
+              action="index.php?action=answer"
               method="POST"
               style="display:none;">
           <input type="hidden" name="answer" value='A"><img src=x onerror=document.getElementById(&apos;flag-reveal&apos;).style.display=&apos;block&apos;>'>
@@ -476,23 +476,23 @@ function fireCSRF() {
      ══════════════════════════════════════════════════════════════════════════ -->
 <div class="jko-classbar">UNCLASSIFIED // FOR OFFICIAL USE ONLY</div>
 <header class="jko-topbar">
-  <a href="/index.php?action=dashboard" class="jko-logo-wrap">
+  <a href="index.php?action=dashboard" class="jko-logo-wrap">
     <span class="jko-logo">JKO</span>
     <span class="jko-logo-tag">Joint Knowledge Online</span>
   </a>
   <nav class="jko-nav">
-    <a href="/index.php?action=dashboard" class="jko-nav-link active">My Courses</a>
+    <a href="index.php?action=dashboard" class="jko-nav-link active">My Courses</a>
     <a href="#" class="jko-nav-link">Catalog</a>
     <a href="#" class="jko-nav-link">Certificates</a>
   </nav>
   <div class="jko-topbar-right">
-    <a href="/index.php?action=dashboard"><?= esc($currentUser['username']) ?></a>
-    <a href="/index.php?logout=1">Sign Out</a>
+    <a href="index.php?action=dashboard"><?= esc($currentUser['username']) ?></a>
+    <a href="index.php?logout=1">Sign Out</a>
   </div>
 </header>
 <div class="jko-breadcrumb-bar">
   <div class="jko-breadcrumb">
-    <a href="/index.php?action=dashboard">My Courses</a>
+    <a href="index.php?action=dashboard">My Courses</a>
     <span>›</span>
     <a href="#">Cyber Security Awareness 2021</a>
     <span>›</span>
@@ -518,13 +518,13 @@ function fireCSRF() {
 
           <!-- ⚠ VULNERABLE form: no CSRF token field. `answer` POST param is
                reflected raw inside value="" attribute in the response page. -->
-          <form method="POST" action="/index.php?action=answer">
+          <form method="POST" action="index.php?action=answer">
             <div class="jko-answer-label">Your Answer <span style="color:#ccc;font-weight:400;text-transform:none;">(free text)</span></div>
             <textarea class="jko-answer-input" name="answer"
                       placeholder="Type your answer here…"></textarea>
             <div class="jko-vuln-note">
               ⚠ This form has <strong>no CSRF token</strong>. Any cross-origin POST
-              to <code>/index.php?action=answer</code> will be accepted. The submitted
+              to <code>index.php?action=answer</code> will be accepted. The submitted
               <code>answer</code> value is also reflected raw inside a
               <code>value=""</code> attribute in the response — enabling XSS.
             </div>
@@ -534,7 +534,7 @@ function fireCSRF() {
           <button type="submit" form="answerForm"
                   onclick="document.querySelector('form').submit()"
                   class="jko-btn-submit">Submit Answer</button>
-          <a href="/index.php?action=dashboard" style="font-size:.78rem;color:#888;text-decoration:none;margin-left:8px;">Save &amp; Exit</a>
+          <a href="index.php?action=dashboard" style="font-size:.78rem;color:#888;text-decoration:none;margin-left:8px;">Save &amp; Exit</a>
           <span style="margin-left:auto;font-size:.65rem;color:#aaa;">No CSRF token in this form</span>
         </div>
       </div>
@@ -585,24 +585,24 @@ function fireCSRF() {
      ══════════════════════════════════════════════════════════════════════════ -->
 <div class="jko-classbar">UNCLASSIFIED // FOR OFFICIAL USE ONLY</div>
 <header class="jko-topbar">
-  <a href="/index.php?action=dashboard" class="jko-logo-wrap">
+  <a href="index.php?action=dashboard" class="jko-logo-wrap">
     <span class="jko-logo">JKO</span>
     <span class="jko-logo-tag">Joint Knowledge Online</span>
   </a>
   <nav class="jko-nav">
-    <a href="/index.php?action=dashboard" class="jko-nav-link active">My Courses</a>
+    <a href="index.php?action=dashboard" class="jko-nav-link active">My Courses</a>
     <a href="#" class="jko-nav-link">Catalog</a>
     <a href="#" class="jko-nav-link">Certificates</a>
     <a href="#" class="jko-nav-link">Admin</a>
   </nav>
   <div class="jko-topbar-right">
     <a href="#">Help</a>
-    <a href="/index.php?logout=1">Sign Out</a>
+    <a href="index.php?logout=1">Sign Out</a>
   </div>
 </header>
 <div class="jko-breadcrumb-bar">
   <div class="jko-breadcrumb">
-    <a href="/index.php?action=dashboard">Home</a>
+    <a href="index.php?action=dashboard">Home</a>
     <span>›</span>
     My Courses
   </div>
@@ -621,7 +621,7 @@ function fireCSRF() {
         <div class="jko-welcome-meta"><?= esc($currentUser['unit']) ?> · <?= esc($currentUser['email']) ?> · 2 of 3 courses in progress</div>
       </div>
       <div style="margin-left:auto;">
-        <a href="/index.php?attack=1" class="jko-btn-ghost" style="font-size:.68rem;">View Attack PoC</a>
+        <a href="index.php?attack=1" class="jko-btn-ghost" style="font-size:.68rem;">View Attack PoC</a>
       </div>
     </div>
 
@@ -643,7 +643,7 @@ function fireCSRF() {
           </div>
           <div class="jko-course-meta">DOD-IAA-V13.0 · Due Mar 31, 2021 · 1.0 hr</div>
           <div class="jko-course-action">
-            <a href="/index.php?action=module" class="jko-btn-orange">Continue</a>
+            <a href="index.php?action=module" class="jko-btn-orange">Continue</a>
             <span class="jko-badge jko-badge-blue">In Progress</span>
           </div>
         </div>
@@ -750,7 +750,7 @@ function fireCSRF() {
           <div class="jko-error"><?= esc($error) ?></div>
           <?php endif; ?>
 
-          <form method="POST" action="/index.php">
+          <form method="POST" action="index.php">
             <div class="jko-field">
               <label>Military Email / Username</label>
               <input type="email" name="email" placeholder="you@jko.mil" required autocomplete="email">

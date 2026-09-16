@@ -3,9 +3,8 @@
 // Based on HackerOne Report #311330 (Semrush — Severity: Low, Resolved Feb 22, 2018)
 // Vulnerability: /redirect endpoint passes ?url= directly to header("Location:") — zero validation
 
-// ── Absolute base URL for attack panel links ───────────────────────────────
-$scheme  = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
-$labBase = $scheme . '://' . $_SERVER['HTTP_HOST'] . '/index.php';
+// ── Base URL for attack panel links (relative to current page) ─────────────
+$labBase = '';
 
 // ── Instant open redirect — fires before any HTML output ──────────────────
 // ⚠ VULNERABLE: $url is passed directly to header("Location:") with no validation

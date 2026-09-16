@@ -39,7 +39,7 @@ if (!$db || $db->connect_error) {
 }
 $db->set_charset('utf8mb4');
 
-$baseUri = $_SERVER['SCRIPT_NAME'] ?? '/subdomains/myaccount/index.php';
+$baseUri = $_SERVER['SCRIPT_NAME'] ?? '';
 $loginUrl   = $baseUri;
 $dashUrl    = $baseUri . '?action=dashboard';
 $profileUrl = $baseUri . '?action=profile';
@@ -475,7 +475,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Arial,sans-s
 
 <!-- ⚠ Real CSRF form — hidden, auto-submits on "Test in browser" click -->
 <form id="realCsrfForm"
-      action="/index.php?action=profile"
+      action="index.php?action=profile"
       method="POST">
   <input type="hidden" name="username"  value="h4ck3r">
   <input type="hidden" name="password"  value="">
@@ -490,7 +490,7 @@ function runPoC() {
     var st  = document.getElementById('pocStatus');
     btn.disabled = true;
     btn.textContent = '⏳  Sending request…';
-    st.textContent  = 'POST /index.php?action=profile → waiting for response…';
+    st.textContent  = 'POST index.php?action=profile → waiting for response…';
     st.className    = 'burp-status';
     setTimeout(function() {
         st.textContent = '✔  200 OK — profile updated — redirecting to dashboard…';
@@ -519,22 +519,22 @@ function runPoC() {
     <div class="nps-title-sub">Microgrid Management Portal · Monterey, CA</div>
   </div>
   <div class="nps-topbar-right">
-    <a href="/index.php?action=dashboard"><?= esc($currentUser['username']) ?></a>
-    <a href="/index.php?logout=1">Sign Out</a>
+    <a href="index.php?action=dashboard"><?= esc($currentUser['username']) ?></a>
+    <a href="index.php?logout=1">Sign Out</a>
   </div>
 </header>
 <div class="nps-subbar">
-  <a href="/index.php?action=dashboard" class="nps-subnav-link">Dashboard</a>
+  <a href="index.php?action=dashboard" class="nps-subnav-link">Dashboard</a>
   <a href="#" class="nps-subnav-link">Grid Reports</a>
   <a href="#" class="nps-subnav-link">Alerts</a>
-  <a href="/index.php?action=profile" class="nps-subnav-link active">My Profile</a>
+  <a href="index.php?action=profile" class="nps-subnav-link active">My Profile</a>
 </div>
 
 <div class="nps-layout">
   <nav class="nps-sidebar">
     <div style="padding:0 16px 12px;">
       <div class="nps-sidebar-section">Main</div>
-      <a href="/index.php?action=dashboard" class="nps-sidebar-link">
+      <a href="index.php?action=dashboard" class="nps-sidebar-link">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
         Dashboard
       </a>
@@ -547,11 +547,11 @@ function runPoC() {
         Alerts
       </a>
       <div class="nps-sidebar-section" style="margin-top:12px;">Account</div>
-      <a href="/index.php?action=profile" class="nps-sidebar-link active">
+      <a href="index.php?action=profile" class="nps-sidebar-link active">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
         Edit Profile
       </a>
-      <a href="/index.php?logout=1" class="nps-sidebar-link">
+      <a href="index.php?logout=1" class="nps-sidebar-link">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
         Sign Out
       </a>
@@ -569,7 +569,7 @@ function runPoC() {
     <?php endif; ?>
 
     <!-- ⚠ VULNERABLE form: no csrf_token, no hidden nonce — that's the bug -->
-    <form method="POST" action="/index.php?action=profile">
+    <form method="POST" action="index.php?action=profile">
       <div class="nps-form-card">
         <div class="nps-form-card-hdr"><h3>Account Information</h3></div>
         <div class="nps-form-body">
@@ -610,7 +610,7 @@ function runPoC() {
         </div>
         <div class="nps-form-footer">
           <button type="submit" name="save" value="Save" class="nps-btn-save">Save Changes</button>
-          <a href="/index.php?action=dashboard" class="nps-btn-cancel-a">Cancel</a>
+          <a href="index.php?action=dashboard" class="nps-btn-cancel-a">Cancel</a>
           <span style="margin-left:auto;font-size:.65rem;color:#aaa;">No CSRF token in this form</span>
         </div>
       </div>
@@ -635,22 +635,22 @@ function runPoC() {
     <div class="nps-title-sub">Microgrid Management Portal · Monterey, CA</div>
   </div>
   <div class="nps-topbar-right">
-    <a href="/index.php?action=profile"><?= esc($currentUser['username']) ?></a>
-    <a href="/index.php?logout=1">Sign Out</a>
+    <a href="index.php?action=profile"><?= esc($currentUser['username']) ?></a>
+    <a href="index.php?logout=1">Sign Out</a>
   </div>
 </header>
 <div class="nps-subbar">
-  <a href="/index.php?action=dashboard" class="nps-subnav-link active">Dashboard</a>
+  <a href="index.php?action=dashboard" class="nps-subnav-link active">Dashboard</a>
   <a href="#" class="nps-subnav-link">Grid Reports</a>
   <a href="#" class="nps-subnav-link">Alerts</a>
-  <a href="/index.php?action=profile" class="nps-subnav-link">My Profile</a>
+  <a href="index.php?action=profile" class="nps-subnav-link">My Profile</a>
 </div>
 
 <div class="nps-layout">
   <nav class="nps-sidebar">
     <div style="padding:0 16px 12px;">
       <div class="nps-sidebar-section">Main</div>
-      <a href="/index.php?action=dashboard" class="nps-sidebar-link active">
+      <a href="index.php?action=dashboard" class="nps-sidebar-link active">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
         Dashboard
       </a>
@@ -663,11 +663,11 @@ function runPoC() {
         Alerts <span style="background:#b91c1c;color:#fff;border-radius:10px;font-size:.55rem;font-weight:700;padding:1px 5px;margin-left:4px;">3</span>
       </a>
       <div class="nps-sidebar-section" style="margin-top:12px;">Account</div>
-      <a href="/index.php?action=profile" class="nps-sidebar-link">
+      <a href="index.php?action=profile" class="nps-sidebar-link">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
         Edit Profile
       </a>
-      <a href="/index.php?logout=1" class="nps-sidebar-link">
+      <a href="index.php?logout=1" class="nps-sidebar-link">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
         Sign Out
       </a>
@@ -712,8 +712,8 @@ function runPoC() {
         </div>
       </div>
       <div class="nps-profile-right">
-        <a href="/index.php?action=profile" class="nps-btn-sm nps-btn-outline-sm">Edit Profile</a>
-        <a href="/index.php?attack=1" class="nps-btn-sm nps-btn-navy" style="text-decoration:none;">CSRF PoC</a>
+        <a href="index.php?action=profile" class="nps-btn-sm nps-btn-outline-sm">Edit Profile</a>
+        <a href="index.php?attack=1" class="nps-btn-sm nps-btn-navy" style="text-decoration:none;">CSRF PoC</a>
       </div>
     </div>
 
@@ -834,7 +834,7 @@ function runPoC() {
           <div class="nps-error"><?= esc($error) ?></div>
           <?php endif; ?>
 
-          <form method="POST" action="/index.php">
+          <form method="POST" action="index.php">
             <div class="nps-field">
               <label>Email Address</label>
               <input type="email" name="email" placeholder="you@nps.edu" required autocomplete="email">

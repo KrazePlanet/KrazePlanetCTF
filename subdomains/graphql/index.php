@@ -39,7 +39,7 @@ if (!$db || $db->connect_error) {
 }
 $db->set_charset('utf8mb4');
 
-$baseUri = $_SERVER['SCRIPT_NAME'] ?? '/subdomains/graphql/index.php';
+$baseUri = $_SERVER['SCRIPT_NAME'] ?? '';
 $loginUrl     = $baseUri;
 $dashboardUrl = $baseUri . '?action=dashboard';
 $logoutUrl    = $baseUri . '?logout=1';
@@ -414,7 +414,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Arial,sans-s
       <!-- ⚠ CSRF: GET form auto-submits to /gl/api/graphql with createSnippet mutation.
            No X-CSRF-Token needed for GET — the vulnerability.
            The snippet is created on the victim's account silently. -->
-      <form id="csrfForm" action="/index.php" method="GET" style="display:none;">
+      <form id="csrfForm" action="index.php" method="GET" style="display:none;">
         <input type="hidden" name="action" value="graphql">
         <input type="hidden" name="query" value="mutation CreateSnippet($input: CreateSnippetInput!) {  createSnippet(input: $input) {    errors    snippet {      webUrl      __typename    }    needsCaptchaResponse    captchaSiteKey    __typename  }}">
         <input type="hidden" name="variables" value='{"input":{"title":"CSRF Proof of Concept","description":"Auto-created via CSRF GET mutation","visibilityLevel":"public","blobActions":[{"action":"create","previousPath":"readme.md","content":"This snippet was created by a CSRF attack via GET /gl/api/graphql — no token required!","filePath":"readme.md"}],"uploadedFiles":[],"projectPath":"","content":"This snippet was created by a CSRF attack via GET /gl/api/graphql — no token required!","filePath":"exploit.md"}}'>
@@ -451,7 +451,7 @@ function fireCSRF() {
      DASHBOARD — Snippets
      ══════════════════════════════════════════════════════════════════════════ -->
 <header class="gl-topbar">
-  <a href="/index.php?action=dashboard" class="gl-logo-wrap">
+  <a href="index.php?action=dashboard" class="gl-logo-wrap">
     <svg class="gl-tanuki" viewBox="0 0 380 380" fill="none" xmlns="http://www.w3.org/2000/svg">
       <path d="M190 350L287 55H93L190 350Z" fill="#e24329"/>
       <path d="M190 350L93 55L10 55L190 350Z" fill="#fc6d26"/>
@@ -464,11 +464,11 @@ function fireCSRF() {
   <a href="#" class="gl-nav-item">Projects</a>
   <a href="#" class="gl-nav-item">Groups</a>
   <a href="#" class="gl-nav-item">Activity</a>
-  <a href="/index.php?action=dashboard" class="gl-nav-item active">Snippets</a>
+  <a href="index.php?action=dashboard" class="gl-nav-item active">Snippets</a>
   <div class="gl-nav-right">
     <div class="gl-avatar"><?= strtoupper(substr($currentUser['username'], 0, 2)) ?></div>
     <span style="font-size:.8rem;color:rgba(255,255,255,.7);padding:0 6px;"><?= esc($currentUser['name']) ?></span>
-    <a href="/index.php?logout=1" class="gl-signout">Sign out</a>
+    <a href="index.php?logout=1" class="gl-signout">Sign out</a>
   </div>
 </header>
 
@@ -492,7 +492,7 @@ function fireCSRF() {
       Activity
     </a>
     <div class="gl-sb-section">Your profile</div>
-    <a href="/index.php?action=dashboard" class="gl-sb-link active">
+    <a href="index.php?action=dashboard" class="gl-sb-link active">
       <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
       Snippets
       <span class="gl-sb-count"><?= count($snippets) ?></span>
@@ -506,7 +506,7 @@ function fireCSRF() {
       <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 010 14.14M4.93 4.93a10 10 0 000 14.14"/></svg>
       API access
     </a>
-    <a href="/index.php?logout=1" class="gl-sb-link" style="color:rgba(239,68,68,.5);margin-top:12px;">
+    <a href="index.php?logout=1" class="gl-sb-link" style="color:rgba(239,68,68,.5);margin-top:12px;">
       <svg viewBox="0 0 24 24"><path d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
       Sign out
     </a>
@@ -640,7 +640,7 @@ function createSnippetPost() {
     msg.style.color = '#6b7280';
     msg.textContent = 'Creating snippet…';
 
-    fetch('/index.php?action=graphql', {
+    fetch('index.php?action=graphql', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -690,7 +690,7 @@ function createSnippetPost() {
       <div class="gl-error-banner"><?= esc($error) ?></div>
       <?php endif; ?>
 
-      <form method="POST" action="/index.php">
+      <form method="POST" action="index.php">
         <div class="gl-field">
           <label>Email or username</label>
           <input type="email" name="email" placeholder="you@example.com" required autocomplete="email">

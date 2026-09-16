@@ -4,9 +4,8 @@
 // Vulnerability: parse_url() sees www.tumblr.com as host for "evil.com\@www.tumblr.com"
 //               but browser normalises \ → / and navigates to evil.com instead
 
-// ── Absolute base URL for attack panel links ───────────────────────────────
-$scheme  = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
-$labBase = $scheme . '://' . $_SERVER['HTTP_HOST'] . '/index.php';
+// ── Base URL for attack panel links (relative to current page) ─────────────
+$labBase = '';
 
 // ── Logout + redirect handler ──────────────────────────────────────────────
 $action     = $_GET['action'] ?? '';
