@@ -3,13 +3,19 @@
 mysqli_report(MYSQLI_REPORT_OFF);
 
 // MySQL database details
-$DATABASE_HOST = 'krazeplanet';
-$DATABASE_NAME = 'KrazePlanet';
+$DATABASE_HOST = (getenv('DB_HOST') ?: (file_exists('/.dockerenv') ? 'krazeplanet' : '127.0.0.1'));
+$DATABASE_NAME = 'KrazePlanet_DB';
 $DATABASE_USER = 'root';
 $DATABASE_PASS = '';
 
 // Step 1: Attempt direct connection with Database Name (standard for cPanel & production)
 $con = @mysqli_connect($DATABASE_HOST, $DATABASE_USER, $DATABASE_PASS, $DATABASE_NAME);
+
+// Fallback to local MySQL if the configured host is unreachable (e.g. 'krazeplanet' not resolvable on VPS)
+if (!$con && $DATABASE_HOST !== '127.0.0.1') {
+    $DATABASE_HOST = '127.0.0.1';
+    $con = @mysqli_connect($DATABASE_HOST, $DATABASE_USER, $DATABASE_PASS, $DATABASE_NAME);
+}
 
 // Step 2: Fallback for local development if database does not exist yet
 if (!$con) {
