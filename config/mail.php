@@ -22,6 +22,14 @@ if (!function_exists('configureKrazeMailer')) {
         $mail->SMTPSecure  = $smtp_secure;
         $mail->SMTPAutoTLS = $smtp_autotls;
         $mail->Timeout     = $smtp_timeout;
+
+        // Use the sending domain as the SMTP HELO/EHLO name and Message-ID host.
+        // The machine hostname ("KrazePlanet") is not an FQDN, which makes strict
+        // receivers spam/drop the mail; a domain-aligned FQDN fixes both signals.
+        $from_domain = substr(strrchr($mail_from, '@'), 1) ?: 'kzlabs.store';
+        $mail->Hostname = $from_domain;
+        $mail->MessageID = sprintf('<%s@%s>', bin2hex(random_bytes(16)), $from_domain);
+
         $mail->setFrom($mail_from, $fromName);
         return $mail;
     }

@@ -10,7 +10,11 @@ use PHPMailer\PHPMailer\Exception;
 function sendVerificationOTP($email_val, $username_val, $otp_code) {
     $mail = new PHPMailer(true);
     try {
-        configureKrazeMailer($mail, 'noreply@codeshack.io', 'CodeShack');
+        // Use the authenticated sending domain as the From address so SPF/DKIM
+        // align and the OTP actually reaches the inbox (a codeshack.io From would
+        // fail SPF and get silently dropped/spam-filtered by the recipient).
+        configureKrazeMailer($mail, null, 'CodeShack');
+        $mail->addReplyTo('noreply@codeshack.io', 'CodeShack');
         $mail->addAddress($email_val, $username_val);
         $mail->isHTML(true);
         $mail->Subject = 'Your Verification Code - CodeShack';
@@ -31,7 +35,14 @@ function sendVerificationOTP($email_val, $username_val, $otp_code) {
                 </p>
             </div>
         </div>';
-        
+        // Plain-text alternative so the message is multipart (HTML-only mail
+        // scores higher as spam and is more likely to be junked/dropped).
+        $mail->AltBody = "CodeShack — Verify your email\n\n"
+            . "Hi " . $username_val . ",\n\n"
+            . "Your 6-digit verification code is: " . $otp_code . "\n"
+            . "This code is valid for 10 minutes.\n\n"
+            . "If you did not request this, please ignore this email.";
+
         $mail->send();
         return true;
     } catch (Exception $e) {
