@@ -1,0 +1,23 @@
+<HTML>
+<HEAD>
+<SCRIPT>
+function GetAttach()
+{
+	var strSearch = document.location.search
+	strSearch = strSearch.substring(1)
+	
+	if (strSearch) {
+		// If it looks like a domain without protocol, add https://
+		if (strSearch.indexOf('://') === -1 && strSearch.indexOf('.') !== -1 && strSearch.indexOf('/') === -1) {
+			strSearch = 'https://' + strSearch;
+		}
+		
+		document.location.replace(strSearch)
+	}
+}
+</SCRIPT>
+</HEAD>
+<BODY onload='GetAttach()'>
+
+</BODY>
+</HTML>

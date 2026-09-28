@@ -1,10 +1,6 @@
 <?php
-// Lab 68 — DOM XSS via window.location.hash in jQuery Fancybox Selector
-// Platform: ForeScout Technologies (www.forescout.com) | HackerOne Report #704266
-// Vulnerable code: jQuery('a.fancybox-inline[href="' + window.location.hash + '"]:first').each(...)
-// In IE/Edge: hash is NOT percent-encoded — raw <img src=x onerror=alert('XSS')> reaches jQuery
-// Lab adaptation: decodeURIComponent makes it cross-browser exploitable
-// Exploit: index.php#<img src=x onerror=alert(document.domain)>
+// No PHP processing needed, but keeping .php extension for server compatibility
+header('Content-Type: text/html; charset=UTF-8');
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -306,25 +302,6 @@ body{font-family:'Helvetica Neue',Arial,sans-serif;color:#1a1a2e;background:#fff
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
 <script>
-// ============================================================
-//  ForeScout homepage — fancybox-inline hash trigger
-//  Mirrors the vulnerable jQuery code reported in #704266:
-//
-//    jQuery(window).load(function() {
-//        jQuery('a.fancybox-inline[href="' + window.location.hash + '"]:first')
-//            .each(function() {
-//                jQuery(this).delay(700).trigger('click');
-//            });
-//    });
-//
-//  In IE/Edge: window.location.hash returns the raw, unencoded fragment.
-//  e.g. hash = "#<img src=x onerror=alert('XSS')>" — raw HTML passed to jQuery.
-//  Chrome/Firefox percent-encode the hash, preventing exploitation.
-//
-//  ⚠ LAB ADAPTATION: decodeURIComponent normalises the percent-encoded hash
-//  so the lab is exploitable cross-browser — functionally identical to
-//  IE/Edge's native behaviour with the original unencoded hash.
-// ============================================================
 
 // ── Normal fancybox click handler ─────────────────────────────────────────
 $('a.fancybox-inline').on('click', function(e) {
@@ -345,11 +322,6 @@ $(window).on('load', function() {
     var hash = window.location.hash; // ⚠ source — no sanitization
 
     if (hash.length > 1) {
-        // Exact original selector from ForeScout source code (Report #704266):
-        //   jQuery('a.fancybox-inline[href="' + window.location.hash + '"]:first')
-        //       .each(function() { jQuery(this).delay(700).trigger('click'); });
-        //
-        // ⚠ Cross-browser decode (replicates IE/Edge's unencoded hash behaviour):
         var decoded = decodeURIComponent(hash.substring(1));
 
         // Try to auto-click the matching fancybox anchor (normal behaviour)
@@ -359,14 +331,6 @@ $(window).on('load', function() {
             // Normal path: hash matches a known anchor → open lightbox
             $anchor.delay(700).trigger('click');
         } else {
-            // ⚠ VULNERABLE SINK:
-            // No matching anchor found — decoded hash content injected into
-            // the inline preview strip via .html() without sanitization.
-            // Mirrors how IE/Edge's jQuery execution evaluated the raw hash HTML.
-            //
-            // Payload: index.php#<img src=x onerror=alert(document.domain)>
-            //   decoded = '<img src=x onerror=alert(document.domain)>'
-            //   .html(decoded) → img created in DOM → onerror fires → XSS ✓
             $('#inline-preview').html(decoded);
         }
     }

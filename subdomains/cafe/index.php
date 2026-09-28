@@ -1,22 +1,6 @@
 <?php
-// Lab 67 — Reflected DOM XSS via URL + prettyPhoto Hash Chain — Starbucks UK
-// Platform: www.starbucks.co.uk | HackerOne Report #396493
-// Vulnerability (2-issue chain — exactly as reported by bayotop):
-//   Issue 1 (unfixed since #252908): slug reflected into <link rel="canonical">
-//     href without sanitization — double URL encoding (%2522 → %22 → ")
-//     achieves HTML attribute injection: onclick="confirm(document.domain)"
-//   Issue 2: prettyPhoto JS reads #!hash from URL, builds jQuery selector
-//     a[rel^='hashRel']:eq(hashIndex) and calls .trigger("click"). Backslash
-//     is NOT escaped in the sanitization regex. Crafted hashRel produces
-//     a malformed selector; old jQuery's eq(NaN) bug fires click on ALL
-//     elements — including the <link> with the injected onclick.
-// Exploit: 67.php?slug=anything%2522onclick=%2522confirm(document.domain)#!'\,\*\,/1
-//   Firefox/Edge: XSS fires. Chrome blocks via XSS Auditor as noted in report.
-//
-// Note: double urldecode() mirrors the real server's path-processing behaviour.
-
 $slug_raw = isset($_GET['slug']) ? $_GET['slug'] : 'egift-holiday-2018';
-$slug     = urldecode($slug_raw);  // second decode: %22 → " — enables attribute break-out
+$slug     = urldecode($slug_raw);
 ?>
 <!DOCTYPE html>
 <html lang="en-GB">
@@ -25,10 +9,6 @@ $slug     = urldecode($slug_raw);  // second decode: %22 → " — enables attri
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Thank You for Your Order | Starbucks eGift</title>
 
-<!-- ⚠ VULNERABLE: $slug echoed into href without htmlspecialchars().
-     Double-encoding (%2522 → %22 → ") achieves attribute injection.
-     Inject: ?slug=anything%2522onclick=%2522confirm(document.domain)
-     Result: <link rel="canonical" href="...anything"onclick="confirm(document.domain)"> -->
 <link rel="canonical" href="https://www.starbucks.co.uk/shop/card/egift/thank-you/<?php echo $slug; ?>">
 
 <style>
@@ -131,23 +111,23 @@ body{font-family:'Helvetica Neue',Arial,sans-serif;background:#f9f6f2;color:#1e3
     <span class="header-brand">Starbucks</span>
   </a>
   <nav class="header-nav">
-    <a href="#">Coffee</a>
-    <a href="#">Menu</a>
-    <a href="#">Rewards</a>
-    <a href="#">Find a Store</a>
-    <a href="#">eGift</a>
+    <a href="?slug=coffee">Coffee</a>
+    <a href="?slug=menu">Menu</a>
+    <a href="?slug=rewards">Rewards</a>
+    <a href="?slug=find-store">Find a Store</a>
+    <a href="?slug=egift">eGift</a>
   </nav>
   <div class="header-right">
-    <button class="hdr-btn">Sign In</button>
-    <button class="hdr-btn solid">Join Now</button>
+    <button class="hdr-btn" onclick="alert('Sign in functionality coming soon!')">Sign In</button>
+    <button class="hdr-btn solid" onclick="alert('Join Starbucks Rewards today!')">Join Now</button>
   </div>
 </header>
 
 <!-- Breadcrumb -->
 <div class="breadcrumb">
-  <a href="#">Home</a><span>›</span>
-  <a href="#">Gift Cards</a><span>›</span>
-  <a href="#">eGift</a><span>›</span>
+  <a href="?slug=home">Home</a><span>›</span>
+  <a href="?slug=gift-cards">Gift Cards</a><span>›</span>
+  <a href="?slug=egift">eGift</a><span>›</span>
   Thank You
 </div>
 
@@ -174,6 +154,7 @@ body{font-family:'Helvetica Neue',Arial,sans-serif;background:#f9f6f2;color:#1e3
           <div class="order-detail-row"><span class="odr-label">From</span><span class="odr-val">A Starbucks Fan</span></div>
           <div class="order-detail-row"><span class="odr-label">Message</span><span class="odr-val">Enjoy your coffee! ☕</span></div>
           <div class="order-detail-row"><span class="odr-label">Amount</span><span class="odr-val">£25.00</span></div>
+          <div class="order-detail-row"><span class="odr-label">Status</span><span class="odr-val" style="color:#00704a">✓ Delivered</span></div>
         </div>
       </div>
     </div>
@@ -181,52 +162,56 @@ body{font-family:'Helvetica Neue',Arial,sans-serif;background:#f9f6f2;color:#1e3
       <span class="order-total-label">Total Charged</span>
       <span class="order-total-val">£25.00</span>
     </div>
+    <div style="padding:16px 24px;background:#f9f6f2;border-top:1px solid #e5e0d8;display:flex;gap:12px;">
+      <button class="hdr-btn solid" style="flex:1;padding:10px 20px;background:#00704a;color:#fff;border:none;" onclick="alert('Receipt sent to your email!')">📧 Email Receipt</button>
+      <button class="hdr-btn" style="flex:1;padding:10px 20px;" onclick="alert('Order saved to your account!')">💾 Save Order</button>
+    </div>
   </div>
 </div>
 
 <!-- Gallery — prettyPhoto card designs -->
 <section class="gallery-section">
   <div class="gallery-title">More eGift Card Designs</div>
-  <div class="gallery-sub">Browse our full collection of seasonal and classic designs.</div>
+  <div class="gallery-sub">Browse our full collection of seasonal and classic designs. Click any card to view details.</div>
   <div class="gallery-grid">
 
     <div class="gallery-item">
-      <a href="#" rel="prettyPhoto[cards]" data-card="Holiday Red" data-color="#c0392b" data-icon="🎄">
+      <a href="?slug=holiday-red" rel="prettyPhoto[cards]" data-card="Holiday Red" data-color="#c0392b" data-icon="🎄">
         <div class="gallery-thumb" style="background:linear-gradient(135deg,#c0392b,#7b241c);">🎄</div>
         <div class="gallery-caption">Holiday Red</div>
       </a>
     </div>
 
     <div class="gallery-item">
-      <a href="#" rel="prettyPhoto[cards]" data-card="Winter Plaid" data-color="#1a5276" data-icon="❄️">
+      <a href="?slug=winter-plaid" rel="prettyPhoto[cards]" data-card="Winter Plaid" data-color="#1a5276" data-icon="❄️">
         <div class="gallery-thumb" style="background:linear-gradient(135deg,#1a5276,#154360);">❄️</div>
         <div class="gallery-caption">Winter Plaid</div>
       </a>
     </div>
 
     <div class="gallery-item">
-      <a href="#" rel="prettyPhoto[cards]" data-card="Starbucks Green" data-color="#00704a" data-icon="⭐">
+      <a href="?slug=starbucks-green" rel="prettyPhoto[cards]" data-card="Starbucks Green" data-color="#00704a" data-icon="⭐">
         <div class="gallery-thumb" style="background:linear-gradient(135deg,#00704a,#1e3932);">⭐</div>
         <div class="gallery-caption">Starbucks Green</div>
       </a>
     </div>
 
     <div class="gallery-item">
-      <a href="#" rel="prettyPhoto[cards]" data-card="Gold Reserve" data-color="#9a7d0a" data-icon="🌟">
+      <a href="?slug=gold-reserve" rel="prettyPhoto[cards]" data-card="Gold Reserve" data-color="#9a7d0a" data-icon="🌟">
         <div class="gallery-thumb" style="background:linear-gradient(135deg,#f1c40f,#9a7d0a);">🌟</div>
         <div class="gallery-caption">Gold Reserve</div>
       </a>
     </div>
 
     <div class="gallery-item">
-      <a href="#" rel="prettyPhoto[cards]" data-card="Pink Blossom" data-color="#c0577b" data-icon="🌸">
+      <a href="?slug=pink-blossom" rel="prettyPhoto[cards]" data-card="Pink Blossom" data-color="#c0577b" data-icon="🌸">
         <div class="gallery-thumb" style="background:linear-gradient(135deg,#e91e8c,#c0577b);">🌸</div>
         <div class="gallery-caption">Pink Blossom</div>
       </a>
     </div>
 
     <div class="gallery-item">
-      <a href="#" rel="prettyPhoto[cards]" data-card="Midnight Blue" data-color="#1b2631" data-icon="🌙">
+      <a href="?slug=midnight-blue" rel="prettyPhoto[cards]" data-card="Midnight Blue" data-color="#1b2631" data-icon="🌙">
         <div class="gallery-thumb" style="background:linear-gradient(135deg,#1b2631,#2c3e50);">🌙</div>
         <div class="gallery-caption">Midnight Blue</div>
       </a>
@@ -267,10 +252,10 @@ body{font-family:'Helvetica Neue',Arial,sans-serif;background:#f9f6f2;color:#1e3
       <span class="footer-brand">Starbucks</span>
     </div>
     <div class="footer-links">
-      <a href="#">Privacy Policy</a>
-      <a href="#">Terms of Use</a>
-      <a href="#">Cookie Settings</a>
-      <a href="#">Accessibility</a>
+      <a href="?slug=privacy">Privacy Policy</a>
+      <a href="?slug=terms">Terms of Use</a>
+      <a href="?slug=cookies">Cookie Settings</a>
+      <a href="?slug=accessibility">Accessibility</a>
       <a href="https://hackerone.com/reports/396493" target="_blank">Report #396493</a>
     </div>
     <span class="footer-copy">© 2018 Starbucks Coffee Company. All rights reserved.</span>

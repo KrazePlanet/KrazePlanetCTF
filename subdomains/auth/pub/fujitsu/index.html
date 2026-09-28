@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fujitsu Library</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            border-bottom: 2px solid #6d5efc;
+            padding-bottom: 10px;
+        }
+        .folder-list {
+            margin-top: 20px;
+        }
+        .folder-item {
+            padding: 15px;
+            border: 1px solid #ddd;
+            margin-bottom: 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .folder-item:hover {
+            background: #f0f0ff;
+        }
+        .folder-name {
+            font-weight: bold;
+            color: #6d5efc;
+        }
+        .folder-desc {
+            color: #666;
+            font-size: 0.9em;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Fujitsu Library</h1>
+        <p>Fujitsu software and documentation library.</p>
+        
+        <div class="folder-list">
+            <div class="folder-item" onclick="window.location.href='fm3v2/'">
+                <div class="folder-name">fm3v2/</div>
+                <div class="folder-desc">FM3V2 Player software</div>
+            </div>
+        </div>
+
+        <p style="margin-top: 20px;">
+            <a href="../">← Back to pub</a>
+        </p>
+    </div>
+</body>
+</html>
