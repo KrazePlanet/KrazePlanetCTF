@@ -1,0 +1,9 @@
+RewriteEngine On
+RewriteBase /subdomains/controllers/
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^ index.php [L]
+Options -Indexes
+<FilesMatch "\.(md|sql)$">
+  Require all denied
+</FilesMatch>
