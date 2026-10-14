@@ -1,7 +1,7 @@
 <?php
 // scoreboard.php - KrazePlanet Monthly & Global Cybersecurity Scoreboard
-if (session_status() === PHP_SESSION_NONE) { session_start(); }
-require_once __DIR__ . '/../config/db.php';
+require_once __DIR__ . '/../config/sso.php';
+startKrazeSession();
 
 $current_page = 'scoreboard.php';
 $loggedInUserId = $_SESSION['user_id'] ?? null;
@@ -55,84 +55,44 @@ $rankings = [];
 $userInRankings = false;
 $currentUserRank = null;
 
-if ($pdo) {
-    // Build SQL condition
-    $whereParts = ["1=1"];
-    $params = [];
+// Rankings cover every student on every KrazePlanet site (central login server).
+$board = krazeSsoCall('scoreboard', [
+    'period'  => $isAllTime ? 'all' : 'month',
+    'year'    => $selectedYear,
+    'month'   => $selectedMonth,
+    'country' => $selectedCountry,
+]);
+$me = $board['me'] ?? null;
+$loggedInUserId = $me['id'] ?? null;
 
-    if (!$isAllTime) {
-        $whereParts[] = "YEAR(s.solved_at) = ? AND MONTH(s.solved_at) = ?";
-        $params[] = $selectedYear;
-        $params[] = $selectedMonth;
+// Assign Rank Numbers & Track Logged In User
+foreach ($board['rankings'] ?? [] as $idx => $r) {
+    $r['rank'] = $idx + 1;
+
+    $trends = ['up', 'down', 'steady', 'up', 'down'];
+    $r['trend'] = $trends[($r['id'] + $selectedMonth) % count($trends)];
+
+    $rankings[] = $r;
+
+    if ($loggedInUserId && $r['id'] == $loggedInUserId) {
+        $userInRankings = true;
+        $currentUserRank = $r;
     }
+}
 
-    if ($selectedCountry !== 'ALL' && !empty($selectedCountry)) {
-        $whereParts[] = "u.country = ?";
-        $params[] = $selectedCountry;
-    }
-
-    $whereClause = implode(" AND ", $whereParts);
-
-    // Aggregate points, speed, signal, and impact per user
-    $sql = "
-        SELECT 
-            u.id, 
-            u.username, 
-            u.country, 
-            u.avatar, 
-            u.role,
-            COUNT(s.id) as solved_count,
-            COALESCE(SUM(s.points), 0) as reputation_points,
-            ROUND(6.00 + (COUNT(s.id) * 0.08) + (RAND(u.id + 1) * 0.8), 2) as signal_score,
-            ROUND(15.00 + (COUNT(s.id) * 0.9) + (RAND(u.id + 2) * 9.0), 2) as impact_score,
-            MIN(s.solved_at) as first_solve,
-            MAX(s.solved_at) as latest_solve
-        FROM users u
-        INNER JOIN user_solved_labs s ON u.id = s.user_id
-        WHERE {$whereClause}
-        GROUP BY u.id
-        ORDER BY reputation_points DESC, solved_count DESC, latest_solve ASC
-    ";
-
-    $stmt = $pdo->prepare($sql);
-    $stmt->execute($params);
-    $allRanks = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-    // Assign Rank Numbers & Track Logged In User
-    foreach ($allRanks as $idx => $r) {
-        $rankPos = $idx + 1;
-        $r['rank'] = $rankPos;
-        
-        $trends = ['up', 'down', 'steady', 'up', 'down'];
-        $r['trend'] = $trends[($r['id'] + $selectedMonth) % count($trends)];
-
-        $rankings[] = $r;
-
-        if ($loggedInUserId && $r['id'] == $loggedInUserId) {
-            $userInRankings = true;
-            $currentUserRank = $r;
-        }
-    }
-
-    // Only if logged in user is NOT in rankings, fetch fallback for the pinned row
-    if ($loggedInUserId && !$userInRankings) {
-        $stmtMe = $pdo->prepare("SELECT id, username, country, avatar, role FROM users WHERE id = ?");
-        $stmtMe->execute([$loggedInUserId]);
-        $me = $stmtMe->fetch(PDO::FETCH_ASSOC);
-        if ($me) {
-            $currentUserRank = [
-                'id' => $me['id'],
-                'username' => $me['username'],
-                'country' => $me['country'] ?? 'IN',
-                'avatar' => $me['avatar'] ?? '',
-                'rank' => '-',
-                'reputation_points' => 0,
-                'signal_score' => '-',
-                'impact_score' => '-',
-                'trend' => 'steady'
-            ];
-        }
-    }
+// Only if logged in user is NOT in rankings, show a pinned fallback row
+if ($me && !$userInRankings) {
+    $currentUserRank = [
+        'id' => $me['id'],
+        'username' => $me['username'],
+        'country' => $me['country'] ?? 'IN',
+        'avatar' => $me['avatar'] ?? '',
+        'rank' => '-',
+        'reputation_points' => 0,
+        'signal_score' => '-',
+        'impact_score' => '-',
+        'trend' => 'steady'
+    ];
 }
 ?>
 <!DOCTYPE html>

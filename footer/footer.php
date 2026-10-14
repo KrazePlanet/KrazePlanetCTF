@@ -68,33 +68,6 @@
     box-shadow: 0 4px 12px rgba(56, 189, 248, 0.25);
   }
 
-  /* Floating WhatsApp Action Button */
-  .whatsapp-float-btn {
-    position: fixed;
-    bottom: 25px;
-    right: 25px;
-    width: 52px;
-    height: 52px;
-    background: #25D366;
-    color: #ffffff;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 26px;
-    box-shadow: 0 6px 20px rgba(37, 211, 102, 0.45);
-    z-index: 999;
-    text-decoration: none;
-    transition: all 0.25s ease-in-out;
-  }
-
-  .whatsapp-float-btn:hover {
-    background: #20ba59;
-    color: #ffffff;
-    transform: scale(1.08) translateY(-2px);
-    box-shadow: 0 8px 25px rgba(37, 211, 102, 0.6);
-  }
-
   .footer-bottom-bar {
     border-top: 1px solid rgba(255, 255, 255, 0.06);
     margin-top: 2.5rem;
@@ -182,11 +155,6 @@
               <i class="bi bi-envelope me-2 text-info"></i> contact@krazeplanet.com
             </a>
           </li>
-          <li>
-            <a href="https://wa.me/918527310670?text=Hi%20KrazePlanet%20team!%20I%20have%20an%20inquiry%20regarding%20your%20cybersecurity%20training%2C%20labs%2C%20and%20pentesting%20services." target="_blank" rel="noopener noreferrer" class="footer-link">
-              <i class="bi bi-telephone me-2 text-success"></i> +91 8527310670
-            </a>
-          </li>
         </ul>
       </div>
 
@@ -198,8 +166,3 @@
     </div>
   </div>
 </footer>
-
-<!-- Floating WhatsApp Quick Connect Button with Pre-filled Inquiry Text -->
-<a href="https://wa.me/918527310670?text=Hi%20KrazePlanet%20team!%20I%20have%20an%20inquiry%20regarding%20your%20cybersecurity%20training%2C%20labs%2C%20and%20pentesting%20services." target="_blank" rel="noopener noreferrer" class="whatsapp-float-btn" title="Chat with KrazePlanet on WhatsApp">
-  <i class="bi bi-whatsapp"></i>
-</a>

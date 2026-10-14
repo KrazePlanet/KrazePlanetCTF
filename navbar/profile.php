@@ -1,11 +1,11 @@
 <?php
 // profile.php - KrazePlanet User Dashboard with Profile, Continue, Bookmarks, Notifications, Settings & Import/Export
-if (session_status() === PHP_SESSION_NONE) { session_start(); }
-require_once __DIR__ . '/../config/db.php';
+require_once __DIR__ . '/../config/sso.php';
+startKrazeSession();
 
 // Redirect to login if user is not authenticated
-if (!isset($_SESSION['user_id'])) {
-    header("Location: index.php?modal=login&redirect=" . urlencode($_SERVER['REQUEST_URI']));
+if (!krazeLoggedIn()) {
+    header('Location: ' . krazeLoginUrl($_SERVER['REQUEST_URI']));
     exit;
 }
 
@@ -16,48 +16,19 @@ if (!in_array($activeTab, $allowedTabs)) {
     $activeTab = 'profile';
 }
 
-$user = null;
-$solvedLabs = [];
-$bookmarkedLabs = [];
-$continueLabs = [];
-$allNotifications = [];
-
-if ($pdo) {
-    // 1. User Info
-    $stmt = $pdo->prepare("SELECT id, username, fullname, email, phone, avatar, role, created_at FROM users WHERE id = ?");
-    $stmt->execute([$userId]);
-    $user = $stmt->fetch(PDO::FETCH_ASSOC);
-
-    // 2. Solved Labs
-    $stmtSolved = $pdo->prepare("SELECT lab_id, difficulty, points, solved_at FROM user_solved_labs WHERE user_id = ? ORDER BY solved_at DESC");
-    $stmtSolved->execute([$userId]);
-    $solvedLabs = $stmtSolved->fetchAll(PDO::FETCH_ASSOC);
-
-    // 3. Bookmarks
-    $stmtBookmarked = $pdo->prepare("SELECT lab_id, created_at FROM user_bookmarks WHERE user_id = ? ORDER BY created_at DESC");
-    $stmtBookmarked->execute([$userId]);
-    $bookmarkedLabs = $stmtBookmarked->fetchAll(PDO::FETCH_ASSOC);
-
-    // 4. Continue (In-progress labs visited but NOT marked as solved)
-    $stmtContinue = $pdo->prepare("
-        SELECT h.* 
-        FROM user_lab_history h
-        LEFT JOIN user_solved_labs s ON h.user_id = s.user_id AND h.lab_id = s.lab_id
-        WHERE h.user_id = ? AND s.id IS NULL
-        ORDER BY h.last_accessed_at DESC
-    ");
-    $stmtContinue->execute([$userId]);
-    $continueLabs = $stmtContinue->fetchAll(PDO::FETCH_ASSOC);
-
-    // 5. All Notifications
-    $stmtNotifs = $pdo->prepare("
-        SELECT * FROM user_notifications 
-        WHERE (user_id IS NULL OR user_id = ?) 
-        ORDER BY created_at DESC
-    ");
-    $stmtNotifs->execute([$userId]);
-    $allNotifications = $stmtNotifs->fetchAll(PDO::FETCH_ASSOC);
+// Profile, solved labs, bookmarks, in-progress labs and notifications all come
+// from the central login server in one call.
+$bundle = krazeSsoCall('profile_bundle');
+if (!krazeLoggedIn()) {
+    header('Location: ' . krazeLoginUrl($_SERVER['REQUEST_URI']));
+    exit;
 }
+$user = $bundle['user'] ?? null;
+$solvedLabs = $bundle['solved'] ?? [];
+$bookmarkedLabs = $bundle['bookmarks'] ?? [];
+$continueLabs = $bundle['continue'] ?? [];
+$allNotifications = $bundle['notifications'] ?? [];
+$accountPageUrl = krazeSsoAccountUrl();
 
 $username = $user['username'] ?? $_SESSION['username'] ?? 'Trainee';
 $fullname = $user['fullname'] ?? '';
@@ -470,7 +441,7 @@ elseif ($solvedCount >= 5) $rankTitle = "Apprentice Hunter";
               <div class="profile-field-row">
                 <div class="profile-field-label">Email address</div>
                 <div class="profile-field-control">
-                  <input type="email" id="profileEmailInput" class="form-control custom-profile-input" value="<?= htmlspecialchars($email) ?>" required>
+                  <input type="email" id="profileEmailInput" class="form-control custom-profile-input" value="<?= htmlspecialchars($email) ?>" readonly title="Change your email on your KrazePlanet account page">
                 </div>
               </div>
 
@@ -485,7 +456,7 @@ elseif ($solvedCount >= 5) $rankTitle = "Apprentice Hunter";
                 <div class="profile-field-label">Public profile</div>
                 <div class="profile-field-control">
                   <div class="input-group">
-                    <input type="text" id="publicProfileUrl" class="form-control custom-profile-input font-monospace small" value="http://localhost/profile.php?user=<?= htmlspecialchars($username) ?>" readonly style="border-top-right-radius: 0 !important; border-bottom-right-radius: 0 !important;">
+                    <input type="text" id="publicProfileUrl" class="form-control custom-profile-input font-monospace small" value="<?= htmlspecialchars(krazeSiteUrl('/profile.php?user=' . urlencode($username))) ?>" readonly style="border-top-right-radius: 0 !important; border-bottom-right-radius: 0 !important;">
                     <button type="button" class="btn btn-outline-info px-3" onclick="copyProfileUrl()" style="border-top-left-radius: 0; border-bottom-left-radius: 0; font-size: 13px;">
                       <i class="bi bi-clipboard me-1"></i> Copy
                     </button>
@@ -559,7 +530,7 @@ elseif ($solvedCount >= 5) $rankTitle = "Apprentice Hunter";
                     </div>
 
                     <div class="d-flex align-items-center gap-2">
-                      <a href="<?= htmlspecialchars($cl['lab_url'] ?? $cl['lab_id']) ?>" target="_blank" class="btn btn-sm btn-primary py-1 px-3" style="font-size: 12.5px; border-radius: 8px;">
+                      <a href="<?= htmlspecialchars(krazeLabUrl($cl['lab_url'] ?? $cl['lab_id'])) ?>" target="_blank" class="btn btn-sm btn-primary py-1 px-3" style="font-size: 12.5px; border-radius: 8px;">
                         <i class="bi bi-play-circle-fill me-1"></i> Resume Lab
                       </a>
                     </div>
@@ -604,7 +575,7 @@ elseif ($solvedCount >= 5) $rankTitle = "Apprentice Hunter";
                       </div>
                     </div>
 
-                    <a href="<?= htmlspecialchars($b['lab_id']) ?>" target="_blank" class="btn btn-sm btn-outline-info py-1 px-3" style="font-size: 12.5px; border-radius: 8px;">
+                    <a href="<?= htmlspecialchars(krazeLabUrl($b['lab_id'])) ?>" target="_blank" class="btn btn-sm btn-outline-info py-1 px-3" style="font-size: 12.5px; border-radius: 8px;">
                       <i class="bi bi-box-arrow-up-right me-1"></i> Open Lab
                     </a>
                   </div>
@@ -683,26 +654,16 @@ elseif ($solvedCount >= 5) $rankTitle = "Apprentice Hunter";
 
               <div class="mb-4">
                 <label class="form-label small text-secondary fw-semibold">Email Address</label>
-                <input type="email" id="settingsEmail" class="form-control custom-profile-input" value="<?= htmlspecialchars($email) ?>" required>
+                <input type="email" id="settingsEmail" class="form-control custom-profile-input" value="<?= htmlspecialchars($email) ?>" readonly>
               </div>
 
               <hr class="border-secondary border-opacity-25 my-4">
 
-              <h6 class="fw-bold text-white small mb-3"><i class="bi bi-shield-lock-fill text-warning me-2"></i> Change Password</h6>
-              <div class="row g-3 mb-4">
-                <div class="col-md-4">
-                  <label class="form-label small text-secondary fw-semibold">Current Password</label>
-                  <input type="password" id="settingsCurrentPass" class="form-control custom-profile-input" placeholder="••••••••">
-                </div>
-                <div class="col-md-4">
-                  <label class="form-label small text-secondary fw-semibold">New Password</label>
-                  <input type="password" id="settingsNewPass" class="form-control custom-profile-input" placeholder="••••••••" minlength="6">
-                </div>
-                <div class="col-md-4">
-                  <label class="form-label small text-secondary fw-semibold">Confirm Password</label>
-                  <input type="password" id="settingsConfirmPass" class="form-control custom-profile-input" placeholder="••••••••" minlength="6">
-                </div>
-              </div>
+              <h6 class="fw-bold text-white small mb-2"><i class="bi bi-shield-lock-fill text-warning me-2"></i> Email &amp; Password</h6>
+              <p class="text-secondary small mb-4">
+                Your KrazePlanet account works on every KrazePlanet lab site. Change your email or password on your
+                <a href="<?= htmlspecialchars($accountPageUrl) ?>" target="_blank" rel="noopener" class="text-info fw-semibold">KrazePlanet account page &rarr;</a>
+              </p>
 
               <button type="submit" id="btnSettingsSubmit" class="btn-update-profile">Save Settings</button>
             </form>
@@ -870,18 +831,6 @@ function handleSettingsUpdate(e) {
   formData.append('action', 'update_settings');
   formData.append('fullname', document.getElementById('settingsFullname').value.trim());
   formData.append('email', document.getElementById('settingsEmail').value.trim());
-  formData.append('current_password', document.getElementById('settingsCurrentPass').value);
-  formData.append('new_password', document.getElementById('settingsNewPass').value);
-
-  const confirmPass = document.getElementById('settingsConfirmPass').value;
-  const newPass = document.getElementById('settingsNewPass').value;
-
-  if (newPass && newPass !== confirmPass) {
-    btn.disabled = false;
-    btn.innerText = 'Save Settings';
-    showAlert('settingsAlert', 'New passwords do not match.', false);
-    return;
-  }
 
   fetch('/api/auth_api.php', { method: 'POST', body: formData })
     .then(r => r.json())

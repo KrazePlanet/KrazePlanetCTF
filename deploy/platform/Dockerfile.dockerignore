@@ -1,0 +1,15 @@
+# Platform image: main site only. The labs ship in their own image.
+.git
+.gitattributes
+.gitignore
+deploy/*
+!deploy/platform
+HackerOneReport
+login.krazeplanetsecurity.com
+setup.sh
+update.sh
+README.md
+config/mail.local.php
+# auth_api.php, contact.php and assignments.php load PHPMailer from here
+subdomains/*
+!subdomains/PHPMailer

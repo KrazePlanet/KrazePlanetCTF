@@ -1,15 +1,7 @@
 <?php 
-if (session_status() === PHP_SESSION_NONE) { session_start(); }
-require_once __DIR__ . '/config/db.php';
-$isAdmin = false;
-if (isset($_SESSION['user_id']) && $pdo) {
-    $stmt = $pdo->prepare("SELECT role, username FROM users WHERE id = ?");
-    $stmt->execute([$_SESSION['user_id']]);
-    $u = $stmt->fetch();
-    if ($u && ($u['role'] === 'admin' || strtolower($u['username']) === 'admin')) {
-        $isAdmin = true;
-    }
-}
+require_once __DIR__ . '/config/sso.php';
+startKrazeSession();
+$isAdmin = krazeIsAdmin();
 ?>
 <!doctype html>
 <html lang="en">
@@ -909,7 +901,7 @@ if (isset($_SESSION['user_id']) && $pdo) {
           <div class="lab-title"><?= $e($lab['title']) ?></div>
         </div>
         <div class="lab-action">
-          <a href="<?= $e($lab['access']) ?>" class="btn-ACCESS" target="_blank"><?= $accessIcon ?> ACCESS THE LAB</a>
+          <a href="<?= $e(krazeLabUrl($lab['access'])) ?>" data-lab-id="<?= $e($lab['access']) ?>" class="btn-ACCESS" target="_blank"><?= $accessIcon ?> ACCESS THE LAB</a>
         </div>
       </div>
 <?php endforeach; ?>
@@ -1066,7 +1058,7 @@ if (isset($_SESSION['user_id']) && $pdo) {
 
       function updateAllLabCardsUI() {
         allLabCards.forEach((card) => {
-          const labLink = card.querySelector('a.btn-ACCESS')?.getAttribute('href') || '';
+          const labLink = card.querySelector('a.btn-ACCESS')?.getAttribute('data-lab-id') || '';
           if (!labLink) return;
 
           const isSolved = solvedLabs.includes(labLink);
@@ -1108,7 +1100,7 @@ if (isset($_SESSION['user_id']) && $pdo) {
 
       // Inject Solved & Bookmark Toggle Buttons into every lab-card
       allLabCards.forEach((card) => {
-        const labLink = card.querySelector('a.btn-ACCESS')?.getAttribute('href') || '';
+        const labLink = card.querySelector('a.btn-ACCESS')?.getAttribute('data-lab-id') || '';
         if (!labLink) return;
 
         const labAction = card.querySelector('.lab-action');
@@ -1454,7 +1446,7 @@ if (isset($_SESSION['user_id']) && $pdo) {
           let visibleCardCountInCategory = 0;
 
           cards.forEach((card) => {
-            const labLink = card.querySelector('a.btn-ACCESS')?.getAttribute('href') || '';
+            const labLink = card.querySelector('a.btn-ACCESS')?.getAttribute('data-lab-id') || '';
             const isSolved = solvedLabs.includes(labLink);
             const isBookmarked = bookmarkedLabs.includes(labLink);
 
@@ -1559,7 +1551,7 @@ if (isset($_SESSION['user_id']) && $pdo) {
 
         allLabCards.forEach((card) => {
           const badgeText = card.querySelector('.lab-badge')?.textContent.trim() || '';
-          const href = card.querySelector('a.btn-ACCESS')?.getAttribute('href') || '';
+          const href = card.querySelector('a.btn-ACCESS')?.getAttribute('data-lab-id') || '';
           
           if (badgeText.toLowerCase() === `lab ${targetNum}` || href === `${targetNum}.php` || href === `${targetNum}`) {
             foundCard = card;
@@ -1680,13 +1672,7 @@ if (isset($_SESSION['user_id']) && $pdo) {
       document.addEventListener('click', function(e) {
         if (e.target.closest('#logoutBtnNav')) {
           e.preventDefault();
-          fetch('/api/auth_api.php?action=logout')
-            .then(res => res.json())
-            .then(res => {
-              if (res.success) {
-                location.reload();
-              }
-            });
+          window.location.href = '/sso/logout.php';
         }
       });
 
@@ -1828,7 +1814,7 @@ if (isset($_SESSION['user_id']) && $pdo) {
               const reportTag = card.querySelector('.report-tag') || card.querySelector('a[href*="hackerone.com"]');
               const reportNum = reportTag ? reportTag.textContent.trim().replace('↗', '').trim() : '';
               const reportUrl = reportTag ? reportTag.getAttribute('href') : '';
-              const labHref = card.querySelector('a.btn-ACCESS')?.getAttribute('href') || '#';
+              const labHref = card.querySelector('a.btn-ACCESS')?.getAttribute('data-lab-id') || '#';
 
               // Clean title (remove report tag text and trailing arrows)
               let cleanTitle = fullTitle.replace(reportNum, '').replace('→', '').replace('↗', '').trim();

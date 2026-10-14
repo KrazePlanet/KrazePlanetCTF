@@ -1,0 +1,137 @@
+# KrazePlanet production stack.
+#
+#   Cloudflare ──> host nginx :443 ──> gateway (127.0.0.1:8080)
+#                                        ├─ pwnedbox.site, www  ──> platform ──> central login server (HTTPS API)
+#                                        └─ <lab>.pwnedbox.site ──> labs     ──> labs-db (same netns, loopback only)
+#
+# Student accounts and progress live on the central login server
+# (login.krazeplanetsecurity.com), shared by every KrazePlanet site, so this
+# stack keeps no student data at all.
+#
+# The labs are intentionally vulnerable, so they live in their own container with
+# their own throwaway database. Nothing in the labs container can reach the
+# platform, the host, or the other projects on this VPS (see host/firewall.sh).
+# Nothing here publishes a port except the gateway on 127.0.0.1.
+
+name: krazeplanet
+
+x-defaults: &defaults
+  restart: unless-stopped
+  security_opt:
+    - no-new-privileges:true
+  logging:
+    driver: json-file
+    options:
+      max-size: "10m"
+      max-file: "3"
+
+services:
+  gateway:
+    <<: *defaults
+    image: nginxinc/nginx-unprivileged:1.27-alpine
+    cap_drop: [ALL]
+    read_only: true
+    tmpfs:
+      - /tmp
+    ports:
+      - "127.0.0.1:${GATEWAY_PORT:-8080}:8080"
+    volumes:
+      - ./gateway/default.conf:/etc/nginx/conf.d/default.conf:ro
+    networks: [edge-platform, edge-labs]
+    depends_on: [platform, labs]
+    mem_limit: 128m
+
+  platform:
+    <<: *defaults
+    build:
+      context: ..
+      dockerfile: deploy/platform/Dockerfile
+    image: krazeplanet/platform:latest
+    cap_drop: [ALL]
+    read_only: true
+    tmpfs:
+      - /tmp
+      - /var/run/apache2
+      - /var/lock/apache2
+    volumes:
+      - platform-sessions:/var/lib/php/sessions
+    environment:
+      SSO_URL: ${SSO_URL:-https://login.krazeplanetsecurity.com}
+      SSO_API_URL: ${SSO_API_URL:-}
+      SSO_CLIENT_ID: ${SSO_CLIENT_ID:?set SSO_CLIENT_ID in .env}
+      SSO_CLIENT_SECRET: ${SSO_CLIENT_SECRET:?set SSO_CLIENT_SECRET in .env}
+      APP_URL: ${APP_URL}
+      LAB_BASE_DOMAIN: ${LAB_BASE_DOMAIN}
+      SMTP_HOST: ${SMTP_HOST:-}
+      SMTP_PORT: ${SMTP_PORT:-465}
+      SMTP_USER: ${SMTP_USER:-}
+      SMTP_PASS: ${SMTP_PASS:-}
+      SMTP_SECURE: ${SMTP_SECURE:-ssl}
+      MAIL_FROM: ${MAIL_FROM:-}
+      PHP_SESSION_NAME: ${PHP_SESSION_NAME:-__Host-KPSESSID}
+      PHP_COOKIE_SECURE: ${PHP_COOKIE_SECURE:-1}
+    networks: [edge-platform]
+    mem_limit: 512m
+    pids_limit: 256
+
+  labs:
+    <<: *defaults
+    build:
+      context: ..
+      dockerfile: deploy/labs/Dockerfile
+    image: krazeplanet/labs:latest
+    cap_drop: [ALL]
+    volumes:
+      - labs-dbsock:/run/mysqld
+    environment:
+      # Labs hardcode root with an empty password on 127.0.0.1 / localhost,
+      # exactly like XAMPP. labs-db shares this container's loopback, so that
+      # keeps working and the database is unreachable from anywhere else.
+      DB_HOST: 127.0.0.1
+      DB_USER: root
+      DB_PASS: ""
+      # Use a separate, rate-limited mailbox here: anyone who gets a shell in a
+      # lab can read these values.
+      SMTP_HOST: ${LAB_SMTP_HOST:-}
+      SMTP_PORT: ${LAB_SMTP_PORT:-465}
+      SMTP_USER: ${LAB_SMTP_USER:-}
+      SMTP_PASS: ${LAB_SMTP_PASS:-}
+      SMTP_SECURE: ${LAB_SMTP_SECURE:-ssl}
+      MAIL_FROM: ${LAB_MAIL_FROM:-}
+    networks: [edge-labs]
+    mem_limit: 1536m
+    cpus: 1.5
+    pids_limit: 512
+    ulimits:
+      nofile: 4096
+
+  labs-db:
+    <<: *defaults
+    image: mariadb:11.4
+    network_mode: service:labs
+    command:
+      - --bind-address=127.0.0.1
+      - --max-connections=300
+      - --innodb-buffer-pool-size=256M
+    environment:
+      MARIADB_ALLOW_EMPTY_ROOT_PASSWORD: "1"
+    cap_drop: [ALL]
+    cap_add: [CHOWN, SETUID, SETGID, DAC_OVERRIDE, FOWNER]
+    volumes:
+      - labs-dbsock:/run/mysqld
+      # Anonymous volume: wiped by host/reset-labs.sh (labs re-seed themselves).
+      - /var/lib/mysql
+    depends_on: [labs]
+    mem_limit: 768m
+    pids_limit: 256
+
+networks:
+  edge-platform: {}
+  edge-labs:
+    driver_opts:
+      # Fixed bridge name so host/firewall.sh can fence the labs in.
+      com.docker.network.bridge.name: kp-labs0
+
+volumes:
+  platform-sessions: {}
+  labs-dbsock: {}

@@ -1,7 +1,7 @@
 <?php
 // ctf.php - KrazePlanet Annual Flagship CTF Championship
-if (session_status() === PHP_SESSION_NONE) { session_start(); }
-require_once __DIR__ . '/../config/db.php';
+require_once __DIR__ . '/../config/sso.php';
+startKrazeSession();
 
 $current_page = 'ctf.php';
 $userId = $_SESSION['user_id'] ?? null;

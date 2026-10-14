@@ -1,52 +1,22 @@
 <?php
 // navbar.php - Unified KrazePlanet Header Navigation with 5 Recent Notifications & Complete Dropdown Actions
-require_once __DIR__ . '/../config/domain.php';
+require_once __DIR__ . '/../config/sso.php';
 startKrazeSession();
-
-if (!isset($pdo)) {
-    @include_once __DIR__ . '/../config/db.php';
-}
 
 $current_page = basename($_SERVER['PHP_SELF']);
 
-$user_avatar = '';
-$user_email_display = 'trainee@krazeplanet.com';
+// Account details come from the session (filled at sign-in from the central
+// login server); notifications come from the central server, cached briefly.
+$user_email_display = $_SESSION['user_email'] ?? 'trainee@krazeplanet.com';
+$user_avatar = !empty($_SESSION['avatar']) ? $_SESSION['avatar'] : ('https://api.dicebear.com/7.x/adventurer/svg?seed=' . urlencode($_SESSION['username'] ?? 'User'));
 $recent_notifications = [];
 $unread_count = 0;
 
-if (isset($_SESSION['user_id']) && isset($pdo) && $pdo) {
-    try {
-        $uId = $_SESSION['user_id'];
-        $stmtU = $pdo->prepare("SELECT username, email, avatar, role FROM users WHERE id = ?");
-        $stmtU->execute([$uId]);
-        $userData = $stmtU->fetch(PDO::FETCH_ASSOC);
-        
-        if ($userData) {
-            $user_email_display = !empty($userData['email']) ? $userData['email'] : 'trainee@krazeplanet.com';
-            $_SESSION['user_email'] = $user_email_display;
-            
-            if (!empty($userData['avatar'])) {
-                $user_avatar = $userData['avatar'];
-                $_SESSION['avatar'] = $user_avatar;
-            } else {
-                $user_avatar = 'https://api.dicebear.com/7.x/adventurer/svg?seed=' . urlencode($userData['username'] ?? 'User');
-                $_SESSION['avatar'] = $user_avatar;
-            }
-        }
-
-        // Fetch exactly the latest 5 notifications for the navbar bell
-        $stmtNotif = $pdo->prepare("SELECT * FROM user_notifications WHERE (user_id IS NULL OR user_id = ?) ORDER BY created_at DESC LIMIT 5");
-        $stmtNotif->execute([$uId]);
-        $recent_notifications = $stmtNotif->fetchAll(PDO::FETCH_ASSOC);
-
-        foreach ($recent_notifications as $n) {
-            if (empty($n['is_read'])) $unread_count++;
-        }
-    } catch (Exception $e) {}
-}
-
-if (empty($user_avatar)) {
-    $user_avatar = !empty($_SESSION['avatar']) ? $_SESSION['avatar'] : ('https://api.dicebear.com/7.x/adventurer/svg?seed=' . urlencode($_SESSION['username'] ?? 'User'));
+if (krazeLoggedIn()) {
+    $recent_notifications = krazeRecentNotifications();
+    foreach ($recent_notifications as $n) {
+        if (empty($n['is_read'])) $unread_count++;
+    }
 }
 
 $baseDomain = getKrazeBaseDomain();
@@ -305,7 +275,7 @@ $baseDomain = getKrazeBaseDomain();
 
       <!-- Right: 5 Latest Notifications & Exact Avatar Dropdown -->
       <div id="navAuthArea" class="d-flex align-items-center gap-3 ms-md-0 mt-2 mt-md-0">
-        <?php if (isset($_SESSION['user_id'])): ?>
+        <?php if (krazeLoggedIn()): ?>
           
           <!-- 1. NOTIFICATION BELL (Shows only latest 5 notifications in popup) -->
           <div class="dropdown">
@@ -406,7 +376,7 @@ $baseDomain = getKrazeBaseDomain();
 
               <!-- 7. Logout -->
               <li>
-                <a class="dropdown-item text-danger" href="/api/auth_api.php?action=logout" id="logoutBtnNav" onclick="handleUserLogout(event)">
+                <a class="dropdown-item text-danger" href="/sso/logout.php" id="logoutBtnNav" onclick="handleUserLogout(event)">
                   <i class="bi bi-box-arrow-right text-danger"></i> Logout
                 </a>
               </li>
@@ -414,11 +384,11 @@ $baseDomain = getKrazeBaseDomain();
           </div>
 
         <?php else: ?>
-          <!-- Modern Sleek Login Button Triggering Modal -->
-          <button type="button" class="btn btn-vexium-login" onclick="openLoginModal(event)" data-bs-toggle="modal" data-bs-target="#loginModal">
+          <!-- Sign in on the central KrazePlanet login server -->
+          <a class="btn btn-vexium-login" href="<?= htmlspecialchars(krazeLoginUrl()) ?>" onclick="openLoginModal(event)">
             <i class="bi bi-box-arrow-in-right"></i>
             <span>Login</span>
-          </button>
+          </a>
         <?php endif; ?>
       </div>
 
@@ -436,10 +406,7 @@ function dismissNavNotif(e) {
 
 function handleUserLogout(e) {
   if (e && e.preventDefault) e.preventDefault();
-  fetch('/api/auth_api.php?action=logout', { method: 'POST' })
-    .finally(() => {
-      window.location.href = '/';
-    });
+  window.location.href = '/sso/logout.php';
 }
 </script>
 

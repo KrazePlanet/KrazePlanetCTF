@@ -1,0 +1,8 @@
+# Labs image: only the lab folders, the lab-facing config and the deploy files.
+*
+!subdomains
+!config/database.php
+!config/db.php
+!config/mail.php
+!config/domain.php
+!deploy/labs

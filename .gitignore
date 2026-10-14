@@ -1,1 +1,5 @@
 HackerOneReport/
+config/mail.local.php
+deploy/.env
+# Central login server: private, deployed separately to Hostinger
+login.krazeplanetsecurity.com/

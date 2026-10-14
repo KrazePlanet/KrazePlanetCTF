@@ -1,62 +1,17 @@
 <?php
-if (session_status() === PHP_SESSION_NONE) { session_start(); }
-require_once __DIR__ . '/../config/db.php';
+// settings.php - Email and password live on the central KrazePlanet account
+// page (shared by every lab site); this page points there.
+require_once __DIR__ . '/../config/sso.php';
+startKrazeSession();
 
-if (!isset($_SESSION['user_id'])) {
-    header("Location: index.php?modal=login");
+if (!krazeLoggedIn()) {
+    header('Location: ' . krazeLoginUrl($_SERVER['REQUEST_URI']));
     exit;
 }
 
-$userId = $_SESSION['user_id'];
-$success = '';
-$error = '';
-
-if ($pdo && $_SERVER['REQUEST_METHOD'] === 'POST') {
-    $actionType = $_POST['action_type'] ?? '';
-
-    if ($actionType === 'update_profile') {
-        $new_email = trim($_POST['email'] ?? '');
-        if (filter_var($new_email, FILTER_VALIDATE_EMAIL)) {
-            $stmt = $pdo->prepare("UPDATE users SET email = ? WHERE id = ?");
-            $stmt->execute([$new_email, $userId]);
-            $_SESSION['user_email'] = $new_email;
-            $success = "Profile updated successfully!";
-        } else {
-            $error = "Please provide a valid email address.";
-        }
-    } elseif ($actionType === 'change_password') {
-        $current_pass = $_POST['current_password'] ?? '';
-        $new_pass = $_POST['new_password'] ?? '';
-        $confirm_pass = $_POST['confirm_password'] ?? '';
-
-        $stmt = $pdo->prepare("SELECT password FROM users WHERE id = ?");
-        $stmt->execute([$userId]);
-        $userPass = $stmt->fetchColumn();
-
-        if (!password_verify($current_pass, $userPass)) {
-            $error = "Incorrect current password.";
-        } elseif (strlen($new_pass) < 6) {
-            $error = "New password must be at least 6 characters.";
-        } elseif ($new_pass !== $confirm_pass) {
-            $error = "New passwords do not match.";
-        } else {
-            $hashed = password_hash($new_pass, PASSWORD_DEFAULT);
-            $upd = $pdo->prepare("UPDATE users SET password = ? WHERE id = ?");
-            $upd->execute([$hashed, $userId]);
-            $success = "Password changed successfully!";
-        }
-    }
-}
-
-// Fetch current user details
-$user = null;
-if ($pdo) {
-    $stmt = $pdo->prepare("SELECT username, email, created_at FROM users WHERE id = ?");
-    $stmt->execute([$userId]);
-    $user = $stmt->fetch();
-}
-$username = $user['username'] ?? $_SESSION['username'];
-$email = $user['email'] ?? $_SESSION['user_email'];
+$username = $_SESSION['username'];
+$email = $_SESSION['user_email'];
+$accountPageUrl = krazeSsoAccountUrl();
 ?>
 <!doctype html>
 <html lang="en">
@@ -149,52 +104,18 @@ $email = $user['email'] ?? $_SESSION['user_email'];
         <i class="bi bi-gear text-success me-2"></i>Account Settings
       </h3>
 
-      <?php if (!empty($success)): ?>
-        <div class="alert alert-success py-2 mb-4" style="font-size: 0.88rem; border-radius: 10px;">
-          <i class="bi bi-check-circle-fill me-1"></i> <?php echo htmlspecialchars($success); ?>
-        </div>
-      <?php endif; ?>
-
-      <?php if (!empty($error)): ?>
-        <div class="alert alert-danger py-2 mb-4" style="font-size: 0.88rem; border-radius: 10px;">
-          <i class="bi bi-exclamation-triangle-fill me-1"></i> <?php echo htmlspecialchars($error); ?>
-        </div>
-      <?php endif; ?>
-
-      <!-- Profile Details Form -->
-      <form action="settings.php" method="POST" class="mb-5 border-bottom border-secondary border-opacity-25 pb-4">
-        <input type="hidden" name="action_type" value="update_profile">
-        <h5 class="fw-semibold text-light mb-3">Profile Information</h5>
-        <div class="mb-3">
-          <label class="form-label text-muted small fw-semibold">Username</label>
-          <input type="text" class="form-control" value="<?php echo htmlspecialchars($username); ?>" disabled style="opacity: 0.7;">
-          <div class="form-text text-muted small">Username cannot be changed.</div>
-        </div>
-        <div class="mb-3">
-          <label for="email" class="form-label text-muted small fw-semibold">Email Address</label>
-          <input type="email" name="email" id="email" class="form-control" value="<?php echo htmlspecialchars($email); ?>" required>
-        </div>
-        <button type="submit" class="btn btn-cta">Save Changes</button>
-      </form>
-
-      <!-- Change Password Form -->
-      <form action="settings.php" method="POST">
-        <input type="hidden" name="action_type" value="change_password">
-        <h5 class="fw-semibold text-light mb-3">Security & Password</h5>
-        <div class="mb-3">
-          <label for="current_password" class="form-label text-muted small fw-semibold">Current Password</label>
-          <input type="password" name="current_password" id="current_password" class="form-control" placeholder="Enter current password" required>
-        </div>
-        <div class="mb-3">
-          <label for="new_password" class="form-label text-muted small fw-semibold">New Password</label>
-          <input type="password" name="new_password" id="new_password" class="form-control" placeholder="Enter new password" required>
-        </div>
-        <div class="mb-4">
-          <label for="confirm_password" class="form-label text-muted small fw-semibold">Confirm New Password</label>
-          <input type="password" name="confirm_password" id="confirm_password" class="form-control" placeholder="Confirm new password" required>
-        </div>
-        <button type="submit" class="btn btn-cta">Update Password</button>
-      </form>
+      <div class="mb-3">
+        <label class="form-label text-muted small fw-semibold">Username</label>
+        <input type="text" class="form-control" value="<?php echo htmlspecialchars($username); ?>" disabled style="opacity: 0.7;">
+      </div>
+      <div class="mb-4">
+        <label class="form-label text-muted small fw-semibold">Email Address</label>
+        <input type="email" class="form-control" value="<?php echo htmlspecialchars($email); ?>" disabled style="opacity: 0.7;">
+      </div>
+      <p class="text-muted small mb-3">
+        One KrazePlanet account works on every KrazePlanet lab site. Change your email or password on your account page.
+      </p>
+      <a class="btn btn-cta" href="<?php echo htmlspecialchars($accountPageUrl); ?>" target="_blank" rel="noopener">Open account page &rarr;</a>
     </div>
   </main>
 

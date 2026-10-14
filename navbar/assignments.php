@@ -35,46 +35,18 @@ function formatAssignmentInstructions($raw) {
 }
 
 // Unified Assignments Platform & API for KrazePlanet
-if (session_status() === PHP_SESSION_NONE) { session_start(); }
-require_once __DIR__ . '/../config/db.php';
-// Robust PHPMailer Multi-Path Loader
-$phpMailerLoaded = false;
-$mailerPaths = [
-    __DIR__ . '/PHPMailer',
-    __DIR__ . '/../subdomains/PHPMailer',
-    __DIR__ . '/../PHPMailer',
-    '/opt/lampp/htdocs/subdomains/PHPMailer',
-    '/opt/lampp/htdocs/navbar/PHPMailer',
-    '/opt/lampp/htdocs/PHPMailer'
-];
-foreach ($mailerPaths as $mDir) {
-    if (file_exists("{$mDir}/Exception.php")) {
-        require_once "{$mDir}/Exception.php";
-        require_once "{$mDir}/PHPMailer.php";
-        require_once "{$mDir}/SMTP.php";
-        $phpMailerLoaded = true;
-        break;
-    }
-}
+// Assignments are stored on the central login server, so they show up on every
+// KrazePlanet site; the central server also sends the emails (student
+// addresses never reach this site).
+require_once __DIR__ . '/../config/sso.php';
+startKrazeSession();
 
-use PHPMailer\PHPMailer\PHPMailer;
-use PHPMailer\PHPMailer\Exception;
-
-$isLoggedIn = isset($_SESSION['user_id']);
+$isLoggedIn = krazeLoggedIn();
 $currentUsername = $_SESSION['username'] ?? '';
-$isAdmin = false;
+$isAdmin = krazeIsAdmin();
 
-if ($isLoggedIn && $pdo) {
-    $stmt = $pdo->prepare("SELECT role, username FROM users WHERE id = ?");
-    $stmt->execute([$_SESSION['user_id']]);
-    $u = $stmt->fetch();
-    if ($u && ($u['role'] === 'admin' || strtolower($u['username']) === 'admin')) {
-        $isAdmin = true;
-    }
-}
-
-// Helper function to dispatch assignment emails to all tagged users
-function notifyTaggedUsers($pdo, $assigned_users_str, $assignment_title, $category_name, $submission_date, $description, $labs_data) {
+// Emails every tagged student about an assignment.
+function notifyTaggedUsers($assigned_users_str, $assignment_title, $category_name, $submission_date, $description, $labs_data) {
     $tags = preg_split('/[\s,]+/', $assigned_users_str, -1, PREG_SPLIT_NO_EMPTY);
     if (empty($tags)) return;
 
@@ -83,11 +55,12 @@ function notifyTaggedUsers($pdo, $assigned_users_str, $assignment_title, $catego
     // Build Labs HTML
     $labsHtml = '';
     foreach ($labs_data as $l) {
-        $rep = (!empty($l['report_num']) && !empty($l['report_url'])) ? ' <a href="' . $l['report_url'] . '" style="color:#fb7185;text-decoration:none;font-weight:bold;">[' . $l['report_num'] . ']</a>' : '';
-        $labLink = htmlspecialchars($l['link'] ?? '#');
+        $rep = (!empty($l['report_num']) && !empty($l['report_url'])) ? ' <a href="' . htmlspecialchars($l['report_url']) . '" style="color:#fb7185;text-decoration:none;font-weight:bold;">[' . htmlspecialchars($l['report_num']) . ']</a>' : '';
+        $labLink = krazeLabUrl($l['link'] ?? '#');
         if (strpos($labLink, 'http') !== 0) {
-            $labLink = 'http://localhost' . (strpos($labLink, '/') === 0 ? '' : '/') . $labLink;
+            $labLink = krazeSiteUrl((strpos($labLink, '/') === 0 ? '' : '/') . $labLink);
         }
+        $labLink = htmlspecialchars($labLink);
 
         $labsHtml .= '
         <div style="background:#1e293b; border:1px solid rgba(255,255,255,0.08); border-radius:8px; padding:12px 16px; margin-bottom:8px; display:flex; align-items:center; justify-content:space-between;">
@@ -102,23 +75,8 @@ function notifyTaggedUsers($pdo, $assigned_users_str, $assignment_title, $catego
         </div>';
     }
 
-    foreach ($tags as $tag) {
-        $cleanUsername = ltrim($tag, '@');
-        if (empty($cleanUsername)) continue;
-
-        $stmt = $pdo->prepare("SELECT id, username, fullname, email FROM users WHERE LOWER(username) = LOWER(?) LIMIT 1");
-        $stmt->execute([$cleanUsername]);
-        $u = $stmt->fetch(PDO::FETCH_ASSOC);
-
-        if ($u && !empty($u['email']) && filter_var($u['email'], FILTER_VALIDATE_EMAIL)) {
-            try {
-                $mail = new PHPMailer(true);
-                configureKrazeMailer($mail, 'noreply@krazeplanet.com', 'KrazePlanet Security');
-                $mail->addAddress($u['email'], $u['username']);
-                $mail->isHTML(true);
-                $mail->Subject = 'New Assignment: ' . $assignment_title . ' - KrazePlanet';
-
-                $mail->Body = '
+    // "{{username}}" is filled in per student by the central server.
+    $html = '
                 <div style="font-family: -apple-system, BlinkMacSystemFont, Roboto, sans-serif; background:#070b14; padding:30px 15px; color:#f8fafc;">
                     <div style="max-width:620px; margin:0 auto; background:#0f172a; border:1px solid rgba(255,255,255,0.12); border-radius:16px; padding:32px; box-shadow:0 20px 40px rgba(0,0,0,0.6);">
                         <div style="display:flex; align-items:center; gap:8px; margin-bottom:20px;">
@@ -127,7 +85,7 @@ function notifyTaggedUsers($pdo, $assigned_users_str, $assignment_title, $catego
                         </div>
                         
                         <h2 style="font-size:22px; font-weight:800; margin-bottom:8px; color:#ffffff;">New Security Assignment</h2>
-                        <p style="color:#94a3b8; font-size:14px; margin-bottom:20px;">Hello <strong>@' . htmlspecialchars($u['username']) . '</strong>, you have been tagged and assigned a new security assignment.</p>
+                        <p style="color:#94a3b8; font-size:14px; margin-bottom:20px;">Hello <strong>@{{username}}</strong>, you have been tagged and assigned a new security assignment.</p>
 
                         <div style="background:#070b14; border-left:4px solid #38bdf8; border-radius:8px; padding:18px; margin-bottom:24px;">
                             <p style="margin:0 0 8px 0; font-size:15px; color:#ffffff;"><strong style="color:#38bdf8;">Assignment:</strong> ' . htmlspecialchars($assignment_title) . '</p>
@@ -140,7 +98,7 @@ function notifyTaggedUsers($pdo, $assigned_users_str, $assignment_title, $catego
                         ' . $labsHtml . '
 
                         <div style="text-align:center; margin-top:28px; margin-bottom:16px;">
-                            <a href="http://localhost/assignments.php" style="background:linear-gradient(135deg, #0284c7, #0369a1); color:#ffffff; padding:12px 28px; border-radius:10px; text-decoration:none; font-weight:700; font-size:14px; display:inline-block; box-shadow:0 4px 15px rgba(2,132,199,0.4);">
+                            <a href="' . htmlspecialchars(krazeSiteUrl('/navbar/assignments.php')) . '" style="background:linear-gradient(135deg, #0284c7, #0369a1); color:#ffffff; padding:12px 28px; border-radius:10px; text-decoration:none; font-weight:700; font-size:14px; display:inline-block; box-shadow:0 4px 15px rgba(2,132,199,0.4);">
                                 Open Assignments Portal &rarr;
                             </a>
                         </div>
@@ -152,12 +110,11 @@ function notifyTaggedUsers($pdo, $assigned_users_str, $assignment_title, $catego
                     </div>
                 </div>';
 
-                $mail->send();
-            } catch (Exception $e) {
-                error_log("Assignment Notify Mail Error for {$u['email']}: " . $mail->ErrorInfo);
-            }
-        }
-    }
+    krazeSsoCall('notify_users', [
+        'usernames' => array_map(fn($t) => ltrim($t, '@'), $tags),
+        'subject'   => 'New Assignment: ' . $assignment_title . ' - KrazePlanet',
+        'html'      => $html,
+    ]);
 }
 
 // ---------------- API HANDLERS (when action query/post is supplied) ----------------
@@ -177,70 +134,37 @@ if (!empty($action)) {
         $category_name = trim($_POST['category_name'] ?? 'General');
         $assigned_users = trim($_POST['assigned_users'] ?? '');
         $submission_date = trim($_POST['submission_date'] ?? '');
-        $labs_raw = trim($_POST['labs_json'] ?? '[]');
+        $labs_data = json_decode(trim($_POST['labs_json'] ?? '[]'), true);
+        if (!is_array($labs_data)) {
+            $labs_data = [];
+        }
 
         if (empty($title) || empty($assigned_users) || empty($submission_date)) {
             echo json_encode(['success' => false, 'message' => 'Please fill in Title, Assigned Users, and Submission Deadline.']);
             exit;
         }
 
-        $labs_data = json_decode($labs_raw, true);
-        if (!is_array($labs_data)) {
-            $labs_data = [];
+        $res = krazeSsoCall('task_save', [
+            'title'           => $title,
+            'description'     => $description,
+            'category_name'   => $category_name,
+            'assigned_users'  => $assigned_users,
+            'submission_date' => $submission_date,
+            'labs'            => $labs_data,
+        ]);
+        if (empty($res['success'])) {
+            echo json_encode(['success' => false, 'message' => $res['error'] ?? 'Could not save the assignment.']);
+            exit;
         }
 
-        try {
-            $stmtCheck = $pdo->prepare("SELECT id FROM tasks WHERE LOWER(TRIM(title)) = LOWER(TRIM(?))");
-            $stmtCheck->execute([$title]);
-            $existingTask = $stmtCheck->fetch();
+        notifyTaggedUsers($assigned_users, $title, $category_name, $submission_date, $description, $labs_data);
 
-            if ($existingTask) {
-                $stmtUpdate = $pdo->prepare("
-                    UPDATE tasks 
-                    SET description = ?, category_name = ?, assigned_users = ?, submission_date = ?, labs_json = ?
-                    WHERE id = ?
-                ");
-                $stmtUpdate->execute([
-                    $description,
-                    $category_name,
-                    $assigned_users,
-                    $submission_date,
-                    json_encode($labs_data, JSON_UNESCAPED_SLASHES),
-                    $existingTask['id']
-                ]);
-
-                notifyTaggedUsers($pdo, $assigned_users, $title, $category_name, $submission_date, $description, $labs_data);
-
-                echo json_encode([
-                    'success' => true,
-                    'message' => 'Existing assignment updated and notifications dispatched to tagged students!'
-                ]);
-                exit;
-            }
-
-            $stmt = $pdo->prepare("
-                INSERT INTO tasks (title, description, category_name, assigned_users, submission_date, labs_json, created_by)
-                VALUES (?, ?, ?, ?, ?, ?, ?)
-            ");
-            $stmt->execute([
-                $title,
-                $description,
-                $category_name,
-                $assigned_users,
-                $submission_date,
-                json_encode($labs_data, JSON_UNESCAPED_SLASHES),
-                $_SESSION['user_id']
-            ]);
-
-            notifyTaggedUsers($pdo, $assigned_users, $title, $category_name, $submission_date, $description, $labs_data);
-
-            echo json_encode([
-                'success' => true,
-                'message' => 'Assignment created and notification emails dispatched to tagged students!'
-            ]);
-        } catch (PDOException $e) {
-            echo json_encode(['success' => false, 'message' => 'Database error: ' . $e->getMessage()]);
-        }
+        echo json_encode([
+            'success' => true,
+            'message' => !empty($res['updated'])
+                ? 'Existing assignment updated and notifications dispatched to tagged students!'
+                : 'Assignment created and notification emails dispatched to tagged students!'
+        ]);
         exit;
     }
 
@@ -256,23 +180,16 @@ if (!empty($action)) {
             exit;
         }
 
-        try {
-            $stmt = $pdo->prepare("DELETE FROM tasks WHERE id = ?");
-            $stmt->execute([$taskId]);
-            echo json_encode(['success' => true, 'message' => 'Assignment deleted successfully.']);
-        } catch (PDOException $e) {
-            echo json_encode(['success' => false, 'message' => 'Database error: ' . $e->getMessage()]);
-        }
+        $res = krazeSsoCall('task_delete', ['task_id' => $taskId]);
+        echo json_encode(!empty($res['success'])
+            ? ['success' => true, 'message' => 'Assignment deleted successfully.']
+            : ['success' => false, 'message' => $res['error'] ?? 'Could not delete the assignment.']);
         exit;
     }
 }
 
 // ---------------- HTML VIEW ----------------
-$tasks = [];
-if ($pdo) {
-    $stmt = $pdo->query("SELECT * FROM tasks ORDER BY id DESC");
-    $tasks = $stmt->fetchAll(PDO::FETCH_ASSOC);
-}
+$tasks = krazeSsoCall('tasks')['tasks'] ?? [];
 ?>
 <!doctype html>
 <html lang="en">
@@ -874,7 +791,7 @@ if ($pdo) {
                 </div>
 
                 <div class="lab-action">
-                  <a href="<?= htmlspecialchars($lab['link'] ?? '#') ?>" class="btn-ACCESS" target="_blank">
+                  <a href="<?= htmlspecialchars(krazeLabUrl($lab['link'] ?? '#')) ?>" data-lab-id="<?= htmlspecialchars($lab['link'] ?? '') ?>" class="btn-ACCESS" target="_blank">
                     <svg viewBox="0 0 24 24"><path d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"></path></svg>
                     ACCESS THE LAB
                   </a>

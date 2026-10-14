@@ -1,13 +1,18 @@
 <?php
 // config/mail.php - Centralized SMTP Mailer Configuration
-// Users only need to edit this file or set environment variables
+// Credentials come from environment variables (Docker .env in production).
+// For local XAMPP, put putenv() calls in config/mail.local.php (gitignored).
+
+if (file_exists(__DIR__ . '/mail.local.php')) {
+    include_once __DIR__ . '/mail.local.php';
+}
 
 if (!function_exists('configureKrazeMailer')) {
     function configureKrazeMailer($mail, $fromEmail = null, $fromName = 'KrazePlanet') {
         $smtp_host     = getenv('SMTP_HOST')     ?: 'mail.kzlabs.store';
         $smtp_port     = intval(getenv('SMTP_PORT') ?: 465);
         $smtp_user     = getenv('SMTP_USER')     ?: 'noreply@kzlabs.store';
-        $smtp_pass     = getenv('SMTP_PASS')     ?: '+kR^^N670#5&c72#5$*6&!MkK17~';
+        $smtp_pass     = getenv('SMTP_PASS')     ?: '';
         $smtp_secure   = getenv('SMTP_SECURE')   ?: 'ssl';
         $smtp_autotls  = getenv('SMTP_AUTOTLS')  !== 'true';
         $smtp_timeout  = intval(getenv('SMTP_TIMEOUT') ?: 5);

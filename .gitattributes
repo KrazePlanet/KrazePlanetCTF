@@ -1,2 +1,6 @@
 # Auto detect text files and perform LF normalization
 * text=auto
+
+# Scripts and configs that run inside Linux containers / on the VPS
+*.sh text eol=lf
+deploy/** text eol=lf
