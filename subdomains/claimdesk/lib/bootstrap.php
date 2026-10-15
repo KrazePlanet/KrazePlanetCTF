@@ -2,10 +2,12 @@
 // ClaimDesk — Expense Claim Portal Training Lab
 // Intentional vulnerability: claims table has no UNIQUE constraint on claim_ref.
 // Submitting the same POST body multiple times creates duplicate approved claims.
-const BASE     = '/subdomains/claimdesk';
+// Served at the root of claimdesk.<lab domain>, or at /subdomains/claimdesk on XAMPP.
+define('BASE', str_starts_with(parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH) ?: '/', '/subdomains/claimdesk')
+    ? '/subdomains/claimdesk' : '');
 const LAB_FLAG = 'KP{duplicate_claim_no_idempotency}';
 
-session_set_cookie_params(['path' => BASE, 'httponly' => true, 'samesite' => 'Lax']);
+session_set_cookie_params(['path' => BASE === '' ? '/' : BASE, 'httponly' => true, 'samesite' => 'Lax']);
 session_name('CLAIMDESKSID');
 session_start();
 
@@ -93,7 +95,7 @@ function gen_ref(): string {
 
 /* ── HELPERS ──────────────────────────────────────────────── */
 function h($s): string { return htmlspecialchars((string)$s,ENT_QUOTES,'UTF-8'); }
-function url(string $p=''): string { return BASE.($p?'/'.ltrim($p,'/'):''); }
+function url(string $p=''): string { return BASE.($p?'/'.ltrim($p,'/'):'/'); }
 function inr(int $paise): string {
     $s=(string)abs($paise);
     $dec=substr($s,-2); $whole=substr($s,0,-2)?:'0';
@@ -116,7 +118,19 @@ function user(): ?array {
 }
 function require_login(): array { $u=user(); if(!$u){flash('error','Please sign in.');redirect('login');} return $u; }
 function csrf_token(): string { if(empty($_SESSION['csrf'])) $_SESSION['csrf']=bin2hex(random_bytes(16)); return $_SESSION['csrf']; }
-function verify_csrf(): void { if(!hash_equals($_SESSION['csrf']??'',$_POST['_csrf']??'')){http_response_code(403);die('Invalid CSRF token.');} }
+function verify_csrf(): void {
+    if (hash_equals($_SESSION['csrf'] ?? '', $_POST['_csrf'] ?? '')) return;
+    // Usually a page left open across a lab reset (sessions are wiped): send the
+    // student back to a fresh copy of the form instead of a dead-end error page.
+    unset($_SESSION['csrf']);
+    flash('error', 'Your session expired, so that form could not be submitted. Please try again.');
+    $ref  = $_SERVER['HTTP_REFERER'] ?? '';
+    $back = parse_url($ref, PHP_URL_HOST) === preg_replace('/:\d+$/', '', $_SERVER['HTTP_HOST'] ?? '')
+        ? (parse_url($ref, PHP_URL_PATH) ?: '/')
+        : (parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH) ?: '/');
+    $rel = ltrim(substr($back, strlen(BASE)), '/');
+    redirect(preg_match('#^[a-z0-9/_-]*$#i', $rel) ? $rel : '');
+}
 
 function status_tag(string $s): string {
     return match($s){
