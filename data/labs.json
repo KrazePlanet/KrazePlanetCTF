@@ -39,6 +39,192 @@
       "access": "/subdomains/bbp"
     }
   ],
+  "Authentication Bypass": [
+    {
+      "title": "OTP Verification Bypass via Response Manipulation",
+      "difficulty": "Medium",
+      "report": "",
+      "access": "/subdomains/verify"
+    },
+    {
+      "title": "Phone OTP Bypass via Response Manipulation",
+      "difficulty": "Medium",
+      "report": "",
+      "access": "/subdomains/mobile"
+    },
+    {
+      "title": "ControlHub - JSON Response Manipulation Auth Bypass",
+      "difficulty": "Hard",
+      "report": "",
+      "access": "/subdomains/hub"
+    },
+    {
+      "title": "Admin Authentication Bypass Lead to Admin Account Takeover",
+      "difficulty": "Hard",
+      "report": "https://hackerone.com/reports/1490470",
+      "access": "/subdomains/adminpanel"
+    },
+    {
+      "title": "Email Verification code bypass in account registration process",
+      "difficulty": "Hard",
+      "report": "https://hackerone.com/reports/1406471",
+      "access": "/subdomains/hackers"
+    },
+    {
+      "title": "Authentication Bypass Leads To Complete Account TakeveOver",
+      "difficulty": "Hard",
+      "report": "https://hackerone.com/reports/1709881",
+      "access": "/subdomains/mtnbusiness"
+    },
+    {
+      "title": "Authentication Bypass with usage of PreSignedURL",
+      "difficulty": "Hard",
+      "report": "https://hackerone.com/reports/2337427",
+      "access": "/subdomains/presignedurl"
+    },
+    {
+      "title": "Improper Authentication - 2FA OTP Reusable",
+      "difficulty": "Hard",
+      "report": "https://hackerone.com/reports/2529780",
+      "access": "/subdomains/authenticator"
+    },
+    {
+      "title": "Bypass Email Verification in Customer Portal",
+      "difficulty": "Hard",
+      "report": "https://hackerone.com/reports/1443211",
+      "access": "/subdomains/mattermost"
+    },
+    {
+      "title": "Authentication bypass leads to Information Disclosure",
+      "difficulty": "Hard",
+      "report": "https://hackerone.com/reports/1690548",
+      "access": "/subdomains/airforce"
+    },
+    {
+      "title": "Authentication bypass in MTN Group",
+      "difficulty": "Hard",
+      "report": "https://hackerone.com/reports/1747146",
+      "access": "/subdomains/mntupload"
+    }
+  ],
+  "Business Logic Errors": [
+    {
+      "title": "Client-Side Price Manipulation Allows Purchasing Any Product for $1",
+      "difficulty": "Easy",
+      "report": "",
+      "access": "/subdomains/stitchly"
+    },
+    {
+      "title": "Product Price Parameter Tampering Allows Purchasing Items Below Listed Price",
+      "difficulty": "Easy",
+      "report": "",
+      "access": "/subdomains/controlzone"
+    },
+    {
+      "title": "Coupon Code Reuse Logic Flaw Allows Applying the Same Discount Multiple Times",
+      "difficulty": "Easy",
+      "report": "",
+      "access": "/subdomains/controllers"
+    },
+    {
+      "title": "Negative Transfer Amount Abuse Allows Stealing Funds from Other Wallets",
+      "difficulty": "Easy",
+      "report": "",
+      "access": "/subdomains/swiftpay"
+    },
+    {
+      "title": "Plan Upgrade Parameter Tampering Grants Pro Access Without Payment",
+      "difficulty": "Easy",
+      "report": "",
+      "access": "/subdomains/gigboard"
+    },
+    {
+      "title": "Missing Idempotency on Claim Submission Allows Duplicate Expense Payouts",
+      "difficulty": "Easy",
+      "report": "",
+      "access": "/subdomains/claimdesk"
+    },
+    {
+      "title": "Return Cancellation Does Not Reverse Wallet Refund Allowing Double Payout",
+      "difficulty": "Medium",
+      "report": "",
+      "access": "/subdomains/retailzone"
+    },
+    {
+      "title": "Race Condition Bypass Allows Purchasing Flash Sale Items Beyond the Per-Customer Limit",
+      "difficulty": "Hard",
+      "report": "",
+      "access": "/subdomains/flashbuy"
+    },
+    {
+      "title": "Business Logic Bypass Allows Setting “Read Access\" Role Without Pro Plan Subscription",
+      "difficulty": "Hard",
+      "report": "https://hackerone.com/reports/3591764",
+      "access": "/subdomains/lovable"
+    },
+    {
+      "title": "OLO Total price manipulation using negative quantities",
+      "difficulty": "Hard",
+      "report": "https://hackerone.com/reports/364843",
+      "access": "/subdomains/upserve"
+    },
+    {
+      "title": "An attacker can buy marketplace articles for lower prices as it allows for negative quantity values leading to business loss",
+      "difficulty": "Hard",
+      "report": "https://hackerone.com/reports/771694",
+      "access": "/subdomains/marketplace"
+    },
+    {
+      "title": "Bypassing the block of Security Domain Restriction and normally invite blocked domains with special characters “İ\"",
+      "difficulty": "Hard",
+      "report": "https://hackerone.com/reports/2033005",
+      "access": "/subdomains/frontegg"
+    },
+    {
+      "title": "2FA disabled External user can participate in 2FA enabled program's report",
+      "difficulty": "Hard",
+      "report": "https://hackerone.com/reports/2571981",
+      "access": "/subdomains/participate"
+    }
+  ],
+  "Improper Access Control": [
+    {
+      "title": "Improper Access Control Allows Unauthorized Profile Picture Takeover",
+      "difficulty": "Easy",
+      "report": "",
+      "access": "/subdomains/pixora"
+    },
+    {
+      "title": "Improper Access Control Allows Unauthorized Access to Other Patients' Lab Reports via Unvalidated Report ID",
+      "difficulty": "Easy",
+      "report": "",
+      "access": "/subdomains/medicore"
+    },
+    {
+      "title": "Missing Function-Level Access Control Allows Regular Employees to Export Confidential Payroll Data",
+      "difficulty": "Easy",
+      "report": "",
+      "access": "/subdomains/staffhub"
+    },
+    {
+      "title": "Improper Access Control Allows Cancelling Other Users' Event Tickets via Unvalidated Ticket ID",
+      "difficulty": "Easy",
+      "report": "",
+      "access": "/subdomains/eventpass"
+    },
+    {
+      "title": "Improper Access Control Allows Reading Private Message Threads via Unvalidated Thread ID in URL",
+      "difficulty": "Easy",
+      "report": "",
+      "access": "/subdomains/chatbox"
+    },
+    {
+      "title": "Mass Assignment Vulnerability Allows Self-Granting Admin Privileges via Unvalidated POST Fields",
+      "difficulty": "Medium",
+      "report": "",
+      "access": "/subdomains/accounthub"
+    }
+  ],
   "Cross-Site Scripting": [
     {
       "title": "Reflected XSS - TutorialRepublic: Web Development Reference Search",
@@ -603,74 +789,6 @@
       "access": "/subdomains/demonstrates"
     }
   ],
-  "Authentication Bypass": [
-    {
-      "title": "OTP Verification Bypass via Response Manipulation",
-      "difficulty": "Medium",
-      "report": "",
-      "access": "/subdomains/verify"
-    },
-    {
-      "title": "Phone OTP Bypass via Response Manipulation",
-      "difficulty": "Medium",
-      "report": "",
-      "access": "/subdomains/mobile"
-    },
-    {
-      "title": "ControlHub - JSON Response Manipulation Auth Bypass",
-      "difficulty": "Hard",
-      "report": "",
-      "access": "/subdomains/hub"
-    },
-    {
-      "title": "Admin Authentication Bypass Lead to Admin Account Takeover",
-      "difficulty": "Hard",
-      "report": "https://hackerone.com/reports/1490470",
-      "access": "/subdomains/adminpanel"
-    },
-    {
-      "title": "Email Verification code bypass in account registration process",
-      "difficulty": "Hard",
-      "report": "https://hackerone.com/reports/1406471",
-      "access": "/subdomains/hackers"
-    },
-    {
-      "title": "Authentication Bypass Leads To Complete Account TakeveOver",
-      "difficulty": "Hard",
-      "report": "https://hackerone.com/reports/1709881",
-      "access": "/subdomains/mtnbusiness"
-    },
-    {
-      "title": "Authentication Bypass with usage of PreSignedURL",
-      "difficulty": "Hard",
-      "report": "https://hackerone.com/reports/2337427",
-      "access": "/subdomains/presignedurl"
-    },
-    {
-      "title": "Improper Authentication - 2FA OTP Reusable",
-      "difficulty": "Hard",
-      "report": "https://hackerone.com/reports/2529780",
-      "access": "/subdomains/authenticator"
-    },
-    {
-      "title": "Bypass Email Verification in Customer Portal",
-      "difficulty": "Hard",
-      "report": "https://hackerone.com/reports/1443211",
-      "access": "/subdomains/mattermost"
-    },
-    {
-      "title": "Authentication bypass leads to Information Disclosure",
-      "difficulty": "Hard",
-      "report": "https://hackerone.com/reports/1690548",
-      "access": "/subdomains/airforce"
-    },
-    {
-      "title": "Authentication bypass in MTN Group",
-      "difficulty": "Hard",
-      "report": "https://hackerone.com/reports/1747146",
-      "access": "/subdomains/mntupload"
-    }
-  ],
   "No Rate Limiting": [
     {
       "title": "No Rate Limiting",
@@ -799,14 +917,6 @@
       "difficulty": "Hard",
       "report": "https://hackerone.com/reports/3104355",
       "access": "/subdomains/duststaff"
-    }
-  ],
-  "OAuth Misconfiguration": [
-    {
-      "title": "OAuth Misconfiguration",
-      "difficulty": "Easy",
-      "report": "",
-      "access": "/subdomains/misconfiguration"
     }
   ],
   "Information Disclosure": [
@@ -969,7 +1079,7 @@
       "access": "/subdomains/operation"
     }
   ],
-  "Using Default Credentials": [
+  "Exploiting Default Credentials": [
     {
       "title": "CBSE - Default Credentials Authentication Bypass",
       "difficulty": "Easy",
@@ -1705,7 +1815,7 @@
       "access": "/subdomains/smuggling"
     }
   ],
-  "Cache Poisoning": [
+  "Web Cache Poisoning": [
     {
       "title": "Cache Poisoning",
       "difficulty": "Easy",
@@ -1713,122 +1823,12 @@
       "access": "/subdomains/poisoning"
     }
   ],
-  "Business Logic Errors": [
+  "OAuth Misconfiguration": [
     {
-      "title": "Client-Side Price Manipulation Allows Purchasing Any Product for $1",
+      "title": "OAuth Misconfiguration",
       "difficulty": "Easy",
       "report": "",
-      "access": "/subdomains/stitchly"
-    },
-    {
-      "title": "Product Price Parameter Tampering Allows Purchasing Items Below Listed Price",
-      "difficulty": "Easy",
-      "report": "",
-      "access": "/subdomains/controlzone"
-    },
-    {
-      "title": "Coupon Code Reuse Logic Flaw Allows Applying the Same Discount Multiple Times",
-      "difficulty": "Easy",
-      "report": "",
-      "access": "/subdomains/controllers"
-    },
-    {
-      "title": "Negative Transfer Amount Abuse Allows Stealing Funds from Other Wallets",
-      "difficulty": "Easy",
-      "report": "",
-      "access": "/subdomains/swiftpay"
-    },
-    {
-      "title": "Plan Upgrade Parameter Tampering Grants Pro Access Without Payment",
-      "difficulty": "Easy",
-      "report": "",
-      "access": "/subdomains/gigboard"
-    },
-    {
-      "title": "Missing Idempotency on Claim Submission Allows Duplicate Expense Payouts",
-      "difficulty": "Easy",
-      "report": "",
-      "access": "/subdomains/claimdesk"
-    },
-    {
-      "title": "Return Cancellation Does Not Reverse Wallet Refund Allowing Double Payout",
-      "difficulty": "Medium",
-      "report": "",
-      "access": "/subdomains/retailzone"
-    },
-    {
-      "title": "Race Condition Bypass Allows Purchasing Flash Sale Items Beyond the Per-Customer Limit",
-      "difficulty": "Hard",
-      "report": "",
-      "access": "/subdomains/flashbuy"
-    },
-    {
-      "title": "Business Logic Bypass Allows Setting “Read Access\" Role Without Pro Plan Subscription",
-      "difficulty": "Hard",
-      "report": "https://hackerone.com/reports/3591764",
-      "access": "/subdomains/lovable"
-    },
-    {
-      "title": "OLO Total price manipulation using negative quantities",
-      "difficulty": "Hard",
-      "report": "https://hackerone.com/reports/364843",
-      "access": "/subdomains/upserve"
-    },
-    {
-      "title": "An attacker can buy marketplace articles for lower prices as it allows for negative quantity values leading to business loss",
-      "difficulty": "Hard",
-      "report": "https://hackerone.com/reports/771694",
-      "access": "/subdomains/marketplace"
-    },
-    {
-      "title": "Bypassing the block of Security Domain Restriction and normally invite blocked domains with special characters “İ\"",
-      "difficulty": "Hard",
-      "report": "https://hackerone.com/reports/2033005",
-      "access": "/subdomains/frontegg"
-    },
-    {
-      "title": "2FA disabled External user can participate in 2FA enabled program's report",
-      "difficulty": "Hard",
-      "report": "https://hackerone.com/reports/2571981",
-      "access": "/subdomains/participate"
-    }
-  ],
-  "Improper Access Control": [
-    {
-      "title": "Improper Access Control Allows Unauthorized Profile Picture Takeover",
-      "difficulty": "Easy",
-      "report": "",
-      "access": "/subdomains/pixora"
-    },
-    {
-      "title": "Improper Access Control Allows Unauthorized Access to Other Patients' Lab Reports via Unvalidated Report ID",
-      "difficulty": "Easy",
-      "report": "",
-      "access": "/subdomains/medicore"
-    },
-    {
-      "title": "Missing Function-Level Access Control Allows Regular Employees to Export Confidential Payroll Data",
-      "difficulty": "Easy",
-      "report": "",
-      "access": "/subdomains/staffhub"
-    },
-    {
-      "title": "Improper Access Control Allows Cancelling Other Users' Event Tickets via Unvalidated Ticket ID",
-      "difficulty": "Easy",
-      "report": "",
-      "access": "/subdomains/eventpass"
-    },
-    {
-      "title": "Improper Access Control Allows Reading Private Message Threads via Unvalidated Thread ID in URL",
-      "difficulty": "Easy",
-      "report": "",
-      "access": "/subdomains/chatbox"
-    },
-    {
-      "title": "Mass Assignment Vulnerability Allows Self-Granting Admin Privileges via Unvalidated POST Fields",
-      "difficulty": "Medium",
-      "report": "",
-      "access": "/subdomains/accounthub"
+      "access": "/subdomains/misconfiguration"
     }
   ],
   "File Upload Vulnerabilities": [
