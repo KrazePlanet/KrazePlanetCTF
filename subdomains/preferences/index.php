@@ -107,6 +107,7 @@ if ($isRegister && $_SERVER['REQUEST_METHOD'] === 'POST') {
         $st = $db->prepare("INSERT INTO preferences_users (username, email, password, balance, account_number) VALUES (?,?,?,0.00,?)");
         $st->bind_param('ssss', $uname, $email, $hashed, $accNum);
         if ($st->execute()) {
+            session_regenerate_id(true); // fresh cookie with current SameSite=None/Secure flags
             $_SESSION['preferences_uid'] = $db->insert_id;
             header('Location: ' . $dashUrl);
             exit;
@@ -129,6 +130,7 @@ if (!$isRegister && !$isSettings && $_SERVER['REQUEST_METHOD'] === 'POST') {
         $user = $st->get_result()->fetch_assoc();
         $st->close();
         if ($user && password_verify($pass, $user['password'])) {
+            session_regenerate_id(true); // fresh cookie with current SameSite=None/Secure flags
             $_SESSION['preferences_uid'] = $user['id'];
             header('Location: ' . $dashUrl);
             exit;

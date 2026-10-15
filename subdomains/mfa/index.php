@@ -114,6 +114,7 @@ if ($isRegister && $_SERVER['REQUEST_METHOD'] === 'POST') {
         $st = $db->prepare("INSERT INTO mfa_users (username, email, password, totp_enabled) VALUES (?,?,?,1)");
         $st->bind_param('sss', $uname, $email, $hashed);
         if ($st->execute()) {
+            session_regenerate_id(true); // fresh cookie with current SameSite=None/Secure flags
             $_SESSION['mfa_uid'] = $db->insert_id;
             header('Location: ' . $dashUrl);
             exit;
@@ -136,6 +137,7 @@ if (!$isRegister && !$isDisable && $_SERVER['REQUEST_METHOD'] === 'POST') {
         $user = $st->get_result()->fetch_assoc();
         $st->close();
         if ($user && password_verify($pass, $user['password'])) {
+            session_regenerate_id(true); // fresh cookie with current SameSite=None/Secure flags
             $_SESSION['mfa_uid'] = $user['id'];
             header('Location: ' . $dashUrl);
             exit;

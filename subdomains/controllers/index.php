@@ -313,6 +313,17 @@ function page_cart(): void {
     $u = require_login();
     $lines = cart_lines($u['id']);
     $subtotal = cart_subtotal($lines);
+    // Welcome offer: applied once automatically (as a normal first application).
+    // Removing it, or applying another code, is remembered until the next checkout.
+    if ($lines && !get_coupon() && empty($_SESSION['coupon_auto_done'])) {
+        $st = db()->prepare("SELECT discount_pct FROM coupons WHERE code = 'WELCOME20' AND active = 1");
+        $st->execute();
+        $pct = $st->fetchColumn();
+        if ($pct !== false) {
+            $_SESSION['coupon'] = ['code' => 'WELCOME20', 'pct' => (int)$pct, 'factor' => 1 - ($pct / 100), 'count' => 1, 'auto' => true];
+        }
+        $_SESSION['coupon_auto_done'] = true;
+    }
     $coupon = get_coupon();
     $discount = coupon_discount($subtotal);
     $total = max(0, $subtotal - $discount);
@@ -379,27 +390,31 @@ function page_cart(): void {
       <div class="card card-pad">
         <div style="font-weight:700;margin-bottom:12px"><img src="https://cdn-icons-png.flaticon.com/512/2662/2662503.png" style="width:20px;height:20px;vertical-align:middle;margin-right:6px;"> Apply Coupon</div>
         <?php if ($coupon): ?>
-        <div style="background:rgba(16,185,129,.1);border:1px solid rgba(16,185,129,.3);border-radius:8px;padding:12px;margin-bottom:12px">
-          <div style="font-weight:700;color:#34d399">✓ <?= h($coupon['code']) ?> applied</div>
-          <div class="text-sm text-muted mt-4"><?= h($coupon['pct']) ?>% off — applied <?= h($coupon['count']) ?>×</div>
-          <div class="text-sm mt-4" style="color:#34d399">Effective discount: <?= round((1 - $coupon['factor'])*100, 1) ?>%</div>
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;background:rgba(16,185,129,.1);border:1px solid rgba(16,185,129,.3);border-radius:8px;padding:10px 12px;margin-bottom:12px">
+          <div style="min-width:0">
+            <div style="font-weight:700;color:#34d399;font-family:monospace;letter-spacing:.5px">✓ <?= h($coupon['code']) ?></div>
+            <div class="text-sm text-muted mt-4">
+              <?= h($coupon['pct']) ?>% off<?= !empty($coupon['auto']) ? ' · applied automatically' : '' ?>
+              <?php if ((int)$coupon['count'] > 1): ?>
+                <br><span style="color:#34d399">Applied <?= h($coupon['count']) ?>× · effective discount <?= round((1 - $coupon['factor'])*100, 1) ?>%</span>
+              <?php endif; ?>
+            </div>
+          </div>
+          <form method="POST" action="<?= url('cart/remove-coupon') ?>" style="flex-shrink:0">
+            <input type="hidden" name="_csrf" value="<?= h(csrf_token()) ?>">
+            <button class="btn btn-danger btn-sm" title="Remove this coupon">Remove</button>
+          </form>
         </div>
         <?php endif; ?>
         <!-- POST /cart/apply-coupon with coupon_code=WELCOME20 — apply multiple times to stack -->
         <form method="POST" action="<?= url('cart/apply-coupon') ?>">
           <input type="hidden" name="_csrf" value="<?= h(csrf_token()) ?>">
           <div class="flex gap-8">
-            <input type="text" name="coupon_code" value="<?= $coupon ? h($coupon['code']) : '' ?>"
-                   placeholder="Enter coupon code" class="form-control" style="flex:1">
+            <input type="text" name="coupon_code" value=""
+                   placeholder="<?= $coupon ? 'Have a different code?' : 'Enter coupon code' ?>" class="form-control" style="flex:1">
             <button class="btn btn-secondary">Apply</button>
           </div>
         </form>
-        <?php if ($coupon): ?>
-        <form method="POST" action="<?= url('cart/remove-coupon') ?>" style="margin-top:8px">
-          <input type="hidden" name="_csrf" value="<?= h(csrf_token()) ?>">
-          <button class="btn btn-danger btn-sm" style="width:100%">Remove Coupon</button>
-        </form>
-        <?php endif; ?>
       </div>
 
       <!-- ORDER SUMMARY -->
@@ -796,10 +811,6 @@ function page_dashboard(): void {
         <a href="<?= $href ?>" class="btn btn-secondary" style="width:100%;margin-bottom:8px;justify-content:flex-start"><?= $label ?></a>
         <?php endforeach; ?>
       </div>
-      <div class="card card-pad" style="background:rgba(124,58,237,.08);border-color:rgba(124,58,237,.2)">
-        <div style="font-size:.72rem;font-weight:700;color:var(--accent3);margin-bottom:8px"><img src="https://cdn-icons-png.flaticon.com/512/2991/2991108.png" style="width:16px;height:16px;vertical-align:middle;margin-right:4px;"> Lab Hint</div>
-        <p class="text-sm" style="color:var(--text2);line-height:1.6">Try applying coupon <code style="background:var(--bg3);padding:2px 6px;border-radius:4px;color:var(--accent3)">WELCOME20</code> multiple times via Burp Suite. POST to <code style="background:var(--bg3);padding:2px 6px;border-radius:4px;color:var(--accent3)">/cart/apply-coupon</code> with <code style="background:var(--bg3);padding:2px 6px;border-radius:4px;color:var(--accent3)">coupon_code=WELCOME20</code>.</p>
-      </div>
     </div>
   </div>
 </div>
@@ -1135,6 +1146,8 @@ function action_apply_coupon(): void {
     $coupon = $st->fetch();
     if (!$coupon) { flash('error','Invalid or expired coupon code.'); redirect('cart'); }
 
+    $_SESSION['coupon_auto_done'] = true;
+
     // --- INTENTIONAL BUG: no "already applied" check, no category restriction check ---
     $existing = $_SESSION['coupon'] ?? [];
     if ($existing && $existing['code'] !== $code) {
@@ -1157,6 +1170,7 @@ function action_remove_coupon(): void {
     require_login();
     verify_csrf();
     unset($_SESSION['coupon']);
+    $_SESSION['coupon_auto_done'] = true;
     flash('info','Coupon removed.');
     redirect('cart');
 }
@@ -1201,7 +1215,8 @@ function action_checkout_submit(): void {
     foreach ($lines as $l)
         $ii->execute([$oid, $l['product_id'], $l['name'], $l['brand'], $l['price'], $l['quantity'], $l['subtotal']]);
 
-    // Clear cart and coupon
+    // Clear cart and coupon (the welcome offer is offered again on the next cart)
+    unset($_SESSION['coupon_auto_done']);
     db()->prepare("DELETE FROM cart_items WHERE user_id=?")->execute([$u['id']]);
     unset($_SESSION['coupon']);
 

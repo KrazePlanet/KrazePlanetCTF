@@ -1,18 +1,24 @@
 <?php
 // Pulse — Social Media Platform
 
-// Configure session to work with both HTTP and HTTPS
-// Secure=false allows cookies to work on both protocols
-// SameSite=Lax allows CSRF attacks while maintaining browser compatibility
+// Session cookie.
+// This is a CSRF lab, so the session cookie must ride along on a cross-site POST
+// from the attacker's page. Browsers only do that for SameSite=None cookies, and
+// SameSite=None requires the Secure flag, which requires HTTPS. Over HTTPS we use
+// None+Secure (the exploitable setting); over plain HTTP (local XAMPP) we fall
+// back to Lax so normal login still works — cross-site CSRF can't work on HTTP anyway.
+$pls_https = (($_SERVER['HTTPS'] ?? '') === 'on')
+    || (($_SERVER['HTTP_X_FORWARDED_PROTO'] ?? '') === 'https')
+    || (($_SERVER['REQUEST_SCHEME'] ?? '') === 'https');
 if (session_status() === PHP_SESSION_NONE) {
     session_name('PULSE_SESSID');
     session_set_cookie_params([
         'lifetime' => 0,
-        'path'     => '/',  // Root path to ensure cookies work across all subdomains
-        'domain'   => '',  // Empty domain allows current domain
-        'secure'   => false,  // Allow cookies on both HTTP and HTTPS
+        'path'     => '/',
+        'domain'   => '',
+        'secure'   => $pls_https,
         'httponly' => true,
-        'samesite' => 'Lax',  // Works with both protocols and allows CSRF
+        'samesite' => $pls_https ? 'None' : 'Lax',
     ]);
     session_start();
 }
@@ -114,6 +120,7 @@ if ($isRegister && $_SERVER['REQUEST_METHOD'] === 'POST') {
         $st = $db->prepare("INSERT INTO security_users (username, email, password) VALUES (?,?,?)");
         $st->bind_param('sss', $uname, $email, $hashed);
         if ($st->execute()) {
+            session_regenerate_id(true); // issue a fresh cookie with the current SameSite/Secure flags
             $_SESSION['security_uid'] = $db->insert_id;
             header('Location: ' . $profileUrl);
             exit;
@@ -136,6 +143,7 @@ if (!$isRegister && !$isSettings && $_SERVER['REQUEST_METHOD'] === 'POST') {
         $user = $st->get_result()->fetch_assoc();
         $st->close();
         if ($user && password_verify($pass, $user['password'])) {
+            session_regenerate_id(true); // issue a fresh cookie with the current SameSite/Secure flags
             $_SESSION['security_uid'] = $user['id'];
             header('Location: ' . $profileUrl);
             exit;

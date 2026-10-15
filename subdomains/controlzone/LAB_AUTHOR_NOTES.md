@@ -42,9 +42,9 @@ The price always comes from `products.price`. There is no way for a client POST 
 
 1. Log in and add **NiTHO V80 Bluetooth Gamepad** (₹2,299) to the cart with quantity 1.
 2. Add **Ant Esports MG15 Super Cube Wireless Gamepad** (₹979) with quantity 1 (intercept with Burp).
-3. In Burp, intercept `POST /subdomains/controllers/cart/add` and forward it normally — the item is now in the cart.
+3. In Burp, intercept `POST /subdomains/controlzone/cart/add` and forward it normally — the item is now in the cart.
 4. Go to Cart. Click **Update** on the MG15 row.
-5. Intercept the `POST /subdomains/controllers/cart/update` request:
+5. Intercept the `POST /subdomains/controlzone/cart/update` request:
    ```
    product_id=2&quantity=1&_csrf=...
    ```
@@ -66,7 +66,7 @@ price field, the attempt has no effect. The cart will show the correct database 
 
 ## Reset
 
-To reset the database between student runs, visit `/opt/lampp/htdocs/subdomains/controllers/`
+To reset the database between student runs, visit `/opt/lampp/htdocs/subdomains/controlzone/`
 and execute the SQL manually, or add a one-time reset call in `lib/bootstrap.php`:
 
 ```php

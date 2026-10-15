@@ -1,8 +1,12 @@
 <?php
 // PadHub - local controller store demo.
-const BASE = '/subdomains/controllers';
+// Served at the root of controlzone.<lab domain>, or at /subdomains/controlzone on XAMPP.
+// (This lab started as a copy of "controllers" and still pointed there, so every
+// form posted into the other lab and failed its CSRF check.)
+define('BASE', str_starts_with(parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH) ?: '/', '/subdomains/controlzone')
+    ? '/subdomains/controlzone' : '');
 
-session_set_cookie_params(['path' => BASE, 'httponly' => true, 'samesite' => 'Lax']);
+session_set_cookie_params(['path' => BASE === '' ? '/' : BASE, 'httponly' => true, 'samesite' => 'Lax']);
 session_name('PADHUBSESSID');
 session_start();
 
@@ -23,6 +27,11 @@ function db(): PDO {
         $root->exec("CREATE DATABASE `$name` CHARACTER SET utf8mb4");
         $pdo = new PDO("mysql:host=$host;dbname=$name;charset=utf8mb4", $user, $pass, $opt);
         install_schema($pdo);
+    }
+    // Databases seeded before product photos were wired up stored colours here.
+    if ($pdo->query("SELECT COUNT(*) FROM products WHERE image LIKE '%|%'")->fetchColumn()) {
+        $fix = $pdo->prepare("UPDATE products SET image = ? WHERE id = ?");
+        foreach (product_images() as $i => $file) $fix->execute([$file, $i + 1]);
     }
     return $pdo;
 }
@@ -77,7 +86,8 @@ function install_schema(PDO $pdo, bool $reset = false): void {
             ['Ant Esports GP320 Wireless Controller',        1598,  2499, 'Mobile Gamepads',      4.0,  298, '#f0f1f5', '#2a2d38'],
         ];
         $st = $pdo->prepare("INSERT INTO products (name,description,price,old_price,image,category,rating,reviews,stock) VALUES (?,?,?,?,?,?,?,?,100)");
-        foreach ($rows as $r) $st->execute([$r[0], $desc[$r[3]], $r[1], $r[2], $r[6] . '|' . $r[7], $r[3], $r[4], $r[5]]);
+        $images = product_images();
+        foreach ($rows as $i => $r) $st->execute([$r[0], $desc[$r[3]], $r[1], $r[2], $images[$i], $r[3], $r[4], $r[5]]);
     }
     if ((int)$pdo->query("SELECT COUNT(*) FROM users")->fetchColumn() === 0) {
         $pdo->prepare("INSERT INTO users (name,email,password_hash) VALUES (?,?,?)")
@@ -85,8 +95,14 @@ function install_schema(PDO $pdo, bool $reset = false): void {
     }
 }
 
+/** Product photos in assets/imgs, in the same order as the seeded products. */
+function product_images(): array {
+    return ['imgs/p1.jpg', 'imgs/p2.png', 'imgs/p3.jpg', 'imgs/p4.png', 'imgs/p5.jpg', 'imgs/p6.jpg', 'imgs/p7.png', 'imgs/p8.jpg',
+            'imgs/p9.jpg', 'imgs/p10.jpg', 'imgs/p11.jpg', 'imgs/p12.jpg', 'imgs/p13.png', 'imgs/p14.jpg', 'imgs/p15.png'];
+}
+
 function h($s): string { return htmlspecialchars((string)$s, ENT_QUOTES, 'UTF-8'); }
-function url(string $path = ''): string { return BASE . ($path === '' ? '' : '/' . ltrim($path, '/')); }
+function url(string $path = ''): string { return BASE . ($path === '' ? '/' : '/' . ltrim($path, '/')); }
 
 function inr(int $n): string {
     $neg = $n < 0;

@@ -154,6 +154,7 @@ if ($isRegister && $_SERVER['REQUEST_METHOD'] === 'POST') {
         $st->bind_param('sss', $uname, $email, $hashed);
         if ($st->execute()) {
             $newUid = $db->insert_id;
+            session_regenerate_id(true); // fresh cookie with current SameSite=None/Secure flags
             $_SESSION['privacy_uid'] = $newUid;
             // Seed generic orders for new users
             $seedOrders = [
@@ -188,6 +189,7 @@ if (!$isRegister && !$isDelete && $_SERVER['REQUEST_METHOD'] === 'POST') {
         $user = $st->get_result()->fetch_assoc();
         $st->close();
         if ($user && password_verify($pass, $user['password'])) {
+            session_regenerate_id(true); // fresh cookie with current SameSite=None/Secure flags
             $_SESSION['privacy_uid'] = $user['id'];
             header('Location: ' . $dashUrl);
             exit;

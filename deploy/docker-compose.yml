@@ -119,6 +119,8 @@ services:
     cap_add: [CHOWN, SETUID, SETGID, DAC_OVERRIDE, FOWNER]
     volumes:
       - labs-dbsock:/run/mysqld
+      # Create the shared databases on every fresh init (runs on each reset).
+      - ./labs/initdb.sql:/docker-entrypoint-initdb.d/01-shared-dbs.sql:ro
       # Anonymous volume: wiped by host/reset-labs.sh (labs re-seed themselves).
       - /var/lib/mysql
     depends_on: [labs]

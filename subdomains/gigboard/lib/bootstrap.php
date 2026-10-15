@@ -1,11 +1,13 @@
 <?php
 // GigBoard — Freelancing Marketplace Training Lab
 // Intentional vulnerability: plan upgrade via parameter tampering (payment_token never validated against DB).
-const BASE     = '/subdomains/gigboard';
+// Served at the root of gigboard.<lab domain>, or at /subdomains/gigboard on XAMPP.
+define('BASE', str_starts_with(parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH) ?: '/', '/subdomains/gigboard')
+    ? '/subdomains/gigboard' : '');
 const LAB_FLAG = 'KP{plan_upgrade_parameter_tampering}';
 const FREE_GIG_LIMIT = 3;
 
-session_set_cookie_params(['path' => BASE, 'httponly' => true, 'samesite' => 'Lax']);
+session_set_cookie_params(['path' => BASE === '' ? '/' : BASE, 'httponly' => true, 'samesite' => 'Lax']);
 session_name('GIGBOARDSID');
 session_start();
 
@@ -153,7 +155,7 @@ function install_schema(PDO $pdo, bool $reset=false): void {
 
 /* ── HELPERS ────────────────────────────────────────────── */
 function h($s): string { return htmlspecialchars((string)$s,ENT_QUOTES,'UTF-8'); }
-function url(string $p=''): string { return BASE.($p?'/'.ltrim($p,'/'):''); }
+function url(string $p=''): string { return BASE.($p?'/'.ltrim($p,'/'):'/'); }
 function inr(int $n): string {
     $s=(string)$n; if(strlen($s)>3) $s=preg_replace('/\B(?=(\d{2})+(?!\d))/',',',substr($s,0,-3).','.substr($s,-3)); return '₹'.$s;
 }
@@ -176,7 +178,19 @@ function fresh_user(): ?array {
 function require_login(): array { $u=user(); if(!$u){flash('error','Please sign in.');redirect('login');} return $u; }
 function stars(float $r): string { $o=''; for($i=1;$i<=5;$i++) $o.=($r>=$i?'★':($r>=$i-.5?'⯨':'☆')); return $o; }
 function csrf_token(): string { if(empty($_SESSION['csrf'])) $_SESSION['csrf']=bin2hex(random_bytes(16)); return $_SESSION['csrf']; }
-function verify_csrf(): void { if(!hash_equals($_SESSION['csrf']??'',$_POST['_csrf']??'')){ http_response_code(403); die('Invalid CSRF token.'); } }
+function verify_csrf(): void {
+    if (hash_equals($_SESSION['csrf'] ?? '', $_POST['_csrf'] ?? '')) return;
+    // Usually a page left open across a lab reset (sessions are wiped): send the
+    // student back to a fresh copy of the form instead of a dead-end error page.
+    unset($_SESSION['csrf']);
+    flash('error', 'Your session expired, so that form could not be submitted. Please try again.');
+    $ref  = $_SERVER['HTTP_REFERER'] ?? '';
+    $back = parse_url($ref, PHP_URL_HOST) === preg_replace('/:\d+$/', '', $_SERVER['HTTP_HOST'] ?? '')
+        ? (parse_url($ref, PHP_URL_PATH) ?: '/')
+        : (parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH) ?: '/');
+    $rel = ltrim(substr($back, strlen(BASE)), '/');
+    redirect(preg_match('#^[a-z0-9/_-]*$#i', $rel) ? $rel : '');
+}
 function avatar(array $u, int $size=40): string {
     $init=strtoupper(substr($u['name'],0,1)); $c=h($u['avatar_color']);
     return "<div style='width:{$size}px;height:{$size}px;border-radius:50%;background:{$c};display:inline-flex;align-items:center;justify-content:center;font-size:".round($size*.4)."px;font-weight:800;color:#fff;flex-shrink:0'>$init</div>";

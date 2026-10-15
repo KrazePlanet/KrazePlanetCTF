@@ -1,11 +1,13 @@
 <?php
 // SwiftPay — Digital Wallet Training Lab
 // Intentionally vulnerable: negative transfer amount accepted server-side.
-const BASE     = '/subdomains/swiftpay';
+// Served at the root of swiftpay.<lab domain>, or at /subdomains/swiftpay on XAMPP.
+define('BASE', str_starts_with(parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH) ?: '/', '/subdomains/swiftpay')
+    ? '/subdomains/swiftpay' : '');
 const SEED_BAL = 50000; // ₹500.00 stored as paise (integer)
 const LAB_FLAG = 'KP{negative_transfer_balance_exploit}';
 
-session_set_cookie_params(['path' => BASE, 'httponly' => true, 'samesite' => 'Lax']);
+session_set_cookie_params(['path' => BASE === '' ? '/' : BASE, 'httponly' => true, 'samesite' => 'Lax']);
 session_name('SWIFTPAYSID');
 session_start();
 
@@ -80,7 +82,7 @@ function install_schema(PDO $pdo, bool $reset = false): void {
 
 /* ── HELPERS ──────────────────────────────────────────────── */
 function h($s): string { return htmlspecialchars((string)$s, ENT_QUOTES, 'UTF-8'); }
-function url(string $p = ''): string { return BASE . ($p ? '/' . ltrim($p, '/') : ''); }
+function url(string $p = ''): string { return BASE . ($p ? '/' . ltrim($p, '/') : '/'); }
 
 function inr(int $paise): string {
     $neg = $paise < 0;
@@ -109,8 +111,23 @@ function user(): ?array {
 
 function require_login(): array {
     $u = user();
-    if (!$u) { flash('error', 'Please sign in to continue.'); redirect('login'); }
+    if (!$u) {
+        // Come back to this page after signing in, like a real site.
+        if ($_SERVER['REQUEST_METHOD'] === 'GET') {
+            $path = parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH) ?: '/';
+            $_SESSION['after_login'] = ltrim(substr($path, strlen(BASE)), '/');
+        }
+        flash('info', 'Please sign in to continue.');
+        redirect('login');
+    }
     return $u;
+}
+
+/** Where to go after signing in: the page that asked for it, or the wallet. */
+function after_login_path(): string {
+    $p = (string)($_SESSION['after_login'] ?? '');
+    unset($_SESSION['after_login']);
+    return preg_match('#^[a-z0-9/_-]*$#i', $p) && !str_starts_with($p, '/') ? $p : '';
 }
 
 function csrf_token(): string {

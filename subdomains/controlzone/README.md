@@ -22,7 +22,7 @@ sudo /opt/lampp/lampp startmysql
 Then open:
 
 ```
-http://127.0.0.1/subdomains/controllers/
+http://127.0.0.1/subdomains/controlzone/
 ```
 
 ## Default Account
@@ -36,17 +36,17 @@ http://127.0.0.1/subdomains/controllers/
 
 | Page           | URL                                          |
 |----------------|----------------------------------------------|
-| Home           | /subdomains/controllers/                     |
-| Register       | /subdomains/controllers/register             |
-| Login          | /subdomains/controllers/login                |
-| Product detail | /subdomains/controllers/product/{id}         |
-| Cart           | /subdomains/controllers/cart                 |
-| Cart update    | /subdomains/controllers/cart/update  (POST)  |
-| Cart remove    | /subdomains/controllers/cart/remove  (POST)  |
-| Checkout       | /subdomains/controllers/checkout             |
-| Orders         | /subdomains/controllers/orders               |
-| Order detail   | /subdomains/controllers/order/{id}           |
-| Profile        | /subdomains/controllers/profile              |
+| Home           | /subdomains/controlzone/                     |
+| Register       | /subdomains/controlzone/register             |
+| Login          | /subdomains/controlzone/login                |
+| Product detail | /subdomains/controlzone/product/{id}         |
+| Cart           | /subdomains/controlzone/cart                 |
+| Cart update    | /subdomains/controlzone/cart/update  (POST)  |
+| Cart remove    | /subdomains/controlzone/cart/remove  (POST)  |
+| Checkout       | /subdomains/controlzone/checkout             |
+| Orders         | /subdomains/controlzone/orders               |
+| Order detail   | /subdomains/controlzone/order/{id}           |
+| Profile        | /subdomains/controlzone/profile              |
 
 ## Database Configuration
 

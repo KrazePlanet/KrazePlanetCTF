@@ -38,7 +38,7 @@ match (true) {
    PAGE: HOME / WALLET DASHBOARD
 ══════════════════════════════════════════════════════════ */
 function page_home(): void {
-    $u = require_login();
+    if (!user()) { page_landing(); return; }
     $u = fresh_user();
 
     // Check flag condition: balance > initial seed (was exploited)
@@ -120,6 +120,65 @@ function page_home(): void {
       <?php else: ?>
       <div style="padding:40px;text-align:center;color:var(--text3)">No transactions yet. Send or receive money to get started.</div>
       <?php endif; ?>
+    </div>
+  </div>
+</div>
+<?php page_close();
+}
+
+/* ══════════════════════════════════════════════════════════
+   PAGE: PUBLIC HOME (signed out)
+══════════════════════════════════════════════════════════ */
+function page_landing(): void {
+    page_open('UPI Payments, Recharge & Bills');
+    $services = [
+        ['transfer', '💸', 'Send Money',      'To any UPI ID or mobile number, instantly'],
+        ['topup',    '➕', 'Add Money',       'Top up your wallet from any bank account'],
+        ['recharge', '📱', 'Mobile Recharge', 'Prepaid plans for every operator'],
+        ['bill',     '🧾', 'Pay Bills',       'Electricity, broadband, DTH and more'],
+    ];
+    ?>
+<div class="main">
+  <section class="balance-hero" style="padding:44px 36px">
+    <div class="balance-label">India Ka Digital Wallet</div>
+    <h1 style="font-size:2.1rem;font-weight:900;line-height:1.2;margin:8px 0 12px;max-width:620px">Pay anyone, recharge and settle bills in seconds.</h1>
+    <p style="opacity:.85;max-width:560px;line-height:1.6;margin-bottom:22px">One SwiftPay wallet for UPI transfers, mobile recharges and bill payments. New accounts get a ₹500 welcome balance.</p>
+    <div style="display:flex;gap:12px;flex-wrap:wrap;position:relative;z-index:1">
+      <a href="<?= url('register') ?>" class="btn btn-lg" style="background:#fff;color:var(--p);font-weight:800">Create free account</a>
+      <a href="<?= url('login') ?>" class="btn btn-lg" style="background:rgba(255,255,255,.14);color:#fff;border:1px solid rgba(255,255,255,.35)">Sign in</a>
+    </div>
+    <div class="balance-chips" style="margin-top:22px">
+      <span class="balance-chip">⚡ Instant UPI transfers</span>
+      <span class="balance-chip">🔒 Bank-grade security</span>
+      <span class="balance-chip">🎁 ₹500 welcome balance</span>
+    </div>
+  </section>
+
+  <div class="page-title" style="margin:28px 0 4px">What you can do</div>
+  <div class="section-sub" style="margin-bottom:14px">Pick a service. We'll ask you to sign in when it's time to pay.</div>
+  <div class="quick-actions">
+    <?php foreach ($services as [$path, $icon, $label, $sub]): ?>
+    <a href="<?= url($path) ?>" class="qa-btn">
+      <div class="qa-icon"><?= $icon ?></div>
+      <div class="qa-label"><?= h($label) ?></div>
+      <div style="font-size:.72rem;color:var(--text3);margin-top:4px;line-height:1.4"><?= h($sub) ?></div>
+    </a>
+    <?php endforeach; ?>
+  </div>
+
+  <div class="grid-2" style="margin-top:24px">
+    <div class="card card-pad">
+      <div class="page-title" style="font-size:1rem;margin-bottom:12px">Why SwiftPay</div>
+      <div class="tx-item"><div class="tx-icon tx-icon-credit">⚡</div><div class="tx-info"><div class="tx-desc">Money moves instantly</div><div class="tx-meta">UPI transfers arrive in seconds, 24×7, including holidays.</div></div></div>
+      <div class="tx-item"><div class="tx-icon tx-icon-credit">🧾</div><div class="tx-info"><div class="tx-desc">Every payment in one place</div><div class="tx-meta">Recharges, bills and transfers with a full transaction history.</div></div></div>
+      <div class="tx-item"><div class="tx-icon tx-icon-credit">🔒</div><div class="tx-info"><div class="tx-desc">Your wallet, protected</div><div class="tx-meta">Every action needs your signed-in session and is logged.</div></div></div>
+    </div>
+    <div class="card card-pad">
+      <div class="page-title" style="font-size:1rem;margin-bottom:12px">Get started in 3 steps</div>
+      <div class="tx-item"><div class="tx-icon tx-icon-debit">1</div><div class="tx-info"><div class="tx-desc">Create your account</div><div class="tx-meta">Name, mobile number and email. Takes under a minute.</div></div></div>
+      <div class="tx-item"><div class="tx-icon tx-icon-debit">2</div><div class="tx-info"><div class="tx-desc">Get your UPI ID</div><div class="tx-meta">Your wallet comes with its own @swift UPI ID and ₹500 to start.</div></div></div>
+      <div class="tx-item"><div class="tx-icon tx-icon-debit">3</div><div class="tx-info"><div class="tx-desc">Pay, recharge, repeat</div><div class="tx-meta">Send money, recharge and pay bills from one wallet.</div></div></div>
+      <a href="<?= url('register') ?>" class="btn btn-primary" style="width:100%;margin-top:14px">Create free account</a>
     </div>
   </div>
 </div>
@@ -542,7 +601,7 @@ function action_login(): void {
     session_regenerate_id(true);
     $_SESSION['uid'] = $u['id'];
     flash('success','Welcome back, '.$u['name'].'!');
-    redirect('');
+    redirect(after_login_path());
 }
 
 function action_register(): void {
@@ -566,14 +625,14 @@ function action_register(): void {
         session_regenerate_id(true);
         $_SESSION['uid'] = $uid;
         flash('success','Account created! ₹500 welcome balance added.');
-        redirect('');
+        redirect(after_login_path());
     } catch (PDOException) { flash('error','Email or phone already registered.'); redirect('register'); }
 }
 
 function action_logout(): void {
     verify_csrf();
     session_destroy();
-    header('Location: '.url('login')); exit;
+    header('Location: '.url()); exit;
 }
 
 /*

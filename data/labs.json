@@ -1237,42 +1237,6 @@
       "difficulty": "Easy",
       "report": "",
       "access": "/subdomains/mfa"
-    },
-    {
-      "title": "Login CSRF vulnerability on HackerOne",
-      "difficulty": "Easy",
-      "report": "https://hackerone.com/reports/834366",
-      "access": "/subdomains/session"
-    },
-    {
-      "title": "CSRF logs the victim into attacker's account",
-      "difficulty": "Medium",
-      "report": "https://hackerone.com/reports/339352",
-      "access": "/subdomains/identity"
-    },
-    {
-      "title": "CSRF on /api/graphql allows executing mutations through GET requests",
-      "difficulty": "Hard",
-      "report": "https://hackerone.com/reports/1122408",
-      "access": "/subdomains/graphql"
-    },
-    {
-      "title": "Reflected XSS by exploiting CSRF vulnerability on Starbucks",
-      "difficulty": "Medium",
-      "report": "https://hackerone.com/reports/177508",
-      "access": "/subdomains/wishlist"
-    },
-    {
-      "title": "CSRF leads to Account takeover",
-      "difficulty": "Hard",
-      "report": "https://hackerone.com/reports/2712857",
-      "access": "/subdomains/myaccount"
-    },
-    {
-      "title": "CSRF to Cross-site Scripting (XSS)",
-      "difficulty": "Medium",
-      "report": "https://hackerone.com/reports/1118521",
-      "access": "/subdomains/academy"
     }
   ],
   "Insecure Direct Object Reference": [
