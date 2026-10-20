@@ -1,0 +1,19 @@
+RewriteEngine On
+
+# The labs Apache config aliases /subdomains to this shared folder on EVERY lab
+# host (see deploy/labs/apache.conf), so hardcoded /subdomains/<lab>/ links and
+# RewriteBase values keep working. Side effect: without this file, any lab host
+# (e.g. research.pwnedbox.site) serves every OTHER lab under /subdomains/<name>/.
+#
+# Namespace the alias: on a real lab host (<lab>.<domain>) only THIS lab and the
+# shared PHPMailer vendor dir are reachable under /subdomains/; cross-lab paths
+# return 404. Local/dev hosts (localhost, 127.0.0.1) keep the full XAMPP tree.
+#
+# Conditions below are ANDed. The last one joins host + request URI with "@@"
+# and allows the path only when the lab segment equals the host's first label
+# (\1) or is PHPMailer; anything else falls through to the 404 rule.
+RewriteCond %{REQUEST_URI} ^/subdomains/
+RewriteCond %{HTTP_HOST} !^[0-9.]+$
+RewriteCond %{HTTP_HOST} \.
+RewriteCond %{HTTP_HOST}@@%{REQUEST_URI} !^([^.]+)\.[^@]*@@/subdomains/(?:PHPMailer|\1)(/|$) [NC]
+RewriteRule ^ - [R=404,L]
