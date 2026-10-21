@@ -116,7 +116,7 @@
     },
     {
       "title": "Race Condition Bypass Allows Purchasing Flash Sale Items Beyond the Per-Customer Limit",
-      "difficulty": "Hard",
+      "difficulty": "Medium",
       "report": "",
       "access": "/subdomains/flashbuy"
     },
