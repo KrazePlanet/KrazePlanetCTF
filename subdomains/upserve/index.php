@@ -234,12 +234,15 @@ if ($action === 'login') {
     exit;
 }
 
-if (!$me) {
+// The storefront (menu + cart) is public, like a real online-ordering site.
+// Only account actions — checkout, saved cards, and order history — need a login.
+$loginRequired = ['checkout', 'place-order', 'cards', 'add-card', 'orders', 'order'];
+if (!$me && in_array($action, $loginRequired, true)) {
     $next = urlencode($_SERVER['REQUEST_URI'] ?? 'index.php');
     header('Location: index.php?action=login&next=' . $next);
     exit;
 }
-$myId = (int)$me['id'];
+$myId = $me ? (int)$me['id'] : 0;
 
 // ── Cart mutation endpoints (server-authoritative, used by the normal UI) ────────
 if ($action === 'add-to-cart' && $_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -535,14 +538,21 @@ function render_topbar($active, $me, $cartCount) {
   <a href="index.php?action=menu" class="brand"><span class="mark">HC</span> Hacker Café</a>
   <div class="nav">
     <a href="index.php?action=menu" class="<?php echo $active==='menu'?'active':''; ?>">Menu</a>
+    <?php if ($me): ?>
     <a href="index.php?action=orders" class="<?php echo $active==='orders'?'active':''; ?>">Orders</a>
     <a href="index.php?action=cards" class="<?php echo $active==='cards'?'active':''; ?>">Payment methods</a>
+    <?php endif; ?>
     <a href="index.php?action=cart" class="cart-link <?php echo $active==='cart'?'active':''; ?>">Cart<?php if ($cartCount>0): ?><span class="cart-badge"><?php echo (int)$cartCount; ?></span><?php endif; ?></a>
   </div>
   <div class="acct">
+    <?php if ($me): ?>
     <span class="av"><?php echo esc(avatar_letter($me['first_name'])); ?></span>
     <span style="font-size:0.85rem;"><?php echo esc(first_name($me['first_name'])); ?></span>
     <a href="index.php?action=logout" class="btn">Sign out</a>
+    <?php else: ?>
+    <a href="index.php?action=login" class="btn">Sign in</a>
+    <a href="index.php?action=register" class="btn btn-primary">Create account</a>
+    <?php endif; ?>
   </div>
 </div></div>
 <?php

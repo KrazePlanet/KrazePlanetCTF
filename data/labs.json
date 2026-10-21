@@ -103,22 +103,10 @@
       "access": "/subdomains/controllers"
     },
     {
-      "title": "Negative Transfer Amount Abuse Allows Stealing Funds from Other Wallets",
-      "difficulty": "Easy",
-      "report": "",
-      "access": "/subdomains/swiftpay"
-    },
-    {
       "title": "Plan Upgrade Parameter Tampering Grants Pro Access Without Payment",
       "difficulty": "Easy",
       "report": "",
       "access": "/subdomains/gigboard"
-    },
-    {
-      "title": "Missing Idempotency on Claim Submission Allows Duplicate Expense Payouts",
-      "difficulty": "Easy",
-      "report": "",
-      "access": "/subdomains/claimdesk"
     },
     {
       "title": "Return Cancellation Does Not Reverse Wallet Refund Allowing Double Payout",
@@ -131,12 +119,6 @@
       "difficulty": "Hard",
       "report": "",
       "access": "/subdomains/flashbuy"
-    },
-    {
-      "title": "Business Logic Bypass Allows Setting “Read Access\" Role Without Pro Plan Subscription",
-      "difficulty": "Hard",
-      "report": "https://hackerone.com/reports/3591764",
-      "access": "/subdomains/lovable"
     },
     {
       "title": "OLO Total price manipulation using negative quantities",
@@ -167,6 +149,12 @@
       "difficulty": "Hard",
       "report": "https://hackerone.com/reports/1443211",
       "access": "/subdomains/mattermost"
+    },
+    {
+      "title": "Business Logic Bypass Allows Setting “Read Access\" Role Without Pro Plan Subscription",
+      "difficulty": "Hard",
+      "report": "https://hackerone.com/reports/3591764",
+      "access": "/subdomains/lovable"
     }
   ],
   "Improper Access Control": [

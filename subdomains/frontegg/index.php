@@ -127,7 +127,7 @@ function org_invites($db, $ownerId) {
     $out = []; $r = $st->get_result(); while ($row = $r->fetch_assoc()) $out[] = $row; return $out;
 }
 
-$action = $_GET['action'] ?? 'users';
+$action = $_GET['action'] ?? 'home';
 $me = current_user($db);
 
 // ── Auth ──────────────────────────────────────────────────────────────────────
@@ -173,6 +173,13 @@ if ($action === 'login') {
         $authError = 'Invalid email or password.';
     }
     render_auth('login', $authError);
+    exit;
+}
+
+// Public marketing landing page — the admin console itself stays behind login.
+if ($action === 'home') {
+    if ($me) { header('Location: index.php?action=users'); exit; }
+    render_landing();
     exit;
 }
 
@@ -394,6 +401,73 @@ input:focus{outline:none;border-color:#4f46e5;}
     </div>
   </div>
 </div>
+</body></html>
+<?php
+}
+
+function render_landing() {
+?>
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Frontegg — User management for your product</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;}
+body{margin:0;background:#f4f5f9;color:#1e2230;font-family:'Inter',sans-serif;}
+a{text-decoration:none;}
+.lp-nav{position:sticky;top:0;z-index:20;background:rgba(244,245,249,.85);backdrop-filter:blur(8px);border-bottom:1px solid #e5e7eb;}
+.lp-nav-in{max-width:1080px;margin:0 auto;padding:0.9rem 1.5rem;display:flex;align-items:center;justify-content:space-between;}
+.lp-brand{display:flex;align-items:center;gap:0.55rem;font-weight:800;font-size:1.15rem;color:#1e2230;}
+.lp-brand .mark{width:30px;height:30px;border-radius:8px;background:#4f46e5;color:#fff;display:flex;align-items:center;justify-content:center;font-size:0.85rem;font-weight:700;}
+.lp-nav-links{display:flex;align-items:center;gap:1.4rem;}
+.lp-nav-links .lk{color:#4b5563;font-weight:500;font-size:0.9rem;}
+.lp-nav-links .lk:hover{color:#1e2230;}
+.lp-signin{color:#4f46e5;font-weight:600;font-size:0.9rem;}
+.lp-cta{background:#4f46e5;color:#fff;border-radius:8px;padding:0.5rem 1rem;font-weight:600;font-size:0.9rem;}
+.lp-cta:hover{background:#4338ca;}
+.lp-hero{max-width:820px;margin:0 auto;padding:5rem 1.5rem 3rem;text-align:center;}
+.lp-badge{display:inline-block;background:#eef2ff;color:#4f46e5;border:1px solid #e0e7ff;border-radius:999px;padding:0.3rem 0.85rem;font-size:0.78rem;font-weight:600;margin-bottom:1.25rem;}
+.lp-hero h1{font-size:2.9rem;line-height:1.1;letter-spacing:-0.02em;margin:0 0 1rem;}
+.lp-hero h1 span{color:#4f46e5;}
+.lp-hero p{font-size:1.1rem;color:#5b6472;max-width:620px;margin:0 auto 1.9rem;}
+.lp-actions{display:flex;gap:0.75rem;justify-content:center;flex-wrap:wrap;}
+.lp-btn-primary{background:#4f46e5;color:#fff;border-radius:9px;padding:0.75rem 1.4rem;font-weight:600;}
+.lp-btn-primary:hover{background:#4338ca;}
+.lp-btn-ghost{background:#fff;color:#1e2230;border:1px solid #d1d5db;border-radius:9px;padding:0.75rem 1.4rem;font-weight:600;}
+.lp-btn-ghost:hover{border-color:#9ca3af;}
+.lp-features{max-width:1080px;margin:0 auto;padding:1rem 1.5rem 5rem;display:grid;grid-template-columns:repeat(3,1fr);gap:1.25rem;}
+.lp-card{background:#fff;border:1px solid #e5e7eb;border-radius:14px;padding:1.5rem;box-shadow:0 2px 14px rgba(30,30,60,0.05);}
+.lp-ic{width:42px;height:42px;border-radius:10px;background:#eef2ff;color:#4f46e5;display:flex;align-items:center;justify-content:center;font-size:1.2rem;margin-bottom:0.9rem;}
+.lp-card h3{font-size:1.05rem;margin:0 0 0.4rem;}
+.lp-card p{font-size:0.9rem;color:#5b6472;margin:0;line-height:1.6;}
+.lp-foot{border-top:1px solid #e5e7eb;color:#8a92a3;font-size:0.82rem;text-align:center;padding:1.5rem;}
+@media(max-width:800px){.lp-features{grid-template-columns:1fr;}.lp-hero h1{font-size:2.1rem;}.lp-nav-links .lk{display:none;}}
+</style></head><body>
+<div class="lp-nav"><div class="lp-nav-in">
+  <a class="lp-brand" href="index.php?action=home"><span class="mark">Fé</span> Frontegg</a>
+  <div class="lp-nav-links">
+    <a class="lk" href="index.php?action=home">Product</a>
+    <a class="lk" href="index.php?action=home">Docs</a>
+    <a class="lk" href="index.php?action=home">Pricing</a>
+    <a class="lp-signin" href="index.php?action=login">Sign in</a>
+    <a class="lp-cta" href="index.php?action=register">Get started</a>
+  </div>
+</div></div>
+<div class="lp-hero">
+  <span class="lp-badge">Customer identity &amp; access management</span>
+  <h1>User management your <span>customers can trust</span></h1>
+  <p>Add authentication, organization management, SSO and fine-grained domain controls to your product — without building identity from scratch.</p>
+  <div class="lp-actions">
+    <a class="lp-btn-primary" href="index.php?action=register">Start for free →</a>
+    <a class="lp-btn-ghost" href="index.php?action=login">Sign in to console</a>
+  </div>
+</div>
+<div class="lp-features">
+  <div class="lp-card"><div class="lp-ic">👤</div><h3>User management</h3><p>Invite teammates, manage roles and keep every organization's members in one place.</p></div>
+  <div class="lp-card"><div class="lp-ic">🛡️</div><h3>Domain restrictions</h3><p>Allow or block sign-ups and invites by email domain to keep your workspace secure.</p></div>
+  <div class="lp-card"><div class="lp-ic">🔑</div><h3>SSO &amp; security</h3><p>Enterprise-grade single sign-on, MFA and audit logs built in from day one.</p></div>
+</div>
+<div class="lp-foot">© Frontegg · Admin console demo for security training.</div>
 </body></html>
 <?php
 }
