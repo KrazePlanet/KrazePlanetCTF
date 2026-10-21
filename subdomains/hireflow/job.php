@@ -1,4 +1,5 @@
 <?php
+require_once __DIR__.'/config.php';
 $id=(int)($_GET['id']??0); $stmt=db()->prepare("SELECT * FROM jobs WHERE id=? AND status='open'"); $stmt->bind_param('i',$id); $stmt->execute(); $job=stmt_one($stmt); if(!$job){http_response_code(404); die('Role not found.');}
 $title=$job['title']; require 'header.php'; ?>
 <main class="container job-detail"><a class="back" href="jobs.php">← All roles</a><div class="job-head"><div><span class="role-dept"><?=e($job['department'])?></span><h1><?=e($job['title'])?></h1><div class="chips"><span><?=e($job['location'])?></span><span><?=e($job['work_mode'])?></span><span><?=e($job['employment_type'])?></span><?php if($job['salary']): ?><span><?=e($job['salary'])?></span><?php endif; ?></div></div><a class="btn dark" href="apply.php?job=<?=$job['id']?>">Apply for this role</a></div>

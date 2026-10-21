@@ -259,6 +259,55 @@ select.form-control{cursor:pointer;}
 .toast.show{opacity:1;transform:translateY(0);}
 .toast.success{background:#065f46;}
 .toast.error{background:#991b1b;}
+
+/* ════ SHOPIFY-STYLE PRODUCT EDITOR (Write section) ════ */
+#sec-write.sp-bleed{width:100vw;position:relative;left:50%;right:50%;margin-left:-50vw;margin-right:-50vw;margin-top:-2.5rem;background:#f1f1f1;min-height:calc(100vh - var(--q-nav-h));padding:1.5rem 0 3rem;}
+.sp-wrap{max-width:1000px;margin:0 auto;padding:0 1.5rem;}
+.sp-topbar{display:flex;align-items:center;gap:.75rem;margin-bottom:1.1rem;}
+.sp-back{width:30px;height:30px;border:1px solid #d0d0d0;background:#fff;border-radius:8px;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;color:#4a4a4a;font-size:.95rem;}
+.sp-back:hover{background:#f6f6f6;}
+.sp-title{font-size:1.2rem;font-weight:700;color:#1a1a1a;letter-spacing:-.01em;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.sp-top-actions{display:flex;align-items:center;gap:.5rem;}
+.sp-ghost{background:#fff;border:1px solid #d0d0d0;border-radius:8px;padding:.4rem .8rem;font-size:.82rem;font-weight:600;color:#1a1a1a;cursor:pointer;font-family:inherit;}
+.sp-ghost:hover{background:#f6f6f6;}
+.sp-pager{display:flex;}
+.sp-pager button{width:30px;height:32px;background:#fff;border:1px solid #d0d0d0;cursor:pointer;color:#8a8a8a;display:inline-flex;align-items:center;justify-content:center;}
+.sp-pager button:first-child{border-radius:8px 0 0 8px;}
+.sp-pager button:last-child{border-radius:0 8px 8px 0;border-left:none;}
+.sp-grid{display:grid;grid-template-columns:1fr 300px;gap:1.25rem;align-items:start;}
+.sp-card{background:#fff;border:1px solid #e3e3e3;border-radius:12px;padding:1.05rem 1.1rem;box-shadow:0 1px 0 rgba(0,0,0,.04);margin-bottom:1.1rem;}
+.sp-side .sp-card:last-child,.sp-main .sp-card:last-child{margin-bottom:0;}
+.sp-field{margin-bottom:1rem;}
+.sp-field:last-child{margin-bottom:0;}
+.sp-label{display:block;font-size:.8rem;font-weight:600;color:#303030;margin-bottom:.35rem;}
+.sp-input{width:100%;border:1px solid #8a8a8a;border-radius:8px;padding:.5rem .7rem;font-size:.88rem;font-family:inherit;color:#1a1a1a;outline:none;background:#fff;}
+.sp-input:focus{border-color:#005bd3;box-shadow:0 0 0 2px #cce3ff;}
+.sp-card-title{font-size:.9rem;font-weight:700;color:#1a1a1a;margin-bottom:.7rem;}
+.sp-card-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:.75rem;}
+.sp-card-head h3{font-size:.9rem;font-weight:700;}
+.sp-link{color:#005bd3;font-size:.82rem;font-weight:600;background:none;border:none;cursor:pointer;font-family:inherit;}
+.sp-link:hover{text-decoration:underline;}
+.sp-rte{border:1px solid #8a8a8a;border-radius:8px;overflow:hidden;}
+.sp-rte:focus-within{border-color:#005bd3;box-shadow:0 0 0 2px #cce3ff;}
+.sp-rte-bar{display:flex;flex-wrap:wrap;align-items:center;background:#fbfbfb;border-bottom:1px solid #e3e3e3;padding:.3rem .4rem;}
+.sp-tool{background:none;border:1px solid transparent;border-radius:6px;min-width:28px;height:28px;padding:0 .35rem;font-size:.85rem;color:#4a4a4a;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:.15rem;font-family:inherit;line-height:1;}
+.sp-tool:hover{background:#f0f0f0;color:#1a1a1a;}
+.sp-tool.active{background:#e7f0ff;color:#005bd3;border-color:#cce3ff;}
+.sp-tool .bi-caret-down-fill{font-size:.5rem;opacity:.55;}
+.sp-div{width:1px;height:18px;background:#e2e2e2;margin:0 .25rem;}
+#sec-write .rte-visual{min-height:150px;padding:.7rem .85rem;font-size:.9rem;color:#1a1a1a;line-height:1.7;outline:none;}
+#sec-write .rte-source{display:none;width:100%;min-height:150px;border:none;outline:none;resize:vertical;font-family:ui-monospace,'Courier New',monospace;font-size:.82rem;padding:.7rem .85rem;color:#1a1a1a;background:#fff;line-height:1.6;}
+.sp-help{font-size:.76rem;color:#6a6a6a;margin-top:.45rem;}
+.sp-media{border:1.5px dashed #c9cccf;border-radius:10px;padding:1.3rem;text-align:center;background:#fafafa;}
+.sp-media p{font-size:.76rem;color:#8a8a8a;margin-top:.55rem;}
+.sp-status-row{display:flex;align-items:center;gap:.35rem;font-size:.76rem;color:#6a6a6a;margin-top:.55rem;}
+.sp-channel{display:flex;align-items:center;gap:.5rem;font-size:.82rem;color:#4a4a4a;padding:.28rem 0;}
+.sp-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+.sp-savebar{display:flex;justify-content:flex-end;gap:.6rem;margin-top:1.1rem;}
+.sp-save{background:#303030;color:#fff;border:none;border-radius:8px;padding:.5rem 1.15rem;font-size:.85rem;font-weight:600;cursor:pointer;font-family:inherit;}
+.sp-save:hover{background:#1a1a1a;}
+.sp-cancel{background:#fff;border:1px solid #d0d0d0;border-radius:8px;padding:.5rem 1rem;font-size:.85rem;font-weight:600;color:#1a1a1a;cursor:pointer;font-family:inherit;}
+@media(max-width:820px){.sp-grid{grid-template-columns:1fr;}.sp-title{white-space:normal;}}
 </style>
 </head>
 <body>
@@ -346,53 +395,100 @@ select.form-control{cursor:pointer;}
         </div>
 
         <!-- ── WRITE ── -->
-        <div id="sec-write" style="display:none;">
-            <div class="editor-back">
-                <button class="btn-back" onclick="showSection('articles')"><i class="bi bi-arrow-left"></i> Back to My Articles</button>
-            </div>
-            <div class="editor-card">
-                <div class="form-group">
-                    <label class="form-label">Title <span style="color:var(--q-red)">*</span></label>
-                    <input type="text" id="artTitle" class="form-control" placeholder="Give your article a compelling title…">
-                </div>
-                <div class="form-group">
-                    <label class="form-label">Tags <span style="color:var(--q-muted);font-weight:400;font-size:.73rem;">(comma-separated)</span></label>
-                    <input type="text" id="artTags" class="form-control" placeholder="e.g. webdev, css, javascript">
-                </div>
-                <div class="form-group">
-                    <label class="form-label">Body</label>
-                    <div class="rte-outer">
-                        <div class="rte-tabs-row">
-                            <div class="rte-tab-btns">
-                                <button type="button" class="rte-tab active" id="tab-write" onclick="switchTab('write')"><i class="bi bi-pen"></i> Write</button>
-                                <button type="button" class="rte-tab"        id="tab-html"  onclick="switchTab('html')"><i class="bi bi-code-slash"></i> HTML</button>
-                            </div>
-                            <div class="rte-toolbar" id="rteToolbar">
-                                <button type="button" class="rte-fmt" onclick="rteExec('bold')"              title="Bold"><strong>B</strong></button>
-                                <button type="button" class="rte-fmt" onclick="rteExec('italic')"            title="Italic"><em>I</em></button>
-                                <button type="button" class="rte-fmt" onclick="rteExec('underline')"         title="Underline"><u>U</u></button>
-                                <button type="button" class="rte-fmt" onclick="rteExec('insertOrderedList')" title="Ordered list"><i class="bi bi-list-ol"></i></button>
-                            </div>
-                        </div>
-                        <div contenteditable="true" class="rte-visual" id="rteVisual"></div>
-                        <textarea class="rte-source" id="rteSource"
-                            placeholder="<!-- Paste your raw HTML here -->&#10;Payload: &quot;&gt;]&lt;img src=x onerror=alert(document.domain)&gt;"></textarea>
+        <div id="sec-write" class="sp-bleed" style="display:none;">
+          <div class="sp-wrap">
+            <div class="sp-topbar">
+                <button class="sp-back" onclick="showSection('articles')" title="Back to articles"><i class="bi bi-chevron-left"></i></button>
+                <h1 class="sp-title" id="spTitle">New article</h1>
+                <div class="sp-top-actions">
+                    <button class="sp-ghost" type="button">Duplicate</button>
+                    <button class="sp-ghost" type="button">Preview</button>
+                    <div class="sp-pager">
+                        <button type="button" title="Previous"><i class="bi bi-chevron-left"></i></button>
+                        <button type="button" title="Next"><i class="bi bi-chevron-right"></i></button>
                     </div>
-                    <div class="rte-hint">Click the <strong>HTML</strong> tab to paste raw HTML directly — stored without sanitisation and rendered via <code>innerHTML</code> on your articles page.</div>
                 </div>
-                <div style="display:flex;align-items:center;gap:.75rem;">
-                    <label class="form-label" style="margin:0;white-space:nowrap;">Status:</label>
-                    <select id="artStatus" class="form-control" style="max-width:145px;">
-                        <option value="published">Published</option>
+            </div>
+
+            <div class="sp-grid">
+              <!-- MAIN COLUMN -->
+              <div class="sp-main">
+                <div class="sp-card">
+                    <div class="sp-field">
+                        <label class="sp-label" for="artTitle">Title</label>
+                        <input type="text" id="artTitle" class="sp-input" placeholder="Short sleeve t-shirt"
+                               oninput="document.getElementById('spTitle').textContent=this.value.trim()||'New article'">
+                    </div>
+                    <div class="sp-field">
+                        <label class="sp-label">Description</label>
+                        <div class="sp-rte">
+                            <div class="sp-rte-bar">
+                                <div id="rteToolbar" style="display:flex;flex-wrap:wrap;align-items:center;gap:.15rem;">
+                                    <button type="button" class="sp-tool" title="Paragraph style">A <i class="bi bi-caret-down-fill"></i></button>
+                                    <span class="sp-div"></span>
+                                    <button type="button" class="sp-tool" onclick="rteExec('bold')" title="Bold"><strong>B</strong></button>
+                                    <button type="button" class="sp-tool" onclick="rteExec('italic')" title="Italic"><em>I</em></button>
+                                    <button type="button" class="sp-tool" onclick="rteExec('underline')" title="Underline"><u>U</u></button>
+                                    <span class="sp-div"></span>
+                                    <button type="button" class="sp-tool" title="Alignment"><i class="bi bi-text-left"></i> <i class="bi bi-caret-down-fill"></i></button>
+                                    <button type="button" class="sp-tool" title="Text color"><span style="border-bottom:2px solid #1a1a1a;line-height:.8;">A</span> <i class="bi bi-caret-down-fill"></i></button>
+                                    <button type="button" class="sp-tool" onclick="rteExec('insertOrderedList')" title="List"><i class="bi bi-list-ol"></i></button>
+                                    <button type="button" class="sp-tool" title="Insert link"><i class="bi bi-link-45deg"></i></button>
+                                    <button type="button" class="sp-tool" title="Insert table"><i class="bi bi-table"></i> <i class="bi bi-caret-down-fill"></i></button>
+                                    <button type="button" class="sp-tool" title="Insert image"><i class="bi bi-image"></i> <i class="bi bi-caret-down-fill"></i></button>
+                                    <button type="button" class="sp-tool" title="Insert video"><i class="bi bi-camera-video"></i></button>
+                                    <button type="button" class="sp-tool" onclick="rteExec('removeFormat')" title="Clear formatting"><i class="bi bi-eraser"></i></button>
+                                </div>
+                                <div style="margin-left:auto;display:flex;gap:.1rem;">
+                                    <button type="button" class="sp-tool active" id="tab-write" onclick="switchTab('write')" title="Rich text"><i class="bi bi-pen"></i></button>
+                                    <button type="button" class="sp-tool" id="tab-html" onclick="switchTab('html')" title="Edit HTML source"><i class="bi bi-code-slash"></i></button>
+                                </div>
+                            </div>
+                            <div contenteditable="true" class="rte-visual" id="rteVisual"></div>
+                            <textarea class="rte-source" id="rteSource" placeholder="&lt;!-- Paste raw HTML here --&gt;"></textarea>
+                        </div>
+                        <div class="sp-help">Use the <i class="bi bi-code-slash"></i> button to edit the HTML source directly. Content is saved as-is and rendered with <code>innerHTML</code> on your articles page.</div>
+                    </div>
+                </div>
+
+                <div class="sp-card">
+                    <div class="sp-card-head"><h3>Media</h3><button type="button" class="sp-link">Add media from URL</button></div>
+                    <div class="sp-media">
+                        <button type="button" class="sp-ghost">Add file</button>
+                        <p>Accepts images, videos, or 3D models</p>
+                    </div>
+                </div>
+              </div>
+
+              <!-- SIDEBAR -->
+              <div class="sp-side">
+                <div class="sp-card">
+                    <div class="sp-card-title">Product status</div>
+                    <select id="artStatus" class="sp-input">
+                        <option value="published">Active</option>
                         <option value="draft">Draft</option>
                     </select>
+                    <div class="sp-status-row"><i class="bi bi-info-circle"></i> This article will appear on your articles page.</div>
                 </div>
-                <div class="editor-actions">
-                    <button class="btn-outline" onclick="showSection('articles')">Cancel</button>
-                    <button class="btn-write"   onclick="publishArticle()"><i class="bi bi-send"></i> Publish</button>
+                <div class="sp-card">
+                    <div class="sp-card-title">Sales channels and apps</div>
+                    <div class="sp-channel"><span class="sp-dot" style="background:#16a34a"></span> Online Store</div>
+                    <div class="sp-channel"><span class="sp-dot" style="background:#16a34a"></span> Point of Sale</div>
                 </div>
-                <div class="editor-err" id="artErr"></div>
+                <div class="sp-card">
+                    <div class="sp-card-title">Organization</div>
+                    <label class="sp-label" for="artTags">Tags</label>
+                    <input type="text" id="artTags" class="sp-input" placeholder="webdev, css, javascript">
+                </div>
+              </div>
             </div>
+
+            <div class="sp-savebar">
+                <button class="sp-cancel" type="button" onclick="showSection('articles')">Cancel</button>
+                <button class="sp-save" type="button" onclick="publishArticle()">Save</button>
+            </div>
+            <div class="editor-err" id="artErr" style="text-align:right;margin-top:.5rem;"></div>
+          </div>
         </div>
 
         <!-- ── PROFILE ── -->
@@ -509,6 +605,7 @@ function getBody(){
 function resetEditor(){
     _tabMode='write';
     document.getElementById('artTitle').value='';
+    var _st=document.getElementById('spTitle');if(_st)_st.textContent='New article';
     document.getElementById('artTags').value='';
     document.getElementById('rteVisual').innerHTML='';
     document.getElementById('rteSource').value='';
