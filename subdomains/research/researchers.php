@@ -8,8 +8,15 @@
  * researchers.php?next=https://example.com
  */
 
-if (isset($_GET['next']) && $_GET['next'] !== '') {
-    header('Location: ' . $_GET['next'], true, 302);
+// Deliberate open redirect. The ?next value is sent to the Location header
+// with no host validation whenever it points off-site (an absolute or
+// protocol-relative URL), e.g. publications.php?next=https://bing.com. A
+// relative path such as ?next=/ just renders the page, so a student first
+// discovers the parameter via the 'Return to Research Portal' links, then
+// swaps in an external URL to trigger the redirect.
+$next = $_GET['next'] ?? '';
+if ($next !== '' && preg_match('#^(https?:)?//#i', $next)) {
+    header('Location: ' . $next, true, 302);
     exit;
 }
 
@@ -223,14 +230,6 @@ if (isset($_GET['next']) && $_GET['next'] !== '') {
 
             <a href="/">
                 Home
-            </a>
-
-            <a href="/publications.php">
-                Publications
-            </a>
-
-            <a href="/researchers.php">
-                Researchers
             </a>
 
         </nav>

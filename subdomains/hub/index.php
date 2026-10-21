@@ -66,6 +66,8 @@ html,body{min-height:100vh;background:#0f1114;color:#e4e7eb;font-family:-apple-s
 .console-header .ch-info h2{font-size:1.15rem;font-weight:700;color:#f0f4f8;}
 .console-header .ch-info .ch-sub{font-size:.72rem;color:#6b7280;}
 .console-header .ch-badge{background:#064e3b;color:#6ee7b7;font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.5px;padding:4px 10px;border-radius:4px;border:1px solid #059669;}
+.console-header .ch-logout{background:transparent;color:#f87171;font-size:.7rem;font-weight:600;padding:5px 12px;border-radius:4px;border:1px solid #3a2d33;cursor:pointer;display:inline-flex;align-items:center;gap:6px;}
+.console-header .ch-logout:hover{border-color:#f87171;background:rgba(248,113,113,0.08);}
 .dash-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px;margin-bottom:22px;}
 .stat-card{background:#1c1f26;border:1px solid #2d323c;border-radius:8px;padding:16px 18px;transition:border-color .15s;}
 .stat-card:hover{border-color:#3b4452;}
@@ -153,6 +155,7 @@ table.data-tbl tr:hover td{background:#21252f;}
             <div class="ch-sub">Welcome, administrator — you are signed in with full privileges.</div>
         </div>
         <div class="ch-badge">Admin Session</div>
+        <button type="button" class="ch-logout" id="logoutBtn"><svg viewBox="0 0 24 24" width="13" height="13" fill="currentColor"><path d="M16 17v-3H9v-4h7V7l5 5-5 5zM14 2a2 2 0 0 1 2 2v2h-2V4H4v16h10v-2h2v2a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h10z"/></svg> Logout</button>
     </div>
 
     <div class="dash-grid">
@@ -259,6 +262,18 @@ table.data-tbl tr:hover td{background:#21252f;}
             errorAlert.classList.add('show');
         });
     });
+
+    var logoutBtn = document.getElementById('logoutBtn');
+    if (logoutBtn) {
+        logoutBtn.addEventListener('click', function() {
+            consoleWrap.classList.remove('show');
+            if (loginCard) loginCard.style.display = '';
+            errorAlert.classList.remove('show');
+            document.getElementById('username').value = '';
+            document.getElementById('password').value = '';
+            window.scrollTo(0, 0);
+        });
+    }
 })();
 </script>
 </body>

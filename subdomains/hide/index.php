@@ -373,20 +373,18 @@ nav a:hover {
 .product-image {
     height: 180px;
 
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    overflow: hidden;
 
-    background:
-        linear-gradient(
-            135deg,
-            #e5e7eb,
-            #f9fafb
-        );
+    background: #e5e7eb;
+}
 
-    color: #64748b;
+.product-image img {
+    width: 100%;
+    height: 100%;
 
-    font-size: 46px;
+    object-fit: cover;
+
+    display: block;
 }
 
 .card-body {
@@ -618,7 +616,11 @@ Home
 
 <div class="product-image">
 
-<?= $product['category'] === 'Audio' ? '◉' : '◆' ?>
+<img
+    src="images/<?= $product['id'] ?>.svg"
+    alt="<?= htmlspecialchars($product['name']) ?>"
+    loading="lazy"
+>
 
 </div>
 

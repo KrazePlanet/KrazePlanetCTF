@@ -40,8 +40,15 @@ $pdo->exec("
 $seedCheck = $pdo->query("SELECT COUNT(*) FROM lab201_users")->fetchColumn();
 if ($seedCheck == 0) {
     $ins = $pdo->prepare("INSERT INTO lab201_users (username, password, role) VALUES (?, ?, ?)");
-    $ins->execute(["admin",   password_hash("admin",       PASSWORD_DEFAULT), "admin"]);
+    $ins->execute(["admin",   password_hash("root",        PASSWORD_DEFAULT), "admin"]);
     $ins->execute(["support", password_hash("support@123", PASSWORD_DEFAULT), "user"]);
+}
+
+// Ensure the admin credential stays admin / root (migrates any older admin/admin seed)
+$adm = $pdo->query("SELECT id, password FROM lab201_users WHERE username = 'admin'")->fetch();
+if ($adm && password_verify("admin", $adm['password'])) {
+    $pdo->prepare("UPDATE lab201_users SET password = ? WHERE id = ?")
+        ->execute([password_hash("root", PASSWORD_DEFAULT), $adm['id']]);
 }
 
 // ── AJAX login handler ──
@@ -55,8 +62,6 @@ if (isset($_GET['action']) && $_GET['action'] === 'login' && $_SERVER['REQUEST_M
     $stmt->execute([$uname]);
     $row = $stmt->fetch();
 
-    // VULNERABLE: status value is returned in the JSON body but the CLIENT trusts it without
-    // any server-side session. An attacker intercepts ANY response and flips false → true.
     if ($row && password_verify($pass, $row['password'])) {
         echo json_encode(['status' => true,  'errorMessage' => '']);
     } else {
@@ -437,7 +442,6 @@ if (isset($_GET['action']) && $_GET['action'] === 'login' && $_SERVER['REQUEST_M
         <a href="index.php">
             <i class="bi bi-arrow-left"></i> Back to Labs
         </a>
-        <span class="lab-badge-real">HackerOne #1490470 - UPS VDP - Auth Bypass - Real World</span>
     </div>
 
     <!-- UPS site header -->
@@ -501,20 +505,12 @@ if (isset($_GET['action']) && $_GET['action'] === 'login' && $_SERVER['REQUEST_M
             </nav>
             <div class="admin-user">
                 <div class="admin-user-dot"></div>
-                Admin (bypassed)
+                Administrator
+                <button type="button" id="logoutBtn" onclick="adminLogout()" style="margin-left:14px;background:transparent;border:1px solid rgba(255,255,255,0.25);color:#fff;border-radius:5px;padding:5px 12px;font-size:0.78rem;cursor:pointer;display:inline-flex;align-items:center;gap:5px;"><i class="bi bi-box-arrow-right"></i> Logout</button>
             </div>
         </div>
 
         <div class="admin-body">
-
-            <div class="admin-bypass-alert">
-                <i class="bi bi-check-circle-fill" style="font-size:1.2rem;color:#2ecc71;flex-shrink:0;"></i>
-                <div>
-                    <strong>Authentication Bypassed!</strong> - You flipped <code style="background:rgba(255,255,255,0.1);padding:0.1rem 0.3rem;border-radius:3px;font-family:monospace;color:#a0f0c0;">"status":false</code> →
-                    <code style="background:rgba(255,255,255,0.1);padding:0.1rem 0.3rem;border-radius:3px;font-family:monospace;color:#a0f0c0;">"status":true</code>
-                    in the server response. The app trusted the client-side value and granted admin access.
-                </div>
-            </div>
 
             <!-- Stats -->
             <div class="admin-stats">
@@ -605,32 +601,6 @@ if (isset($_GET['action']) && $_GET['action'] === 'login' && $_SERVER['REQUEST_M
                 </tbody>
             </table>
 
-            <!-- Lab info box inside admin panel -->
-            <div class="lab-info-box">
-                <h4><i class="bi bi-bug-fill"></i> Real World Lab - Vulnerability Explained</h4>
-                <p>
-                    The database contains two accounts: <code>admin / admin</code> and <code>support / support@123</code>.<br><br>
-                    The login endpoint returns <code>{"status":true}</code> for correct credentials and
-                    <code>{"status":false}</code> for wrong ones. The client-side JavaScript reads this
-                    <code>status</code> field to decide whether to grant access -
-                    <strong style="color:#fbbf24;">no server-side session is created or validated</strong>.<br><br>
-                    Use <strong style="color:#fbbf24;">Burp Suite</strong> to intercept the login response:
-                    send any wrong password, intercept the response in Burp Proxy, and change
-                    <code>"status":false</code> → <code>"status":true</code>, then forward.
-                    The app grants admin access because it blindly trusts the client-received JSON value.<br><br>
-                    The real-world impact included access to 1,066 shipment reports containing full PII
-                    (tracking numbers, addresses, service details) and the ability to delete records or change the admin password.
-                </p>
-                <div class="lab-meta-row">
-                    <div class="lab-meta-item"><strong>Platform:</strong> HackerOne</div>
-                    <div class="lab-meta-item"><strong>Report:</strong> #1490470</div>
-                    <div class="lab-meta-item"><strong>Target:</strong> UPS VDP</div>
-                    <div class="lab-meta-item"><strong>Severity:</strong> Medium (6.5)</div>
-                    <div class="lab-meta-item"><strong>Bounty:</strong> Hidden</div>
-                    <div class="lab-meta-item"><strong>Researcher:</strong> 7odamoo</div>
-                    <div class="lab-meta-item"><strong>Status:</strong> Resolved (Mar 2022)</div>
-                </div>
-            </div>
         </div>
     </div>
 
@@ -655,9 +625,6 @@ if (isset($_GET['action']) && $_GET['action'] === 'login' && $_SERVER['REQUEST_M
             });
             const data = await resp.json();
 
-            // VULNERABLE: app trusts the client-received JSON status field.
-            // No server-side session is created - intercepting this response
-            // in Burp Suite and flipping false → true grants admin access.
             if (data.status === true) {
                 document.getElementById('loginPage').style.display = 'none';
                 document.getElementById('adminPanel').style.display = 'block';
@@ -672,6 +639,16 @@ if (isset($_GET['action']) && $_GET['action'] === 'login' && $_SERVER['REQUEST_M
 
         btn.disabled = false;
         btn.innerHTML = '<i class="bi bi-box-arrow-in-right"></i> Sign In';
+    }
+
+    // ── Logout: return to the login page ──
+    function adminLogout() {
+        document.getElementById('adminPanel').style.display = 'none';
+        document.getElementById('loginPage').style.display = '';
+        const u = document.getElementById('username'); if (u) u.value = '';
+        const p = document.getElementById('password'); if (p) p.value = '';
+        const err = document.getElementById('loginError'); if (err) err.style.display = 'none';
+        window.scrollTo(0, 0);
     }
     </script>
 </body>

@@ -58,6 +58,72 @@ $pdo->exec("
     )
 ");
 
+// ── Addresses table ──
+$pdo->exec("
+    CREATE TABLE IF NOT EXISTS lab203_addresses (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        user_phone VARCHAR(15) NOT NULL,
+        label VARCHAR(30) NOT NULL DEFAULT 'Home',
+        address VARCHAR(255) NOT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        INDEX (user_phone)
+    )
+");
+try { $pdo->exec("ALTER TABLE lab203_orders ADD COLUMN IF NOT EXISTS delivery_address VARCHAR(255) NULL"); } catch (Exception $e) {}
+
+// ── Default saved addresses (seeded per account on first load) ──
+$lab203_default_addresses = [
+    '+919876543210' => [['Home','Flat 4B, Sunrise Apartments, MG Road, Bengaluru 560001'],['Work','Block C, Prestige Tech Park, Whitefield, Bengaluru 560066']],
+    '+918765432109' => [['Home','Door 22, Green Valley Layout, HSR Layout, Bengaluru 560102'],['Work','WeWork Galaxy, 43 Residency Rd, Bengaluru 560025']],
+    '+917654321098' => [['Home','S-7, Shivam Heights, Prabhadevi, Mumbai 400025'],['Work','9th Floor, One BKC Tower, BKC, Mumbai 400051']],
+    '+916543210987' => [['Home','3/14 Rajouri Garden Extn, New Delhi 110027'],['Work','F-12, Cyber City Tower B, Gurgaon 122002']],
+    '+919988776655' => [['Home','Plot 46, Kaveri Nagar, Hyderabad 500062'],['Work','2nd Floor, DLF Cyber Hub, Hyderabad 500081']],
+    '+919876543211' => [['Home','Flat 7A, Lake View Residency, Koramangala, Bengaluru 560034'],['Work','Tower B, Embassy TechVillage, Bengaluru 560103']],
+    '+919876543212' => [['Home','12/3, Rose Garden Colony, Viman Nagar, Pune 411014'],['Work','Level 5, Panchshil Tech Park, Hinjewadi, Pune 411057']],
+    '+919876543213' => [['Home','B-204, Palm Meadows, Sector 21, Noida 201301'],['Work','7th Floor, DLF Cyber City, Gurugram 122002']],
+];
+
+function lab203_seed_addresses($pdo, $phone, $defaults) {
+    $c = $pdo->prepare("SELECT COUNT(*) FROM lab203_addresses WHERE user_phone = ?");
+    $c->execute([$phone]);
+    if ($c->fetchColumn() > 0) return;
+    $rows = $defaults[$phone] ?? [];
+    if (!$rows) return;
+    $ins = $pdo->prepare("INSERT INTO lab203_addresses (user_phone, label, address) VALUES (?,?,?)");
+    foreach ($rows as $r) $ins->execute([$phone, $r[0], $r[1]]);
+}
+
+// ── AJAX: get_addresses ──
+if (isset($_GET['action']) && $_GET['action'] === 'get_addresses' && $_SERVER['REQUEST_METHOD'] === 'POST') {
+    while (ob_get_level()) ob_end_clean();
+    header('Content-Type: application/json');
+    $body  = json_decode(file_get_contents('php://input'), true);
+    $phone = trim($body['phone'] ?? '');
+    lab203_seed_addresses($pdo, $phone, $lab203_default_addresses);
+    $rows = $pdo->prepare("SELECT id, label, address FROM lab203_addresses WHERE user_phone = ? ORDER BY id");
+    $rows->execute([$phone]);
+    echo json_encode(['ok'=>true, 'addresses'=>$rows->fetchAll()]);
+    exit;
+}
+
+// ── AJAX: add_address ──
+if (isset($_GET['action']) && $_GET['action'] === 'add_address' && $_SERVER['REQUEST_METHOD'] === 'POST') {
+    while (ob_get_level()) ob_end_clean();
+    header('Content-Type: application/json');
+    $body    = json_decode(file_get_contents('php://input'), true);
+    $phone   = trim($body['phone']   ?? '');
+    $label   = trim($body['label']   ?? 'Other');
+    $address = trim($body['address'] ?? '');
+    if (!$phone) { echo json_encode(['ok'=>false,'message'=>'Session expired.']); exit; }
+    if ($address === '') { echo json_encode(['ok'=>false,'message'=>'Address is required.']); exit; }
+    $label   = mb_substr($label !== '' ? $label : 'Other', 0, 30);
+    $address = mb_substr($address, 0, 255);
+    $ins = $pdo->prepare("INSERT INTO lab203_addresses (user_phone, label, address) VALUES (?,?,?)");
+    $ins->execute([$phone, $label, $address]);
+    echo json_encode(['ok'=>true, 'id'=>(int)$pdo->lastInsertId(), 'label'=>$label, 'address'=>$address]);
+    exit;
+}
+
 // ── Seed default users + orders (once) ──
 $sc = $pdo->query("SELECT COUNT(*) FROM lab203_users WHERE phone IN ('+919876543210','+918765432109')")->fetchColumn();
 if ($sc == 0) {
@@ -90,6 +156,79 @@ if ($sc == 0) {
         ['+919988776655', 'Dettol Soap 3-pack',        1, 120.00, 'processing', date('Y-m-d H:i:s', strtotime('-2 hours'))],
     ];
     foreach ($orders as $o) $io->execute($o);
+}
+
+// ── Products catalog (lab demo storefront) ──
+$lab203_products = [
+    ['id'=>1,  'name'=>'Amul Butter 500g',   'price'=>264.00, 'icon'=>'bi-box-seam-fill'],
+    ['id'=>2,  'name'=>'Farm Eggs 12 pcs',   'price'=>84.00,  'icon'=>'bi-egg-fried'],
+    ['id'=>3,  'name'=>'Brown Bread',        'price'=>45.00,  'icon'=>'bi-basket2-fill'],
+    ['id'=>4,  'name'=>'Maggi Noodles 12pk', 'price'=>120.00, 'icon'=>'bi-cup-straw'],
+    ['id'=>5,  'name'=>'Tata Salt 1kg',      'price'=>28.00,  'icon'=>'bi-droplet-fill'],
+    ['id'=>6,  'name'=>'Amul Gold Milk 1L',  'price'=>68.00,  'icon'=>'bi-cup-hot-fill'],
+    ['id'=>7,  'name'=>'Parle-G 800g',       'price'=>85.00,  'icon'=>'bi-cookie'],
+    ['id'=>8,  'name'=>'Lays Classic 52g',   'price'=>20.00,  'icon'=>'bi-bag-fill'],
+    ['id'=>9,  'name'=>'Coca-Cola 2L',       'price'=>99.00,  'icon'=>'bi-cup-straw'],
+    ['id'=>10, 'name'=>'Surf Excel 1kg',     'price'=>220.00, 'icon'=>'bi-stars'],
+];
+
+// ── Seed funded test accounts (one-time; upsert fixes name/balance, never on every load) ──
+$needSeed = $pdo->query("SELECT COUNT(*) FROM lab203_users WHERE phone = '+919876543211' AND name = 'Rahul Sharma'")->fetchColumn();
+if ($needSeed == 0) {
+    $ts = $pdo->prepare("INSERT INTO lab203_users (name, phone, wallet_balance) VALUES (?,?,?)
+                         ON DUPLICATE KEY UPDATE name = VALUES(name), wallet_balance = VALUES(wallet_balance)");
+    foreach ([
+        ['Rahul Sharma', '+919876543211', 1000.00],
+        ['Rohan',        '+919876543212', 1000.00],
+        ['Rockey',       '+919876543213', 1000.00],
+    ] as $tu) $ts->execute($tu);
+}
+
+// ── AJAX: buy / place order (deducts wallet, records a delivered order) ──
+if (isset($_GET['action']) && $_GET['action'] === 'buy' && $_SERVER['REQUEST_METHOD'] === 'POST') {
+    while (ob_get_level()) ob_end_clean();
+    header('Content-Type: application/json');
+    $body  = json_decode(file_get_contents('php://input'), true);
+    $phone = trim($body['phone'] ?? '');
+    $pid   = (int)($body['product_id'] ?? 0);
+    $qty   = max(1, min(99, (int)($body['quantity'] ?? 1)));
+
+    $product = null;
+    foreach ($lab203_products as $pr) { if ($pr['id'] === $pid) { $product = $pr; break; } }
+    if (!$product) { echo json_encode(['ok'=>false,'message'=>'Product not found.']); exit; }
+
+    $u = $pdo->prepare("SELECT wallet_balance FROM lab203_users WHERE phone = ?");
+    $u->execute([$phone]);
+    $row = $u->fetch();
+    if (!$row) { echo json_encode(['ok'=>false,'message'=>'Account not found.']); exit; }
+
+    $total   = round($product['price'] * $qty, 2);
+    $balance = (float)$row['wallet_balance'];
+    if ($balance < $total) {
+        echo json_encode(['ok'=>false,'message'=>'Insufficient Blinkit Cash — balance ₹'.number_format($balance,2).', needs ₹'.number_format($total,2).'.']);
+        exit;
+    }
+
+    // Resolve the delivery address chosen at checkout
+    $addressId = (int)($body['address_id'] ?? 0);
+    $deliveryAddress = '';
+    if ($addressId) {
+        $a = $pdo->prepare("SELECT address FROM lab203_addresses WHERE id = ? AND user_phone = ?");
+        $a->execute([$addressId, $phone]);
+        $deliveryAddress = (string)($a->fetchColumn() ?: '');
+    }
+    if ($deliveryAddress === '') {
+        $a = $pdo->prepare("SELECT address FROM lab203_addresses WHERE user_phone = ? ORDER BY id LIMIT 1");
+        $a->execute([$phone]);
+        $deliveryAddress = (string)($a->fetchColumn() ?: '');
+    }
+
+    $pdo->prepare("UPDATE lab203_users SET wallet_balance = wallet_balance - ? WHERE phone = ?")->execute([$total, $phone]);
+    $pdo->prepare("INSERT INTO lab203_orders (user_phone, item_name, quantity, total, status, delivery_address) VALUES (?,?,?,?, 'delivered', ?)")
+        ->execute([$phone, $product['name'], $qty, $total, $deliveryAddress]);
+
+    echo json_encode(['ok'=>true, 'wallet'=>round($balance - $total, 2), 'item'=>$product['name'], 'quantity'=>$qty, 'total'=>$total, 'address'=>$deliveryAddress]);
+    exit;
 }
 
 // ── AJAX: send_otp ──
@@ -157,7 +296,7 @@ if (isset($_GET['action']) && $_GET['action'] === 'get_orders' && $_SERVER['REQU
     header('Content-Type: application/json');
     $body  = json_decode(file_get_contents('php://input'), true);
     $phone = trim($body['phone'] ?? '');
-    $rows  = $pdo->prepare("SELECT id, item_name, quantity, total, status, created_at FROM lab203_orders WHERE user_phone = ? ORDER BY id DESC");
+    $rows  = $pdo->prepare("SELECT id, item_name, quantity, total, status, created_at, delivery_address FROM lab203_orders WHERE user_phone = ? ORDER BY id DESC");
     $rows->execute([$phone]);
     echo json_encode(['ok'=>true, 'orders'=>$rows->fetchAll()]);
     exit;
@@ -544,6 +683,95 @@ if (isset($_GET['action']) && $_GET['action'] === 'update_profile' && $_SERVER['
         .lab-meta-item { font-size: 0.7rem; color: #64748b; }
         .lab-meta-item strong { color: #94a3b8; }
 
+        /* Modals */
+        .modal-overlay {
+            position: fixed; inset: 0; z-index: 999;
+            background: rgba(0,0,0,0.65);
+            display: none; align-items: center; justify-content: center;
+            padding: 1rem;
+        }
+        .modal-overlay.show { display: flex; }
+        .modal {
+            background: var(--bl-surface);
+            border: 1px solid var(--bl-border);
+            border-radius: 14px;
+            padding: 1.4rem;
+            width: 100%; max-width: 420px;
+        }
+        .modal-title { font-size: 1rem; font-weight: 700; color: var(--bl-text); margin-bottom: 1rem; display: flex; align-items: center; gap: 0.45rem; }
+        .modal-title i { color: var(--bl-yellow); }
+        .modal-actions { display: flex; gap: 0.6rem; justify-content: flex-end; margin-top: 0.4rem; }
+        .btn-ghost { background: transparent; border: 1px solid var(--bl-border); color: var(--bl-muted); border-radius: 8px; padding: 0.55rem 1rem; font-size: 0.82rem; cursor: pointer; }
+        .btn-ghost:hover { color: var(--bl-text); border-color: var(--bl-muted); }
+        .deliver-list { display: flex; flex-direction: column; gap: 0.5rem; margin-bottom: 1rem; max-height: 300px; overflow-y: auto; }
+        .deliver-opt { display: flex; gap: 0.6rem; align-items: flex-start; border: 1px solid var(--bl-border); border-radius: 10px; padding: 0.7rem 0.85rem; cursor: pointer; }
+        .deliver-opt.selected { border-color: var(--bl-yellow); background: var(--bl-yellow-glow); }
+        .deliver-opt .da-label { font-size: 0.72rem; font-weight: 700; color: var(--bl-yellow); text-transform: uppercase; letter-spacing: 0.06em; }
+        .deliver-opt .da-text  { font-size: 0.8rem; color: #a1a1aa; line-height: 1.5; }
+        .order-addr { font-size: 0.72rem; color: var(--bl-muted); margin-top: 0.25rem; }
+
+        /* Test accounts panel */
+        .test-accounts { margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--bl-border); }
+        .ta-head { font-size: 0.72rem; color: var(--bl-muted); margin-bottom: 0.5rem; text-align: center; }
+        .ta-chip {
+            width: 100%;
+            display: flex; align-items: center; justify-content: space-between; gap: 0.5rem;
+            background: var(--bl-surface2);
+            border: 1px solid var(--bl-border);
+            border-radius: 8px;
+            padding: 0.5rem 0.75rem;
+            margin-bottom: 0.4rem;
+            color: var(--bl-text);
+            font-size: 0.82rem;
+            cursor: pointer;
+        }
+        .ta-chip:hover { border-color: var(--bl-yellow); }
+        .ta-chip .ta-num { color: var(--bl-yellow); font-family: monospace; font-size: 0.78rem; }
+
+        /* Shop tab */
+        .product-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 1rem;
+            max-width: 680px;
+        }
+        .product-card {
+            background: var(--bl-surface);
+            border: 1px solid var(--bl-border);
+            border-radius: 12px;
+            padding: 1.1rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            gap: 0.45rem;
+        }
+        .product-icon {
+            width: 54px; height: 54px;
+            display: flex; align-items: center; justify-content: center;
+            border-radius: 50%;
+            background: var(--bl-yellow-glow);
+            color: var(--bl-yellow);
+            font-size: 1.5rem;
+        }
+        .product-name { font-size: 0.86rem; font-weight: 600; color: var(--bl-text); }
+        .product-price { font-size: 1.05rem; font-weight: 700; color: var(--bl-yellow); }
+        .btn-buy {
+            margin-top: 0.3rem;
+            width: 100%;
+            border: none;
+            border-radius: 8px;
+            background: var(--bl-yellow);
+            color: #111;
+            font-weight: 700;
+            font-size: 0.82rem;
+            padding: 0.55rem;
+            cursor: pointer;
+            display: flex; align-items: center; justify-content: center; gap: 0.3rem;
+        }
+        .btn-buy:hover { background: var(--bl-yellow-d); }
+        .btn-buy:disabled { opacity: 0.6; cursor: default; }
+
         /* Addresses tab */
         .address-list { display: flex; flex-direction: column; gap: 0.85rem; max-width: 520px; }
         .address-card {
@@ -690,6 +918,12 @@ if (isset($_GET['action']) && $_GET['action'] === 'update_profile' && $_SERVER['
                     <div class="alert-error" id="phoneError"></div>
                 </form>
                 <div class="divider-text">By continuing, you agree to blinkit's Terms of Service</div>
+                <div class="test-accounts">
+                    <div class="ta-head"><i class="bi bi-people-fill"></i> Test accounts — tap to autofill, then Send OTP</div>
+                    <button type="button" class="ta-chip" onclick="fillTest('Rahul Sharma','9876543211')"><span>Rahul Sharma</span><span class="ta-num">+91 98765 43211</span></button>
+                    <button type="button" class="ta-chip" onclick="fillTest('Rohan','9876543212')"><span>Rohan</span><span class="ta-num">+91 98765 43212</span></button>
+                    <button type="button" class="ta-chip" onclick="fillTest('Rockey','9876543213')"><span>Rockey</span><span class="ta-num">+91 98765 43213</span></button>
+                </div>
             </div>
         </div>
     </div>
@@ -771,6 +1005,7 @@ if (isset($_GET['action']) && $_GET['action'] === 'update_profile' && $_SERVER['
         <div class="dash-header">
             <span class="dash-header-title"><i class="bi bi-lightning-charge-fill"></i> blinkit</span>
             <nav class="dash-nav">
+                <a href="#"               onclick="switchTab('shop',this);      return false;"><i class="bi bi-shop"       style="margin-right:0.3rem;"></i>Shop</a>
                 <a href="#" class="active" onclick="switchTab('orders',this);   return false;"><i class="bi bi-bag-check" style="margin-right:0.3rem;"></i>Orders</a>
                 <a href="#"               onclick="switchTab('addresses',this); return false;"><i class="bi bi-geo-alt"   style="margin-right:0.3rem;"></i>Addresses</a>
                 <a href="#"               onclick="switchTab('wallet',this);    return false;"><i class="bi bi-wallet2"   style="margin-right:0.3rem;"></i>Wallet</a>
@@ -826,6 +1061,28 @@ if (isset($_GET['action']) && $_GET['action'] === 'update_profile' && $_SERVER['
             </div>
 
             <!-- ══ TAB: ADDRESSES ══ -->
+            <!-- Shop tab -->
+            <div class="tab-panel" id="tab-shop">
+                <div class="section-header">
+                    <div>
+                        <div class="section-title"><i class="bi bi-shop" style="color:var(--bl-yellow);"></i> Shop Groceries</div>
+                        <div class="section-sub">Pay instantly with Blinkit Cash — delivered to your saved address</div>
+                    </div>
+                </div>
+                <div class="product-grid">
+                    <?php foreach ($lab203_products as $pr): ?>
+                    <div class="product-card">
+                        <div class="product-icon"><i class="bi <?= $pr['icon'] ?>"></i></div>
+                        <div class="product-name"><?= htmlspecialchars($pr['name']) ?></div>
+                        <div class="product-price">₹<?= number_format($pr['price'], 2) ?></div>
+                        <button class="btn-buy" onclick="buyProduct(<?= $pr['id'] ?>, this)">
+                            <i class="bi bi-lightning-charge-fill"></i> Order Now
+                        </button>
+                    </div>
+                    <?php endforeach; ?>
+                </div>
+            </div>
+
             <div class="tab-panel" id="tab-addresses">
                 <div class="section-header">
                     <div>
@@ -833,23 +1090,10 @@ if (isset($_GET['action']) && $_GET['action'] === 'update_profile' && $_SERVER['
                         <div class="section-sub">Your delivery locations</div>
                     </div>
                 </div>
-                <div class="address-list">
-                    <div class="address-card">
-                        <div class="address-icon"><i class="bi bi-house-fill"></i></div>
-                        <div>
-                            <div class="address-type">Home</div>
-                            <div class="address-text" id="addrHome">Loading…</div>
-                        </div>
-                    </div>
-                    <div class="address-card">
-                        <div class="address-icon"><i class="bi bi-briefcase-fill"></i></div>
-                        <div>
-                            <div class="address-type">Work</div>
-                            <div class="address-text" id="addrWork">Loading…</div>
-                        </div>
-                    </div>
+                <div class="address-list" id="addressList">
+                    <div class="orders-empty"><i class="bi bi-hourglass-split"></i>Loading addresses…</div>
                 </div>
-                <button class="btn-add-addr" onclick="showToast('Add address is not available in this lab demo.','error')">
+                <button class="btn-add-addr" onclick="openAddrModal()">
                     <i class="bi bi-plus-circle"></i> Add New Address
                 </button>
             </div>
@@ -929,6 +1173,37 @@ if (isset($_GET['action']) && $_GET['action'] === 'update_profile' && $_SERVER['
         </div><!-- /dash-body -->
     </div><!-- /dashboardView -->
 
+    <!-- Add Address modal -->
+    <div class="modal-overlay" id="addrModal">
+        <div class="modal">
+            <div class="modal-title"><i class="bi bi-geo-alt-fill"></i> Add New Address</div>
+            <div class="form-group">
+                <label class="form-label">Label</label>
+                <input type="text" id="addrLabel" class="form-control" placeholder="Home / Work / Other" maxlength="30" autocomplete="off">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Address</label>
+                <textarea id="addrText" class="form-control" rows="3" placeholder="Flat, street, area, city PIN" maxlength="255"></textarea>
+            </div>
+            <div class="modal-actions">
+                <button type="button" class="btn-ghost" onclick="closeAddrModal()">Cancel</button>
+                <button type="button" class="btn-primary" id="addrSaveBtn" style="width:auto;" onclick="submitAddress()"><i class="bi bi-check-lg"></i> Save Address</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Delivery address picker modal -->
+    <div class="modal-overlay" id="deliverModal">
+        <div class="modal">
+            <div class="modal-title"><i class="bi bi-truck"></i> Choose delivery address</div>
+            <div class="deliver-list" id="deliverList"></div>
+            <div class="modal-actions">
+                <button type="button" class="btn-ghost" onclick="closeDeliverModal()">Cancel</button>
+                <button type="button" class="btn-primary" id="deliverConfirmBtn" style="width:auto;" onclick="confirmDeliver()"><i class="bi bi-lightning-charge-fill"></i> Place Order</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Toast -->
     <div class="toast" id="toast"><i class="bi bi-check-circle-fill"></i><span id="toastMsg"></span></div>
 
@@ -981,7 +1256,7 @@ if (isset($_GET['action']) && $_GET['action'] === 'update_profile' && $_SERVER['
         document.getElementById('walletCreditExtra').textContent = extra > 0 ? '+₹' + extra : '+₹0';
 
         // Addresses (personalised per user)
-        setAddresses(phone);
+        loadAddresses();
 
         document.getElementById('phoneView').style.display     = 'none';
         document.getElementById('otpView').style.display       = 'none';
@@ -1002,6 +1277,9 @@ if (isset($_GET['action']) && $_GET['action'] === 'update_profile' && $_SERVER['
             '+917654321098': ['S-7, Shivam Heights, Prabhadevi,\nMumbai – 400025', '9th Floor, One BKC Tower,\nBandra Kurla Complex, Mumbai – 400051'],
             '+916543210987': ['3/14 Rajouri Garden Extn,\nNew Delhi – 110027', 'F-12, Cyber City Tower B,\nGurgaon – 122002'],
             '+919988776655': ['Plot 46, Kaveri Nagar,\nHyderabad – 500062', '2nd Floor, DLF Cyber Hub,\nHyderabad – 500081'],
+            '+919876543211': ['Flat 7A, Lake View Residency, Koramangala, Bengaluru 560034', 'Tower B, Embassy TechVillage, Bengaluru 560103'],
+            '+919876543212': ['12/3, Rose Garden Colony, Viman Nagar, Pune 411014', 'Level 5, Panchshil Tech Park, Hinjewadi, Pune 411057'],
+            '+919876543213': ['B-204, Palm Meadows, Sector 21, Noida 201301', '7th Floor, DLF Cyber City, Gurugram 122002'],
         };
         const addrs = map[phone] || ['Saved address not available', 'Saved address not available'];
         document.getElementById('addrHome').textContent = addrs[0];
@@ -1046,6 +1324,7 @@ if (isset($_GET['action']) && $_GET['action'] === 'update_profile' && $_SERVER['
                     <div class="order-info">
                         <div class="order-name">${esc(o.item_name)}</div>
                         <div class="order-meta">Qty: ${o.quantity} &nbsp;·&nbsp; <span class="status-badge ${o.status}">${o.status.replace('_',' ')}</span></div>
+                        ${o.delivery_address ? `<div class="order-addr"><i class="bi bi-geo-alt"></i> ${esc(o.delivery_address)}</div>` : ''}
                     </div>
                     <div class="order-right">
                         <div class="order-total">₹${parseFloat(o.total).toFixed(2)}</div>
@@ -1063,6 +1342,133 @@ if (isset($_GET['action']) && $_GET['action'] === 'update_profile' && $_SERVER['
         } catch(e) {
             cont.innerHTML = '<div class="orders-empty"><i class="bi bi-exclamation-circle"></i>Failed to load orders.</div>';
         }
+    }
+
+    // ════ TEST ACCOUNT AUTOFILL ════
+    function fillTest(name, phone) {
+        document.getElementById('regName').value  = name;
+        document.getElementById('regPhone').value = phone;
+        showToast('Autofilled ' + name + ' — tap Send OTP');
+    }
+
+    // ════ ADDRESSES ════
+    let userAddresses = [];
+    let pendingProductId = null;
+    let selectedAddressId = null;
+
+    function addrIcon(label) {
+        const l = (label || '').toLowerCase();
+        if (l === 'home') return 'bi-house-fill';
+        if (l === 'work') return 'bi-briefcase-fill';
+        return 'bi-geo-alt-fill';
+    }
+
+    async function loadAddresses() {
+        try {
+            const resp = await fetch('?action=get_addresses', {
+                method: 'POST', headers: {'Content-Type':'application/json'},
+                body: JSON.stringify({ phone: currentPhone })
+            });
+            const data = await resp.json();
+            userAddresses = data.ok ? data.addresses : [];
+        } catch (e) { userAddresses = []; }
+        renderAddresses();
+    }
+
+    function renderAddresses() {
+        const cont = document.getElementById('addressList');
+        if (!cont) return;
+        if (!userAddresses.length) {
+            cont.innerHTML = '<div class="orders-empty"><i class="bi bi-geo-alt"></i>No saved addresses yet. Add one below.</div>';
+            return;
+        }
+        cont.innerHTML = userAddresses.map(a => `
+            <div class="address-card">
+                <div class="address-icon"><i class="bi ${addrIcon(a.label)}"></i></div>
+                <div>
+                    <div class="address-type">${esc(a.label)}</div>
+                    <div class="address-text">${esc(a.address)}</div>
+                </div>
+            </div>`).join('');
+    }
+
+    // ---- Add address modal ----
+    function openAddrModal() {
+        document.getElementById('addrLabel').value = '';
+        document.getElementById('addrText').value  = '';
+        document.getElementById('addrModal').classList.add('show');
+    }
+    function closeAddrModal() { document.getElementById('addrModal').classList.remove('show'); }
+
+    async function submitAddress() {
+        const label   = document.getElementById('addrLabel').value.trim() || 'Other';
+        const address = document.getElementById('addrText').value.trim();
+        if (!address) { showToast('Enter an address.', 'error'); return; }
+        const btn = document.getElementById('addrSaveBtn');
+        btn.disabled = true; btn.innerHTML = '<i class="bi bi-hourglass-split"></i> Saving…';
+        try {
+            const resp = await fetch('?action=add_address', {
+                method: 'POST', headers: {'Content-Type':'application/json'},
+                body: JSON.stringify({ phone: currentPhone, label, address })
+            });
+            const data = await resp.json();
+            if (data.ok) { showToast('Address added!'); closeAddrModal(); await loadAddresses(); }
+            else showToast(data.message || 'Could not add address.', 'error');
+        } catch (e) { showToast('Network error.', 'error'); }
+        btn.disabled = false; btn.innerHTML = '<i class="bi bi-check-lg"></i> Save Address';
+    }
+
+    // ════ SHOP / BUY (pick delivery address, then order) ════
+    function buyProduct(id) {
+        if (!userAddresses.length) {
+            showToast('Add a delivery address first.', 'error');
+            switchTab('addresses', document.querySelector('.dash-nav a:nth-child(3)'));
+            return;
+        }
+        pendingProductId  = id;
+        selectedAddressId = userAddresses[0].id;
+        renderDeliverList();
+        document.getElementById('deliverModal').classList.add('show');
+    }
+
+    function renderDeliverList() {
+        document.getElementById('deliverList').innerHTML = userAddresses.map(a => `
+            <div class="deliver-opt ${a.id == selectedAddressId ? 'selected' : ''}" onclick="selectDeliver(${a.id})">
+                <i class="bi ${addrIcon(a.label)}" style="color:var(--bl-yellow);font-size:1.1rem;"></i>
+                <div>
+                    <div class="da-label">${esc(a.label)}</div>
+                    <div class="da-text">${esc(a.address)}</div>
+                </div>
+            </div>`).join('');
+    }
+    function selectDeliver(id) { selectedAddressId = id; renderDeliverList(); }
+    function closeDeliverModal() { document.getElementById('deliverModal').classList.remove('show'); pendingProductId = null; }
+
+    async function confirmDeliver() {
+        if (!pendingProductId) { closeDeliverModal(); return; }
+        const btn = document.getElementById('deliverConfirmBtn');
+        btn.disabled = true; btn.innerHTML = '<i class="bi bi-hourglass-split"></i> Placing…';
+        try {
+            const resp = await fetch('?action=buy', {
+                method: 'POST', headers: {'Content-Type':'application/json'},
+                body: JSON.stringify({ phone: currentPhone, product_id: pendingProductId, quantity: 1, address_id: selectedAddressId })
+            });
+            const data = await resp.json();
+            if (data.ok) {
+                currentWallet = parseFloat(data.wallet) || 0;
+                document.getElementById('statWallet').textContent    = '₹' + currentWallet.toFixed(2);
+                document.getElementById('walletBalance').textContent = '₹' + currentWallet.toFixed(2);
+                const sess = JSON.parse(localStorage.getItem('lab203_session') || '{}');
+                sess.wallet = currentWallet;
+                localStorage.setItem('lab203_session', JSON.stringify(sess));
+                closeDeliverModal();
+                showToast('Order placed! ' + data.item + ' — ₹' + parseFloat(data.total).toFixed(2) + ' · delivering to ' + ((data.address || '').split(',')[0] || 'your address'));
+                loadOrders();
+            } else {
+                showToast(data.message || 'Order failed.', 'error');
+            }
+        } catch (e) { showToast('Network error.', 'error'); }
+        btn.disabled = false; btn.innerHTML = '<i class="bi bi-lightning-charge-fill"></i> Place Order';
     }
 
     // ════ PROFILE SAVE ════

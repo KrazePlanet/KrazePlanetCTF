@@ -117,9 +117,6 @@ if (isset($_GET['action']) && $_GET['action'] === 'verify' && $_SERVER['REQUEST_
     $stmt->execute([$email]);
     $row = $stmt->fetch();
 
-    // VULNERABLE: verify field is returned in JSON body — no server-side session is set.
-    // Client checks response.verify === true to grant access.
-    // Intercept with Burp Suite: flip "verify":false → "verify":true to bypass OTP entirely.
     if ($row && $code === $row['otp']) {
         $pdo->prepare("UPDATE lab202_users SET email_verified = 1 WHERE email = ?")->execute([$email]);
         echo json_encode(['verify'=>true, 'message'=>'Email verified successfully.', 'name'=>$row['name'], 'role'=>$row['role']]);
@@ -565,19 +562,6 @@ if (isset($_GET['action']) && $_GET['action'] === 'create_project' && $_SERVER['
         .dash-user { display: flex; align-items: center; gap: 0.5rem; font-size: 0.78rem; color: rgba(255,255,255,0.7); }
         .dash-user-dot { width: 8px; height: 8px; background: var(--sa-green); border-radius: 50%; }
         .dash-body { padding: 2rem; background: #0a0a0b; min-height: calc(100vh - 148px); }
-        .bypass-alert {
-            background: rgba(34,197,94,0.08);
-            border: 1px solid rgba(34,197,94,0.25);
-            border-left: 4px solid var(--sa-green);
-            border-radius: 8px;
-            padding: 0.9rem 1.1rem;
-            margin-bottom: 1.75rem;
-            display: flex;
-            align-items: flex-start;
-            gap: 0.75rem;
-            font-size: 0.82rem;
-            color: #86efac;
-        }
         .user-profile-card {
             background: var(--sa-surface);
             border: 1px solid var(--sa-border);
@@ -1004,17 +988,6 @@ if (isset($_GET['action']) && $_GET['action'] === 'create_project' && $_SERVER['
 
             <!-- ══ TAB: OVERVIEW ══ -->
             <div class="tab-panel active" id="tab-overview">
-                <div class="bypass-alert" id="bypassAlert">
-                    <i class="bi bi-check-circle-fill" style="font-size:1.2rem;color:var(--sa-green);flex-shrink:0;margin-top:0.1rem;"></i>
-                    <div>
-                        <strong>OTP Bypass Successful!</strong> — You flipped
-                        <code style="background:rgba(255,255,255,0.1);padding:0.1rem 0.3rem;border-radius:3px;font-family:monospace;color:#86efac;">"verify":false</code>
-                        →
-                        <code style="background:rgba(255,255,255,0.1);padding:0.1rem 0.3rem;border-radius:3px;font-family:monospace;color:#86efac;">"verify":true</code>
-                        in the server response. The app granted access without a valid OTP — no server-side session was validated.
-                    </div>
-                </div>
-
                 <div class="user-profile-card">
                     <div class="user-avatar" id="dashAvatar">U</div>
                     <div class="user-info">
@@ -1218,7 +1191,6 @@ if (isset($_GET['action']) && $_GET['action'] === 'create_project' && $_SERVER['
         document.getElementById('dashFullName').textContent = name;
         document.getElementById('dashEmail').textContent    = email;
         document.getElementById('dashAvatar').textContent   = name.charAt(0).toUpperCase();
-        document.getElementById('bypassAlert').style.display   = bypassed ? 'flex' : 'none';
         document.getElementById('adminBadge').style.display    = currentRole === 'admin' ? 'inline-flex' : 'none';
         document.getElementById('registerView').style.display  = 'none';
         document.getElementById('otpView').style.display       = 'none';
@@ -1593,10 +1565,6 @@ if (isset($_GET['action']) && $_GET['action'] === 'create_project' && $_SERVER['
                 body: JSON.stringify({ email: currentEmail, otp })
             });
             const data = await resp.json();
-            // VULNERABLE: app trusts the client-received "verify" field.
-            // No server-side session is created or checked.
-            // Use Burp Suite to intercept this response and flip:
-            //   "verify":false  →  "verify":true
             if (data.verify === true) {
                 const uname = data.name || currentName;
                 const role  = data.role || 'user';

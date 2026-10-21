@@ -193,14 +193,6 @@ http_response_code(404);
                 Home
             </a>
 
-            <a href="/publications.php">
-                Publications
-            </a>
-
-            <a href="/researchers.php">
-                Researchers
-            </a>
-
         </nav>
 
     </div>

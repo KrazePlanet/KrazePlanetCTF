@@ -1,39 +1,39 @@
 {
   "Content Discovery": [
     {
-      "title": "Redirect-Based Content Discovery",
+      "title": "Unauthorized Access to Administrative Interface via HTTP 302 Redirect",
       "difficulty": "Easy",
       "report": "",
       "access": "/subdomains/japan"
     },
     {
-      "title": "404 Response-Based Discovery",
+      "title": "404 Response-Based Discovery Leads to Open Redirect",
       "difficulty": "Easy",
       "report": "",
       "access": "/subdomains/research"
     },
     {
-      "title": "CloudSync: Sensitive Data Exposure and Credential Leakage",
-      "difficulty": "Hard",
+      "title": "403 Subdomain Directory Listing Leads to Sensitive Data Exposure",
+      "difficulty": "Medium",
       "report": "",
       "access": "/subdomains/kzlabs"
     },
     {
-      "title": "WordPress Configuration Security Analysis",
-      "difficulty": "Hard",
+      "title": "403 Subdomain Config Backup Disclosure Leads to WordPress Credential Leakage",
+      "difficulty": "Medium",
       "report": "",
       "access": "/subdomains/blog"
     }
   ],
   "Hidden Parameter Fuzzing": [
     {
-      "title": "Uncovering Hidden Parameters",
+      "title": "Server-Side Hidden Parameter Discovery via Fuzzing",
       "difficulty": "Easy",
       "report": "",
       "access": "/subdomains/hide"
     },
     {
-      "title": "Client-Side Parameter Discovery",
+      "title": "Client-Side Parameter Discovery via JavaScript Review",
       "difficulty": "Easy",
       "report": "",
       "access": "/subdomains/bbp"
@@ -42,69 +42,45 @@
   "Authentication Bypass": [
     {
       "title": "OTP Verification Bypass via Response Manipulation",
-      "difficulty": "Medium",
+      "difficulty": "Easy",
       "report": "",
       "access": "/subdomains/verify"
     },
     {
       "title": "Phone OTP Bypass via Response Manipulation",
-      "difficulty": "Medium",
+      "difficulty": "Easy",
       "report": "",
       "access": "/subdomains/mobile"
     },
     {
-      "title": "ControlHub - JSON Response Manipulation Auth Bypass",
-      "difficulty": "Hard",
+      "title": "JSON Response Manipulation Leads to Admin Authentication Bypass",
+      "difficulty": "Easy",
       "report": "",
       "access": "/subdomains/hub"
     },
     {
       "title": "Admin Authentication Bypass Lead to Admin Account Takeover",
-      "difficulty": "Hard",
+      "difficulty": "Medium",
       "report": "https://hackerone.com/reports/1490470",
       "access": "/subdomains/adminpanel"
     },
     {
       "title": "Email Verification code bypass in account registration process",
-      "difficulty": "Hard",
+      "difficulty": "Medium",
       "report": "https://hackerone.com/reports/1406471",
       "access": "/subdomains/hackers"
     },
     {
       "title": "Authentication Bypass Leads To Complete Account TakeveOver",
-      "difficulty": "Hard",
+      "difficulty": "Medium",
       "report": "https://hackerone.com/reports/1709881",
       "access": "/subdomains/mtnbusiness"
-    },
-    {
-      "title": "Authentication Bypass with usage of PreSignedURL",
-      "difficulty": "Hard",
-      "report": "https://hackerone.com/reports/2337427",
-      "access": "/subdomains/presignedurl"
-    },
-    {
-      "title": "Improper Authentication - 2FA OTP Reusable",
-      "difficulty": "Hard",
-      "report": "https://hackerone.com/reports/2529780",
-      "access": "/subdomains/authenticator"
-    },
-    {
-      "title": "Bypass Email Verification in Customer Portal",
-      "difficulty": "Hard",
-      "report": "https://hackerone.com/reports/1443211",
-      "access": "/subdomains/mattermost"
     },
     {
       "title": "Authentication bypass leads to Information Disclosure",
       "difficulty": "Hard",
       "report": "https://hackerone.com/reports/1690548",
       "access": "/subdomains/airforce"
-    },
-    {
-      "title": "Authentication bypass in MTN Group",
-      "difficulty": "Hard",
-      "report": "https://hackerone.com/reports/1747146",
-      "access": "/subdomains/mntupload"
     }
   ],
   "Business Logic Errors": [
@@ -185,6 +161,12 @@
       "difficulty": "Hard",
       "report": "https://hackerone.com/reports/2571981",
       "access": "/subdomains/participate"
+    },
+    {
+      "title": "Bypass Email Verification in Customer Portal",
+      "difficulty": "Hard",
+      "report": "https://hackerone.com/reports/1443211",
+      "access": "/subdomains/mattermost"
     }
   ],
   "Improper Access Control": [

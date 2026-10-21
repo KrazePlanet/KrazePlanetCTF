@@ -1,5 +1,10 @@
 RewriteEngine On
 
+# Push the rule below into every lab's own .htaccess and run it FIRST, so labs
+# that have their own RewriteEngine (swiftpay, gigboard, ...) can't re-enter the
+# rewrite engine and discard the 404 this sets.
+RewriteOptions InheritDownBefore
+
 # The labs Apache config aliases /subdomains to this shared folder on EVERY lab
 # host (see deploy/labs/apache.conf), so hardcoded /subdomains/<lab>/ links and
 # RewriteBase values keep working. Side effect: without this file, any lab host

@@ -1,0 +1,11 @@
+RewriteEngine On
+
+# Serve real files/directories normally
+RewriteCond %{REQUEST_FILENAME} -f [OR]
+RewriteCond %{REQUEST_FILENAME} -d
+RewriteRule ^ - [L]
+
+# Everything else (including /api/v1/users/...) goes to the app
+RewriteRule ^ index.php [L]
+
+Options -Indexes

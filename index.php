@@ -488,9 +488,41 @@ $isAdmin = krazeIsAdmin();
       font-family: var(--font-mono);
       letter-spacing: 0.02em;
       flex-shrink: 0;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      position: relative;
       box-shadow: 0 2px 8px rgba(190, 24, 93, 0.4);
+      transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+      animation: reportPulse 2.2s ease-in-out infinite;
     }
-    .report-badge:hover { background: #9d174d; color: #ffffff; }
+    /* External-link arrow cue — signals this badge opens a real HackerOne report */
+    .report-badge::after {
+      content: "\2197"; /* ↗ */
+      font-size: 0.82em;
+      line-height: 1;
+      transition: transform 0.15s ease;
+    }
+    .report-badge:hover {
+      background: linear-gradient(135deg, #ec4899, #be185d);
+      color: #ffffff;
+      transform: translateY(-1px) scale(1.04);
+      box-shadow: 0 4px 20px rgba(236, 72, 153, 0.95);
+      animation-play-state: paused;
+    }
+    .report-badge:hover::after { transform: translate(2px, -2px); }
+    .report-badge:focus-visible {
+      outline: 2px solid #f9a8d4;
+      outline-offset: 2px;
+    }
+    @keyframes reportPulse {
+      0%, 100% { box-shadow: 0 2px 8px rgba(190, 24, 93, 0.40); }
+      50%      { box-shadow: 0 2px 18px rgba(236, 72, 153, 0.85); }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .report-badge { animation: none; }
+    }
 
     .lab-action {
       padding: 0.85rem 1.25rem;
