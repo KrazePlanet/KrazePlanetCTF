@@ -11,7 +11,7 @@ $error = flash('error');
     <meta name="theme-color" content="#0b1220">
     <title>Admin Login — <?= e(SITE_NAME) ?></title>
     <link rel="stylesheet" href="../assets/css/style.css">
-    <link rel="stylesheet" href="../assets/css/admin.css">
+    <link rel="stylesheet" href="../assets/css/admin.css?v=2">
 </head>
 <body class="admin-login-page">
     <main class="login-shell">
@@ -30,6 +30,12 @@ $error = flash('error');
             <?php if ($error): ?>
                 <div class="login-alert" role="alert">⚠ <?= e($error) ?></div>
             <?php endif; ?>
+
+            <div class="login-testacct">
+                <span class="login-testacct-title">Lab test account</span>
+                <div><span>Email</span><code><?= e(ADMIN_EMAIL) ?></code></div>
+                <div><span>Password</span><code><?= e(ADMIN_PASSWORD) ?></code></div>
+            </div>
 
             <form method="post" action="authenticate.php" class="login-form">
                 <?= csrf_field() ?>
