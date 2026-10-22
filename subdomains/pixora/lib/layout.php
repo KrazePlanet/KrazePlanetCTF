@@ -57,7 +57,13 @@ a{color:var(--p);text-decoration:none}a:hover{color:var(--p2)}
 .card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow)}
 .card-pad{padding:22px}
 /* AVATAR */
-.avatar{display:inline-flex;align-items:center;justify-content:center;border-radius:50%;font-size:2rem;flex-shrink:0;background:linear-gradient(135deg,var(--bg3),#fff);border:3px solid var(--border)}
+.avatar{display:inline-flex;align-items:center;justify-content:center;border-radius:50%;font-size:2rem;flex-shrink:0;background:linear-gradient(135deg,var(--bg3),#fff);border:3px solid var(--border);overflow:hidden}
+.avatar img{width:100%;height:100%;object-fit:cover;border-radius:50%;display:block}
+.avatar-upload{display:flex;align-items:center;gap:12px;width:100%;padding:14px 16px;border:2px dashed var(--border);border-radius:12px;cursor:pointer;background:var(--bg3);transition:.15s}
+.avatar-upload:hover{border-color:var(--p);background:#ede9fe}
+.avatar-upload .au-ic{font-size:1.4rem}
+.avatar-upload strong{display:block;font-size:.875rem}
+.avatar-upload small{display:block;font-size:.75rem;color:var(--text3);margin-top:2px}
 .avatar-sm{width:40px;height:40px;font-size:1.1rem;border-width:2px}
 .avatar-md{width:56px;height:56px;font-size:1.6rem}
 .avatar-lg{width:90px;height:90px;font-size:2.8rem;border-width:4px}
@@ -92,10 +98,6 @@ a{color:var(--p);text-decoration:none}a:hover{color:var(--p2)}
 .form-label{font-size:.75rem;font-weight:700;color:var(--text);text-transform:uppercase;letter-spacing:.4px}
 .form-control{background:#fafafa;border:1.5px solid var(--border);color:var(--text);border-radius:9px;padding:10px 14px;transition:.15s;outline:none;width:100%;font-family:inherit;font-size:.9rem}
 .form-control:focus{border-color:var(--p);background:#fff;box-shadow:0 0 0 3px rgba(124,58,237,.1)}
-/* FLAG */
-.flag-box{background:linear-gradient(135deg,#064e3b,#065f46);border:2px solid #059669;border-radius:14px;padding:24px 28px;margin-bottom:20px}
-.flag-box h3{color:#34d399;font-size:1rem;font-weight:700;margin-bottom:10px}
-.flag-val{font-family:monospace;font-size:1.25rem;font-weight:800;color:#6ee7b7;background:#052e1c;border:1px solid #065f46;padding:8px 18px;border-radius:7px;display:inline-block;margin-top:6px;letter-spacing:2px}
 /* EXPLORE */
 .user-row{display:flex;align-items:center;gap:12px;padding:12px 16px;border-bottom:1px solid #f9fafb}
 .user-row:last-child{border-bottom:none}
@@ -122,7 +124,7 @@ a{color:var(--p);text-decoration:none}a:hover{color:var(--p2)}
     <?php endif;?>
     <div class="nav-actions">
       <?php if($u):?>
-        <div class="avatar avatar-sm"><?=h($u['avatar'])?></div>
+        <div class="avatar avatar-sm"><?=avatar_html($u['avatar'])?></div>
         <a href="<?=url('settings')?>" class="btn btn-secondary btn-sm">⚙️ Settings</a>
         <form method="POST" action="<?=url('logout')?>" style="margin:0">
           <input type="hidden" name="_csrf" value="<?=h(csrf_token())?>">
@@ -156,7 +158,7 @@ function render_post(array $p): void {
 <div class="post-card">
   <div class="post-header">
     <a href="<?=url("profile/{$p['user_id']}")?>">
-      <div class="avatar avatar-md"><?=h($p['avatar'])?></div>
+      <div class="avatar avatar-md"><?=avatar_html($p['avatar'])?></div>
     </a>
     <div class="post-meta">
       <div class="post-username"><?=h($p['name'])?></div>

@@ -1,14 +1,19 @@
 <?php
-// Pixora — Social Profile Platform Training Lab
-// Intentional vulnerability: POST /profile/avatar trusts user_id from request body,
-// not from the authenticated session — classic IDOR on profile picture update.
+// Pixora — Social Profile Platform
 const BASE     = '/subdomains/pixora';
-const LAB_FLAG = 'KP{idor_profile_picture_update}';
 
 const AVATARS = ['🐱','🐻','🦊','🐼','🦁','🐸','🦄','🐺','🐯','🦋','🌟','🔥','👾','🎭','🌈','💎'];
 
+// Retire any legacy session cookie (old name was PIXORASID, previously scoped to the
+// narrow BASE path). A leftover copy at the old path shadows the real session and
+// breaks login/registration, so expire it at both paths before starting the session.
+if (isset($_COOKIE['PIXORASID'])) {
+    foreach ([BASE, '/'] as $legacyPath) {
+        setcookie('PIXORASID', '', ['expires' => time() - 3600, 'path' => $legacyPath]);
+    }
+}
 session_set_cookie_params(['path' => '/', 'httponly' => true, 'samesite' => 'Lax']);
-session_name('PIXORASID');
+session_name('PXSESSID');
 session_start();
 
 function db(): PDO {
@@ -40,7 +45,7 @@ function install_schema(PDO $pdo, bool $reset=false): void {
         email VARCHAR(190) NOT NULL UNIQUE,
         password_hash VARCHAR(255) NOT NULL,
         bio VARCHAR(255) DEFAULT '',
-        avatar VARCHAR(8) DEFAULT '🐱',
+        avatar VARCHAR(255) DEFAULT '🐱',
         avatar_changed_by INT NULL,
         followers INT DEFAULT 0,
         following INT DEFAULT 0,
@@ -85,7 +90,7 @@ function install_schema(PDO $pdo, bool $reset=false): void {
             [$admin,'🔒 Security reminder: Your account settings are private to you. Only you can change your profile picture. Stay safe on Pixora!','🛡️',534],
             [$alice,'Just shipped a new open source project! Check it out — a lightweight PHP router that handles path parameters cleanly. Link in bio 🚀','💻',198],
             [$alice,'Hot take: session-based auth is underrated. Stateless tokens are fine but sometimes you just want to know WHO is making the request on the server side 🤔','🔑',143],
-            [$alice,'Fun bug I found today: an app was accepting `user_id` from POST body to update profile data. Server never checked if it matched the session. Classic IDOR. Please validate server-side, folks! 🙏','🐛',312],
+            [$alice,'Shipped a big refactor today and finally cleaned up our image pipeline. Feels good to delete more code than you add. 🧹✨','🚀',312],
             [$bob,'New portfolio shots from last weekend 📸 The golden hour lighting was absolutely perfect. Sometimes you just have to wait for the right moment.','🌅',267],
             [$bob,'Working on a rebrand for a local café. Brand identity is so much more than a logo — it\'s the whole story ✨','🎨',189],
             [$bob,'Changed my profile picture again 😅 Can\'t decide between the bear or the owl. What do you think?','🐻',94],
@@ -99,6 +104,32 @@ function install_schema(PDO $pdo, bool $reset=false): void {
 /* ── HELPERS ──────────────────────────────────────────────── */
 function h($s): string { return htmlspecialchars((string)$s,ENT_QUOTES,'UTF-8'); }
 function url(string $p=''): string { return BASE.'/'.ltrim($p,'/'); }
+// Render a user's avatar: an uploaded image (stored under uploads/) becomes an <img>,
+// otherwise it is treated as an emoji and printed as text.
+function avatar_html(?string $avatar): string {
+    $a = (string)$avatar;
+    if (strncmp($a, 'uploads/', 8) === 0) return '<img src="'.h(url($a)).'" alt="avatar">';
+    return h($a);
+}
+// Validate and store an uploaded avatar image. Returns "uploads/<file>" or '' on failure.
+// The stored extension is derived from the real image type (not the filename), and PHP
+// execution is disabled in the uploads folder — so this upload cannot become an RCE.
+function save_avatar_upload(array $f): string {
+    if (($f['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_OK) return '';
+    if (($f['size'] ?? 0) <= 0 || $f['size'] > 2 * 1024 * 1024) return '';
+    $info = @getimagesize($f['tmp_name']);
+    if ($info === false) return '';
+    $map = [IMAGETYPE_PNG => 'png', IMAGETYPE_JPEG => 'jpg', IMAGETYPE_GIF => 'gif', IMAGETYPE_WEBP => 'webp'];
+    $ext = $map[$info[2] ?? 0] ?? null;
+    if ($ext === null) return '';
+    $dir = __DIR__ . '/../uploads';
+    if (!is_dir($dir)) @mkdir($dir, 0775, true);
+    $ht = $dir . '/.htaccess';
+    if (!is_file($ht)) @file_put_contents($ht, "php_flag engine off\nRemoveHandler .php .phtml .php3 .php4 .php5 .php7 .phps\nRemoveType .php .phtml\nSetHandler none\nOptions -ExecCGI\n");
+    $name = bin2hex(random_bytes(12)) . '.' . $ext;
+    if (!@move_uploaded_file($f['tmp_name'], $dir . '/' . $name)) return '';
+    return 'uploads/' . $name;
+}
 function flash(string $t, string $m): void { $_SESSION['flash'][]=[$t,$m]; }
 function redirect(string $p): never { header('Location:'.url($p)); exit; }
 function user(): ?array {

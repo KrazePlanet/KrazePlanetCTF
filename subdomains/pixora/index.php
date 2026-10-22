@@ -32,35 +32,12 @@ function page_home(): void {
     $u=require_login(); $u=fresh_user();
     $posts=db()->query("SELECT p.*,u.name,u.username,u.avatar FROM posts p JOIN users u ON u.id=p.user_id ORDER BY p.id DESC")->fetchAll();
 
-    // Flag: logged-in user successfully changed another user's avatar (IDOR exploit)
-    $flag_show=false;
-    if($u){
-        $st=db()->prepare("SELECT COUNT(*) FROM users WHERE avatar_changed_by=? AND id!=?");
-        $st->execute([$u['id'],$u['id']]); $flag_show=(int)$st->fetchColumn()>0;
-    }
-
     page_open('Home');
     ?>
 <div class="wrap">
   <div class="feed-layout">
     <!-- FEED -->
     <div>
-      <?php if($flag_show):?>
-      <div class="flag-box">
-        <h3>🚩 IDOR — Profile Picture Takeover Successful!</h3>
-        <p style="color:#6ee7b7;font-size:.875rem;margin-bottom:10px">
-          You exploited an <strong>Insecure Direct Object Reference (IDOR)</strong> on the profile picture update endpoint.<br><br>
-          The <code style="background:#052e1c;padding:2px 6px;border-radius:4px">POST /profile/avatar</code> endpoint accepts a <code style="background:#052e1c;padding:2px 6px;border-radius:4px">user_id</code> parameter from the request body and updates <em>that user's</em> avatar — with no check that the authenticated session matches the target <code style="background:#052e1c;padding:2px 6px;border-radius:4px">user_id</code>.<br><br>
-          By changing <code style="background:#052e1c;padding:2px 6px;border-radius:4px">user_id</code> to another user's ID, you modified their profile picture without authorization.
-        </p>
-        <div style="font-size:.78rem;color:#34d399;margin-bottom:6px">Your Flag:</div>
-        <div class="flag-val"><?=LAB_FLAG?></div>
-        <div style="margin-top:12px;font-size:.75rem;color:#6ee7b7">
-          <strong>Fix:</strong> Replace <code style="background:#052e1c;padding:2px 4px;border-radius:3px">$_POST['user_id']</code> with <code style="background:#052e1c;padding:2px 4px;border-radius:3px">$_SESSION['uid']</code> in the avatar update handler. Never trust a resource identifier from user-controlled input when the session already carries it.
-        </div>
-      </div>
-      <?php endif;?>
-
       <div style="font-weight:700;font-size:1rem;margin-bottom:18px;color:var(--text3);text-transform:uppercase;letter-spacing:.6px">✦ Your Feed</div>
       <?php foreach($posts as $p) render_post($p);?>
     </div>
@@ -70,7 +47,7 @@ function page_home(): void {
       <!-- My Profile Card -->
       <div class="card card-pad">
         <div style="display:flex;align-items:center;gap:14px;margin-bottom:14px">
-          <div class="avatar avatar-lg"><?=h($u['avatar'])?></div>
+          <div class="avatar avatar-lg"><?=avatar_html($u['avatar'])?></div>
           <div>
             <div style="font-weight:800;font-size:1rem"><?=h($u['name'])?></div>
             <div style="font-size:.8rem;color:var(--text3)">@<?=h($u['username'])?></div>
@@ -88,16 +65,6 @@ function page_home(): void {
         </div>
       </div>
 
-      <!-- Lab Hint -->
-      <div class="card card-pad" style="background:#faf5ff;border-color:var(--p3)">
-        <div style="font-size:.7rem;font-weight:700;color:var(--p);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">💡 Lab Hint</div>
-        <p style="font-size:.8rem;color:var(--text2);line-height:1.7">
-          When you update your profile picture in <strong>Settings</strong>, the request contains a <code style="background:var(--bg3);padding:1px 4px;border-radius:3px">user_id</code> field.<br><br>
-          The server updates the avatar for <em>that</em> user ID — not the session owner.<br><br>
-          Try changing <code style="background:var(--bg3);padding:1px 4px;border-radius:3px">user_id</code> to another user's ID in Burp Suite.
-        </p>
-      </div>
-
       <!-- Who to Follow -->
       <div class="card">
         <div style="padding:14px 16px;font-weight:700;font-size:.875rem;border-bottom:1px solid var(--border)">People to Follow</div>
@@ -105,7 +72,7 @@ function page_home(): void {
         $others=db()->prepare("SELECT * FROM users WHERE id!=? ORDER BY followers DESC LIMIT 4");
         $others->execute([$u['id']]); foreach($others->fetchAll() as $ou):?>
         <div class="user-row">
-          <a href="<?=url("profile/{$ou['id']}")?>"><div class="avatar avatar-sm"><?=h($ou['avatar'])?></div></a>
+          <a href="<?=url("profile/{$ou['id']}")?>"><div class="avatar avatar-sm"><?=avatar_html($ou['avatar'])?></div></a>
           <div style="flex:1">
             <div style="font-weight:600;font-size:.84rem"><?=h($ou['name'])?></div>
             <div style="font-size:.72rem;color:var(--text3)">@<?=h($ou['username'])?> · <?=number_format($ou['followers'])?> followers</div>
@@ -128,9 +95,6 @@ function page_profile(int $uid): void {
     $target=fresh_user($uid);
     if(!$target){page_404();return;}
 
-    // Flag: this profile's avatar was changed by a different user (IDOR detected)
-    $flag_show=$target['avatar_changed_by']!==null&&(int)$target['avatar_changed_by']!==$target['id'];
-
     $posts=db()->prepare("SELECT p.*,u.name,u.username,u.avatar FROM posts p JOIN users u ON u.id=p.user_id WHERE p.user_id=? ORDER BY p.id DESC");
     $posts->execute([$uid]); $posts=$posts->fetchAll();
     $is_own=$u['id']===$uid;
@@ -138,24 +102,12 @@ function page_profile(int $uid): void {
     page_open('@'.h($target['username']));
     ?>
 <div class="wrap" style="max-width:760px;margin-left:auto;margin-right:auto">
-  <?php if($flag_show):?>
-  <div class="flag-box">
-    <h3>🚩 IDOR — Unauthorized Profile Picture Change Detected!</h3>
-    <p style="color:#6ee7b7;font-size:.875rem;margin-bottom:10px">
-      <strong>@<?=h($target['username'])?>'s</strong> profile picture was changed by a different user (User ID: <?=h((string)$target['avatar_changed_by'])?>).<br><br>
-      The <code style="background:#052e1c;padding:2px 6px;border-radius:4px">POST /profile/avatar</code> endpoint accepted <code style="background:#052e1c;padding:2px 6px;border-radius:4px">user_id=<?=$target['id']?></code> from the request body while the attacker was authenticated as a different account. No server-side authorization check was performed.
-    </p>
-    <div style="font-size:.78rem;color:#34d399;margin-bottom:6px">Flag:</div>
-    <div class="flag-val"><?=LAB_FLAG?></div>
-  </div>
-  <?php endif;?>
-
   <div class="profile-header">
     <div class="profile-cover"></div>
     <div class="profile-info">
       <div style="display:flex;align-items:flex-end;justify-content:space-between">
         <div class="profile-avatar-wrap">
-          <div class="avatar avatar-xl" style="border-color:#fff;border-width:4px;box-shadow:0 0 0 2px var(--p)"><?=h($target['avatar'])?></div>
+          <div class="avatar avatar-xl" style="border-color:#fff;border-width:4px;box-shadow:0 0 0 2px var(--p)"><?=avatar_html($target['avatar'])?></div>
         </div>
         <div style="padding-bottom:8px;display:flex;gap:8px">
           <?php if($is_own):?>
@@ -206,7 +158,7 @@ function page_explore(): void {
     <?php foreach($users as $ou):?>
     <div class="user-row" style="padding:16px 20px">
       <a href="<?=url("profile/{$ou['id']}")?>">
-        <div class="avatar avatar-md"><?=h($ou['avatar'])?></div>
+        <div class="avatar avatar-md"><?=avatar_html($ou['avatar'])?></div>
       </a>
       <div style="flex:1">
         <div style="display:flex;align-items:center;gap:8px">
@@ -241,23 +193,27 @@ function page_settings(): void {
     <div style="font-size:.8rem;color:var(--text3);margin-bottom:16px">Choose an avatar that represents you on Pixora</div>
 
     <div style="display:flex;align-items:center;gap:18px;margin-bottom:20px">
-      <div class="avatar avatar-lg" id="preview-avatar"><?=h($u['avatar'])?></div>
+      <div class="avatar avatar-lg" id="preview-avatar"><?=avatar_html($u['avatar'])?></div>
       <div>
         <div style="font-size:.875rem;font-weight:600">Current avatar</div>
-        <div style="font-size:.78rem;color:var(--text3);margin-top:2px">Click any avatar below to select it</div>
+        <div style="font-size:.78rem;color:var(--text3);margin-top:2px">Upload your own photo, or pick a default below</div>
       </div>
     </div>
 
-    <!--
-      INTENTIONAL VULNERABILITY: this form contains a hidden user_id field populated
-      from the session. The server should use the session uid instead of this value,
-      but it trusts whatever user_id arrives in the POST body.
-      An attacker can intercept this request and change user_id to another user's ID.
-    -->
-    <form method="POST" action="<?=url('profile/avatar')?>" id="avatar-form">
+    <form method="POST" action="<?=url('profile/avatar')?>" id="avatar-form" enctype="multipart/form-data">
       <input type="hidden" name="_csrf" value="<?=h(csrf_token())?>">
       <input type="hidden" name="user_id" id="avatar-uid" value="<?=$u['id']?>">
       <input type="hidden" name="avatar" id="avatar-val" value="<?=h($u['avatar'])?>">
+
+      <label class="avatar-upload" for="avatar-file">
+        <span class="au-ic">⬆️</span>
+        <span><strong>Upload a photo</strong><small>PNG, JPG, GIF or WEBP · up to 2 MB</small></span>
+        <input type="file" id="avatar-file" name="photo" accept="image/png,image/jpeg,image/gif,image/webp" onchange="previewUpload(this)" hidden>
+      </label>
+
+      <div style="display:flex;align-items:center;gap:10px;margin:14px 0 10px;color:var(--text3);font-size:.78rem">
+        <span style="flex:1;height:1px;background:var(--border)"></span>or choose a default<span style="flex:1;height:1px;background:var(--border)"></span>
+      </div>
 
       <div class="avatar-grid" id="avatar-grid">
         <?php foreach(AVATARS as $av):
@@ -308,10 +264,24 @@ function page_settings(): void {
 <script>
 function selectAvatar(av){
   document.getElementById('avatar-val').value=av;
-  document.getElementById('preview-avatar').textContent=av;
+  var p=document.getElementById('preview-avatar');
+  p.textContent=av; // emoji preview
+  var f=document.getElementById('avatar-file'); if(f) f.value=''; // clear any chosen file
   document.querySelectorAll('.avatar-opt').forEach(function(el){
     el.classList.toggle('selected', el.dataset.avatar===av);
   });
+}
+function previewUpload(input){
+  var file=input.files&&input.files[0]; if(!file) return;
+  if(file.size>2*1024*1024){ alert('Image is larger than 2 MB. Please choose a smaller file.'); input.value=''; return; }
+  var reader=new FileReader();
+  reader.onload=function(e){
+    var p=document.getElementById('preview-avatar');
+    p.textContent='';
+    p.innerHTML='<img src="'+e.target.result+'" alt="avatar">';
+    document.querySelectorAll('.avatar-opt').forEach(function(el){el.classList.remove('selected');});
+  };
+  reader.readAsDataURL(file);
 }
 </script>
 <?php page_close();
@@ -339,9 +309,9 @@ function page_login(): void {
     <div style="text-align:center;margin-top:14px;font-size:.84rem;color:var(--text3)">New to Pixora? <a href="<?=url('register')?>">Create account</a></div>
     <div style="margin-top:14px;padding:12px;background:var(--bg3);border-radius:8px;font-size:.75rem;color:var(--text3)">
       <strong style="color:var(--p)">Demo accounts:</strong><br>
-      student@pixora.lab / student123 (your account, ID: 4)<br>
-      alice@pixora.app / alice123 (target, ID: 2)<br>
-      admin@pixora.app / admin123 (target, ID: 1)
+      student@pixora.lab / student123<br>
+      alice@pixora.app / alice123<br>
+      admin@pixora.app / admin123
     </div>
   </div>
 </div>
@@ -421,48 +391,29 @@ function action_logout(): void {
     verify_csrf(); session_destroy(); header('Location:'.url('login')); exit;
 }
 
-/*
- * INTENTIONALLY VULNERABLE AVATAR UPDATE ENDPOINT
- * POST /profile/avatar   params: user_id, avatar, _csrf
- *
- * Vulnerability: the endpoint reads user_id from the POST body and updates THAT user's
- * avatar — with no check that the authenticated session user matches the target user_id.
- *
- * A logged-in user can change ANY other user's profile picture by simply setting
- * user_id to the victim's ID in the intercepted request.
- *
- * Burp Suite vector:
- *   POST /subdomains/pixora/profile/avatar
- *   user_id=1&avatar=💀&_csrf=<valid-token>
- *   → Changes user ID 1 (admin)'s profile picture, even though session belongs to user ID 4.
- *
- * Secure fix: replace $_POST['user_id'] with $_SESSION['uid'].
- */
+/* POST /profile/avatar — params: user_id, avatar/photo, _csrf */
 function action_update_avatar(): void {
     $u=require_login(); verify_csrf();
 
-    // INTENTIONAL VULNERABILITY: uses user_id from POST body, not from session
     $target_uid=(int)($_POST['user_id']??0);
     $avatar=$_POST['avatar']??'';
 
-    if(!in_array($avatar,AVATARS,true)){flash('error','Invalid avatar selection.');redirect('settings');}
+    // A user may upload their own photo, or pick one of the default emoji avatars.
+    if(!empty($_FILES['photo']['name']) && (int)($_FILES['photo']['error']??UPLOAD_ERR_NO_FILE)!==UPLOAD_ERR_NO_FILE){
+        $avatar=save_avatar_upload($_FILES['photo']);
+        if($avatar===''){flash('error','Please upload a valid image (PNG, JPG, GIF or WEBP, up to 2 MB).');redirect('settings');}
+    } elseif(!in_array($avatar,AVATARS,true)){
+        flash('error','Invalid avatar selection.');redirect('settings');
+    }
 
     $st=db()->prepare("SELECT id,name FROM users WHERE id=?"); $st->execute([$target_uid]); $target=$st->fetch();
     if(!$target){flash('error','User not found.');redirect('settings');}
 
-    // No authorization check here:
-    // if ($target_uid !== $u['id']) { http_response_code(403); die('Forbidden'); }
-
-    // avatar_changed_by tracks who last changed this user's avatar (for flag reveal)
     db()->prepare("UPDATE users SET avatar=?, avatar_changed_by=? WHERE id=?")
         ->execute([$avatar,$u['id'],$target_uid]);
 
-    if($target_uid===$u['id'])
-        flash('success','Profile picture updated!');
-    else
-        flash('success','Profile picture for @'.h($target['name']).' updated.');
-
-    redirect("profile/$target_uid");
+    flash('success','Profile picture updated!');
+    redirect('settings');
 }
 
 function action_update_bio(): void {
