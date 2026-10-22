@@ -7,7 +7,7 @@ const LAB_FLAG = 'KP{idor_profile_picture_update}';
 
 const AVATARS = ['🐱','🐻','🦊','🐼','🦁','🐸','🦄','🐺','🐯','🦋','🌟','🔥','👾','🎭','🌈','💎'];
 
-session_set_cookie_params(['path' => BASE, 'httponly' => true, 'samesite' => 'Lax']);
+session_set_cookie_params(['path' => '/', 'httponly' => true, 'samesite' => 'Lax']);
 session_name('PIXORASID');
 session_start();
 
@@ -98,7 +98,7 @@ function install_schema(PDO $pdo, bool $reset=false): void {
 
 /* ── HELPERS ──────────────────────────────────────────────── */
 function h($s): string { return htmlspecialchars((string)$s,ENT_QUOTES,'UTF-8'); }
-function url(string $p=''): string { return BASE.($p?'/'.ltrim($p,'/'):''); }
+function url(string $p=''): string { return BASE.'/'.ltrim($p,'/'); }
 function flash(string $t, string $m): void { $_SESSION['flash'][]=[$t,$m]; }
 function redirect(string $p): never { header('Location:'.url($p)); exit; }
 function user(): ?array {
