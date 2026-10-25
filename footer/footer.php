@@ -38,6 +38,7 @@
     display: inline-flex;
     align-items: center;
     font-size: 0.88rem;
+    overflow-wrap: anywhere;
   }
 
   .footer-link:hover {
@@ -147,7 +148,7 @@
       </div>
 
       <!-- Contact -->
-      <div class="col-lg-3 col-md-3 col-6">
+      <div class="col-lg-3 col-md-3 col-sm-6 col-12">
         <h6 class="footer-heading">CONTACT</h6>
         <ul class="footer-links">
           <li>

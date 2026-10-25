@@ -109,21 +109,47 @@ $seed = [
     ['Iced Tea', 'Fresh brewed, unsweetened or sweet', 300, 'Drinks', '🧊', 'https://images.unsplash.com/photo-1556679343-c7306c1976bc?w=500&fit=crop&q=80'],
     ['Buffalo Wings (8pc)', 'Crispy wings, classic buffalo, blue cheese', 1100, 'Mains', '🍗', 'https://images.unsplash.com/photo-1608039755401-742074f0548d?w=500&fit=crop&q=80'],
     ['Margherita Pizza', 'Wood-fired, san marzano, fresh mozzarella', 1400, 'Mains', '🍕', 'https://images.unsplash.com/photo-1574071318508-1cdbab80d002?w=500&fit=crop&q=80'],
+
+    // ── Starters ──
+    ['Crispy Chicken Tenders', 'Buttermilk-brined, honey mustard dip', 850, 'Starters', '🍗', 'https://images.unsplash.com/photo-1548340748-6d2b7d7da280?w=500&fit=crop&q=80'],
+    ['Onion Rings', 'Beer-battered, smoky aioli', 500, 'Starters', '🧅', 'https://images.unsplash.com/photo-1639024471283-03518883512d?w=500&fit=crop&q=80'],
+    ['Garlic Bread', 'Toasted ciabatta, garlic butter, herbs', 450, 'Starters', '🧄', 'https://images.unsplash.com/photo-1573140401552-3fab0b24306f?w=500&fit=crop&q=80'],
+    ['Nachos Supreme', 'Tortilla chips, cheese, jalapeños, salsa, sour cream', 950, 'Starters', '🧀', 'https://images.unsplash.com/photo-1513456852971-30c0b8199d4d?w=500&fit=crop&q=80'],
+
+    // ── Mains ──
+    ['Classic Cheeseburger', 'Beef patty, aged cheddar, lettuce, tomato', 1250, 'Mains', '🍔', 'https://images.unsplash.com/photo-1550547660-d9450f859349?w=500&fit=crop&q=80'],
+    ['Pepperoni Pizza', 'Wood-fired, mozzarella, double pepperoni', 1500, 'Mains', '🍕', 'https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=500&fit=crop&q=80'],
+    ['Grilled Chicken Sandwich', 'Grilled chicken, avocado, chipotle mayo', 1150, 'Mains', '🥪', 'https://images.unsplash.com/photo-1528735602780-2552fd46c7af?w=500&fit=crop&q=80'],
+    ['Fish & Chips', 'Beer-battered cod, thick-cut fries, tartar', 1300, 'Mains', '🐟', 'https://images.unsplash.com/photo-1579208030886-b937da0925dc?w=500&fit=crop&q=80'],
+    ['Spaghetti Carbonara', 'Pancetta, egg, pecorino, cracked pepper', 1350, 'Mains', '🍝', 'https://images.unsplash.com/photo-1612874742237-6526221588e3?w=500&fit=crop&q=80'],
+    ['Chicken Tacos (3pc)', 'Grilled chicken, pico de gallo, lime crema', 1050, 'Mains', '🌮', 'https://images.unsplash.com/photo-1565299585323-38d6b0865b47?w=500&fit=crop&q=80'],
+    ['BBQ Pork Ribs', 'Slow-smoked half rack, house BBQ glaze', 1750, 'Mains', '🍖', 'https://images.unsplash.com/photo-1544025162-d76694265947?w=500&fit=crop&q=80'],
+    ['Grilled Steak', '8oz sirloin, herb butter, seasonal greens', 1900, 'Mains', '🥩', 'https://images.unsplash.com/photo-1558030006-450675393462?w=500&fit=crop&q=80'],
+
+    // ── Desserts ──
+    ['Chocolate Brownie', 'Fudgy brownie, vanilla gelato, chocolate drizzle', 700, 'Desserts', '🍫', 'https://images.unsplash.com/photo-1606313564200-e75d5e30476c?w=500&fit=crop&q=80'],
+
+    // ── Drinks ──
+    ['Cappuccino', 'Double shot, steamed milk, cocoa dust', 400, 'Drinks', '☕', 'https://images.unsplash.com/photo-1572442388796-11668a67e53d?w=500&fit=crop&q=80'],
+    ['Fresh Lemonade', 'Hand-squeezed lemons, mint, soda', 350, 'Drinks', '🍋', 'https://images.unsplash.com/photo-1621263764928-df1444c5e859?w=500&fit=crop&q=80'],
+    ['Fresh Orange Juice', 'Cold-pressed, no added sugar', 400, 'Drinks', '🍊', 'https://images.unsplash.com/photo-1600271886742-f049cd451bba?w=500&fit=crop&q=80'],
+    ['Cola', 'Chilled can, served over ice', 250, 'Drinks', '🥤', 'https://images.unsplash.com/photo-1554866585-cd94860890b7?w=500&fit=crop&q=80'],
 ];
-$menuCheck = $db->query("SELECT COUNT(*) AS c FROM upserve_menu_items")->fetch_assoc();
-if ((int)$menuCheck['c'] === 0) {
-    $st = $db->prepare("INSERT INTO upserve_menu_items (item_uuid, name, description, price_cents, category, emoji, image_url) VALUES (?,?,?,?,?,?,?)");
-    foreach ($seed as $s) {
+// Ensure every seeded item exists (so new menu items appear without a DB reset),
+// and backfill the photo for rows seeded before images were added.
+$findByName = $db->prepare("SELECT id FROM upserve_menu_items WHERE name=?");
+$insItem    = $db->prepare("INSERT INTO upserve_menu_items (item_uuid, name, description, price_cents, category, emoji, image_url) VALUES (?,?,?,?,?,?,?)");
+$backfillImg= $db->prepare("UPDATE upserve_menu_items SET image_url=? WHERE name=? AND (image_url IS NULL OR image_url='')");
+foreach ($seed as $s) {
+    $findByName->bind_param('s', $s[0]);
+    $findByName->execute();
+    if ($findByName->get_result()->fetch_row()) {
+        $backfillImg->bind_param('ss', $s[5], $s[0]);
+        $backfillImg->execute();
+    } else {
         $uuid = uuidv4();
-        $st->bind_param('sssisss', $uuid, $s[0], $s[1], $s[2], $s[3], $s[4], $s[5]);
-        $st->execute();
-    }
-} else {
-    // Backfill image_url for rows seeded before photos were added.
-    $st = $db->prepare("UPDATE upserve_menu_items SET image_url=? WHERE name=? AND (image_url IS NULL OR image_url='')");
-    foreach ($seed as $s) {
-        $st->bind_param('ss', $s[5], $s[0]);
-        $st->execute();
+        $insItem->bind_param('sssisss', $uuid, $s[0], $s[1], $s[2], $s[3], $s[4], $s[5]);
+        $insItem->execute();
     }
 }
 
@@ -576,12 +602,12 @@ if ($action === 'cards') {
         </div>
       <?php endforeach; ?>
       <h2 style="font-size:1.05rem;margin-top:1.5rem;">Add a card</h2>
-      <form method="POST" action="index.php?action=add-card">
-        <div class="field"><label>Name on card</label><input name="holder" required></div>
-        <div class="field"><label>Card number</label><input name="number" inputmode="numeric" placeholder="4242 4242 4242 4242" required></div>
+      <form method="POST" action="index.php?action=add-card" autocomplete="off">
+        <div class="field"><label>Name on card</label><input name="holder" autocomplete="off" required></div>
+        <div class="field"><label>Card number</label><input name="number" inputmode="numeric" autocomplete="off" placeholder="4242 4242 4242 4242" required></div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem;">
-          <div class="field"><label>Expiry</label><input name="exp" placeholder="MM/YY"></div>
-          <div class="field"><label>CVC</label><input name="cvc" placeholder="123"></div>
+          <div class="field"><label>Expiry</label><input name="exp" autocomplete="off" placeholder="MM/YY"></div>
+          <div class="field"><label>CVC</label><input name="cvc" autocomplete="off" placeholder="123"></div>
         </div>
         <button class="btn btn-primary" style="width:100%;justify-content:center;" type="submit">Save card</button>
       </form>
@@ -614,13 +640,12 @@ if ($action === 'cart') {
         <div class="cart-line">
           <img class="ic" src="<?php echo esc($it['image_url']); ?>" alt="<?php echo esc($it['name']); ?>">
           <div class="nm"><?php echo esc($it['name']); ?><div class="unit"><?php echo money($it['price_cents']); ?> each</div></div>
-          <input type="number" name="qty[<?php echo (int)$it['id']; ?>]" value="<?php echo (int)$l['qty']; ?>" min="1" max="20">
+          <input type="number" name="qty[<?php echo (int)$it['id']; ?>]" value="<?php echo (int)$l['qty']; ?>" min="1" max="20" onchange="this.form.submit()">
           <div class="lt"><?php echo money($l['total']); ?></div>
           <a class="rm" href="index.php?action=remove-from-cart&id=<?php echo (int)$it['id']; ?>">Remove</a>
         </div>
         <?php endforeach; ?>
         <div style="display:flex;gap:0.6rem;margin-top:1rem;">
-          <button class="btn" type="submit">Update quantities</button>
           <a class="btn btn-primary" href="index.php?action=checkout">Proceed to checkout →</a>
         </div>
       </form>

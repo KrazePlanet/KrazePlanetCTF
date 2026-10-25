@@ -47,7 +47,12 @@ function fetch_products(string $where='1=1', array $params=[], int $limit=60): a
 }
 
 function cart_lines(int $uid): array {
-    $st=db()->prepare("SELECT ci.*,p.name,p.brand,p.price,p.original_price,c.slug AS cat_slug,(p.price*ci.quantity) AS subtotal FROM cart_items ci JOIN products p ON p.id=ci.product_id JOIN categories c ON c.id=p.category_id WHERE ci.user_id=?");
+    // Price comes from cart_items.unit_price — the value captured when the item was
+    // added to the bag — NOT from the live catalogue. (See action_cart_add.)
+    $st=db()->prepare("SELECT ci.*,p.name,p.brand,p.original_price,c.slug AS cat_slug,
+                              ci.unit_price AS price,(ci.unit_price*ci.quantity) AS subtotal
+                       FROM cart_items ci JOIN products p ON p.id=ci.product_id
+                       JOIN categories c ON c.id=p.category_id WHERE ci.user_id=?");
     $st->execute([$uid]); return $st->fetchAll();
 }
 
@@ -75,23 +80,28 @@ function page_home(): void {
     page_open('Fashion Forward, Always');
     ?>
 <div class="hero">
-  <div class="hero-title">Fashion Forward,<br>Always.</div>
-  <p class="hero-sub">Shop the latest trends in women's, men's and kids' fashion. New arrivals every week.</p>
-  <div class="hero-chips">
-    <span class="hero-chip">🚚 Free delivery ₹799+</span>
-    <span class="hero-chip">↩️ 7-day returns</span>
-    <span class="hero-chip">💳 Instant wallet refunds</span>
-    <span class="hero-chip">✅ Genuine brands</span>
+  <img class="hero-bg" src="https://images.unsplash.com/photo-1483985988355-763728e1935b?w=1600&h=700&fit=crop&auto=format&q=70" alt="">
+  <div class="hero-inner">
+    <div class="hero-eyebrow">New Season · Autumn / Winter</div>
+    <div class="hero-title">Dress the part,<br><em>every single day.</em></div>
+    <p class="hero-sub">Curated women's, men's and kids' fashion from the brands you love — refreshed every week.</p>
+    <a href="<?=url('category/women')?>" class="btn btn-primary btn-lg" style="background:#f6f2ec;color:var(--ink)">Shop New Arrivals</a>
+    <div class="hero-chips" style="margin-top:30px">
+      <span>Free delivery over ₹799</span>
+      <span>7-day easy returns</span>
+      <span>Genuine brands</span>
+    </div>
   </div>
 </div>
 <div class="cat-strip">
   <?php foreach($cats as $c):?>
-  <a href="<?=url("category/{$c['slug']}")?>" class="cat-pill"><?=$c['icon']?> <?=h($c['name'])?></a>
+  <a href="<?=url("category/{$c['slug']}")?>" class="cat-pill"><?=h($c['name'])?></a>
   <?php endforeach;?>
 </div>
 <div class="main">
-  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px">
-    <div><div class="page-title">🔥 Trending Now</div><div class="section-sub">Bestsellers this season</div></div>
+  <div style="margin-bottom:24px">
+    <div class="section-head">Trending Now</div>
+    <div class="section-sub">Bestsellers this season</div>
   </div>
   <div class="product-grid"><?php foreach($products as $p) product_card($p);?></div>
 </div>
@@ -107,7 +117,7 @@ function page_category(string $slug): void {
     $products=fetch_products('p.category_id=?',[$cat['id']]);
     page_open($cat['name']);
     echo '<div class="main">';
-    echo '<div style="margin-bottom:20px"><div class="page-title">'.$cat['icon'].' '.h($cat['name']).'</div><div class="section-sub">'.count($products).' styles available</div></div>';
+    echo '<div style="margin-bottom:24px"><div class="section-head">'.h($cat['name']).'</div><div class="section-sub">'.count($products).' styles available</div></div>';
     echo '<div class="product-grid">'; foreach($products as $p) product_card($p); echo '</div></div>';
     page_close();
 }
@@ -119,13 +129,11 @@ function page_product(int $id): void {
     $ps=fetch_products('p.id=?',[$id],1); $p=$ps[0]??null;
     if(!$p){page_404();return;}
     $disc=$p['original_price']?(int)round((1-$p['price']/$p['original_price'])*100):0;
-    $emojis=['women'=>'👗','men'=>'👔','kids'=>'🧒','footwear'=>'👟','accessories'=>'👜','beauty'=>'💄'];
-    $bgs=['women'=>'#fdf2f8','men'=>'#eff6ff','kids'=>'#f0fdf4','footwear'=>'#fffbeb','accessories'=>'#faf5ff','beauty'=>'#fdf2f8'];
     page_open(h($p['name']));
     ?>
-<div class="main" style="display:grid;grid-template-columns:1fr 1fr;gap:32px;align-items:start">
-  <div class="card" style="aspect-ratio:3/4;display:flex;align-items:center;justify-content:center;font-size:8rem;background:<?=$bgs[$p['cat_slug']]??'#fdf2f8'?>">
-    <?=$emojis[$p['cat_slug']]??'🛍️'?>
+<div class="main" style="display:grid;grid-template-columns:1fr 1fr;gap:40px;align-items:start">
+  <div style="aspect-ratio:3/4;border-radius:var(--radius);overflow:hidden;background:var(--bg3)">
+    <img src="<?=h(product_image($p,900))?>" alt="<?=h($p['name'])?>" style="width:100%;height:100%;object-fit:cover">
   </div>
   <div>
     <div style="font-size:.75rem;color:var(--p);font-weight:700;text-transform:uppercase;letter-spacing:.6px"><?=h($p['cat_name'])?></div>
@@ -147,6 +155,7 @@ function page_product(int $id): void {
     <form method="POST" action="<?=url('cart/add')?>">
       <input type="hidden" name="_csrf" value="<?=h(csrf_token())?>">
       <input type="hidden" name="product_id" value="<?=$p['id']?>">
+      <input type="hidden" name="price" value="<?=(int)$p['price']?>">
       <?php if($p['size_options']&&$p['size_options']!=='One Size'):
         $sizes=explode(',',$p['size_options']);?>
       <div class="form-group">
@@ -178,10 +187,10 @@ function page_product(int $id): void {
 <script>
 document.querySelectorAll('.size-radio').forEach(r=>{
   r.addEventListener('change',()=>{
-    document.querySelectorAll('.size-opt').forEach(d=>d.style.borderColor='#e5e7eb');
-    r.nextElementSibling.style.borderColor='var(--p)';
+    document.querySelectorAll('.size-opt').forEach(d=>d.style.borderColor='#e7ddce');
+    r.nextElementSibling.style.borderColor='var(--ink)';
   });
-  if(r.checked) r.nextElementSibling.style.borderColor='var(--p)';
+  if(r.checked) r.nextElementSibling.style.borderColor='var(--ink)';
 });
 </script>
 <?php page_close();
@@ -194,7 +203,7 @@ function page_cart(): void {
     $u=require_login(); $u=fresh_user();
     $lines=cart_lines($u['id']);
     $subtotal=array_sum(array_column($lines,'subtotal'));
-    $shipping=$subtotal>=79900?0:9900;
+    $shipping=$subtotal>=799?0:99;
     $wallet_usable=min((int)$u['wallet_balance'],$subtotal+$shipping);
     page_open('Shopping Bag');
     ?>
@@ -212,8 +221,8 @@ function page_cart(): void {
       <?php foreach($lines as $l):
         $disc=$l['original_price']?(int)round((1-$l['price']/$l['original_price'])*100):0;?>
       <div style="display:flex;gap:16px;padding:18px 20px;border-bottom:1px solid #f9fafb;align-items:center">
-        <div style="width:80px;height:100px;background:#fdf2f8;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:2.5rem;flex-shrink:0">
-          <?=(['women'=>'👗','men'=>'👔','kids'=>'🧒','footwear'=>'👟','accessories'=>'👜','beauty'=>'💄'])[$l['cat_slug']]??'🛍️'?>
+        <div style="width:80px;height:100px;border-radius:6px;overflow:hidden;background:var(--bg3);flex-shrink:0">
+          <img src="<?=h(product_image($l,160))?>" alt="" style="width:100%;height:100%;object-fit:cover">
         </div>
         <div style="flex:1">
           <div style="font-size:.7rem;color:var(--text3);font-weight:700;text-transform:uppercase"><?=h($l['brand'])?></div>
@@ -275,7 +284,7 @@ function page_checkout_get(): void {
     $lines=cart_lines($u['id']);
     if(!$lines){flash('error','Your bag is empty.');redirect('cart');}
     $subtotal=array_sum(array_column($lines,'subtotal'));
-    $shipping=$subtotal>=79900?0:9900;
+    $shipping=$subtotal>=799?0:99;
     $total=$subtotal+$shipping;
     page_open('Checkout');
     ?>
@@ -446,7 +455,6 @@ function page_order(int $oid): void {
       A refund of <strong><?=inr((int)$ret['refund_amount'])?></strong> has been credited to your wallet.<br>
       Pickup is scheduled. You can cancel this return within 24 hours.
     </p>
-    <!-- VULNERABLE ENDPOINT: cancels return but does NOT reverse the wallet credit -->
     <form method="POST" action="<?=url('returns/cancel')?>">
       <input type="hidden" name="_csrf" value="<?=h(csrf_token())?>">
       <input type="hidden" name="order_id" value="<?=$oid?>">
@@ -512,36 +520,12 @@ function page_returns(): void {
 ══════════════════════════════════════════════════════════ */
 function page_wallet(): void {
     $u=require_login(); $u=fresh_user();
-    $flag_show=false;
-    // Check: has a cancelled return but still has wallet credit from it
-    $exploit_st=db()->prepare("
-        SELECT COUNT(*) FROM returns r
-        JOIN orders o ON o.id=r.order_id
-        WHERE r.user_id=? AND r.status='cancelled' AND r.refund_credited=1
-          AND o.status='return_cancelled'
-    ");
-    $exploit_st->execute([$u['id']]); $flag_show=(int)$exploit_st->fetchColumn()>0;
-
     $txns=db()->prepare("SELECT * FROM wallet_txns WHERE user_id=? ORDER BY id DESC LIMIT 20");
     $txns->execute([$u['id']]); $txns=$txns->fetchAll();
 
     page_open('My Wallet');
     ?>
 <div class="main" style="max-width:680px;margin-left:auto;margin-right:auto">
-  <?php if($flag_show):?>
-  <div class="flag-box">
-    <h3>🚩 Vulnerability Exploited — Double Refund!</h3>
-    <p style="color:#6ee7b7;font-size:.875rem;margin-bottom:10px">
-      You successfully exploited the <strong>refund-without-return</strong> business logic flaw.<br>
-      <code style="background:#052e1c;padding:2px 6px;border-radius:4px">POST /returns/initiate</code> credited your wallet instantly.<br>
-      <code style="background:#052e1c;padding:2px 6px;border-radius:4px">POST /returns/cancel</code> cancelled the return but <strong>did NOT reverse the wallet credit</strong>.<br>
-      You now have both the item and the refund money.
-    </p>
-    <div>Your Flag:</div>
-    <div class="flag-val"><?=LAB_FLAG?></div>
-  </div>
-  <?php endif;?>
-
   <div class="wallet-card">
     <div style="font-size:.75rem;font-weight:600;opacity:.75;text-transform:uppercase;letter-spacing:.6px">RetailZone Wallet Balance</div>
     <div style="font-size:2.8rem;font-weight:900;margin:6px 0"><?=inr((int)$u['wallet_balance'])?></div>
@@ -581,29 +565,62 @@ function page_dashboard(): void {
     $u=require_login(); $u=fresh_user();
     $ost=db()->prepare("SELECT COUNT(*),COALESCE(SUM(total),0) FROM orders WHERE user_id=?");
     $ost->execute([$u['id']]); [$ocnt,$spent]=$ost->fetch(PDO::FETCH_NUM);
+    $mst=db()->prepare("SELECT created_at FROM users WHERE id=?"); $mst->execute([$u['id']]); $since=$mst->fetchColumn();
+    $rst=db()->prepare("SELECT * FROM orders WHERE user_id=? ORDER BY id DESC LIMIT 4"); $rst->execute([$u['id']]); $recent=$rst->fetchAll();
     page_open('My Account');
     ?>
 <div class="main">
-  <div class="page-title" style="margin-bottom:20px">👤 My Account</div>
-  <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:24px">
-    <?php foreach([['📦',$ocnt,'Orders'],['💰',inr((int)$u['wallet_balance']),'Wallet'],['↩️','7 days','Return Window']] as[$i,$v,$l]):?>
-    <div class="card card-pad" style="text-align:center"><div style="font-size:1.8rem"><?=$i?></div><div style="font-size:1.4rem;font-weight:800;margin:4px 0"><?=$v?></div><div style="font-size:.75rem;color:var(--text3);font-weight:600"><?=$l?></div></div>
+  <div style="margin-bottom:26px">
+    <div class="section-head">Hello, <?=h(explode(' ',$u['name'])[0])?></div>
+    <div class="section-sub">Member since <?=$since?date('F Y',strtotime($since)):'today'?></div>
+  </div>
+
+  <!-- Account summary strip -->
+  <div class="wallet-card" style="display:flex;flex-wrap:wrap;gap:20px 56px;align-items:center;margin-bottom:28px">
+    <?php foreach([[(string)$ocnt,'Orders placed'],[inr((int)$spent),'Total spent'],[inr((int)$u['wallet_balance']),'Wallet balance'],['7 days','Return window']] as[$v,$l]):?>
+    <div style="position:relative;z-index:1">
+      <div style="font-family:var(--serif);font-size:1.9rem;font-weight:600;line-height:1"><?=$v?></div>
+      <div style="font-size:.72rem;letter-spacing:1px;text-transform:uppercase;opacity:.7;margin-top:6px"><?=$l?></div>
+    </div>
     <?php endforeach;?>
   </div>
-  <div style="display:grid;grid-template-columns:2fr 1fr;gap:20px">
-    <div class="card card-pad">
-      <div style="font-weight:700;margin-bottom:12px">Quick Links</div>
-      <?php foreach([[url('orders'),'📦 My Orders'],[url('returns'),'↩️ Returns & Refunds'],[url('wallet'),'💰 My Wallet'],[url('profile'),'👤 Edit Profile'],[url(),'🛍️ Continue Shopping']] as[$href,$lbl]):?>
-      <a href="<?=$href?>" class="btn btn-secondary" style="width:100%;margin-bottom:8px;justify-content:flex-start"><?=$lbl?></a>
-      <?php endforeach;?>
+
+  <div style="display:grid;grid-template-columns:1.7fr 1fr;gap:26px;align-items:start">
+    <!-- Recent orders -->
+    <div class="card">
+      <div style="padding:18px 22px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between">
+        <div style="font-family:var(--serif);font-size:1.15rem;font-weight:600">Recent Orders</div>
+        <?php if($recent):?><a href="<?=url('orders')?>" style="font-size:.8rem;font-weight:600">View all →</a><?php endif;?>
+      </div>
+      <?php if(!$recent):?>
+      <div style="padding:48px 22px;text-align:center;color:var(--text3)">
+        <div style="font-size:.95rem;color:var(--text2);margin-bottom:4px">No orders yet</div>
+        <div style="font-size:.82rem">Your recent purchases will appear here.</div>
+        <a href="<?=url()?>" class="btn btn-outline btn-sm" style="margin-top:18px">Start Shopping</a>
+      </div>
+      <?php else: foreach($recent as $o):?>
+      <a href="<?=url("order/{$o['id']}")?>" style="display:flex;align-items:center;justify-content:space-between;padding:15px 22px;border-bottom:1px solid var(--bg3);color:var(--text)">
+        <div>
+          <div style="font-weight:600;font-size:.9rem">Order #<?=h($o['id'])?></div>
+          <div style="font-size:.76rem;color:var(--text3);margin-top:2px"><?=date('d M Y',strtotime($o['placed_at']))?></div>
+        </div>
+        <div style="display:flex;align-items:center;gap:14px">
+          <span class="tag <?=order_status_tag($o['status'])?>"><?=order_status_label($o['status'])?></span>
+          <span style="font-weight:700;min-width:70px;text-align:right"><?=inr((int)$o['total'])?></span>
+        </div>
+      </a>
+      <?php endforeach; endif;?>
     </div>
-    <div class="card card-pad" style="background:#fff7ed;border-color:#fed7aa">
-      <div style="font-size:.75rem;font-weight:700;color:#92400e;margin-bottom:8px">💡 Lab Hint</div>
-      <p style="font-size:.8rem;color:#78350f;line-height:1.6">
-        Initiate a return on a delivered order — your wallet is credited <strong>instantly</strong>.<br><br>
-        Then cancel the return. The credit stays.<br><br>
-        Check <code style="background:#fff8;padding:1px 5px;border-radius:3px">/returns/cancel</code> — it never reverses the wallet debit.
-      </p>
+
+    <!-- Account panel -->
+    <div class="card card-pad">
+      <div style="font-family:var(--serif);font-size:1.15rem;font-weight:600;margin-bottom:4px"><?=h($u['name'])?></div>
+      <div style="font-size:.82rem;color:var(--text3);margin-bottom:18px"><?=h($u['email'])?></div>
+      <div style="display:flex;flex-direction:column">
+        <?php foreach([[url('orders'),'My Orders'],[url('returns'),'Returns & Refunds'],[url('wallet'),'My Wallet'],[url('profile'),'Edit Profile'],[url(),'Continue Shopping']] as[$href,$lbl]):?>
+        <a href="<?=$href?>" style="display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(--bg3);color:var(--text);font-size:.88rem;font-weight:500"><?=$lbl?><span style="color:var(--text3)">→</span></a>
+        <?php endforeach;?>
+      </div>
     </div>
   </div>
 </div>
@@ -637,7 +654,7 @@ function page_login(): void {
     page_open('Sign In');
     ?>
 <div class="main" style="max-width:420px;margin-left:auto;margin-right:auto;padding-top:32px">
-  <div style="text-align:center;margin-bottom:24px"><div style="font-size:2.5rem">💅</div><div class="page-title" style="margin-top:8px">Sign In to RetailZone</div></div>
+  <div style="text-align:center;margin-bottom:24px"><div class="page-title" style="margin-top:8px">Sign In to RetailZone</div></div>
   <div class="card card-pad">
     <form method="POST" action="<?=url('login')?>">
       <input type="hidden" name="_csrf" value="<?=h(csrf_token())?>">
@@ -724,7 +741,7 @@ function action_login(): void {
     $st=db()->prepare("SELECT * FROM users WHERE email=?"); $st->execute([$email]); $u=$st->fetch();
     if(!$u||!password_verify($pass,$u['password_hash'])){flash('error','Invalid email or password.');redirect('login');}
     session_regenerate_id(true); $_SESSION['uid']=$u['id'];
-    flash('success','Welcome back, '.$u['name'].'!'); redirect('dashboard');
+    flash('success','Welcome back, '.$u['name'].'!'); redirect('/');
 }
 
 function action_register(): void {
@@ -734,7 +751,7 @@ function action_register(): void {
     try {
         db()->prepare("INSERT INTO users(name,email,password_hash) VALUES(?,?,?)")->execute([$name,$email,password_hash($pass,PASSWORD_DEFAULT)]);
         session_regenerate_id(true); $_SESSION['uid']=(int)db()->lastInsertId();
-        flash('success','Account created!'); redirect('dashboard');
+        flash('success','Account created! Welcome to RetailZone.'); redirect('/');
     } catch(PDOException){flash('error','Email already registered.');redirect('register');}
 }
 
@@ -742,13 +759,21 @@ function action_logout(): void {
     verify_csrf(); session_destroy(); header('Location:'.url('login')); exit;
 }
 
+/*
+ * INTENTIONALLY VULNERABLE: the price is taken from the request (the hidden
+ * "price" field the product page submits) and stored on the cart row as-is.
+ * It is never compared to products.price, so a tampered request sets any price.
+ */
 function action_cart_add(): void {
     $u=require_login(); verify_csrf();
     $pid=(int)($_POST['product_id']??0); $qty=max(1,min(5,(int)($_POST['quantity']??1)));
     $size=htmlspecialchars($_POST['size']??'');
+    $price=max(0,(int)($_POST['price']??0));   // trusted client-supplied price
     $st=db()->prepare("SELECT id FROM products WHERE id=?"); $st->execute([$pid]);
     if(!$st->fetch()){flash('error','Product not found.');redirect('');}
-    db()->prepare("INSERT INTO cart_items(user_id,product_id,quantity,size) VALUES(?,?,?,?) ON DUPLICATE KEY UPDATE quantity=quantity+VALUES(quantity)")->execute([$u['id'],$pid,$qty,$size]);
+    db()->prepare("INSERT INTO cart_items(user_id,product_id,quantity,unit_price,size) VALUES(?,?,?,?,?)
+                   ON DUPLICATE KEY UPDATE quantity=quantity+VALUES(quantity),unit_price=VALUES(unit_price)")
+        ->execute([$u['id'],$pid,$qty,$price,$size]);
     flash('success','Added to bag!'); redirect('cart');
 }
 
@@ -771,7 +796,7 @@ function action_checkout(): void {
     $lines=cart_lines($u['id']);
     if(!$lines){flash('error','Cart is empty.');redirect('cart');}
     $subtotal=array_sum(array_column($lines,'subtotal'));
-    $shipping=$subtotal>=79900?0:9900;
+    $shipping=$subtotal>=799?0:99;
     $use_wallet=!empty($_POST['use_wallet']);
     $wallet_used=0;
     if($use_wallet){
@@ -795,11 +820,8 @@ function action_checkout(): void {
 }
 
 /*
- * INTENTIONALLY VULNERABLE RETURN INITIATION
- * POST /returns/initiate  params: order_id, reason
- *
- * Realistic UX: instant wallet refund on return initiation (common in Indian e-commerce).
- * The refund_credited flag is set to 1 — this is the credit that should be reversed on cancel.
+ * Return initiation: instant wallet refund (common in Indian e-commerce).
+ * Reversed correctly if the return is cancelled (see action_return_cancel).
  */
 function action_return_initiate(): void {
     $u=require_login(); verify_csrf();
@@ -830,12 +852,8 @@ function action_return_initiate(): void {
 }
 
 /*
- * INTENTIONALLY VULNERABLE RETURN CANCELLATION
- * POST /returns/cancel  params: order_id
- *
- * Bug: marks return as cancelled and updates order status,
- * but NEVER reverses the wallet credit that was applied in action_return_initiate().
- * The wallet_txns entry remains. The user keeps both the item and the refund.
+ * Return cancellation: reverses the instant wallet refund from action_return_initiate()
+ * before marking the return cancelled, so the balance stays correct.
  */
 function action_return_cancel(): void {
     $u=require_login(); verify_csrf();
@@ -845,15 +863,16 @@ function action_return_cancel(): void {
     $st->execute([$oid,$u['id']]); $ret=$st->fetch();
     if(!$ret||$ret['status']!=='initiated'){flash('error','Return cannot be cancelled.');redirect("order/$oid");}
 
-    // --- INTENTIONAL BUG: wallet credit is NOT reversed here ---
-    // Missing: UPDATE users SET wallet_balance = wallet_balance - refund_amount WHERE id = user_id
-    // Missing: wallet_txns debit entry
-
-    // Only updates the return and order status — no financial reversal
-    db()->prepare("UPDATE returns SET status='cancelled' WHERE order_id=?")->execute([$oid]);
+    // Reverse the instant refund that was credited when the return was initiated.
+    if((int)$ret['refund_credited']===1){
+        db()->prepare("UPDATE users SET wallet_balance=wallet_balance-? WHERE id=?")->execute([(int)$ret['refund_amount'],$u['id']]);
+        db()->prepare("INSERT INTO wallet_txns(user_id,amount,type,reason,order_id) VALUES(?,?,'debit',?,?)")
+            ->execute([$u['id'],(int)$ret['refund_amount'],"Refund reversed — return cancelled for Order #$oid",$oid]);
+    }
+    db()->prepare("UPDATE returns SET status='cancelled',refund_credited=0 WHERE order_id=?")->execute([$oid]);
     db()->prepare("UPDATE orders SET status='return_cancelled' WHERE id=?")->execute([$oid]);
 
-    flash('warning','Return request cancelled. Your order will not be picked up.');
+    flash('warning','Return request cancelled. The refund has been reversed from your wallet.');
     redirect("order/$oid");
 }
 

@@ -1,86 +1,10 @@
-<?php 
+<?php
 if (session_status() === PHP_SESSION_NONE) { session_start(); }
 
-// Robust PHPMailer Multi-Path Loader
-$phpMailerLoaded = false;
-$mailerPaths = [
-    __DIR__ . '/PHPMailer',
-    __DIR__ . '/../subdomains/PHPMailer',
-    __DIR__ . '/../PHPMailer',
-    '/opt/lampp/htdocs/subdomains/PHPMailer',
-    '/opt/lampp/htdocs/navbar/PHPMailer',
-    '/opt/lampp/htdocs/PHPMailer'
-];
-foreach ($mailerPaths as $mDir) {
-    if (file_exists("{$mDir}/Exception.php")) {
-        require_once "{$mDir}/Exception.php";
-        require_once "{$mDir}/PHPMailer.php";
-        require_once "{$mDir}/SMTP.php";
-        $phpMailerLoaded = true;
-        break;
-    }
-}
-
-use PHPMailer\PHPMailer\PHPMailer;
-use PHPMailer\PHPMailer\Exception;
-
-require_once __DIR__ . '/../config/mail.php';
-
-$msg_sent = false;
-$msg_error = '';
-
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $name    = trim($_POST['name'] ?? '');
-    $email   = trim($_POST['email'] ?? '');
-    $subject = trim($_POST['subject'] ?? 'General Inquiry');
-    $message = trim($_POST['message'] ?? '');
-
-    if (empty($name) || empty($email) || empty($message)) {
-        $msg_error = 'Please fill in all required fields (Name, Email, and Message).';
-    } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-        $msg_error = 'Please provide a valid email address.';
-    } else {
-        $mail = new PHPMailer(true);
-        try {
-            configureKrazeMailer($mail, 'noreply@krazeplanet.com', 'KrazePlanet Contact Form');
-            $mail->addAddress('support@krazeplanet.com', 'KrazePlanet Support');
-            $mail->addReplyTo($email, $name);
-            $mail->isHTML(true);
-            $mail->Subject = 'New Contact Inquiry: [' . htmlspecialchars($subject) . '] from ' . htmlspecialchars($name);
-
-            $mail->Body = '
-            <div style="font-family: -apple-system, BlinkMacSystemFont, Roboto, sans-serif; background:#070b14; padding:40px 20px; color:#f8fafc;">
-                <div style="max-width:560px; margin:0 auto; background:#0f172a; border:1px solid rgba(255,255,255,0.12); border-radius:16px; padding:36px; box-shadow:0 20px 40px rgba(0,0,0,0.6);">
-                    <div style="display:flex; align-items:center; gap:8px; margin-bottom:20px;">
-                        <span style="font-size:24px; font-weight:800; color:#38bdf8; letter-spacing:-0.5px;">KrazePlanet</span>
-                        <span style="font-size:12px; font-weight:600; background:rgba(56,189,248,0.15); color:#38bdf8; padding:3px 8px; border-radius:8px; border:1px solid rgba(56,189,248,0.3);">Contact Inquiry</span>
-                    </div>
-                    <h2 style="font-size:20px; font-weight:700; margin-bottom:16px; color:#ffffff;">New Contact Form Message</h2>
-                    
-                    <div style="background:#070b14; border:1px solid rgba(255,255,255,0.08); border-radius:10px; padding:18px; margin-bottom:20px;">
-                        <p style="margin:0 0 10px 0; font-size:14px; color:#94a3b8;"><strong style="color:#ffffff;">Sender Name:</strong> ' . htmlspecialchars($name) . '</p>
-                        <p style="margin:0 0 10px 0; font-size:14px; color:#94a3b8;"><strong style="color:#ffffff;">Sender Email:</strong> <a href="mailto:' . htmlspecialchars($email) . '" style="color:#38bdf8; text-decoration:none;">' . htmlspecialchars($email) . '</a></p>
-                        <p style="margin:0 0 10px 0; font-size:14px; color:#94a3b8;"><strong style="color:#ffffff;">Subject:</strong> ' . htmlspecialchars($subject) . '</p>
-                        <p style="margin:0; font-size:13px; color:#64748b;"><strong style="color:#94a3b8;">Timestamp:</strong> ' . date('Y-m-d H:i:s T') . '</p>
-                    </div>
-
-                    <h4 style="font-size:15px; font-weight:700; color:#ffffff; margin-bottom:8px;">Message Content:</h4>
-                    <div style="background:#1e293b; border-left:4px solid #38bdf8; border-radius:6px; padding:16px; font-size:14px; line-height:1.6; color:#f1f5f9; white-space:pre-wrap; margin-bottom:24px;">' . htmlspecialchars($message) . '</div>
-
-                    <p style="color:#64748b; font-size:12px; line-height:1.5; margin:0;">
-                        You can directly reply to this email to reply back to <strong>' . htmlspecialchars($email) . '</strong>.
-                    </p>
-                </div>
-            </div>';
-
-            $mail->send();
-            $msg_sent = true;
-        } catch (Exception $e) {
-            error_log("Contact Mail Send Error: " . $mail->ErrorInfo);
-            $msg_error = 'Failed to send message. Please try again or join our Discord community.';
-        }
-    }
-}
+// Contact details shown on this page
+$supportEmail = 'contact@krazeplanet.com';
+$phoneDisplay = '+91 8527310670';
+$whatsappNum  = '918527310670'; // digits only, for wa.me
 ?>
 <!doctype html>
 <html lang="en">
@@ -92,247 +16,174 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0/dist/css/bootstrap.min.css" rel="stylesheet"
     integrity="sha384-gH2yIJqKdNHPEq0n4Mqa/HGKIhSkIHeL5AyhkYV8i59U5AR6csBvApHHNl/vI1Bx" crossorigin="anonymous">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.9.1/font/bootstrap-icons.css">
-  <link rel="icon" href="favicon.ico" />
-  
-  <!-- Google Fonts: Inter, Outfit, JetBrains Mono -->
+  <link rel="icon" href="/favicon.ico" />
+
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet">
-  
+
   <style>
     :root {
-      --bg-dark: #070b14;
-      --bg-card: rgba(15, 23, 42, 0.75);
-      --border-card: rgba(255, 255, 255, 0.08);
-      --accent-green: #10b981;
-      --accent-green-glow: rgba(16, 185, 129, 0.3);
-      --accent-blue: #38bdf8;
-      --accent-orange: #f59e0b;
-      --accent-red: #f43f5e;
+      --font-primary: 'Inter', system-ui, -apple-system, sans-serif;
+      --font-heading: 'Outfit', sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+      --rose: #f43f5e;
     }
-
-    * {
-      box-sizing: border-box;
-    }
-
+    * { box-sizing: border-box; }
     body {
-      background-color: var(--bg-dark);
-      background-image: 
-        radial-gradient(at 0% 0%, rgba(56, 189, 248, 0.08) 0px, transparent 50%),
-        radial-gradient(at 100% 0%, rgba(16, 185, 129, 0.08) 0px, transparent 50%),
-        radial-gradient(at 50% 100%, rgba(15, 23, 42, 0.5) 0px, transparent 50%);
-      background-attachment: fixed;
       color: #f8fafc;
-      font-family: 'Inter', sans-serif;
       min-height: 100vh;
-      display: flex;
-      flex-direction: column;
+      font-family: var(--font-primary);
+      -webkit-font-smoothing: antialiased;
+    }
+    h1, h2, h3, h4 { font-family: var(--font-heading); }
+    a { text-decoration: none; }
+
+    .contact-wrap {
+      max-width: 940px;
+      margin: 0 auto;
+      padding: 4rem 1.25rem 5rem;
     }
 
-    h1, h2, h3, h4, h5, h6 {
-      font-family: 'Outfit', sans-serif;
-    }
-
-    .hero-title {
-      font-size: 2.6rem;
+    .contact-hero { text-align: center; margin-bottom: 3rem; }
+    .contact-hero h1 {
+      font-size: 3rem;
       font-weight: 800;
-      background: linear-gradient(135deg, #ffffff 30%, #38bdf8 70%, #34d399 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      margin-bottom: 0.8rem;
-      letter-spacing: -0.5px;
+      color: #ffffff;
+      margin-bottom: 1rem;
+      letter-spacing: -0.01em;
+    }
+    .contact-hero p {
+      color: #94a3b8;
+      font-size: 1.05rem;
+      line-height: 1.6;
+      max-width: 620px;
+      margin: 0 auto;
     }
 
-    .hero-subtitle {
-      color: #94a3b8;
-      font-size: 1.1rem;
-      max-width: 650px;
-      margin: 0 auto 1.5rem auto;
-      line-height: 1.6;
+    .contact-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1.5rem;
     }
 
     .contact-card {
-      background: var(--bg-card);
-      border: 1px solid var(--border-card);
-      border-radius: 16px;
-      padding: 32px;
-      backdrop-filter: blur(16px);
-      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
+      background: rgba(15, 23, 42, 0.55);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 18px;
+      padding: 2rem;
+      display: flex;
+      flex-direction: column;
+      backdrop-filter: blur(8px);
+      transition: border-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    .contact-card:hover {
+      transform: translateY(-3px);
+      border-color: rgba(244, 63, 94, 0.4);
+      box-shadow: 0 14px 34px rgba(0, 0, 0, 0.4), 0 0 22px rgba(244, 63, 94, 0.12);
     }
 
-    .form-control, .form-select {
-      background-color: #070b14;
-      border: 1px solid rgba(255, 255, 255, 0.14);
-      color: #ffffff;
-      font-size: 14px;
-      padding: 11px 14px;
-      border-radius: 9px;
-      transition: all 0.2s;
-    }
-
-    .form-control:focus, .form-select:focus {
-      background-color: #070b14;
-      border-color: #38bdf8;
-      color: #ffffff;
-      box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.2);
-    }
-
-    .btn-send {
-      background: linear-gradient(135deg, #0284c7, #0369a1);
-      color: #ffffff;
-      font-weight: 700;
-      font-size: 15px;
-      padding: 12px;
-      border-radius: 9px;
-      border: none;
-      width: 100%;
-      transition: all 0.2s;
+    .contact-icon {
+      width: 56px;
+      height: 56px;
+      border-radius: 14px;
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 8px;
+      background: rgba(244, 63, 94, 0.12);
+      border: 1px solid rgba(244, 63, 94, 0.3);
+      color: #fb7185;
+      font-size: 1.5rem;
+      margin-bottom: 1.5rem;
     }
 
-    .btn-send:hover {
-      background: linear-gradient(135deg, #0369a1, #075985);
-      transform: translateY(-1px);
-      box-shadow: 0 6px 20px rgba(2, 132, 199, 0.35);
+    .contact-card h3 {
+      font-size: 1.35rem;
+      font-weight: 700;
       color: #ffffff;
+      margin-bottom: 0.6rem;
+    }
+    .contact-card .card-desc {
+      color: #94a3b8;
+      font-size: 0.95rem;
+      line-height: 1.55;
+      margin-bottom: 1.25rem;
+    }
+    .contact-value {
+      font-family: var(--font-mono);
+      font-size: 1.05rem;
+      font-weight: 600;
+      color: #f1f5f9;
+      margin-bottom: 1.5rem;
+      word-break: break-all;
     }
 
-    .discord-banner {
-      background: linear-gradient(135deg, rgba(88, 101, 242, 0.15), rgba(64, 78, 237, 0.25));
-      border: 1px solid rgba(88, 101, 242, 0.4);
-      border-radius: 16px;
-      padding: 28px;
-      transition: all 0.25s ease-in-out;
+    .contact-btn {
+      margin-top: auto;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 9px;
+      width: 100%;
+      padding: 12px 20px;
+      border-radius: 12px;
+      font-weight: 600;
+      font-size: 0.98rem;
+      color: #ffffff;
+      background: linear-gradient(135deg, #f43f5e, #e11d48);
+      border: none;
+      box-shadow: 0 6px 18px rgba(244, 63, 94, 0.3);
+      transition: all 0.2s ease;
+    }
+    .contact-btn:hover {
+      background: linear-gradient(135deg, #e11d48, #be123c);
+      color: #ffffff;
+      transform: translateY(-1px);
+      box-shadow: 0 8px 24px rgba(244, 63, 94, 0.45);
     }
 
-    .discord-banner:hover {
-      border-color: #5865F2;
-      box-shadow: 0 10px 30px rgba(88, 101, 242, 0.25);
+    @media (max-width: 720px) {
+      .contact-grid { grid-template-columns: 1fr; }
+      .contact-hero h1 { font-size: 2.2rem; }
+      .contact-wrap { padding: 2.5rem 1rem 4rem; }
     }
   </style>
 </head>
 
 <body>
-  <!-- Standard Navbar -->
   <?php include __DIR__ . '/navbar.php'; ?>
 
-  <div class="container py-5">
-    
-    <!-- Hero Section -->
-    <div class="text-center py-4">
-      <h1 class="hero-title">Get in Touch</h1>
-      <p class="hero-subtitle">
-        Have questions, feedback, or lab suggestions? Reach out directly to our team or join the active KrazePlanet Discord community.
-      </p>
+  <main class="contact-wrap">
+    <div class="contact-hero">
+      <h1>Get in Touch</h1>
+      <p>Have questions, feedback, or lab suggestions? Reach out directly to our team or join the active KrazePlanet Discord community.</p>
     </div>
 
-    <div class="row g-4 justify-content-center">
-      
-      <!-- Left Column: Official Discord & Info -->
-      <div class="col-lg-5">
-        <div class="discord-banner mb-4">
-          <div class="d-flex align-items-center gap-3 mb-3">
-            <div class="rounded-circle d-flex align-items-center justify-content-center" style="width: 50px; height: 50px; background: #5865F2; font-size: 1.6rem; color: #fff;">
-              <i class="bi bi-discord"></i>
-            </div>
-            <div>
-              <h5 class="fw-bold text-white mb-0">Join Our Discord</h5>
-              <div class="text-secondary small">Instant support, lab writeups & discussions</div>
-            </div>
-          </div>
-          <p class="text-light small mb-3 opacity-75">
-            Connect directly with researchers, discuss attack techniques, report issues, and collaborate on CTF challenges.
-          </p>
-          <a href="https://discord.krazeplanet.com" target="_blank" rel="noopener noreferrer" class="btn btn-primary w-100 fw-bold py-2" style="background: #5865F2; border: none; border-radius: 10px;">
-            <i class="bi bi-discord me-2"></i> Join Community Discord &rarr;
-          </a>
-        </div>
-
-        <div class="contact-card">
-          <h6 class="fw-bold text-white mb-3">Community Channels</h6>
-          
-          <div class="d-flex align-items-start gap-3 mb-3">
-            <i class="bi bi-envelope-fill text-info fs-5 mt-1"></i>
-            <div>
-              <div class="text-white small fw-bold">Email Support</div>
-              <a href="mailto:contact@krazeplanet.com" class="text-info small text-decoration-none fw-semibold">contact@krazeplanet.com</a>
-            </div>
-          </div>
-
-          <div class="d-flex align-items-start gap-3 mb-3">
-            <i class="bi bi-mortarboard-fill text-success fs-5 mt-1"></i>
-            <div>
-              <div class="text-white small fw-bold">Academy & Courses</div>
-              <a href="https://academy.krazeplanet.com" target="_blank" class="text-info small text-decoration-none">https://academy.krazeplanet.com</a>
-            </div>
-          </div>
-
-          <div class="d-flex align-items-start gap-3">
-            <i class="bi bi-shield-check text-warning fs-5 mt-1"></i>
-            <div>
-              <div class="text-white small fw-bold">Lab Bug Bounty</div>
-              <a href="https://github.com/KrazePlanet/KrazePlanetCTF" target="_blank" class="text-info small text-decoration-none">https://github.com/KrazePlanet/KrazePlanetCTF</a>
-            </div>
-          </div>
-        </div>
+    <div class="contact-grid">
+      <!-- Email Support -->
+      <div class="contact-card">
+        <div class="contact-icon"><i class="bi bi-envelope-fill"></i></div>
+        <h3>Email Support</h3>
+        <p class="card-desc">For course inquiries, syllabus details, and general questions.</p>
+        <div class="contact-value"><?= htmlspecialchars($supportEmail) ?></div>
+        <a class="contact-btn" href="mailto:<?= htmlspecialchars($supportEmail) ?>">
+          <i class="bi bi-envelope"></i> Send Email
+        </a>
       </div>
 
-      <!-- Right Column: Interactive Contact Form -->
-      <div class="col-lg-7">
-        <div class="contact-card">
-          <h4 class="fw-bold text-white mb-1">Send us a Message</h4>
-          <p class="text-secondary small mb-4">We usually respond within 24 hours.</p>
-
-          <?php if ($msg_sent): ?>
-            <div class="alert alert-success py-3 px-4 border-0 mb-4" style="background: rgba(16, 185, 129, 0.2); border: 1px solid #10b981 !important; color: #a7f3d0; border-radius: 10px;">
-              <i class="bi bi-check-circle-fill me-2"></i> Thank you! Your message has been sent successfully. We will get back to you soon.
-            </div>
-          <?php endif; ?>
-
-          <?php if (!empty($msg_error)): ?>
-            <div class="alert alert-danger py-2 px-3 border-0 mb-4" style="background: rgba(239, 68, 68, 0.2); border: 1px solid #ef4444 !important; color: #fca5a5; border-radius: 10px;">
-              <i class="bi bi-exclamation-triangle-fill me-2"></i> <?= htmlspecialchars($msg_error) ?>
-            </div>
-          <?php endif; ?>
-
-          <form method="POST" action="contact.php">
-            <div class="row g-3 mb-3">
-              <div class="col-md-6">
-                <label class="form-label small fw-semibold text-light mb-1">Your Name</label>
-                <input type="text" name="name" class="form-control" placeholder="John Doe" required autofocus>
-              </div>
-              <div class="col-md-6">
-                <label class="form-label small fw-semibold text-light mb-1">Email Address</label>
-                <input type="email" name="email" class="form-control" placeholder="you@domain.com" required>
-              </div>
-            </div>
-
-            <div class="mb-3">
-              <label class="form-label small fw-semibold text-light mb-1">Subject</label>
-              <input type="text" name="subject" class="form-control" placeholder="Lab Question / Suggestion / General Inquiry" required>
-            </div>
-
-            <div class="mb-4">
-              <label class="form-label small fw-semibold text-light mb-1">Message</label>
-              <textarea name="message" class="form-control" rows="5" placeholder="Type your message here..." required></textarea>
-            </div>
-
-            <button type="submit" class="btn-send">
-              <i class="bi bi-send-fill"></i>
-              <span>Send Message &rarr;</span>
-            </button>
-          </form>
-        </div>
+      <!-- Phone & WhatsApp -->
+      <div class="contact-card">
+        <div class="contact-icon"><i class="bi bi-telephone-fill"></i></div>
+        <h3>Phone &amp; WhatsApp</h3>
+        <p class="card-desc">Call or message directly for enrollment and batch slot assistance.</p>
+        <div class="contact-value"><?= htmlspecialchars($phoneDisplay) ?></div>
+        <a class="contact-btn" href="https://wa.me/<?= htmlspecialchars($whatsappNum) ?>" target="_blank" rel="noopener noreferrer">
+          <i class="bi bi-whatsapp"></i> Contact on WhatsApp
+        </a>
       </div>
-
     </div>
+  </main>
 
-  </div>
-
-  <!-- Standard Footer -->
   <?php include __DIR__ . '/../footer/footer.php'; ?>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0/dist/js/bootstrap.bundle.min.js"

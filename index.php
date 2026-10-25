@@ -1,7 +1,17 @@
-<?php 
+<?php
 require_once __DIR__ . '/config/sso.php';
 startKrazeSession();
 $isAdmin = krazeIsAdmin();
+
+// Shared data for the labs listing
+$categories = json_decode(file_get_contents(__DIR__ . '/data/labs.json'), true) ?: [];
+require __DIR__ . '/includes/category_icons.php';
+$e = fn($s) => htmlspecialchars((string)$s, ENT_QUOTES, 'UTF-8');
+
+// Each category links to its write-up on the blog: blog.krazeplanet.com/templates/blog-post.html?id=<slug>
+// "Username/Email Enumeration" -> "username-email-enumeration"
+$catSlug = fn($name) => trim(preg_replace('/[^a-z0-9]+/', '-', strtolower($name)), '-');
+$blogUrl = fn($name) => 'https://blog.krazeplanet.com/templates/blog-post.html?id=' . rawurlencode($catSlug($name));
 ?>
 <!doctype html>
 <html lang="en">
@@ -18,7 +28,7 @@ $isAdmin = krazeIsAdmin();
   <!-- Google Fonts: Inter, Outfit, JetBrains Mono -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Outfit:wght@500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
   
   <style>
     :root {
@@ -331,8 +341,38 @@ $isAdmin = krazeIsAdmin();
       background: linear-gradient(90deg, rgba(16, 185, 129, 0.15), transparent);
       border-radius: 0 8px 8px 0;
       letter-spacing: -0.3px;
-      scroll-margin-top: 75px;
+      scroll-margin-top: calc(var(--kp-nav-h, 71px) + 4px);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
     }
+
+    .category-writeup-link {
+      font-family: var(--font-primary);
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: #38bdf8;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 4px 12px;
+      border: 1px solid rgba(56, 189, 248, 0.3);
+      border-radius: 8px;
+      background: rgba(56, 189, 248, 0.08);
+      white-space: nowrap;
+      transition: all 0.2s ease;
+    }
+
+    .category-writeup-link:hover {
+      background: rgba(56, 189, 248, 0.18);
+      border-color: rgba(56, 189, 248, 0.5);
+      color: #7dd3fc;
+    }
+
+    .category-writeup-link i { transition: transform 0.2s ease; }
+    .category-writeup-link:hover i { transform: translateX(3px); }
 
     .labs-list {
       display: flex;
@@ -385,6 +425,8 @@ $isAdmin = krazeIsAdmin();
     .lab-badge svg {
       width: 20px;
       height: 20px;
+      flex-shrink: 0;
+      fill: none;
       stroke: #34d399;
       stroke-width: 2.3;
       filter: drop-shadow(0 0 6px rgba(52, 211, 153, 0.5));
@@ -590,7 +632,7 @@ $isAdmin = krazeIsAdmin();
         /* Modern Vexium Dark Fixed Left Sidebar */
     .portswigger-sidebar {
       position: fixed !important;
-      top: 58px !important;
+      top: var(--kp-nav-h, 71px) !important;
       left: 0 !important;
       bottom: 0 !important;
       width: 340px !important;
@@ -678,49 +720,166 @@ $isAdmin = krazeIsAdmin();
       font-size: 0.88rem !important;
     }
 
+    .sidebar-item .sidebar-icon {
+      width: 17px;
+      height: 17px;
+      flex: 0 0 17px;
+      margin-right: 4px;
+      color: #64748b;
+      transition: color 0.18s ease;
+    }
+
+    .sidebar-item .item-label {
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .sidebar-item:hover .sidebar-icon {
+      color: #cbd5e1;
+    }
+
+    .sidebar-item.active-item .sidebar-icon {
+      color: #38bdf8;
+    }
+
     .sidebar-item .item-count {
-      font-size: 0.75rem !important;
-      font-weight: 700 !important;
-      padding: 3px 8px !important;
-      border-radius: 12px !important;
-      background: rgba(15, 23, 42, 0.9) !important;
-      color: #64748b !important;
-      border: 1px solid rgba(255, 255, 255, 0.1) !important;
+      font-size: 0.86rem !important;
+      font-weight: 600 !important;
+      padding: 0 !important;
+      background: none !important;
+      color: #7c8aa0 !important;
+      border: none !important;
       flex: 0 0 auto !important;
       margin-left: 8px !important;
       font-family: 'JetBrains Mono', monospace !important;
-      transition: all 0.2s ease;
+      transition: color 0.2s ease;
       display: inline-block !important;
-      text-align: center !important;
+      text-align: right !important;
     }
 
     .sidebar-item:hover .item-count {
-      color: #38bdf8 !important;
-      border-color: rgba(56, 189, 248, 0.3) !important;
+      color: #cbd5e1 !important;
     }
 
     .sidebar-item.active-item .item-count {
-      background: #38bdf8 !important;
-      color: #070b14 !important;
-      border-color: #38bdf8 !important;
+      color: #38bdf8 !important;
       font-weight: 800 !important;
-      box-shadow: 0 0 10px rgba(56, 189, 248, 0.4) !important;
     }
+    /* Categories drawer toggle + backdrop (only shown below 992px) */
+    .sidebar-toggle-btn {
+      display: none;
+      position: fixed;
+      left: 16px;
+      bottom: 18px;
+      z-index: 1025;
+      align-items: center;
+      gap: 8px;
+      background: linear-gradient(135deg, #0284c7, #0369a1);
+      border: 1px solid rgba(56, 189, 248, 0.45);
+      color: #ffffff;
+      font-weight: 700;
+      font-size: 0.88rem;
+      padding: 10px 18px;
+      border-radius: 30px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5), 0 0 16px rgba(56, 189, 248, 0.3);
+      cursor: pointer;
+    }
+
+    .sidebar-backdrop {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 1009;
+      background: rgba(3, 7, 15, 0.6);
+      backdrop-filter: blur(2px);
+    }
+
+    @media (min-width: 992px) and (max-width: 1199.98px) {
+      .portswigger-sidebar {
+        width: 280px !important;
+      }
+      .main-content-layout {
+        margin-left: 280px !important;
+        width: calc(100% - 280px) !important;
+        padding: 2rem 1.75rem 4rem 1.75rem !important;
+      }
+    }
+
     @media (max-width: 991.98px) {
       .portswigger-sidebar {
-        position: relative !important;
-        top: 0 !important;
-        width: 100% !important;
-        height: auto !important;
-        max-height: 420px !important;
-        border-right: none !important;
-        border-bottom: 1px solid #1e293b !important;
-        box-shadow: none !important;
+        width: min(320px, 86vw) !important;
+        transform: translateX(-105%);
+        transition: transform 0.28s ease;
+        visibility: hidden;
+      }
+      body.sidebar-open .portswigger-sidebar {
+        transform: translateX(0);
+        visibility: visible;
+      }
+      body.kp-resizing .portswigger-sidebar {
+        transition: none !important;
+      }
+      body.sidebar-open .sidebar-backdrop {
+        display: block;
+      }
+      body.sidebar-open {
+        overflow: hidden;
+      }
+      body.sidebar-open .sidebar-toggle-btn {
+        display: none;
+      }
+      .sidebar-toggle-btn {
+        display: inline-flex;
       }
       .main-content-layout {
         margin-left: 0 !important;
         width: 100% !important;
-        padding: 1.5rem 1rem 3rem 1rem !important;
+        padding: 1.5rem 1rem 5rem 1rem !important;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .hero-title {
+        font-size: 2rem;
+      }
+      .hero-subtitle {
+        font-size: 1rem;
+      }
+      .section-title {
+        font-size: 1.45rem;
+        margin-top: 28px;
+      }
+      .category-title {
+        font-size: 1.2rem;
+        margin: 2rem 0 1rem 0;
+      }
+      .lab-badge {
+        justify-content: flex-start;
+      }
+      .lab-title {
+        font-size: 1rem;
+      }
+      #adminTaskDock {
+        width: calc(100% - 24px);
+        bottom: 12px;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 10px;
+        padding: 10px 14px;
+        border-radius: 18px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .hero-title {
+        font-size: 1.65rem;
+      }
+      .main-content-layout {
+        padding: 1.25rem 0.75rem 5rem 0.75rem !important;
+      }
+      .lab-action .btn-ACCESS {
+        flex: 1 1 auto;
+        justify-content: center;
       }
     }
   
@@ -830,25 +989,17 @@ $isAdmin = krazeIsAdmin();
 
   <!-- Modern KrazePlanet Fixed Left Sidebar -->
   <aside class="portswigger-sidebar">
-    <!-- Sidebar Header with Quick Search -->
-    <div class="sidebar-header-box p-3 pb-2 border-bottom border-secondary border-opacity-25" style="background: rgba(7, 11, 20, 0.5);">
-      <div class="d-flex align-items-center justify-content-between mb-2">
-        <span class="fw-bold text-white small" style="letter-spacing: 0.5px; font-family: 'Outfit', sans-serif;">
-          <i class="bi bi-grid-3x3-gap-fill text-info me-1"></i> CATEGORIES
-        </span>
-        <span class="badge" style="background: rgba(56, 189, 248, 0.15); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.25); font-size: 11px;" id="sidebarTopicCount">24 Topics</span>
-      </div>
-      <div class="position-relative">
-        <i class="bi bi-search position-absolute text-muted" style="left: 10px; top: 7px; font-size: 0.78rem;"></i>
-        <input type="text" id="sidebarCategorySearch" class="form-control form-control-sm ps-4" placeholder="Filter categories..." style="background: rgba(7, 11, 20, 0.9); border: 1px solid rgba(255,255,255,0.12); color: #fff; border-radius: 8px; font-size: 12px;">
-      </div>
-    </div>
-
     <!-- Vertical Topic Items Container -->
     <div id="categorySidebarList" class="nav flex-column py-2 pb-4">
       <!-- Dynamically populated vertical topic items -->
     </div>
   </aside>
+
+  <!-- Mobile/tablet: categories drawer toggle + backdrop -->
+  <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
+  <button type="button" class="sidebar-toggle-btn" id="sidebarToggleBtn" aria-label="Open categories">
+    <i class="bi bi-grid-3x3-gap-fill"></i> Categories
+  </button>
 
   <!-- Right Main Content Area -->
   <main class="main-content-layout">
@@ -870,48 +1021,17 @@ $isAdmin = krazeIsAdmin();
 
     <h2 class="section-title">Vulnerability Categories</h2>
 <?php
-  // Labs are loaded from data/labs.json: { "Category Name": [ {lab}, ... ], ... }
-  $categories = json_decode(file_get_contents(__DIR__ . '/data/labs.json'), true) ?: [];
-
-  $categoryIcons = [
-    "Content Discovery" => '<svg viewBox="0 0 24 24"><path d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>',
-    "Hidden Parameter Fuzzing" => '<svg viewBox="0 0 24 24"><path d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>',
-    "Cross-Site Scripting" => '<svg viewBox="0 0 24 24"><path d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"></path></svg>',
-    "HTML Injection" => '<svg viewBox="0 0 24 24"><path d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>',
-    "Open Redirect" => '<svg viewBox="0 0 24 24"><path d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>',
-    "Authentication Bypass" => '<svg viewBox="0 0 24 24"><path d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>',
-    "No Rate Limiting" => '<svg viewBox="0 0 24 24"><path d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>',
-    "Race Condition" => '<svg viewBox="0 0 24 24"><path d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>',
-    "OAuth Misconfiguration" => '<svg viewBox="0 0 24 24"><path d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>',
-    "Information Disclosure" => '<svg viewBox="0 0 24 24"><path d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>',
-    "Username/Email Enumeration" => '<svg viewBox="0 0 24 24"><path d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>',
-    "Using Default Credentials" => '<svg viewBox="0 0 24 24"><path d="M20 4H4c-1.11 0-2 .89-2 2v12c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V6c0-1.11-.89-2-2-2zm0 14H4v-6h16v6zm0-10H4V6h16v2z"/></svg>',
-    "SQL Injection" => '<svg viewBox="0 0 24 24"><path d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>',
-    "Cross-Site Request Forgery" => '<svg viewBox="0 0 24 24"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>',
-    "Insecure Direct Object Reference" => '<svg viewBox="0 0 24 24"><path d="M14 10l-2 1m0 0l-2-1m2 1v2.5M20 7l-2 1m2-1l-2-1m2 1v2.5M14 4l-2-1-2 1M4 7l2-1M4 7l2 1M4 7v2.5M12 21l-2-1m2 1l2-1m-2 1v-2.5M6 18l-2-1v-2.5M20 18l2-1v-2.5"></path></svg>',
-    "Privilege Escalation" => '<svg viewBox="0 0 24 24"><path d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>',
-    "Local File Inclusion" => '<svg viewBox="0 0 24 24"><path d="M20 4H4c-1.11 0-2 .89-2 2v12c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V6c0-1.11-.89-2-2-2zm0 14H4v-6h16v6zm0-10H4V6h16v2z"/></svg>',
-    "Remote Code Execution" => '<svg viewBox="0 0 24 24"><path d="M20 4H4c-1.11 0-2 .89-2 2v12c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V6c0-1.11-.89-2-2-2zm0 14H4v-6h16v6zm0-10H4V6h16v2z"/></svg>',
-    "Server-Side Template Injection" => '<svg viewBox="0 0 24 24"><path d="M14 10l-2 1m0 0l-2-1m2 1v2.5M20 7l-2 1m2-1l-2-1m2 1v2.5M14 4l-2-1-2 1M4 7l2-1M4 7l2 1M4 7v2.5M12 21l-2-1m2 1l2-1m-2 1v-2.5M6 18l-2-1v-2.5M20 18l2-1v-2.5"></path></svg>',
-    "Server-Side Request Forgery" => '<svg viewBox="0 0 24 24"><path d="M14 10l-2 1m0 0l-2-1m2 1v2.5M20 7l-2 1m2-1l-2-1m2 1v2.5M14 4l-2-1-2 1M4 7l2-1M4 7l2 1M4 7v2.5M12 21l-2-1m2 1l2-1m-2 1v-2.5M6 18l-2-1v-2.5M20 18l2-1v-2.5"></path></svg>',
-    "XML External Entity" => '<svg viewBox="0 0 24 24"><path d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>',
-    "HTTP Request Smuggling" => '<svg viewBox="0 0 24 24"><path d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>',
-    "Cache Poisoning" => '<svg viewBox="0 0 24 24"><path d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>',
-    "Business Logic Errors" => '<svg viewBox="0 0 24 24"><path d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>',
-    "Improper Access Control" => '<svg viewBox="0 0 24 24"><path d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>',
-    "File Upload Vulnerabilities" => '<svg viewBox="0 0 24 24"><path d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>',
-    "Subdomain Takeovers" => '<svg viewBox="0 0 24 24"><path d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>',
-    "Remote File Inclusion" => '<svg viewBox="0 0 24 24"><path d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>'
-  ];
-  $defaultIcon = '<svg viewBox="0 0 24 24"><path d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>';
+  // $categories, category icons and learn helpers are loaded at the top of this file.
   $accessIcon = '<svg viewBox="0 0 24 24"><path d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"></path></svg>';
   $difficultyClass = ['medium' => 'medium', 'hard' => 'hard', 'high' => 'hard', 'secure' => 'secure'];
-  $e = fn($s) => htmlspecialchars((string)$s, ENT_QUOTES, 'UTF-8');
 
   foreach ($categories as $category => $catLabs):
-    $icon = $categoryIcons[$category] ?? $defaultIcon;
+    $icon = $categoryIconSvg($categoryIconPaths[$category] ?? $defaultIconPaths);
 ?>
-    <h3 class="category-title"><?= $e($category) ?></h3>
+    <h3 class="category-title" data-category-name="<?= $e($category) ?>">
+      <span><?= $e($category) ?></span>
+      <a class="category-writeup-link" href="<?= $e($blogUrl($category)) ?>" target="_blank" rel="noopener noreferrer">Read the write-up <i class="bi bi-box-arrow-up-right"></i></a>
+    </h3>
     <div class="labs-list">
 <?php foreach ($catLabs as $lab):
         $report = trim($lab['report'] ?? '');
@@ -1295,7 +1415,6 @@ $isAdmin = krazeIsAdmin();
       }
 
       const categorySidebarList = document.getElementById('categorySidebarList');
-      const sidebarTopicCount = document.getElementById('sidebarTopicCount');
 
       function updateBookmarkTabCount() {
         const bCount = bookmarkedLabs.length;
@@ -1315,16 +1434,19 @@ $isAdmin = krazeIsAdmin();
 
       // 1. Tag and store pristine Category Name on each heading before injecting any admin buttons
       categoryTitles.forEach((catTitle) => {
-        const rawName = catTitle.childNodes[0]?.textContent?.trim() || catTitle.textContent.trim();
-        catTitle.setAttribute('data-category-name', rawName);
+        if (!catTitle.getAttribute('data-category-name')) {
+          const rawName = catTitle.querySelector('span')?.textContent?.trim() || catTitle.childNodes[0]?.textContent?.trim() || catTitle.textContent.trim();
+          catTitle.setAttribute('data-category-name', rawName);
+        }
       });
 
       // Dynamically populate Category Dropdown options and Left Sidebar Topics from DOM headings
-      if (categoryTitles.length > 0) {
-        if (sidebarTopicCount) {
-          sidebarTopicCount.textContent = `${categoryTitles.length} Topics`;
-        }
+      // Category icons come from the same PHP list the lab badges use ($categoryIconPaths)
+      const sidebarIconPaths = <?= json_encode($categoryIconPaths, JSON_HEX_TAG | JSON_HEX_AMP | JSON_UNESCAPED_SLASHES) ?>;
+      const sidebarDefaultIcon = <?= json_encode($defaultIconPaths, JSON_HEX_TAG | JSON_HEX_AMP | JSON_UNESCAPED_SLASHES) ?>;
+      const sidebarIcon = (key) => `<svg class="sidebar-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${sidebarIconPaths[key] || sidebarDefaultIcon}</svg>`;
 
+      if (categoryTitles.length > 0) {
         if (categorySidebarList) {
           categorySidebarList.innerHTML = '';
 
@@ -1333,7 +1455,7 @@ $isAdmin = krazeIsAdmin();
           allItem.type = 'button';
           allItem.className = 'sidebar-item active-item';
           allItem.setAttribute('data-category', 'all');
-          allItem.innerHTML = `<span class="item-title"><i class="bi bi-grid-fill me-2 opacity-75"></i>All Vulnerabilities</span><span class="item-count">${totalLabs}</span>`;
+          allItem.innerHTML = `<span class="item-title">${sidebarIcon('all')}All Vulnerabilities</span><span class="item-count">${totalLabs}</span>`;
           categorySidebarList.appendChild(allItem);
 
           // "Bookmarked Labs" item
@@ -1341,26 +1463,8 @@ $isAdmin = krazeIsAdmin();
           bookmarkedItem.type = 'button';
           bookmarkedItem.className = 'sidebar-item';
           bookmarkedItem.setAttribute('data-category', 'bookmarked');
-          bookmarkedItem.innerHTML = `<span class="item-title"><i class="bi bi-star-fill me-2 text-warning"></i>Bookmarked Labs</span><span class="item-count" id="sidebarBookmarkCount">0</span>`;
+          bookmarkedItem.innerHTML = `<span class="item-title">${sidebarIcon('bookmarked')}Bookmarked Labs</span><span class="item-count" id="sidebarBookmarkCount">0</span>`;
           categorySidebarList.appendChild(bookmarkedItem);
-
-          // Setup Sidebar Filter Input Handler
-          const catFilterInput = document.getElementById('sidebarCategorySearch');
-          if (catFilterInput) {
-            catFilterInput.addEventListener('input', function(e) {
-              const query = (e.target.value || '').toLowerCase().trim();
-              const items = categorySidebarList.querySelectorAll('.sidebar-item');
-              items.forEach(btn => {
-                const cat = (btn.getAttribute('data-category') || '').toLowerCase();
-                const text = (btn.querySelector('.item-title')?.textContent || btn.textContent).toLowerCase();
-                if (!query || cat === 'all' || cat === 'bookmarked' || text.includes(query)) {
-                  btn.style.setProperty('display', 'flex', 'important');
-                } else {
-                  btn.style.setProperty('display', 'none', 'important');
-                }
-              });
-            });
-          }
 
           // Category Topics items
           categoryTitles.forEach((catTitle) => {
@@ -1381,11 +1485,41 @@ $isAdmin = krazeIsAdmin();
             item.type = 'button';
             item.className = 'sidebar-item';
             item.setAttribute('data-category', catName);
-            item.innerHTML = `<span class="item-title"><i class="bi bi-chevron-right me-2 text-muted" style="font-size: 0.72rem;"></i>${catName}</span><span class="item-count">${count}</span>`;
+            item.innerHTML = `<span class="item-title">${sidebarIcon(catName)}<span class="item-label">${catName}</span></span><span class="item-count">${count}</span>`;
             categorySidebarList.appendChild(item);
           });
         }
       }
+
+      // Height of the sticky navbar plus a small gap, used when scrolling headings into view
+      function navOffset() {
+        const nav = document.querySelector('nav.navbar');
+        return (nav ? nav.getBoundingClientRect().bottom : 71) + 4;
+      }
+
+      // Categories drawer (below 992px the sidebar slides in from the left)
+      const sidebarToggleBtn = document.getElementById('sidebarToggleBtn');
+      const sidebarBackdrop = document.getElementById('sidebarBackdrop');
+      const isDrawerMode = () => window.matchMedia('(max-width: 991.98px)').matches;
+
+      function setSidebarOpen(open) {
+        // Only one menu at a time: opening the categories drawer closes the navbar's menu drawer
+        if (open && window.kpNavDrawer && window.kpNavDrawer.isOpen()) window.kpNavDrawer.close();
+        document.body.classList.toggle('sidebar-open', open);
+        if (sidebarToggleBtn) sidebarToggleBtn.setAttribute('aria-expanded', open ? 'true' : 'false');
+      }
+
+      // ...and opening the navbar's menu drawer closes the categories drawer
+      document.addEventListener('kp:navdrawer-open', () => setSidebarOpen(false));
+
+      if (sidebarToggleBtn) sidebarToggleBtn.addEventListener('click', () => setSidebarOpen(true));
+      if (sidebarBackdrop) sidebarBackdrop.addEventListener('click', () => setSidebarOpen(false));
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && document.body.classList.contains('sidebar-open')) setSidebarOpen(false);
+      });
+      window.addEventListener('resize', () => {
+        if (!isDrawerMode() && document.body.classList.contains('sidebar-open')) setSidebarOpen(false);
+      });
 
       function scrollToCategory(catName) {
         if (!catName || catName === 'all') {
@@ -1404,7 +1538,7 @@ $isAdmin = krazeIsAdmin();
         if (targetEl) {
           const rect = targetEl.getBoundingClientRect();
           const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
-          const targetY = Math.max(0, rect.top + scrollTop - 75);
+          const targetY = Math.max(0, rect.top + scrollTop - navOffset());
 
           window.scrollTo({
             top: targetY,
@@ -1442,9 +1576,56 @@ $isAdmin = krazeIsAdmin();
 
           updateSidebarStyles();
           updateSearch();
+          if (isDrawerMode()) setSidebarOpen(false);
           scrollToCategory(selectedCategory);
         });
       }
+
+      // Keep the same category/lab at the top of the viewport when the window is resized
+      // (e.g. split screen): cards reflow taller, so the old pixel scroll position lands on an earlier category.
+      let scrollAnchor = null;
+      let isRestoringScroll = false;
+      let resizeTimer = null;
+
+      function captureScrollAnchor() {
+        if (isRestoringScroll || window.scrollY <= 0) {
+          if (!isRestoringScroll) scrollAnchor = null;
+          return;
+        }
+        const els = document.querySelectorAll('.category-title, .lab-card');
+        for (const el of els) {
+          if (el.offsetParent === null) continue;
+          const rect = el.getBoundingClientRect();
+          if (rect.bottom > navOffset()) {
+            scrollAnchor = { el: el, top: rect.top };
+            return;
+          }
+        }
+      }
+
+      function restoreScrollAnchor() {
+        if (!scrollAnchor || !document.body.contains(scrollAnchor.el)) return;
+        isRestoringScroll = true;
+        const delta = scrollAnchor.el.getBoundingClientRect().top - scrollAnchor.top;
+        if (Math.abs(delta) > 1) {
+          window.scrollTo({ top: window.scrollY + delta, behavior: 'instant' });
+        }
+        requestAnimationFrame(() => { isRestoringScroll = false; });
+      }
+
+      window.addEventListener('scroll', () => {
+        if (!resizeTimer) captureScrollAnchor();
+      }, { passive: true });
+
+      window.addEventListener('resize', () => {
+        restoreScrollAnchor();
+        clearTimeout(resizeTimer);
+        resizeTimer = setTimeout(() => {
+          restoreScrollAnchor();
+          resizeTimer = null;
+          captureScrollAnchor();
+        }, 150);
+      });
 
       function updateSearch() {
         const query = searchInput ? searchInput.value.trim().toLowerCase() : '';

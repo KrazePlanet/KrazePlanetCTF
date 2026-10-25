@@ -97,28 +97,22 @@
       "access": "/subdomains/controlzone"
     },
     {
-      "title": "Coupon Code Reuse Logic Flaw Allows Applying the Same Discount Multiple Times",
+      "title": "Coupon Stacking via Request Replay Allows Applying the Same Discount Multiple Times",
       "difficulty": "Easy",
       "report": "",
       "access": "/subdomains/controllers"
     },
     {
-      "title": "Plan Upgrade Parameter Tampering Grants Pro Access Without Payment",
+      "title": "Free Trial Abuse via Request Replay and trial_days Tampering Grants Unlimited Pro Access",
       "difficulty": "Easy",
       "report": "",
       "access": "/subdomains/gigboard"
     },
     {
-      "title": "Return Cancellation Does Not Reverse Wallet Refund Allowing Double Payout",
-      "difficulty": "Medium",
+      "title": "Client-Side Price Tampering in Add-to-Cart Lets You Buy Items at Any Price",
+      "difficulty": "Easy",
       "report": "",
       "access": "/subdomains/retailzone"
-    },
-    {
-      "title": "Race Condition Bypass Allows Purchasing Flash Sale Items Beyond the Per-Customer Limit",
-      "difficulty": "Medium",
-      "report": "",
-      "access": "/subdomains/flashbuy"
     },
     {
       "title": "OLO Total price manipulation using negative quantities",
@@ -851,6 +845,12 @@
       "difficulty": "Easy",
       "report": "",
       "access": "/subdomains/counter"
+    },
+    {
+      "title": "Race Condition Bypass Allows Purchasing Flash Sale Items Beyond the Per-Customer Limit",
+      "difficulty": "Medium",
+      "report": "",
+      "access": "/subdomains/flashbuy"
     },
     {
       "title": "Slack - Race Condition in Account Creation Survey (Unlimited Credits)",

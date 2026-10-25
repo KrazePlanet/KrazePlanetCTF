@@ -4,6 +4,15 @@
 const BASE     = '/subdomains/controllers';
 const LAB_FLAG = 'KP{coupon_business_logic_bypass}';
 
+// The vhost sends every path here, including the browser's automatic /favicon.ico.
+// That request carries no cookie (it is outside the cookie path), so starting a
+// session for it would overwrite the real session cookie and break the CSRF token.
+$reqPath = parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH) ?: '/';
+if ($reqPath !== BASE && !str_starts_with($reqPath, BASE . '/')) {
+    if ($reqPath === '/') { header('Location: ' . BASE . '/'); exit; }
+    http_response_code(404); exit;
+}
+
 session_set_cookie_params(['path' => BASE, 'httponly' => true, 'samesite' => 'Lax']);
 session_name('PCHUBBID');
 session_start();
@@ -336,8 +345,15 @@ function csrf_token(): string {
     return $_SESSION['csrf'];
 }
 function verify_csrf(): void {
-    if (!hash_equals($_SESSION['csrf'] ?? '', $_POST['_csrf'] ?? ''))
-        { http_response_code(403); die('Invalid CSRF token.'); }
+    if (hash_equals($_SESSION['csrf'] ?? '', $_POST['_csrf'] ?? '')) return;
+    // Usually a stale form: the session expired or the lab container was recreated.
+    // Send the user back to the form (it renders a fresh token) instead of a dead end.
+    flash('error', 'Your session expired. Please try again.');
+    $back = parse_url($_SERVER['HTTP_REFERER'] ?? '', PHP_URL_PATH) ?: '';
+    if (!str_starts_with($back, BASE . '/') && $back !== BASE)
+        $back = parse_url($_SERVER['REQUEST_URI'] ?? '', PHP_URL_PATH) ?: BASE;
+    header('Location: ' . $back, true, 303);
+    exit;
 }
 
 // Auto-init DB on every request

@@ -1,8 +1,18 @@
 <?php
 // RetailZone — Fashion E-commerce Training Lab
-// Intentional vulnerability: return cancellation does NOT reverse the wallet refund.
+// Intentional vulnerability: the cart trusts the item price sent by the client
+// (a hidden "price" field on the add-to-bag form), so tampering the request sets
+// any price. The server never re-checks the catalogue price at checkout.
 const BASE     = '/subdomains/retailzone';
-const LAB_FLAG = 'KP{refund_without_return_exploit}';
+
+// The vhost sends every path here, including the browser's automatic /favicon.ico.
+// That request carries no cookie (it is outside the cookie path), so starting a
+// session for it would overwrite the real session cookie and break the CSRF token.
+$reqPath = parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH) ?: '/';
+if ($reqPath !== BASE && !str_starts_with($reqPath, BASE . '/')) {
+    if ($reqPath === '/') { header('Location: ' . BASE . '/'); exit; }
+    http_response_code(404); exit;
+}
 
 session_set_cookie_params(['path' => BASE, 'httponly' => true, 'samesite' => 'Lax']);
 session_name('RETAILZONESID');
@@ -23,7 +33,18 @@ function db(): PDO {
         $pdo=new PDO("mysql:host=$host;dbname=$name;charset=utf8mb4",$user,$pass,$opt);
         install_schema($pdo);
     }
+    ensure_cart_price_column($pdo);
     return $pdo;
+}
+
+// cart_items.unit_price is the price captured when the item was added to the bag.
+// Added on the fly so databases created before it existed get the column too.
+function ensure_cart_price_column(PDO $pdo): void {
+    try {
+        if ($pdo->query("SHOW COLUMNS FROM cart_items LIKE 'unit_price'")->fetch()) return;
+        $pdo->exec("ALTER TABLE cart_items ADD COLUMN unit_price INT NOT NULL DEFAULT 0");
+        $pdo->exec("UPDATE cart_items ci JOIN products p ON p.id=ci.product_id SET ci.unit_price=p.price WHERE ci.unit_price=0");
+    } catch (PDOException) { /* table not created yet; install_schema builds it with the column */ }
 }
 
 function install_schema(PDO $pdo, bool $reset=false): void {
@@ -52,7 +73,8 @@ function install_schema(PDO $pdo, bool $reset=false): void {
 
     $pdo->exec("CREATE TABLE IF NOT EXISTS cart_items (
         id INT AUTO_INCREMENT PRIMARY KEY, user_id INT NOT NULL, product_id INT NOT NULL,
-        quantity INT NOT NULL DEFAULT 1, size VARCHAR(10), color VARCHAR(30),
+        quantity INT NOT NULL DEFAULT 1, unit_price INT NOT NULL DEFAULT 0,
+        size VARCHAR(10), color VARCHAR(30),
         UNIQUE KEY uq_up(user_id,product_id),
         FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE,
         FOREIGN KEY(product_id) REFERENCES products(id))");
@@ -182,7 +204,17 @@ function fresh_user(): ?array {
 }
 function require_login(): array { $u=user(); if(!$u){flash('error','Please sign in.');redirect('login');} return $u; }
 function csrf_token(): string { if(empty($_SESSION['csrf'])) $_SESSION['csrf']=bin2hex(random_bytes(16)); return $_SESSION['csrf']; }
-function verify_csrf(): void { if(!hash_equals($_SESSION['csrf']??'',$_POST['_csrf']??'')){http_response_code(403);die('Invalid CSRF token.');} }
+function verify_csrf(): void {
+    if (hash_equals($_SESSION['csrf'] ?? '', $_POST['_csrf'] ?? '')) return;
+    // Usually a stale form: the session expired or the lab container was recreated.
+    // Send the user back to the form (it renders a fresh token) instead of a dead end.
+    flash('error', 'Your session expired. Please try again.');
+    $back = parse_url($_SERVER['HTTP_REFERER'] ?? '', PHP_URL_PATH) ?: '';
+    if (!str_starts_with($back, BASE . '/') && $back !== BASE)
+        $back = parse_url($_SERVER['REQUEST_URI'] ?? '', PHP_URL_PATH) ?: BASE;
+    header('Location: ' . $back, true, 303);
+    exit;
+}
 function stars(float $r): string { $o=''; for($i=1;$i<=5;$i++) $o.=($r>=$i?'★':($r>=$i-.5?'⯨':'☆')); return $o; }
 
 db();

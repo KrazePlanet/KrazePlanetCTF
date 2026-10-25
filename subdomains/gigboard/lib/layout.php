@@ -62,6 +62,8 @@ a{color:var(--t);text-decoration:none}a:hover{color:var(--t2)}
 .gig-card{background:#fff;border:1px solid var(--border);border-radius:14px;overflow:hidden;transition:.2s;display:flex;flex-direction:column}
 .gig-card:hover{border-color:var(--t);box-shadow:0 6px 24px rgba(13,148,136,.12);transform:translateY(-2px)}
 .gig-thumb{aspect-ratio:16/9;display:flex;align-items:center;justify-content:center;font-size:2.8rem;position:relative;overflow:hidden}
+.gig-thumb img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .35s}
+.gig-card:hover .gig-thumb img{transform:scale(1.04)}
 .gig-body{padding:14px;flex:1;display:flex;flex-direction:column;gap:6px}
 .gig-seller{display:flex;align-items:center;gap:8px;font-size:.78rem;color:var(--text3)}
 .gig-seller-name{font-weight:600;color:var(--text2)}
@@ -109,10 +111,6 @@ select.form-control option{background:#fff}
 .upgrade-banner{background:linear-gradient(135deg,#fffbeb,#fef3c7);border:2px solid #fcd34d;border-radius:14px;padding:20px 24px;display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:24px}
 .upgrade-banner h3{font-weight:700;color:#92400e;font-size:1rem;display:flex;align-items:center;gap:8px}
 .upgrade-banner p{font-size:.82rem;color:#78350f;margin-top:4px}
-/* FLAG BOX */
-.flag-box{background:linear-gradient(135deg,#064e3b,#065f46);border:2px solid #059669;border-radius:14px;padding:24px 28px;margin-bottom:24px}
-.flag-box h3{color:#34d399;font-size:1rem;font-weight:700;margin-bottom:10px;display:flex;align-items:center;gap:8px}
-.flag-val{font-family:monospace;font-size:1.3rem;font-weight:800;color:#6ee7b7;background:#052e1c;border:1px solid #065f46;padding:8px 18px;border-radius:7px;display:inline-block;margin-top:6px;letter-spacing:2px}
 /* ANALYTICS */
 .stat-card{background:#fff;border:1px solid var(--border);border-radius:12px;padding:20px;text-align:center}
 .stat-num{font-size:2rem;font-weight:900;color:var(--t)}
@@ -164,16 +162,40 @@ function page_close(): void {?>
 <?php
 }
 
+// Unsplash cover photo: a picked one for each seeded gig, else one per category
+// (gigs that students create fall back to their category's photo).
+function gig_image(array $g, int $w = 600): string {
+    $by_title=[
+        'Build a Full-Stack React + Node.js Web App'      =>'1555066931-4365d14bab8c',
+        'Fix Your PHP/JavaScript Bugs Fast'               =>'1461749280684-dccba630e2f6',
+        'Technical Consulting — 1 Hour Call'              =>'1516321318423-f06f85e504b3',
+        'Design a Modern Logo with Brand Guidelines'      =>'1561070791-2526d30994b5',
+        'Create Social Media Post Templates'              =>'1432888498266-38ffec3eaf0a',
+        'SEO Audit + 3-Month Strategy Report'             =>'1460925895917-afdab827c52f',
+        'Write SEO-Optimised Blog Posts (1000 words)'     =>'1455390582262-044cdead277a',
+        'Set Up Google Ads Campaign'                      =>'1551288049-bebda4e38f71',
+        'Animate Your Logo — Professional Motion Graphic' =>'1626785774573-4b799315345d',
+        'Create a 60-Second Explainer Video'              =>'1574717024653-61fd2cf4d44d',
+        'Mix and Master Your Track'                       =>'1598488035139-bdbb2231ce04',
+    ];
+    $by_cat=[
+        'design'=>'1586717791821-3f44a563fa4c','tech'=>'1517694712202-14dd9538aa97',
+        'writing'=>'1493421419110-74f4e85ba126','marketing'=>'1533750349088-cd871a92f312',
+        'video'=>'1626785774625-ddcddc3445e9','audio'=>'1511379938547-c1f69419868d',
+        'business'=>'1600880292203-757bb62b4baf',
+    ];
+    $id=$by_title[$g['title']]??$by_cat[$g['cat_slug']]??'1499951360447-b19be8fe80f5';
+    return "https://images.unsplash.com/photo-$id?w=$w&h=".round($w*9/16)."&fit=crop&auto=format&q=75";
+}
+
 function gig_card(array $g): void {
     $bg_colors=['design'=>'#fdf2f8','tech'=>'#f0fdfa','writing'=>'#fffbeb','marketing'=>'#eff6ff','video'=>'#faf5ff','audio'=>'#f0fdf4','business'=>'#f9fafb'];
-    $emoji=['design'=>'🎨','tech'=>'💻','writing'=>'✍️','marketing'=>'📈','video'=>'🎬','audio'=>'🎵','business'=>'💼'];
     $bg=$bg_colors[$g['cat_slug']]??'#f9fafb';
-    $em=$emoji[$g['cat_slug']]??'📋';
     ?>
 <div class="gig-card">
   <a href="<?=url("gig/{$g['id']}")?>" style="display:contents">
     <div class="gig-thumb" style="background:<?=$bg?>">
-      <div style="font-size:3rem"><?=$em?></div>
+      <img src="<?=h(gig_image($g))?>" alt="<?=h($g['title'])?>" loading="lazy">
       <?php if($g['featured']):?><div class="featured-badge">⭐ Featured</div><?php endif;?>
     </div>
     <div class="gig-body">

@@ -12,7 +12,7 @@ match(true){
     $rel==='/login'           &&$method==='POST' => action_login(),
     $rel==='/register'        &&$method==='POST' => action_register(),
     $rel==='/logout'          &&$method==='POST' => action_logout(),
-    $rel==='/account/upgrade' &&$method==='POST' => action_upgrade(),
+    $rel==='/upgrade/trial'   &&$method==='POST' => action_start_trial(),
     $rel==='/order/place'     &&$method==='POST' => action_order_place(),
     $rel==='/profile/update'  &&$method==='POST' => action_profile_update(),
     $rel==='/install'         &&$method==='POST' => action_install(),
@@ -116,8 +116,8 @@ function page_gig(int $id): void {
     ?>
 <div class="main" style="display:grid;grid-template-columns:1fr 320px;gap:28px;align-items:start">
   <div>
-    <div style="background:<?=($bg=['design'=>'#fdf2f8','tech'=>'#f0fdfa','writing'=>'#fffbeb','marketing'=>'#eff6ff','video'=>'#faf5ff','audio'=>'#f0fdf4','business'=>'#f9fafb'])[$g['cat_slug']]??'#f9fafb';?>;border-radius:14px;aspect-ratio:16/9;display:flex;align-items:center;justify-content:center;font-size:5rem;margin-bottom:20px">
-      <?=(['design'=>'🎨','tech'=>'💻','writing'=>'✍️','marketing'=>'📈','video'=>'🎬','audio'=>'🎵','business'=>'💼'])[$g['cat_slug']]??'📋'?>
+    <div style="background:<?=($bg=['design'=>'#fdf2f8','tech'=>'#f0fdfa','writing'=>'#fffbeb','marketing'=>'#eff6ff','video'=>'#faf5ff','audio'=>'#f0fdf4','business'=>'#f9fafb'])[$g['cat_slug']]??'#f9fafb';?>;border-radius:14px;aspect-ratio:16/9;overflow:hidden;margin-bottom:20px">
+      <img src="<?=h(gig_image($g, 1200))?>" alt="<?=h($g['title'])?>" style="width:100%;height:100%;object-fit:cover;display:block">
     </div>
     <div style="font-size:.75rem;color:var(--t);font-weight:700;text-transform:uppercase;letter-spacing:.6px;margin-bottom:6px"><?=h($g['cat_name'])?></div>
     <h1 style="font-size:1.5rem;font-weight:800;line-height:1.3;margin-bottom:14px"><?=h($g['title'])?></h1>
@@ -223,6 +223,7 @@ function page_dashboard(): void {
     $st=db()->prepare("SELECT COUNT(*) FROM gigs WHERE seller_id=? AND active=1"); $st->execute([$u['id']]); $gig_count=(int)$st->fetchColumn();
     $ost=db()->prepare("SELECT COUNT(*) FROM orders WHERE seller_id=? AND status='completed'"); $ost->execute([$u['id']]); $completed=(int)$ost->fetchColumn();
     $bst=db()->prepare("SELECT COUNT(*) FROM orders WHERE buyer_id=?"); $bst->execute([$u['id']]); $bought=(int)$bst->fetchColumn();
+    $on_trial=$u['plan']==='pro'&&$u['trial_ends_at'];
 
     page_open('Dashboard');
     ?>
@@ -249,12 +250,15 @@ function page_dashboard(): void {
       <a href="<?=$href?>" class="btn btn-secondary" style="width:100%;margin-bottom:8px;justify-content:flex-start"><?=$lbl?></a>
       <?php endforeach;?>
     </div>
-    <div class="card card-pad" style="background:#fffbeb;border-color:#fde68a">
-      <div style="font-size:.75rem;font-weight:700;color:#92400e;text-transform:uppercase;margin-bottom:8px">💡 Lab Hint</div>
-      <p style="font-size:.8rem;color:#78350f;line-height:1.6">
-        The Pro upgrade checks a <code style="background:#fff8;padding:2px 5px;border-radius:3px">payment_token</code> for format only — not validity.<br><br>
-        Try: <code style="background:#fff8;padding:2px 5px;border-radius:3px;display:block;margin-top:4px">POST /account/upgrade<br>plan=pro&payment_token=FAKE1234</code>
-      </p>
+    <div class="card card-pad">
+      <div style="font-weight:700;margin-bottom:14px">Plan &amp; Billing</div>
+      <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #f3f4f6;font-size:.875rem"><span style="color:var(--text3)">Current plan</span><span style="font-weight:600"><?=$on_trial?'⭐ Pro (trial)':($u['plan']==='pro'?'⭐ Pro':'Free')?></span></div>
+      <?php if($on_trial):?>
+      <div style="display:flex;justify-content:space-between;padding:8px 0;font-size:.875rem"><span style="color:var(--text3)">Trial ends</span><span style="font-weight:600"><?=date('d M Y',strtotime($u['trial_ends_at']))?></span></div>
+      <?php elseif($u['plan']!=='pro'):?>
+      <div style="display:flex;justify-content:space-between;padding:8px 0;font-size:.875rem"><span style="color:var(--text3)">Gig limit</span><span style="font-weight:600"><?=FREE_GIG_LIMIT?> active gigs</span></div>
+      <a href="<?=url('upgrade')?>" class="btn btn-primary" style="width:100%;margin-top:14px">Upgrade to Pro — <?=inr(PRO_PRICE)?>/mo</a>
+      <?php endif;?>
     </div>
   </div>
 </div>
@@ -262,7 +266,7 @@ function page_dashboard(): void {
 }
 
 /* ══════════════════════════════════════════════════════════
-   PAGE: ANALYTICS (PRO ONLY — FLAG HERE)
+   PAGE: ANALYTICS (PRO ONLY)
 ══════════════════════════════════════════════════════════ */
 function page_analytics(): void {
     $u=require_login(); $u=fresh_user();
@@ -285,18 +289,6 @@ function page_analytics(): void {
     page_open('Analytics — Pro');
     ?>
 <div class="main">
-  <div class="flag-box">
-    <h3>🚩 Pro Analytics Unlocked!</h3>
-    <p style="color:#6ee7b7;font-size:.875rem;margin-bottom:10px">
-      You accessed the <strong>Pro-only Analytics dashboard</strong> by bypassing the payment validation.<br>
-      The <code style="background:#052e1c;padding:2px 6px;border-radius:4px">/account/upgrade</code> endpoint validates
-      <code style="background:#052e1c;padding:2px 6px;border-radius:4px">payment_token</code> only via regex — never against a payments table.
-      Any token matching <code style="background:#052e1c;padding:2px 6px;border-radius:4px">^[A-Z0-9]{8,}$</code> is accepted.
-    </p>
-    <div>Your Flag:</div>
-    <div class="flag-val"><?=LAB_FLAG?></div>
-  </div>
-
   <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px">
     <div><div class="page-title">📈 Seller Analytics</div><div class="section-sub">Your performance overview</div></div>
     <span class="tag tag-pro">⭐ Pro Feature</span>
@@ -363,7 +355,18 @@ function page_upgrade(): void {
       <?php foreach(['Unlimited gigs','Featured listing placement','Pro badge on profile','Full analytics dashboard','Priority support','Earnings insights'] as $f):?>
       <div style="display:flex;align-items:center;gap:8px;padding:7px 0;font-size:.875rem;border-bottom:1px solid #f3f4f6"><span style="color:var(--green);font-weight:700">✓</span><?=$f?></div>
       <?php endforeach;?>
-      <a href="<?=url('upgrade/checkout')?>" class="btn btn-primary btn-lg" style="width:100%;margin-top:16px">Get Pro Now →</a>
+      <?php if(!$u['trial_started_at']):?>
+      <form method="POST" action="<?=url('upgrade/trial')?>" style="margin-top:16px">
+        <input type="hidden" name="_csrf" value="<?=h(csrf_token())?>">
+        <input type="hidden" name="plan" value="pro">
+        <input type="hidden" name="trial_days" value="<?=TRIAL_DAYS?>">
+        <button class="btn btn-primary btn-lg" style="width:100%">Start <?=TRIAL_DAYS?>-Day Free Trial</button>
+      </form>
+      <div style="margin-top:10px;text-align:center;font-size:.75rem;color:var(--text3)">No card required. Then <?=inr(PRO_PRICE)?>/mo. One free trial per account.</div>
+      <?php else:?>
+      <div style="margin-top:16px;padding:10px 12px;background:#f9fafb;border-radius:8px;font-size:.8rem;color:var(--text3);text-align:center">Your free trial ended on <?=date('d M Y',strtotime($u['trial_ends_at']))?>.</div>
+      <a href="<?=url('upgrade/checkout')?>" class="btn btn-primary btn-lg" style="width:100%;margin-top:10px">Subscribe — <?=inr(PRO_PRICE)?>/mo</a>
+      <?php endif;?>
     </div>
   </div>
 </div>
@@ -371,7 +374,7 @@ function page_upgrade(): void {
 }
 
 /* ══════════════════════════════════════════════════════════
-   PAGE: UPGRADE CHECKOUT (payment form)
+   PAGE: UPGRADE CHECKOUT
 ══════════════════════════════════════════════════════════ */
 function page_upgrade_checkout(): void {
     $u=require_login(); $u=fresh_user();
@@ -389,38 +392,15 @@ function page_upgrade_checkout(): void {
       <li>Unlimited gig listings</li><li>Featured placement</li><li>Full analytics</li><li>Pro badge</li>
     </ul>
   </div>
-  <!-- POST /account/upgrade — payment_token validated by regex only (intentional bug) -->
   <div class="card card-pad">
-    <div style="font-weight:700;margin-bottom:14px">💳 Payment Details</div>
-    <form method="POST" action="<?=url('account/upgrade')?>">
-      <input type="hidden" name="_csrf" value="<?=h(csrf_token())?>">
-      <input type="hidden" name="plan" value="pro">
-      <div class="form-group">
-        <label class="form-label">Card Number</label>
-        <input type="text" name="card_number" class="form-control" placeholder="4111 1111 1111 1111" maxlength="19">
-      </div>
-      <div class="grid-2">
-        <div class="form-group"><label class="form-label">Expiry</label><input type="text" name="card_expiry" class="form-control" placeholder="MM/YY" maxlength="5"></div>
-        <div class="form-group"><label class="form-label">CVV</label><input type="text" name="card_cvv" class="form-control" placeholder="123" maxlength="4"></div>
-      </div>
-      <!-- payment_token is generated client-side in real flow; here it is set by the payment processor -->
-      <!-- Server only validates regex, not actual payment — intentional bug -->
-      <input type="hidden" name="payment_token" id="pt" value="">
-      <script>
-        // Simulates what a payment processor JS SDK would inject
-        document.getElementById('pt').value = 'PAY' + Math.random().toString(36).substr(2,8).toUpperCase();
-      </script>
-      <button class="btn btn-primary btn-lg" style="width:100%">Pay ₹999 &amp; Upgrade</button>
-    </form>
-    <div style="margin-top:12px;text-align:center;font-size:.75rem;color:var(--text3)">🔒 Powered by SecurePay Gateway</div>
-  </div>
-  <div class="card card-pad" style="margin-top:14px;background:#fff7ed;border-color:#fed7aa">
-    <div style="font-size:.78rem;font-weight:700;color:#92400e;margin-bottom:6px">💡 Lab Hint</div>
-    <p style="font-size:.8rem;color:#78350f;line-height:1.6">
-      Notice the hidden <code style="background:#fff8;padding:1px 5px;border-radius:3px">payment_token</code> field is set by JS.<br>
-      Intercept with Burp Suite and replace it with any uppercase string of 8+ chars:<br>
-      <code style="background:#fff8;padding:2px 6px;border-radius:3px;margin-top:4px;display:inline-block">plan=pro&payment_token=FAKE1234</code>
-    </p>
+    <div style="display:flex;justify-content:space-between;font-size:.875rem;padding:6px 0"><span style="color:var(--text3)">Subtotal</span><span><?=inr(PRO_PRICE)?></span></div>
+    <div style="display:flex;justify-content:space-between;font-size:.875rem;padding:6px 0;border-bottom:1px solid #f3f4f6"><span style="color:var(--text3)">GST (included)</span><span>₹0</span></div>
+    <div style="display:flex;justify-content:space-between;font-weight:800;font-size:1.05rem;padding:12px 0 4px"><span>Total due today</span><span><?=inr(PRO_PRICE)?></span></div>
+    <div style="margin-top:14px;padding:12px 14px;background:#fffbeb;border:1px solid #fde68a;border-radius:8px;font-size:.82rem;color:#78350f;line-height:1.6">
+      Online payments are temporarily unavailable while we move to a new payment provider.
+      To subscribe now, email <strong>billing@gigboard.app</strong> and our team will activate Pro on your account.
+    </div>
+    <button class="btn btn-primary btn-lg" style="width:100%;margin-top:14px;opacity:.5;cursor:not-allowed" disabled>Pay <?=inr(PRO_PRICE)?></button>
   </div>
 </div>
 <?php page_close();
@@ -597,30 +577,21 @@ function action_logout(): void {
 }
 
 /*
- * INTENTIONALLY VULNERABLE UPGRADE ENDPOINT
- * POST /account/upgrade  params: plan, payment_token
- *
- * Bug: payment_token is validated only for format (regex ^[A-Z0-9]{8,}$)
- * It is NEVER checked against a payments table or external payment processor.
- * Any token matching the regex (e.g. FAKE1234) grants Pro status.
+ * INTENTIONALLY VULNERABLE: POST /upgrade/trial  params: plan, trial_days
+ * The UI only offers the trial once, but the server never checks whether this
+ * account already had one (replaying the request restarts it), and it trusts
+ * the trial length sent by the client (trial_days=3650 gives ten years of Pro).
  */
-function action_upgrade(): void {
+function action_start_trial(): void {
     $u=require_login();
     verify_csrf();
-    $plan=trim($_POST['plan']??'');
-    $token=trim($_POST['payment_token']??'');
-
-    if(!in_array($plan,['pro'])){flash('error','Invalid plan selected.');redirect('upgrade');}
-
-    // --- INTENTIONAL BUG: only regex check, no DB/payment validation ---
-    if(empty($token)||!preg_match('/^[A-Z0-9]{8,}$/',$token)){
-        flash('error','Payment failed. Invalid payment token format.');
-        redirect('upgrade/checkout');
-    }
-
-    // Token "looks valid" — upgrade the account without verifying actual payment
-    db()->prepare("UPDATE users SET plan='pro' WHERE id=?")->execute([$u['id']]);
-    flash('success','🎉 Congratulations! Your account has been upgraded to Pro.');
+    if(($_POST['plan']??'')!=='pro'){flash('error','Invalid plan selected.');redirect('upgrade');}
+    $days=(int)($_POST['trial_days']??0);
+    if($days<1){flash('error','Could not start your trial. Please try again.');redirect('upgrade');}
+    $days=min($days,36500);
+    db()->prepare("UPDATE users SET plan='pro',trial_started_at=NOW(),trial_ends_at=DATE_ADD(NOW(),INTERVAL ? DAY) WHERE id=?")
+        ->execute([$days,$u['id']]);
+    flash('success','🎉 Your Pro trial has started. Enjoy all Pro features!');
     redirect('analytics');
 }
 

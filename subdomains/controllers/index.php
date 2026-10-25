@@ -313,17 +313,6 @@ function page_cart(): void {
     $u = require_login();
     $lines = cart_lines($u['id']);
     $subtotal = cart_subtotal($lines);
-    // Welcome offer: applied once automatically (as a normal first application).
-    // Removing it, or applying another code, is remembered until the next checkout.
-    if ($lines && !get_coupon() && empty($_SESSION['coupon_auto_done'])) {
-        $st = db()->prepare("SELECT discount_pct FROM coupons WHERE code = 'WELCOME20' AND active = 1");
-        $st->execute();
-        $pct = $st->fetchColumn();
-        if ($pct !== false) {
-            $_SESSION['coupon'] = ['code' => 'WELCOME20', 'pct' => (int)$pct, 'factor' => 1 - ($pct / 100), 'count' => 1, 'auto' => true];
-        }
-        $_SESSION['coupon_auto_done'] = true;
-    }
     $coupon = get_coupon();
     $discount = coupon_discount($subtotal);
     $total = max(0, $subtotal - $discount);
@@ -386,35 +375,32 @@ function page_cart(): void {
     </div>
 
     <div style="display:flex;flex-direction:column;gap:16px">
-      <!-- COUPON BOX — intentionally vulnerable endpoint -->
       <div class="card card-pad">
-        <div style="font-weight:700;margin-bottom:12px"><img src="https://cdn-icons-png.flaticon.com/512/2662/2662503.png" style="width:20px;height:20px;vertical-align:middle;margin-right:6px;"> Apply Coupon</div>
+        <div style="font-weight:700;margin-bottom:12px"><img src="https://cdn-icons-png.flaticon.com/512/2662/2662503.png" style="width:20px;height:20px;vertical-align:middle;margin-right:6px;"> Coupons &amp; Offers</div>
         <?php if ($coupon): ?>
-        <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;background:rgba(16,185,129,.1);border:1px solid rgba(16,185,129,.3);border-radius:8px;padding:10px 12px;margin-bottom:12px">
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;background:rgba(16,185,129,.1);border:1px dashed rgba(16,185,129,.45);border-radius:8px;padding:12px 14px">
           <div style="min-width:0">
-            <div style="font-weight:700;color:#34d399;font-family:monospace;letter-spacing:.5px">✓ <?= h($coupon['code']) ?></div>
-            <div class="text-sm text-muted mt-4">
-              <?= h($coupon['pct']) ?>% off<?= !empty($coupon['auto']) ? ' · applied automatically' : '' ?>
-              <?php if ((int)$coupon['count'] > 1): ?>
-                <br><span style="color:#34d399">Applied <?= h($coupon['count']) ?>× · effective discount <?= round((1 - $coupon['factor'])*100, 1) ?>%</span>
-              <?php endif; ?>
-            </div>
+            <div style="font-weight:700;color:#34d399;font-family:monospace;letter-spacing:.5px"><?= h($coupon['code']) ?> <span style="font-family:Inter,sans-serif;font-weight:600;letter-spacing:0">applied</span></div>
+            <div class="text-sm text-muted mt-4">You save <?= inr($discount) ?> on this order</div>
           </div>
           <form method="POST" action="<?= url('cart/remove-coupon') ?>" style="flex-shrink:0">
             <input type="hidden" name="_csrf" value="<?= h(csrf_token()) ?>">
-            <button class="btn btn-danger btn-sm" title="Remove this coupon">Remove</button>
+            <button class="btn btn-secondary btn-sm">Remove</button>
           </form>
         </div>
-        <?php endif; ?>
-        <!-- POST /cart/apply-coupon with coupon_code=WELCOME20 — apply multiple times to stack -->
+        <div class="text-sm text-muted mt-8">Only one coupon can be used per order.</div>
+        <?php else: ?>
+        <div style="background:rgba(124,58,237,.1);border:1px dashed rgba(124,58,237,.45);border-radius:8px;padding:10px 12px;margin-bottom:12px;font-size:.82rem;color:var(--text2)">
+          New to PCHub? Use <strong style="color:var(--accent3);font-family:monospace">WELCOME20</strong> for 20% off your first order.
+        </div>
         <form method="POST" action="<?= url('cart/apply-coupon') ?>">
           <input type="hidden" name="_csrf" value="<?= h(csrf_token()) ?>">
           <div class="flex gap-8">
-            <input type="text" name="coupon_code" value=""
-                   placeholder="<?= $coupon ? 'Have a different code?' : 'Enter coupon code' ?>" class="form-control" style="flex:1">
+            <input type="text" name="coupon_code" value="" placeholder="Enter coupon code" class="form-control" style="flex:1" required>
             <button class="btn btn-secondary">Apply</button>
           </div>
         </form>
+        <?php endif; ?>
       </div>
 
       <!-- ORDER SUMMARY -->
@@ -529,7 +515,7 @@ function page_checkout(): void {
         <div class="flex-between text-sm mb-8"><span class="text-muted">Subtotal</span><span><?= inr($subtotal) ?></span></div>
         <?php if ($discount > 0): ?>
         <div class="flex-between text-sm mb-8" style="color:var(--green)">
-          <span>Coupon (<?= h($coupon['code']) ?> ×<?= h($coupon['count']) ?>)</span>
+          <span>Coupon (<?= h($coupon['code']) ?>)</span>
           <span>−<?= inr($discount) ?></span>
         </div>
         <?php endif; ?>
@@ -693,7 +679,7 @@ function page_order(int $oid): void {
         <div class="flex-between text-sm mb-8"><span class="text-muted">Subtotal</span><span><?= inr((int)$order['subtotal']) ?></span></div>
         <?php if ($order['discount'] > 0): ?>
         <div class="flex-between text-sm mb-8" style="color:var(--green)">
-          <span>Coupon (<?= h($order['coupon_code'] ?? '') ?> ×<?= $order['coupon_applications'] ?>)</span>
+          <span>Coupon (<?= h($order['coupon_code'] ?? '') ?>)</span>
           <span>−<?= inr((int)$order['discount']) ?></span>
         </div>
         <?php endif; ?>
@@ -740,7 +726,7 @@ function page_orders(): void {
         foreach ($orders as $o) {
             $badge = match($o['status']){'Paid','Delivered'=>'tag-success','Pending Payment'=>'tag-warning',default=>'tag-info'};
             echo "<tr><td>#".h($o['id'])."</td><td>".date('d M Y',strtotime($o['created_at']))."</td><td style='font-weight:700'>".inr((int)$o['total'])."</td>";
-            echo "<td>".($o['coupon_code']?"<span class='tag tag-info'>".h($o['coupon_code'])." ×".h($o['coupon_applications'])."</span>":"—")."</td>";
+            echo "<td>".($o['coupon_code']?"<span class='tag tag-info'>".h($o['coupon_code'])."</span>":"—")."</td>";
             echo "<td><span class='tag $badge'>".h($o['status'])."</span></td><td><a href='".url("order/{$o['id']}")."' class='btn btn-secondary btn-sm'>View</a></td></tr>";
         }
         echo '</tbody></table></div>';
@@ -1082,7 +1068,7 @@ function action_register(): void {
         session_regenerate_id(true);
         $_SESSION['uid'] = $uid;
         flash('success','Account created! Welcome to PCHub.');
-        redirect('dashboard');
+        redirect('/');
     } catch (PDOException $e) {
         flash('error','Email already in use.'); redirect('register');
     }
@@ -1146,22 +1132,19 @@ function action_apply_coupon(): void {
     $coupon = $st->fetch();
     if (!$coupon) { flash('error','Invalid or expired coupon code.'); redirect('cart'); }
 
-    $_SESSION['coupon_auto_done'] = true;
-
     // --- INTENTIONAL BUG: no "already applied" check, no category restriction check ---
     $existing = $_SESSION['coupon'] ?? [];
     if ($existing && $existing['code'] !== $code) {
         // Different coupon — replace it
         $_SESSION['coupon'] = ['code' => $code, 'pct' => (int)$coupon['discount_pct'], 'factor' => 1 - ($coupon['discount_pct']/100), 'count' => 1];
-        flash('success', "Coupon $code applied! {$coupon['discount_pct']}% discount.");
+        flash('success', "Coupon $code applied successfully.");
     } else {
         // Same coupon (or first time) — STACK IT (each application multiplies by 0.8)
         $prev_factor = (float)($existing['factor'] ?? 1.0);
         $new_factor  = $prev_factor * (1 - ($coupon['discount_pct']/100));
         $count = (int)($existing['count'] ?? 0) + 1;
         $_SESSION['coupon'] = ['code' => $code, 'pct' => (int)$coupon['discount_pct'], 'factor' => $new_factor, 'count' => $count];
-        $eff_discount = round((1 - $new_factor) * 100, 1);
-        flash('success', "Coupon $code applied (×$count)! Effective discount: $eff_discount%");
+        flash('success', "Coupon $code applied successfully.");
     }
     redirect('cart');
 }
@@ -1170,7 +1153,6 @@ function action_remove_coupon(): void {
     require_login();
     verify_csrf();
     unset($_SESSION['coupon']);
-    $_SESSION['coupon_auto_done'] = true;
     flash('info','Coupon removed.');
     redirect('cart');
 }
@@ -1215,8 +1197,7 @@ function action_checkout_submit(): void {
     foreach ($lines as $l)
         $ii->execute([$oid, $l['product_id'], $l['name'], $l['brand'], $l['price'], $l['quantity'], $l['subtotal']]);
 
-    // Clear cart and coupon (the welcome offer is offered again on the next cart)
-    unset($_SESSION['coupon_auto_done']);
+    // Clear cart and coupon
     db()->prepare("DELETE FROM cart_items WHERE user_id=?")->execute([$u['id']]);
     unset($_SESSION['coupon']);
 

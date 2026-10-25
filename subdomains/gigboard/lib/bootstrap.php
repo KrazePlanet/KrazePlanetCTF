@@ -1,11 +1,13 @@
 <?php
 // GigBoard — Freelancing Marketplace Training Lab
-// Intentional vulnerability: plan upgrade via parameter tampering (payment_token never validated against DB).
+// Intentional vulnerability: the 7-day Pro trial can be restarted by replaying the
+// request, and its length comes from the client (trial_days).
 // Served at the root of gigboard.<lab domain>, or at /subdomains/gigboard on XAMPP.
 define('BASE', str_starts_with(parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH) ?: '/', '/subdomains/gigboard')
     ? '/subdomains/gigboard' : '');
-const LAB_FLAG = 'KP{plan_upgrade_parameter_tampering}';
 const FREE_GIG_LIMIT = 3;
+const PRO_PRICE = 999;
+const TRIAL_DAYS = 7;
 
 session_set_cookie_params(['path' => BASE === '' ? '/' : BASE, 'httponly' => true, 'samesite' => 'Lax']);
 session_name('GIGBOARDSID');
@@ -27,7 +29,17 @@ function db(): PDO {
         $pdo=new PDO("mysql:host=$host;dbname=$name;charset=utf8mb4",$user,$pass,$opt);
         install_schema($pdo);
     }
+    ensure_trial_columns($pdo);
     return $pdo;
+}
+
+// Trial columns, added on the fly so databases created before the trial existed
+// get them too. The demo student starts with a trial that has already ended.
+function ensure_trial_columns(PDO $pdo): void {
+    if ($pdo->query("SHOW COLUMNS FROM users LIKE 'trial_ends_at'")->fetch()) return;
+    $pdo->exec("ALTER TABLE users ADD COLUMN trial_started_at DATETIME NULL, ADD COLUMN trial_ends_at DATETIME NULL");
+    $pdo->exec("UPDATE users SET trial_started_at=NOW()-INTERVAL 12 DAY, trial_ends_at=NOW()-INTERVAL 5 DAY
+                WHERE email='student@gigboard.lab' AND plan='free'");
 }
 
 function install_schema(PDO $pdo, bool $reset=false): void {
@@ -163,16 +175,16 @@ function flash(string $t,string $m): void { $_SESSION['flash'][]=[$t,$m]; }
 function redirect(string $p): never { header('Location:'.url($p)); exit; }
 
 function user(): ?array {
-    static $u=false; if($u!==false) return $u; $u=null;
-    if(!empty($_SESSION['uid'])){
-        $st=db()->prepare("SELECT id,name,email,role,plan,bio,skills,avatar_color,rating,review_count,total_earnings,is_admin FROM users WHERE id=?");
-        $st->execute([$_SESSION['uid']]); $u=$st->fetch()?:null;
-    }
+    static $u=false; if($u!==false) return $u;
+    $u=fresh_user();
     return $u;
 }
 function fresh_user(): ?array {
     if(empty($_SESSION['uid'])) return null;
-    $st=db()->prepare("SELECT id,name,email,role,plan,bio,skills,avatar_color,rating,review_count,total_earnings,is_admin FROM users WHERE id=?");
+    // An ended trial drops the account back to Free.
+    db()->prepare("UPDATE users SET plan='free' WHERE id=? AND plan='pro' AND trial_ends_at IS NOT NULL AND trial_ends_at<=NOW()")
+        ->execute([$_SESSION['uid']]);
+    $st=db()->prepare("SELECT id,name,email,role,plan,bio,skills,avatar_color,rating,review_count,total_earnings,is_admin,trial_started_at,trial_ends_at FROM users WHERE id=?");
     $st->execute([$_SESSION['uid']]); return $st->fetch()?:null;
 }
 function require_login(): array { $u=user(); if(!$u){flash('error','Please sign in.');redirect('login');} return $u; }

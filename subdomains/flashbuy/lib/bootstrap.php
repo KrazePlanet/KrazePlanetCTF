@@ -4,6 +4,15 @@
 const BASE     = '/subdomains/flashbuy';
 const LAB_FLAG = 'KP{race_condition_purchase_limit}';
 
+// The vhost sends every path here, including the browser's automatic /favicon.ico.
+// That request carries no cookie (it is outside the cookie path), so starting a
+// session for it would overwrite the real session cookie and break the CSRF token.
+$reqPath = parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH) ?: '/';
+if ($reqPath !== BASE && !str_starts_with($reqPath, BASE . '/')) {
+    if ($reqPath === '/') { header('Location: ' . BASE . '/'); exit; }
+    http_response_code(404); exit;
+}
+
 session_set_cookie_params(['path' => BASE, 'httponly' => true, 'samesite' => 'Lax']);
 session_name('FLASHBUYSID');
 session_start();
@@ -122,7 +131,17 @@ function user(): ?array {
 }
 function require_login(): array { $u=user(); if(!$u){flash('error','Please sign in.');redirect('login');} return $u; }
 function csrf_token(): string { if(empty($_SESSION['csrf'])) $_SESSION['csrf']=bin2hex(random_bytes(16)); return $_SESSION['csrf']; }
-function verify_csrf(): void { if(!hash_equals($_SESSION['csrf']??'',$_POST['_csrf']??'')){http_response_code(403);die('Invalid CSRF token.');} }
+function verify_csrf(): void {
+    if (hash_equals($_SESSION['csrf'] ?? '', $_POST['_csrf'] ?? '')) return;
+    // Usually a stale form: the session expired or the lab container was recreated.
+    // Send the user back to the form (it renders a fresh token) instead of a dead end.
+    flash('error', 'Your session expired. Please try again.');
+    $back = parse_url($_SERVER['HTTP_REFERER'] ?? '', PHP_URL_PATH) ?: '';
+    if (!str_starts_with($back, BASE . '/') && $back !== BASE)
+        $back = parse_url($_SERVER['REQUEST_URI'] ?? '', PHP_URL_PATH) ?: BASE;
+    header('Location: ' . $back, true, 303);
+    exit;
+}
 function stars(float $r): string { $o=''; for($i=1;$i<=5;$i++) $o.=($r>=$i?'★':($r>=$i-.5?'⯨':'☆')); return $o; }
 
 db();
