@@ -151,7 +151,14 @@ if ($action === 'register') {
                 $hash = password_hash($pass, PASSWORD_BCRYPT);
                 $st = $db->prepare("INSERT INTO frontegg_users (name, email, password_hash, org_name) VALUES (?,?,?,?)");
                 $st->bind_param('ssss', $name, $email, $hash, $org); $st->execute();
-                $_SESSION['uid'] = $db->insert_id;
+                $newUid = $db->insert_id;
+                $_SESSION['uid'] = $newUid;
+                // Every new org ships with a pre-configured domain block, so students can
+                // go straight to inviting and discovering the look-alike-character bypass.
+                foreach (['yopmail.com'] as $blockedSeed) {
+                    $bi = $db->prepare("INSERT IGNORE INTO frontegg_blocked_domains (owner_id, domain) VALUES (?,?)");
+                    $bi->bind_param('is', $newUid, $blockedSeed); $bi->execute();
+                }
                 header('Location: index.php'); exit;
             }
         }
@@ -178,7 +185,7 @@ if ($action === 'login') {
 
 // Public marketing landing page — the admin console itself stays behind login.
 if ($action === 'home') {
-    if ($me) { header('Location: index.php?action=users'); exit; }
+    if ($me) { header('Location: index.php?action=invite'); exit; }
     render_landing();
     exit;
 }
@@ -189,23 +196,6 @@ if (!$me) {
     exit;
 }
 $myId = (int)$me['id'];
-
-// ── Domain restriction management ───────────────────────────────────────────────
-if ($action === 'add-blocked-domain' && $_SERVER['REQUEST_METHOD'] === 'POST') {
-    $domain = strtolower(trim($_POST['domain'] ?? ''));
-    $domain = preg_replace('/^https?:\/\//', '', $domain);
-    if ($domain !== '') {
-        $st = $db->prepare("INSERT IGNORE INTO frontegg_blocked_domains (owner_id, domain) VALUES (?,?)");
-        $st->bind_param('is', $myId, $domain); $st->execute();
-    }
-    header('Location: index.php?action=security'); exit;
-}
-if ($action === 'remove-blocked-domain') {
-    $id = (int)($_GET['id'] ?? 0);
-    $st = $db->prepare("DELETE FROM frontegg_blocked_domains WHERE id=? AND owner_id=?");
-    $st->bind_param('ii', $id, $myId); $st->execute();
-    header('Location: index.php?action=security'); exit;
-}
 
 // ── VULNERABLE ENDPOINT — invite users ───────────────────────────────────────────
 if ($action === 'invite-users') {
@@ -265,17 +255,20 @@ if ($action === 'inbox') {
         $st->bind_param('s', $canonical); $st->execute();
         $r = $st->get_result(); while ($row = $r->fetch_assoc()) $mails[] = $row;
     }
+    $embed = isset($_GET['embed']);
+    $embedQS = $embed ? '&embed=1' : '';
     render_head('Inbox');
     ?>
-    <div class="mailapp">
+    <div class="mailapp<?php echo $embed ? ' embed' : ''; ?>">
       <div class="mail-topbar">
-        <div class="brand-mini">✉ Webmail</div>
+        <?php if (!$embed): ?><div class="brand-mini">✉ Webmail</div><?php endif; ?>
         <form method="GET" class="mail-search">
           <input type="hidden" name="action" value="inbox">
+          <?php if ($embed): ?><input type="hidden" name="embed" value="1"><?php endif; ?>
           <input type="text" name="email" placeholder="Enter an email address to view its inbox…" value="<?php echo esc($queryEmail); ?>">
           <button type="submit">Check inbox</button>
         </form>
-        <a href="index.php" class="btn">← Back to admin console</a>
+        <?php if (!$embed): ?><a href="index.php" class="btn">← Back to admin console</a><?php endif; ?>
       </div>
       <div class="mail-body">
         <div class="mail-list">
@@ -284,7 +277,7 @@ if ($action === 'inbox') {
           <?php elseif (empty($mails)): ?>
             <div class="empty">No mail for <strong><?php echo esc($queryEmail); ?></strong>.</div>
           <?php else: foreach ($mails as $m): ?>
-            <a class="mail-row <?php echo (isset($_GET['mid']) && (int)$_GET['mid']===(int)$m['id'])?'sel':''; ?>" href="index.php?action=inbox&email=<?php echo urlencode($queryEmail); ?>&mid=<?php echo (int)$m['id']; ?>">
+            <a class="mail-row <?php echo (isset($_GET['mid']) && (int)$_GET['mid']===(int)$m['id'])?'sel':''; ?>" href="index.php?action=inbox&email=<?php echo urlencode($queryEmail); ?>&mid=<?php echo (int)$m['id']; ?><?php echo $embedQS; ?>">
               <div class="mr-from">Frontegg</div>
               <div class="mr-subj"><?php echo esc($m['subject']); ?></div>
               <div class="mr-time"><?php echo esc(date('M j, g:i A', strtotime($m['created_at']))); ?></div>
@@ -345,7 +338,7 @@ if ($action === 'activate') {
       <?php else: ?>
         <h1>Invalid activation link</h1>
       <?php endif; ?>
-      <a href="index.php?action=users" class="btn btn-primary" style="margin-top:1rem;display:inline-flex;">Go to Users</a>
+      <a href="index.php?action=invite" class="btn btn-primary" style="margin-top:1rem;display:inline-flex;">Back to Invite</a>
     </div>
     </body></html>
     <?php
@@ -569,6 +562,33 @@ table.users td{padding:0.85rem 1.1rem;border-top:1px solid #f1f2f6;font-size:0.8
 .mail-content h2{font-size:1.2rem;}
 .activate-btn{display:inline-block;background:#4f46e5;color:#fff !important;text-decoration:none;padding:0.75rem 1.75rem;border-radius:8px;font-weight:600;margin:1rem 0;}
 .activate-btn:hover{background:#4338ca;}
+/* Consolidated Invite page: block + invite on the left, webmail on the right */
+.invite-layout{display:flex;gap:1.25rem;padding:1.5rem 1.75rem;align-items:stretch;min-height:calc(100vh - 58px);}
+.invite-left{width:460px;flex-shrink:0;display:flex;flex-direction:column;gap:1.25rem;}
+.invite-right{flex:1;min-width:0;background:#fff;border:1px solid #e5e7eb;border-radius:12px;overflow:hidden;display:flex;flex-direction:column;}
+.invite-right .mail-frame{flex:1;width:100%;border:none;display:block;}
+.panel-title{font-size:0.78rem;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:#6b7280;padding:0.85rem 1.2rem;border-bottom:1px solid #eef0f4;background:#fafbfc;}
+.card{background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:1.25rem 1.4rem;}
+.card h2{margin:0 0 0.9rem;font-size:1.05rem;}
+.inv-results{margin-top:0.9rem;display:flex;flex-direction:column;gap:0.4rem;}
+.inv-res{font-size:0.82rem;padding:0.5rem 0.75rem;border-radius:8px;line-height:1.4;}
+.inv-res.ok{background:#ecfdf5;color:#0f766e;border:1px solid #a7f3d0;}
+.inv-res.bad{background:#fdf1ef;color:#b91c1c;border:1px solid #f3c6c0;}
+.chipbox.inline{min-height:46px;}
+@media(max-width:980px){.invite-layout{flex-direction:column;}.invite-left{width:100%;}.invite-right{min-height:520px;}}
+/* Webmail when embedded in the Invite page */
+.mailapp.embed{max-width:none;margin:0;padding:1.1rem 1.25rem;}
+.mailapp.embed .mail-body{grid-template-columns:260px 1fr;}
+/* Toasts */
+.toast-wrap{position:fixed;top:1rem;right:1rem;z-index:9999;display:flex;flex-direction:column;gap:0.6rem;max-width:360px;}
+.toast{background:#fff;border:1px solid #e5e7eb;border-left:4px solid #6b7280;border-radius:10px;padding:0.8rem 1rem;box-shadow:0 10px 30px rgba(0,0,0,0.12);font-size:0.86rem;display:flex;align-items:flex-start;gap:0.6rem;opacity:0;transform:translateX(20px);transition:opacity .25s ease,transform .25s ease;}
+.toast.show{opacity:1;transform:translateX(0);}
+.toast .ico{font-size:1rem;line-height:1.2;flex-shrink:0;}
+.toast .msg{line-height:1.4;color:#1e2230;}
+.toast.success{border-left-color:#10b981;}
+.toast.success .ico{color:#10b981;}
+.toast.error{border-left-color:#dc4c3f;}
+.toast.error .ico{color:#dc4c3f;}
 </style></head><body>
 <?php
 }
@@ -578,11 +598,7 @@ function render_sidebar($active, $me) {
 <div class="sidebar">
   <div class="sb-brand"><span class="mark">Fé</span> Frontegg</div>
   <div class="sb-org"><?php echo esc($me['org_name']); ?></div>
-  <a href="index.php?action=users" class="nav-item <?php echo $active==='users'?'active':''; ?>">👤 Users</a>
-  <div class="nav-section">Settings</div>
-  <a href="index.php?action=security" class="nav-item <?php echo $active==='security'?'active':''; ?>">🔒 Security</a>
-  <div class="nav-section">Tools</div>
-  <a href="index.php?action=inbox" class="nav-item <?php echo $active==='inbox'?'active':''; ?>" target="_blank">✉ Webmail</a>
+  <a href="index.php?action=invite" class="nav-item <?php echo $active==='invite'?'active':''; ?>">✉ Invite</a>
 </div>
 <?php
 }
@@ -604,96 +620,67 @@ function render_topbar($me) {
 //  PAGES
 // =========================================================================
 
-if ($action === 'security') {
-    $domains = blocked_domains($db, $myId);
-    render_head('Security'); ?>
-    <div class="app"><?php render_sidebar('security', $me); ?>
-    <div class="main"><?php render_topbar($me); ?>
-      <div class="wrap" style="max-width:640px;">
-        <h1>Domain Restrictions</h1>
-        <div class="hint-box">Mode: <strong>Deny Only</strong> — users may sign up or be invited from any domain <em>except</em> the ones listed below.</div>
-        <form method="POST" action="index.php?action=add-blocked-domain" class="add-domain">
-          <input name="domain" placeholder="e.g. yopmail.com" required>
-          <button class="btn btn-primary" type="submit">Add</button>
-        </form>
-        <div class="dlist">
-          <?php if (empty($domains)): ?>
-            <div class="drow" style="color:#9ca3af;">No domains blocked yet.</div>
-          <?php else: foreach ($domains as $d): ?>
-            <div class="drow">
-              <span><?php echo esc($d['domain']); ?></span>
-              <a class="rm" href="index.php?action=remove-blocked-domain&id=<?php echo (int)$d['id']; ?>">Remove</a>
-            </div>
-          <?php endforeach; endif; ?>
-        </div>
-      </div>
-    </div></div>
-    </body></html>
-    <?php
-    exit;
+// Old Security / Users pages are merged into the single Invite console.
+if ($action === 'security' || $action === 'users') {
+    header('Location: index.php?action=invite'); exit;
 }
 
-if ($action === 'users') {
-    $invites = org_invites($db, $myId);
-    render_head('Users'); ?>
-    <div class="app"><?php render_sidebar('users', $me); ?>
+if ($action === 'invite') {
+    $domains = blocked_domains($db, $myId);
+    render_head('Invite'); ?>
+    <div class="app"><?php render_sidebar('invite', $me); ?>
     <div class="main"><?php render_topbar($me); ?>
-      <div class="wrap">
-        <h1>Users</h1>
-        <div class="searchbar">
-          <input type="text" placeholder="Search for any text...">
-          <button class="btn btn-primary" onclick="openInvite()">Invite User</button>
+      <div class="invite-layout">
+
+        <!-- LEFT: invite users -->
+        <div class="invite-left">
+
+          <div class="card">
+            <h2>Invite Users</h2>
+            <?php $blockedList = array_map(fn($d) => $d['domain'], $domains); if (!empty($blockedList)): ?>
+            <div class="hint-box" style="margin-bottom:0.9rem;">Your organization's policy <strong>blocks invites</strong> to: <strong><?php echo esc(implode(', ', $blockedList)); ?></strong>.</div>
+            <?php endif; ?>
+            <div class="field-label" id="fieldLabel">Email &amp; Role</div>
+            <div class="chipbox inline" id="chipBox">
+              <select class="role-select" id="roleSelect">
+                <option value="Member">Member</option>
+                <option value="Admin">Admin</option>
+                <option value="Backoffice Viewer">Backoffice Viewer</option>
+                <option value="Backoffice Admin">Backoffice Admin</option>
+              </select>
+              <input class="chip-input" id="chipInput" placeholder='Type email address and press "Enter"'>
+            </div>
+            <div class="field-note"><span>You can invite up to 5 users at a time.</span><span id="chipCount">0/5</span></div>
+            <div class="field-error" id="fieldError" style="display:none;"></div>
+            <button class="btn btn-primary" style="margin-top:1rem;" onclick="sendInvites()">Send invites</button>
+            <div class="inv-results" id="invResults"></div>
+          </div>
+
         </div>
-        <table class="users">
-          <thead><tr><th>User</th><th>Roles</th><th>Joined</th><th>Last Seen</th></tr></thead>
-          <tbody>
-            <?php if (empty($invites)): ?>
-            <tr><td colspan="4" class="empty">No users yet. Click "Invite User" to add one.</td></tr>
-            <?php else: foreach ($invites as $inv): ?>
-            <tr>
-              <td>
-                <div class="u-cell">
-                  <span class="av" style="background:<?php echo avatar_color($inv['email_raw']); ?>;"><?php echo esc(avatar_letters($inv['email_raw'])); ?></span>
-                  <div><div class="em"><?php echo esc($inv['email_raw']); ?></div><div class="em2"><?php echo esc($inv['email_raw']); ?></div></div>
-                </div>
-              </td>
-              <td><span class="pill role"><?php echo esc($inv['role']); ?></span></td>
-              <td><span class="pill <?php echo $inv['status']==='Active'?'active':'pending'; ?>"><?php echo esc($inv['status']); ?></span></td>
-              <td>-</td>
-            </tr>
-            <?php endforeach; endif; ?>
-          </tbody>
-        </table>
+
+        <!-- RIGHT: the webmail, to see which invites were delivered -->
+        <div class="invite-right">
+          <div class="panel-title">✉ Webmail — check which invites were delivered</div>
+          <iframe class="mail-frame" id="mailFrame" src="index.php?action=inbox&embed=1"></iframe>
+        </div>
+
       </div>
     </div></div>
 
-    <div class="overlay" id="inviteOverlay">
-      <div class="modal">
-        <div class="modal-hd"><h2>Invite User</h2><span class="x" onclick="closeInvite()">&times;</span></div>
-        <div class="modal-body">
-          <div class="field-label" id="fieldLabel">Email & Role</div>
-          <div class="chipbox" id="chipBox">
-            <select class="role-select" id="roleSelect">
-              <option value="Member">Member</option>
-              <option value="Admin">Admin</option>
-              <option value="Backoffice Viewer">Backoffice Viewer</option>
-              <option value="Backoffice Admin">Backoffice Admin</option>
-            </select>
-            <input class="chip-input" id="chipInput" placeholder='Type email address and press "Enter"'>
-          </div>
-          <div class="field-note"><span>You can invite up to 5 users at a time.</span><span id="chipCount">0/5</span></div>
-          <div class="field-error" id="fieldError" style="display:none;"></div>
-        </div>
-        <div class="modal-foot">
-          <button class="btn" onclick="closeInvite()">Cancel</button>
-          <button class="btn btn-primary" onclick="sendInvites()">Invite</button>
-        </div>
-      </div>
-    </div>
+    <div class="toast-wrap" id="toastWrap"></div>
+
     <script>
     let chips = [];
-    function openInvite(){ document.getElementById('inviteOverlay').classList.add('open'); }
-    function closeInvite(){ document.getElementById('inviteOverlay').classList.remove('open'); }
+    function showToast(message, type){
+      const wrap = document.getElementById('toastWrap');
+      const t = document.createElement('div');
+      t.className = 'toast ' + (type || 'info');
+      t.innerHTML = '<span class="ico">' + (type === 'success' ? '✓' : (type === 'error' ? '⚠' : 'ℹ')) + '</span><span class="msg"></span>';
+      t.querySelector('.msg').textContent = message;
+      wrap.appendChild(t);
+      requestAnimationFrame(() => t.classList.add('show'));
+      setTimeout(() => { t.classList.remove('show'); setTimeout(() => t.remove(), 300); }, 4500);
+    }
     function renderChips(){
       const box = document.getElementById('chipBox');
       box.querySelectorAll('.chip').forEach(c=>c.remove());
@@ -707,7 +694,7 @@ if ($action === 'users') {
       document.getElementById('chipCount').textContent = chips.length + '/5';
       const anyErr = chips.some(c=>c.err);
       document.getElementById('fieldLabel').className = 'field-label' + (anyErr ? ' err-label' : '');
-      box.className = 'chipbox' + (anyErr ? ' err-box' : '');
+      box.className = 'chipbox inline' + (anyErr ? ' err-box' : '');
     }
     function removeChip(email){ chips = chips.filter(c=>c.email!==email); renderChips(); }
     document.addEventListener('DOMContentLoaded', () => {
@@ -723,22 +710,61 @@ if ($action === 'users') {
         }
       });
     });
+    // Turn whatever is still typed in the box into a chip, so clicking "Send invites"
+    // works even if the user never pressed Enter.
+    function flushInput(){
+      const inp = document.getElementById('chipInput');
+      const val = inp.value.trim();
+      if (val && chips.length < 5 && !chips.some(c=>c.email===val)) {
+        chips.push({ email: val, err:false });
+        inp.value = '';
+        renderChips();
+      }
+    }
     function sendInvites(){
-      if (chips.length === 0) return;
+      flushInput();
+      if (chips.length === 0) { showToast('Enter an email address to invite.', 'error'); return; }
       const role = document.getElementById('roleSelect').value;
       fetch('?action=invite-users', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ emails: chips.map(c=>c.email), role: role }) })
         .then(r=>r.json())
         .then(d => {
           const err = document.getElementById('fieldError');
-          if (d.error) { err.style.display='block'; err.textContent = d.error; return; }
-          const failed = (d.results||[]).filter(r=>!r.ok);
-          chips = chips.map(c => { const f = failed.find(x=>x.email===c.email); return {email:c.email, err: !!f}; });
+          err.style.display = 'none';
+          if (d.error) { showToast(d.error, 'error'); return; }
+
+          // Show a per-address result (invited vs blocked): a toast for each, plus an
+          // inline row under the form.
+          const box = document.getElementById('invResults');
+          box.innerHTML = '';
+          (d.results || []).forEach(r => {
+            if (r.ok) {
+              showToast('Invite sent to ' + r.email, 'success');
+            } else {
+              showToast(r.error || ("You can't invite " + r.email + ' due to your domain restrictions.'), 'error');
+            }
+            const el = document.createElement('div');
+            el.className = 'inv-res ' + (r.ok ? 'ok' : 'bad');
+            el.textContent = (r.ok ? '✓ Invite sent to ' : '✕ Blocked: ') + r.email + (r.ok ? '' : ' — ' + r.error);
+            box.appendChild(el);
+          });
+
+          // Mark the chips that were blocked, and keep the accepted ones' chips cleared
+          const failed = (d.results || []).filter(r => !r.ok);
+          chips = failed.map(f => ({ email: f.email, err: true }));
           renderChips();
-          if (failed.length) {
-            err.style.display='block';
-            err.textContent = failed[0].error;
-          } else {
-            location.reload();
+
+          // Auto-open the invited address's inbox in the webmail panel on the right,
+          // so the delivered invite shows up without typing anything.
+          const f = document.getElementById('mailFrame');
+          if (f) {
+            const accepted = (d.results || []).filter(r => r.ok);
+            const list = d.results || [];
+            const target = accepted.length ? accepted[accepted.length - 1] : (list.length ? list[list.length - 1] : null);
+            if (target) {
+              f.src = 'index.php?action=inbox&embed=1&email=' + encodeURIComponent(target.email);
+            } else {
+              try { f.contentWindow.location.reload(); } catch (e) { f.src = f.src; }
+            }
           }
         });
     }
@@ -749,4 +775,4 @@ if ($action === 'users') {
 }
 
 // default fallback
-header('Location: index.php?action=users'); exit;
+header('Location: index.php?action=invite'); exit;

@@ -4,14 +4,14 @@
 // Students register real accounts, build a cart, save a payment method, and check out.
 //
 // The intended flaw (mirrors HackerOne #364843, Upserve OLO): the checkout endpoint
-// receives a fully client-assembled order (items with their own price/quantity/total,
-// taxes, tip, delivery fee, and a grand total) and only verifies that those numbers
-// are INTERNALLY CONSISTENT with each other. It never re-derives the charge from its
-// own menu catalog. A shopper who edits the outgoing request can therefore: add a
-// line with a negative quantity to cancel out real items, rewrite a line's unit price
-// arbitrarily (as long as total = price * quantity still holds), or drop the delivery
-// fee out of the running total — all while the request stays "balanced" and is
-// accepted and charged as submitted.
+// receives a client-assembled order (items with their own price and quantity, plus
+// taxes, tip and delivery fee) and re-derives the amount to charge directly from those
+// numbers — price * quantity per line, summed with the submitted taxes/tip/fee — WITHOUT
+// ever comparing the prices against its own menu catalog and WITHOUT requiring the
+// quantity to be positive. A shopper who edits the outgoing request can therefore drop a
+// line's unit price, or, as in the original report, set a NEGATIVE QUANTITY so that the
+// line total goes negative and cancels out the rest of the order, collapsing the charge
+// to a few cents (or below zero) — and it is accepted and charged as computed.
 
 session_start();
 
@@ -337,9 +337,12 @@ if ($action === 'place-order') {
         http_response_code(422); echo json_encode(['error' => 'Order must contain at least one item.']); exit;
     }
 
-    // Each item must reference a real menu item... but its price/quantity/total are
-    // whatever the client says (THE BUG: no comparison against upserve_menu_items.price_cents,
-    // and no rule that quantity must be positive).
+    // Each item must reference a real menu item, but its price and quantity are taken
+    // straight from the request. THE BUG: no comparison against the authoritative
+    // upserve_menu_items.price_cents, and no rule that quantity must be positive. The
+    // server re-derives the line total itself as price × quantity, so a negative
+    // quantity produces a negative line total and drags the whole order down — exactly
+    // the HackerOne #364843 (Upserve OLO) negative-quantity price manipulation.
     $itemsSum = 0;
     foreach ($items as $it) {
         $iid = $it['item_id'] ?? '';
@@ -347,31 +350,19 @@ if ($action === 'place-order') {
         if (!$mi) { http_response_code(422); echo json_encode(['error' => 'Order references an unknown item.']); exit; }
 
         $price = (int)($it['price'] ?? 0);
-        $qty   = (int)($it['quantity'] ?? 0);
-        $total = (int)($it['total'] ?? 0);
-        if ($total !== $price * $qty) {
-            http_response_code(422); echo json_encode(['error' => 'Item total does not match price × quantity.']); exit;
-        }
-        $itemsSum += $total;
+        $qty   = (int)($it['quantity'] ?? 0);   // may be negative — never rejected
+        $itemsSum += $price * $qty;             // server computes the line total; no catalog check
     }
 
-    $taxes        = (int)($charges['taxes'] ?? 0);
-    $tipAmount    = (int)($charges['tip']['amount'] ?? 0);
-    $deliveryFee  = (int)($charges['delivery_fee'] ?? 0);
-    $chargesTotal = (int)($charges['total'] ?? 0);
-    $orderTotal   = (int)($body['order_total'] ?? 0);
-    $paymentsTotal = (int)($body['order']['payments']['total'] ?? 0);
+    $taxes       = (int)($charges['taxes'] ?? 0);
+    $tipAmount   = (int)($charges['tip']['amount'] ?? 0);
+    $deliveryFee = (int)($charges['delivery_fee'] ?? 0);
 
-    $computed = $itemsSum + $taxes + $tipAmount + $deliveryFee;
-    if ($computed !== $chargesTotal) {
-        http_response_code(422); echo json_encode(['error' => 'Order total does not match submitted charges.']); exit;
-    }
-    if ($chargesTotal !== $orderTotal) {
-        http_response_code(422); echo json_encode(['error' => 'Order total does not match top-level total.']); exit;
-    }
-    if ($paymentsTotal !== $orderTotal) {
-        http_response_code(422); echo json_encode(['error' => 'Payment total does not match order total.']); exit;
-    }
+    // The amount charged is re-derived from the submitted (unvalidated) line prices,
+    // quantities, taxes, tip and delivery fee — whatever it comes to is accepted and
+    // charged, including a total slashed to near zero (or negative) by a negative
+    // quantity. No rebalancing of a client-supplied grand total is required.
+    $chargedTotal = $itemsSum + $taxes + $tipAmount + $deliveryFee;
     // ------------------------------------------------------------------------
 
     $orderUuid  = $body['order']['id'] ?? uuidv4();
@@ -387,7 +378,7 @@ if ($action === 'place-order') {
     $st = $db->prepare("INSERT INTO upserve_orders
         (user_id, order_uuid, confirmation_code, submission_id, fulfillment_type, address_json, items_json, taxes_cents, tip_cents, delivery_fee_cents, total_cents, card_uuid, time_placed)
         VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)");
-    $st->bind_param('issssssiiiiss', $myId, $orderUuid, $confCode, $submission, $fulfType, $addressJson, $itemsJson, $taxes, $tipAmount, $deliveryFee, $orderTotal, $cardUuid, $timePlaced);
+    $st->bind_param('issssssiiiiss', $myId, $orderUuid, $confCode, $submission, $fulfType, $addressJson, $itemsJson, $taxes, $tipAmount, $deliveryFee, $chargedTotal, $cardUuid, $timePlaced);
     $st->execute();
     $newId = $db->insert_id;
 
@@ -400,7 +391,7 @@ if ($action === 'place-order') {
         'confirmation_code' => $confCode,
         'submission_id' => $submission,
         'time_placed' => $timePlaced,
-        'total' => $orderTotal,
+        'total' => $chargedTotal,
     ]);
     exit;
 }

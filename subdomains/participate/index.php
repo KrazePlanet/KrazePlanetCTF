@@ -129,18 +129,67 @@ function totp_provisioning_uri($secretBase32, $username, $issuer = 'BugBridge') 
     return "otpauth://totp/{$label}?{$query}";
 }
 
+// Real avatar image for a researcher (Dicebear, same style as the main platform).
+function avatar_img($username) {
+    return 'https://api.dicebear.com/7.x/adventurer/svg?seed=' . rawurlencode($username) . '&backgroundColor=b6e3f4,c0aede,d1d4f9,ffd5dc,ffdfbf';
+}
+// HackerOne-style bounty amount ($50, $8k, $1M) and a square program logo tile.
+function fmt_bounty_amt($n){
+    if ($n >= 1000000) return '$' . rtrim(rtrim(number_format($n/1000000, 1), '0'), '.') . 'M';
+    if ($n >= 1000)    return '$' . rtrim(rtrim(number_format($n/1000, 1), '0'), '.') . 'k';
+    return '$' . number_format($n);
+}
+function prog_square_logo($name){
+    return 'https://api.dicebear.com/7.x/initials/svg?seed=' . rawurlencode($name) . '&radius=20&fontWeight=700&backgroundColor=4b45e0,3b2fd4,b5179e,0891b2,059669,b45309';
+}
+
+$db->query("ALTER TABLE part_programs ADD COLUMN IF NOT EXISTS logo VARCHAR(255) DEFAULT ''");
+
 // ── Seed programs ────────────────────────────────────────────────────────────────
+// [name, slug, description, requires_2fa, min, max, gradient, logo image]
 $seed = [
-    ['Nimbus Cloud', 'nimbus-cloud', 'Cloud storage & collaboration suite.', 1, 200, 8000, 'linear-gradient(135deg,#1d4ed8,#0891b2)'],
-    ['Ledgerly', 'ledgerly', 'Small-business accounting SaaS.', 1, 300, 10000, 'linear-gradient(135deg,#065f46,#0891b2)'],
-    ['Kettlebird Social', 'kettlebird', 'Social networking platform.', 0, 100, 3000, 'linear-gradient(135deg,#7c3aed,#db2777)'],
-    ['Northwind Retail', 'northwind-retail', 'E-commerce platform for merchants.', 1, 250, 6000, 'linear-gradient(135deg,#b45309,#7c2d12)'],
-    ['Pinboard Notes', 'pinboard-notes', 'Note-taking and task app.', 0, 50, 1500, 'linear-gradient(135deg,#0f172a,#334155)'],
+    ['Nimbus Cloud', 'nimbus-cloud', 'Cloud storage & collaboration suite.', 1, 200, 8000, 'linear-gradient(135deg,#1d4ed8,#0891b2)', 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=600&h=240&fit=crop&q=80'],
+    ['Ledgerly', 'ledgerly', 'Small-business accounting SaaS.', 1, 300, 10000, 'linear-gradient(135deg,#065f46,#0891b2)', 'https://images.unsplash.com/photo-1554224155-6726b3ff858f?w=600&h=240&fit=crop&q=80'],
+    ['Kettlebird Social', 'kettlebird', 'Social networking platform.', 0, 100, 3000, 'linear-gradient(135deg,#7c3aed,#db2777)', 'https://images.unsplash.com/photo-1529156069898-49953e39b3ac?w=600&h=240&fit=crop&q=80'],
+    ['Northwind Retail', 'northwind-retail', 'E-commerce platform for merchants.', 1, 250, 6000, 'linear-gradient(135deg,#b45309,#7c2d12)', 'https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=600&h=240&fit=crop&q=80'],
+    ['Pinboard Notes', 'pinboard-notes', 'Note-taking and task app.', 0, 50, 1500, 'linear-gradient(135deg,#0f172a,#334155)', 'https://images.unsplash.com/photo-1517842645767-c639042777db?w=600&h=240&fit=crop&q=80'],
 ];
 $check = $db->query("SELECT COUNT(*) AS c FROM part_programs")->fetch_assoc();
 if ((int)$check['c'] === 0) {
-    $st = $db->prepare("INSERT INTO part_programs (name, slug, description, requires_2fa, min_bounty, max_bounty, grad) VALUES (?,?,?,?,?,?,?)");
-    foreach ($seed as $s) { $st->bind_param('sssiiis', $s[0], $s[1], $s[2], $s[3], $s[4], $s[5], $s[6]); $st->execute(); }
+    $st = $db->prepare("INSERT INTO part_programs (name, slug, description, requires_2fa, min_bounty, max_bounty, grad, logo) VALUES (?,?,?,?,?,?,?,?)");
+    foreach ($seed as $s) { $st->bind_param('sssiiiss', $s[0], $s[1], $s[2], $s[3], $s[4], $s[5], $s[6], $s[7]); $st->execute(); }
+}
+
+// ── Seed the two ready-to-use demo accounts + a sensitive report ────────────────
+// So students skip the whole register / set-up-TOTP / join / submit grind and get
+// straight to the 2FA-participation bug. Mirrors the report's "Steps to Reproduce":
+//   • alice   — researcher WITH 2FA, owns a report in a 2FA-required program
+//   • mallory — external researcher WITHOUT 2FA (the one who shouldn't get in)
+$u0 = $db->query("SELECT COUNT(*) AS c FROM part_users")->fetch_assoc();
+if ((int)$u0['c'] === 0) {
+    $pw = password_hash('password123', PASSWORD_BCRYPT);
+    $seedSecret = totp_new_secret();
+    // alice: 2FA enabled
+    $st = $db->prepare("INSERT INTO part_users (name, username, email, password_hash, twofa_enabled, twofa_secret) VALUES (?,?,?,?,1,?)");
+    $an = 'Alice Carter'; $au = 'alice'; $ae = 'alice@bugbridge.test';
+    $st->bind_param('sssss', $an, $au, $ae, $pw, $seedSecret); $st->execute();
+    $aliceId = $db->insert_id;
+    // mallory: 2FA NOT enabled
+    $st = $db->prepare("INSERT INTO part_users (name, username, email, password_hash, twofa_enabled) VALUES (?,?,?,?,0)");
+    $mn = 'Mallory Reed'; $mu = 'mallory'; $mem = 'mallory@bugbridge.test';
+    $st->bind_param('ssss', $mn, $mu, $mem, $pw); $st->execute();
+
+    // Alice's sensitive report in the 2FA-required Nimbus Cloud program.
+    $nimbus = $db->query("SELECT id FROM part_programs WHERE slug='nimbus-cloud'")->fetch_assoc();
+    if ($nimbus) {
+        $rt = 'Account takeover via password-reset token leak in Nimbus Cloud';
+        $rsev = 'Critical';
+        $rd = "A password-reset request leaks the raw reset token in the JSON response of\nPOST /api/v2/auth/password/reset-request. Any attacker who can trigger a reset\nfor a victim's email can read the token from the response and set a new password,\nfully taking over the account.\n\nThis report is filed under a program that requires two-factor authentication, so\nonly 2FA-protected researchers should ever be able to read these details.";
+        $rp = "1. POST /api/v2/auth/password/reset-request  {\"email\":\"victim@corp.com\"}\n2. Response body contains: {\"status\":\"sent\",\"debug_token\":\"b3f1c2...\"}\n3. POST /api/v2/auth/password/reset  {\"token\":\"b3f1c2...\",\"new_password\":\"Pwned123!\"}\n4. Log in as the victim.";
+        $pid = (int)$nimbus['id'];
+        $st = $db->prepare("INSERT INTO part_reports (program_id, reporter_id, title, severity, details, poc, status) VALUES (?,?,?,?,?,?, 'Triaged')");
+        $st->bind_param('iissss', $pid, $aliceId, $rt, $rsev, $rd, $rp); $st->execute();
+    }
 }
 
 function current_user($db) {
@@ -174,6 +223,20 @@ function report_by_id($db, $id) {
 }
 function my_reports($db, $userId) {
     $st = $db->prepare("SELECT r.*, p.name AS program_name, p.slug AS program_slug FROM part_reports r JOIN part_programs p ON p.id=r.program_id WHERE r.reporter_id=? ORDER BY r.id DESC");
+    $st->bind_param('i', $userId); $st->execute();
+    $out = []; $r = $st->get_result(); while ($row = $r->fetch_assoc()) $out[] = $row; return $out;
+}
+// Reports the user participates in as an ACCEPTED collaborator — on HackerOne this is
+// how a collaborator sees the same program's report and shares its bounty. The 2FA
+// requirement is never re-checked here, so a 2FA-off user ends up participating in a
+// 2FA-required program they could never submit to themselves.
+function my_collaborations($db, $userId) {
+    $st = $db->prepare("SELECT r.*, p.name AS program_name, p.slug AS program_slug, p.requires_2fa, p.min_bounty, p.max_bounty, u.username AS owner_username
+        FROM part_collaborators c
+        JOIN part_reports r ON r.id = c.report_id
+        JOIN part_programs p ON p.id = r.program_id
+        JOIN part_users u ON u.id = r.reporter_id
+        WHERE c.user_id=? AND c.status='accepted' ORDER BY r.id DESC");
     $st->bind_param('i', $userId); $st->execute();
     $out = []; $r = $st->get_result(); while ($row = $r->fetch_assoc()) $out[] = $row; return $out;
 }
@@ -348,7 +411,24 @@ if ($action === 'submit-report') {
                 $st = $db->prepare("INSERT INTO part_reports (program_id, reporter_id, title, severity, details, poc) VALUES (?,?,?,?,?,?)");
                 $st->bind_param('iissss', $program['id'], $myId, $title, $sev, $details, $poc);
                 $st->execute();
-                header('Location: index.php?action=report&id=' . $db->insert_id); exit;
+                $newReportId = $db->insert_id;
+
+                // Add collaborators chosen on the submit form (just like HackerOne).
+                // THE BUG: this never re-checks the program's 2FA requirement, so a
+                // researcher with 2FA off — who could not submit here themselves — can
+                // still be pulled into this 2FA-required report as a bounty-splitting
+                // collaborator.
+                $collabNames = preg_split('/[\s,]+/', strtolower(trim($_POST['collaborators'] ?? '')), -1, PREG_SPLIT_NO_EMPTY);
+                foreach (array_slice($collabNames, 0, 5) as $cu) {
+                    $cu = ltrim($cu, '@');
+                    $target = find_user_by_username($db, $cu);
+                    if ($target && (int)$target['id'] !== $myId) {
+                        $ci = $db->prepare("INSERT IGNORE INTO part_collaborators (report_id, user_id) VALUES (?,?)");
+                        $ci->bind_param('ii', $newReportId, $target['id']); $ci->execute();
+                    }
+                }
+
+                header('Location: index.php?action=report&id=' . $newReportId); exit;
             }
             $submitError = 'Title and vulnerability details are required.';
         }
@@ -368,7 +448,10 @@ if ($action === 'submit-report') {
         </select>
         <label>Vulnerability details</label><textarea name="details" rows="6" required placeholder="Describe the vulnerability, impact, and steps to reproduce..."></textarea>
         <label>Proof of concept (optional)</label><textarea name="poc" rows="4" placeholder="Requests, payloads, screenshots description..."></textarea>
-        <button class="btn btn-primary" type="submit" style="margin-top:1rem;">Submit report</button>
+        <label>Collaborators (optional)</label>
+        <input name="collaborators" placeholder="Invite researchers by username — they split the bounty, e.g. mallory">
+        <div style="font-size:0.78rem;color:#6b6a7d;margin-top:0.35rem;">Collaborators share this report and split its bounty. Separate multiple usernames with spaces or commas.</div>
+        <button class="btn btn-primary" type="submit" style="margin-top:1.25rem;">Submit report</button>
       </form>
     </div>
     </body></html>
@@ -417,6 +500,7 @@ if ($action === 'add-collaborator' && $_SERVER['REQUEST_METHOD'] === 'POST') {
 
 $programs = all_programs($db);
 $myProgramReports = my_reports($db, $myId);
+$myCollaborations = my_collaborations($db, $myId);
 $pendingInvites = my_pending_invites($db, $myId);
 
 // =========================================================================
@@ -431,21 +515,33 @@ function render_auth($mode, $error) {
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@600&display=swap" rel="stylesheet">
 <style>
 *{box-sizing:border-box;}
-body{margin:0;background:#0b1120;color:#e2e8f0;font-family:'Inter',sans-serif;display:flex;align-items:center;justify-content:center;min-height:100vh;}
-.auth{width:400px;max-width:92vw;}
-.logo-row{display:flex;align-items:center;gap:0.6rem;justify-content:center;font-weight:800;font-size:1.35rem;margin-bottom:1.75rem;}
-.logo-row .mark{width:34px;height:34px;border-radius:9px;background:linear-gradient(135deg,#059669,#0891b2);color:#fff;display:flex;align-items:center;justify-content:center;font-size:1rem;font-weight:700;}
-.card{background:#111a2e;border:1px solid #1e293b;border-radius:16px;padding:2rem;}
-.card h1{font-size:1.25rem;margin:0 0 0.35rem;}
-.card p.s{color:#94a3b8;font-size:0.88rem;margin:0 0 1.5rem;}
-label{display:block;font-size:0.8rem;color:#94a3b8;margin:0.9rem 0 0.35rem;font-weight:500;}
-input,textarea,select{width:100%;background:#0b1120;border:1px solid #263349;color:#e2e8f0;border-radius:8px;padding:0.65rem 0.8rem;font-size:0.92rem;font-family:inherit;}
-input:focus,textarea:focus,select:focus{outline:none;border-color:#0891b2;}
-.btn-primary{width:100%;margin-top:1.4rem;background:#0891b2;border:none;color:#fff;padding:0.7rem;border-radius:8px;font-size:0.95rem;font-weight:600;cursor:pointer;}
-.btn-primary:hover{background:#0e7490;}
-.alt{text-align:center;margin-top:1.25rem;font-size:0.86rem;color:#94a3b8;}
-.alt a{color:#22d3ee;text-decoration:none;font-weight:600;}
-.err{background:#450a0a;border:1px solid #7f1d1d;color:#fca5a5;padding:0.7rem 0.9rem;border-radius:8px;font-size:0.85rem;margin-bottom:1rem;}
+body{margin:0;background:#f2f3f9;color:#21183c;font-family:'Inter',sans-serif;display:flex;align-items:center;justify-content:center;min-height:100vh;}
+.auth{width:420px;max-width:92vw;}
+.logo-row{display:flex;align-items:center;gap:0.6rem;justify-content:center;font-weight:800;font-size:1.35rem;margin-bottom:1.75rem;color:#21183c;}
+.logo-row .mark{width:34px;height:34px;border-radius:9px;background:#21183c;color:#fff;display:flex;align-items:center;justify-content:center;font-size:1rem;font-weight:800;}
+.card{background:#fff;border:1px solid #e4e4ef;border-radius:16px;padding:2rem;box-shadow:0 6px 30px rgba(20,16,60,0.06);}
+.card h1{font-size:1.25rem;margin:0 0 0.35rem;color:#21183c;}
+.card p.s{color:#5b5a6e;font-size:0.88rem;margin:0 0 1.5rem;}
+label{display:block;font-size:0.8rem;color:#5b5a6e;margin:0.9rem 0 0.35rem;font-weight:600;}
+input,textarea,select{width:100%;background:#fff;border:1px solid #d3d3e0;color:#21183c;border-radius:8px;padding:0.65rem 0.8rem;font-size:0.92rem;font-family:inherit;}
+input:focus,textarea:focus,select:focus{outline:none;border-color:#4b45e0;}
+.btn-primary{width:100%;margin-top:1.4rem;background:#4b45e0;border:none;color:#fff;padding:0.7rem;border-radius:8px;font-size:0.95rem;font-weight:600;cursor:pointer;}
+.btn-primary:hover{background:#3c37c4;}
+.alt{text-align:center;margin-top:1.25rem;font-size:0.86rem;color:#5b5a6e;}
+.alt a{color:#4b45e0;text-decoration:none;font-weight:600;}
+.err{background:#fdeaea;border:1px solid #f3c0c0;color:#b4232a;padding:0.7rem 0.9rem;border-radius:8px;font-size:0.85rem;margin-bottom:1rem;}
+code{font-family:'JetBrains Mono',monospace;background:#f3f2fe;border:1px solid #d6caf7;border-radius:5px;padding:1px 6px;font-size:0.85em;color:#5b3bd4;}
+.quick-row{display:flex;align-items:center;gap:0.7rem;padding:0.65rem;border:1px solid #e4e4ef;border-radius:10px;margin-top:0.6rem;}
+.quick-row .qav{width:38px;height:38px;border-radius:50%;background:#f0f0f6;flex-shrink:0;}
+.quick-row .qinfo{flex:1;min-width:0;}
+.quick-row .qn{font-size:0.9rem;font-weight:600;display:flex;align-items:center;gap:0.5rem;}
+.quick-row .qs{font-size:0.76rem;color:#8a8a9a;margin-top:0.1rem;}
+.quick-row .btn-mini{background:#4b45e0;border:none;color:#fff;font-size:0.82rem;font-weight:600;padding:0.45rem 0.8rem;border-radius:8px;cursor:pointer;flex-shrink:0;}
+.quick-row .btn-mini:hover{background:#3c37c4;}
+.pill-2fa{font-size:0.62rem;font-weight:700;padding:0.1rem 0.45rem;border-radius:9px;}
+.pill-2fa.on{background:#e7f6ee;color:#1f8f4e;border:1px solid #a7e3c3;}
+.pill-2fa.off{background:#fdeaea;color:#d33;border:1px solid #f3c0c0;}
+.card p.s a{color:#4b45e0;}
 </style></head><body>
 <div class="auth">
   <div class="logo-row"><span class="mark">BB</span> BugBridge</div>
@@ -467,6 +563,29 @@ input:focus,textarea:focus,select:focus{outline:none;border-color:#0891b2;}
       <?php else: ?>New here? <a href="index.php?action=register">Create an account</a><?php endif; ?>
     </div>
   </div>
+
+  <?php if (!$isReg): ?>
+  <div class="card" style="margin-top:1rem;">
+    <div style="font-size:0.8rem;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:0.25rem;">Lab test accounts</div>
+    <div style="font-size:0.8rem;color:#64748b;margin-bottom:0.9rem;">Two ready accounts — one click to sign in. Password for both: <code style="color:#22d3ee;">password123</code></div>
+
+    <form method="POST" action="index.php?action=login" class="quick-row">
+      <input type="hidden" name="email" value="alice@bugbridge.test">
+      <input type="hidden" name="password" value="password123">
+      <img class="qav" src="https://api.dicebear.com/7.x/adventurer/svg?seed=alice&backgroundColor=b6e3f4" alt="">
+      <div class="qinfo"><div class="qn">Alice Carter <span class="pill-2fa on">2FA on</span></div><div class="qs">@alice</div></div>
+      <button class="btn-mini" type="submit">Sign in →</button>
+    </form>
+
+    <form method="POST" action="index.php?action=login" class="quick-row">
+      <input type="hidden" name="email" value="mallory@bugbridge.test">
+      <input type="hidden" name="password" value="password123">
+      <img class="qav" src="https://api.dicebear.com/7.x/adventurer/svg?seed=mallory&backgroundColor=ffd5dc" alt="">
+      <div class="qinfo"><div class="qn">Mallory Reed <span class="pill-2fa off">2FA off</span></div><div class="qs">@mallory</div></div>
+      <button class="btn-mini" type="submit">Sign in →</button>
+    </form>
+  </div>
+  <?php endif; ?>
 </div>
 </body></html>
 <?php
@@ -480,64 +599,103 @@ function render_head($title) {
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
 <style>
 *{box-sizing:border-box;}
-body{margin:0;background:#0b1120;color:#e2e8f0;font-family:'Inter',sans-serif;}
+body{margin:0;background:#f2f3f9;color:#21183c;font-family:'Inter',sans-serif;}
 a{color:inherit;}
-::-webkit-scrollbar{width:8px;}
-::-webkit-scrollbar-thumb{background:#263349;border-radius:4px;}
-.topbar{background:#111a2e;border-bottom:1px solid #1e293b;position:sticky;top:0;z-index:10;}
-.topbar-in{max-width:1080px;margin:0 auto;padding:0.85rem 1.5rem;display:flex;align-items:center;justify-content:space-between;}
-.brand{display:flex;align-items:center;gap:0.55rem;font-weight:800;font-size:1.1rem;text-decoration:none;color:#e2e8f0;}
-.brand .mark{width:28px;height:28px;border-radius:8px;background:linear-gradient(135deg,#059669,#0891b2);color:#fff;display:flex;align-items:center;justify-content:center;font-size:0.8rem;font-weight:700;}
-.nav{display:flex;gap:1.3rem;align-items:center;}
-.nav a{font-size:0.88rem;color:#94a3b8;text-decoration:none;font-weight:500;}
-.nav a.active,.nav a:hover{color:#22d3ee;}
+::-webkit-scrollbar{width:10px;}
+::-webkit-scrollbar-thumb{background:#d4d4e4;border-radius:5px;}
+/* Top navigation (HackerOne-style white bar) */
+.topbar{background:#fff;border-bottom:1px solid #e4e4ef;position:sticky;top:0;z-index:20;}
+.topbar-in{max-width:1180px;margin:0 auto;padding:0.7rem 1.5rem;display:flex;align-items:center;justify-content:space-between;}
+.brand{display:flex;align-items:center;gap:0.55rem;font-weight:800;font-size:1.1rem;text-decoration:none;color:#21183c;}
+.brand .mark{width:30px;height:30px;border-radius:8px;background:#21183c;color:#fff;display:flex;align-items:center;justify-content:center;font-size:0.85rem;font-weight:800;}
+.nav{display:flex;gap:1.4rem;align-items:center;}
+.nav a{font-size:0.9rem;color:#5b5a6e;text-decoration:none;font-weight:500;}
+.nav a.active,.nav a:hover{color:#4b45e0;}
 .nav .invite-link{position:relative;}
-.nav .badge{position:absolute;top:-8px;right:-14px;background:#dc2626;color:#fff;font-size:0.62rem;font-weight:700;border-radius:10px;padding:0.05rem 0.4rem;}
+.nav .badge{position:absolute;top:-8px;right:-14px;background:#e5484d;color:#fff;font-size:0.62rem;font-weight:700;border-radius:10px;padding:0.05rem 0.4rem;}
 .acct{display:flex;align-items:center;gap:0.6rem;}
-.acct .av{width:28px;height:28px;border-radius:50%;color:#fff;display:flex;align-items:center;justify-content:center;font-size:0.78rem;font-weight:700;}
-.twofa-pill{font-size:0.68rem;padding:0.15rem 0.5rem;border-radius:10px;font-weight:600;}
-.twofa-pill.on{background:#052e1a;color:#4ade80;border:1px solid #166534;}
-.twofa-pill.off{background:#3f1d1d;color:#fca5a5;border:1px solid #7f1d1d;}
-.btn{background:#1a2438;border:1px solid #263349;color:#e2e8f0;padding:0.4rem 0.9rem;border-radius:8px;font-size:0.84rem;cursor:pointer;font-weight:500;text-decoration:none;display:inline-flex;align-items:center;gap:0.4rem;}
-.btn:hover{background:#212d47;}
-.btn-primary{background:#0891b2;border:none;color:#fff;}
-.btn-primary:hover{background:#0e7490;}
-.wrap{max-width:1080px;margin:0 auto;padding:2rem 1.5rem;}
-h1{font-size:1.5rem;margin:0 0 1.25rem;}
-.sub{color:#94a3b8;font-size:0.9rem;margin-bottom:1.5rem;}
-.back-link{color:#94a3b8;text-decoration:none;font-size:0.85rem;display:inline-block;margin-bottom:1rem;}
-.back-link:hover{color:#22d3ee;}
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:1.1rem;}
-.pcard{background:#111a2e;border:1px solid #1e293b;border-radius:14px;overflow:hidden;text-decoration:none;color:inherit;display:block;}
-.pcard:hover{border-color:#0891b2;}
-.pcard .thumb{height:80px;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:1.05rem;}
-.pcard .body{padding:1rem 1.1rem;}
-.pcard .dsc{font-size:0.8rem;color:#94a3b8;margin-top:0.3rem;}
-.pcard .meta{display:flex;justify-content:space-between;align-items:center;margin-top:0.9rem;font-size:0.78rem;}
-.pcard .bounty{color:#4ade80;font-weight:600;}
-.badge-2fa{display:inline-block;background:#1e1033;color:#c4b5fd;border:1px solid #4c1d95;font-size:0.75rem;padding:0.25rem 0.65rem;border-radius:8px;margin-bottom:1rem;}
-.notice{background:#052e1a;border:1px solid #166534;color:#86efac;padding:0.9rem 1.1rem;border-radius:10px;font-size:0.85rem;margin-bottom:1.25rem;}
-.warn{background:#3f1d1d;border:1px solid #7f1d1d;color:#fca5a5;padding:0.9rem 1.1rem;border-radius:10px;font-size:0.85rem;margin-bottom:1.25rem;}
-.empty{color:#64748b;font-size:0.9rem;padding:2.5rem 0;text-align:center;}
-label{display:block;font-size:0.82rem;color:#94a3b8;margin:0.9rem 0 0.35rem;font-weight:500;}
-input,textarea,select{width:100%;background:#0b1120;border:1px solid #263349;color:#e2e8f0;border-radius:8px;padding:0.65rem 0.8rem;font-size:0.9rem;font-family:inherit;}
-input:focus,textarea:focus,select:focus{outline:none;border-color:#0891b2;}
-.card{background:#111a2e;border:1px solid #1e293b;border-radius:14px;padding:1.5rem;margin-top:0.5rem;}
-.secret-box{font-family:'JetBrains Mono',monospace;background:#0b1120;border:1px dashed #263349;color:#22d3ee;padding:0.75rem 1rem;border-radius:8px;letter-spacing:2px;margin:0.75rem 0;text-align:center;}
-.qr-box{background:#fff;border-radius:10px;padding:1rem;display:inline-flex;align-items:center;justify-content:center;}
+.acct .av{width:30px;height:30px;border-radius:50%;}
+img.av{object-fit:cover;background:#eef;}
+.twofa-pill{font-size:0.68rem;padding:0.15rem 0.5rem;border-radius:10px;font-weight:700;}
+.twofa-pill.on{background:#e7f6ee;color:#1f8f4e;border:1px solid #a7e3c3;}
+.twofa-pill.off{background:#fdeaea;color:#d33;border:1px solid #f3c0c0;}
+.btn{background:#fff;border:1px solid #d3d3e0;color:#21183c;padding:0.45rem 0.95rem;border-radius:8px;font-size:0.86rem;cursor:pointer;font-weight:600;text-decoration:none;display:inline-flex;align-items:center;gap:0.4rem;}
+.btn:hover{background:#f4f4fa;}
+.btn-primary{background:#4b45e0;border:1px solid #4b45e0;color:#fff;}
+.btn-primary:hover{background:#3c37c4;}
+.wrap{max-width:1180px;margin:0 auto;padding:1.5rem;}
+h1{font-size:1.5rem;margin:0 0 1.25rem;color:#21183c;}
+.sub{color:#5b5a6e;font-size:0.9rem;margin-bottom:1.5rem;}
+.back-link{color:#5b5a6e;text-decoration:none;font-size:0.85rem;display:inline-block;margin-bottom:1rem;}
+.back-link:hover{color:#4b45e0;}
+/* ===== Opportunity Discovery hero + search ===== */
+.hero{background:#3b2fd4;color:#fff;padding:2.5rem 1.5rem 5.5rem;}
+.hero-in{max-width:1180px;margin:0 auto;}
+.hero .eyebrow{font-size:0.82rem;font-weight:600;opacity:0.92;margin-bottom:0.35rem;}
+.hero .htitle{font-size:2.7rem;font-weight:800;letter-spacing:-0.5px;margin:0;}
+.search-card{max-width:1180px;margin:-4rem auto 0;background:#fff;border-radius:14px;box-shadow:0 12px 40px rgba(20,16,60,0.14);padding:1.5rem 1.75rem;position:relative;z-index:5;}
+.search-head{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:1rem;margin-bottom:0.9rem;}
+.search-head .count{font-weight:600;font-size:0.95rem;}
+.filters{display:flex;gap:1.25rem;}
+.filters .f{font-size:0.72rem;color:#8a8a9a;font-weight:700;}
+.filters .f select{display:block;margin-top:0.25rem;background:#fff;border:1px solid #d3d3e0;border-radius:8px;padding:0.5rem 0.7rem;font-size:0.84rem;color:#21183c;min-width:135px;}
+.search-row{display:flex;gap:0.7rem;}
+.search-row .sbox{flex:1;display:flex;align-items:center;gap:0.5rem;border:1px solid #d3d3e0;border-radius:8px;padding:0 0.8rem;}
+.search-row .sbox input{border:none;outline:none;flex:1;padding:0.65rem 0;font-size:0.92rem;background:transparent;}
+.popular{max-width:1180px;margin:1.1rem auto 0;display:flex;align-items:center;gap:0.6rem;flex-wrap:wrap;font-size:0.85rem;color:#5b5a6e;padding:0 1.5rem;}
+.popular .ptag{background:#ececfb;color:#3a34b8;border-radius:16px;padding:0.3rem 0.85rem;font-size:0.82rem;font-weight:500;}
+.section-h{max-width:1180px;margin:2rem auto 1.1rem;padding:0 1.5rem;font-size:1.35rem;font-weight:800;color:#21183c;}
+/* ===== Opportunity cards ===== */
+.opp-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(282px,1fr));gap:1.1rem;}
+.opp-card{background:#fff;border:1px solid #e4e4ef;border-radius:14px;display:flex;flex-direction:column;overflow:hidden;}
+.opp-card .oc-head{display:flex;align-items:center;gap:0.7rem;padding:1rem 1.1rem;border-bottom:1px solid #f0f0f6;}
+.opp-card .oc-logo{width:36px;height:36px;border-radius:8px;object-fit:cover;background:#f0f0f6;flex-shrink:0;}
+.opp-card .oc-name{font-weight:700;font-size:0.98rem;flex:1;min-width:0;}
+.opp-card .oc-star{color:#c3c3d4;font-size:1.1rem;}
+.opp-card .oc-body{padding:1rem 1.1rem;flex:1;display:flex;flex-direction:column;}
+.oc-tag{align-self:flex-start;background:#fdf3d7;color:#8a6d1a;font-size:0.72rem;font-weight:700;padding:0.2rem 0.6rem;border-radius:6px;margin-bottom:0.8rem;}
+.oc-label{font-weight:700;font-size:0.9rem;margin-bottom:0.15rem;}
+.oc-managed{font-size:0.82rem;color:#6b6a7d;margin-bottom:0.8rem;}
+.asset-pills{display:flex;flex-wrap:wrap;gap:0.4rem;margin-bottom:0.9rem;}
+.asset-pill{display:inline-flex;align-items:center;background:#f1f1f8;border-radius:6px;font-size:0.76rem;color:#4a4a5e;overflow:hidden;}
+.asset-pill span{padding:0.15rem 0.5rem;}
+.asset-pill b{background:#e4e4f2;padding:0.15rem 0.45rem;font-weight:700;color:#3a34b8;}
+.oc-gold{display:flex;align-items:center;gap:0.4rem;font-size:0.82rem;color:#b5179e;font-weight:600;margin-bottom:0.5rem;}
+.oc-bounty{color:#1f8f4e;font-weight:800;font-size:1.1rem;margin-bottom:0.7rem;}
+.oc-stats{display:flex;align-items:center;gap:1rem;font-size:0.82rem;color:#6b6a7d;margin-bottom:1rem;margin-top:auto;}
+.oc-stats .dot{color:#1f8f4e;font-size:0.7rem;}
+.oc-cta{display:block;text-align:center;border:1px solid #4b45e0;color:#4b45e0;font-weight:600;border-radius:8px;padding:0.6rem;text-decoration:none;font-size:0.9rem;}
+.oc-cta:hover{background:#f3f2fe;}
+/* ===== shared components (light) ===== */
+.badge-2fa{display:inline-block;background:#efeafe;color:#5b3bd4;border:1px solid #d6caf7;font-size:0.75rem;padding:0.25rem 0.65rem;border-radius:8px;margin-bottom:1rem;}
+.notice{background:#e7f6ee;border:1px solid #a7e3c3;color:#1f7a44;padding:0.9rem 1.1rem;border-radius:10px;font-size:0.85rem;margin-bottom:1.25rem;}
+.warn{background:#fdeaea;border:1px solid #f3c0c0;color:#b4232a;padding:0.9rem 1.1rem;border-radius:10px;font-size:0.85rem;margin-bottom:1.25rem;}
+.empty{color:#8a8a9a;font-size:0.9rem;padding:2.5rem 0;text-align:center;}
+label{display:block;font-size:0.82rem;color:#5b5a6e;margin:0.9rem 0 0.35rem;font-weight:600;}
+input,textarea,select{width:100%;background:#fff;border:1px solid #d3d3e0;color:#21183c;border-radius:8px;padding:0.65rem 0.8rem;font-size:0.9rem;font-family:inherit;}
+input:focus,textarea:focus,select:focus{outline:none;border-color:#4b45e0;}
+.card{background:#fff;border:1px solid #e4e4ef;border-radius:14px;padding:1.5rem;margin-top:0.5rem;}
+.secret-box{font-family:'JetBrains Mono',monospace;background:#f3f2fe;border:1px dashed #c4b5fd;color:#5b3bd4;padding:0.75rem 1rem;border-radius:8px;letter-spacing:2px;margin:0.75rem 0;text-align:center;}
+.qr-box{background:#fff;border:1px solid #e4e4ef;border-radius:10px;padding:1rem;display:inline-flex;}
 .sev-badge{display:inline-block;padding:0.2rem 0.65rem;border-radius:20px;font-size:0.76rem;font-weight:700;color:#fff;}
-.report-row{background:#111a2e;border:1px solid #1e293b;border-radius:12px;padding:1rem 1.25rem;margin-bottom:0.7rem;display:flex;justify-content:space-between;align-items:center;text-decoration:none;color:inherit;}
-.report-row:hover{border-color:#0891b2;}
-.report-row .meta{font-size:0.78rem;color:#94a3b8;margin-top:0.2rem;}
-.collab-row{display:flex;align-items:center;gap:0.7rem;padding:0.6rem 0;border-bottom:1px solid #1e293b;}
-.collab-row .av{width:32px;height:32px;border-radius:50%;color:#fff;display:flex;align-items:center;justify-content:center;font-size:0.78rem;font-weight:700;flex-shrink:0;}
-.status-pill{font-size:0.72rem;padding:0.15rem 0.55rem;border-radius:10px;font-weight:600;margin-left:auto;}
-.status-pill.pending{background:#3f2d0a;color:#fbbf24;border:1px solid #78350f;}
-.status-pill.accepted{background:#052e1a;color:#4ade80;border:1px solid #166534;}
-.invite-card{background:#111a2e;border:1px solid #1e293b;border-radius:12px;padding:1.1rem 1.3rem;margin-bottom:0.8rem;}
+.report-row{background:#fff;border:1px solid #e4e4ef;border-radius:12px;padding:1rem 1.25rem;margin-bottom:0.7rem;display:flex;justify-content:space-between;align-items:center;text-decoration:none;color:inherit;}
+.report-row:hover{border-color:#4b45e0;}
+.report-row .meta{font-size:0.78rem;color:#6b6a7d;margin-top:0.2rem;}
+.collab-row{display:flex;align-items:center;gap:0.7rem;padding:0.6rem 0;border-bottom:1px solid #eee;}
+.collab-row .av{width:32px;height:32px;border-radius:50%;flex-shrink:0;}
+.status-pill{font-size:0.72rem;padding:0.15rem 0.55rem;border-radius:10px;font-weight:700;margin-left:auto;}
+.status-pill.pending{background:#fdf3d7;color:#8a6d1a;border:1px solid #ecdca8;}
+.status-pill.accepted{background:#e7f6ee;color:#1f8f4e;border:1px solid #a7e3c3;}
+.invite-card{background:#fff;border:1px solid #e4e4ef;border-radius:12px;padding:1.1rem 1.3rem;margin-bottom:0.8rem;}
 .invite-card .actions{display:flex;gap:0.5rem;margin-top:0.9rem;}
-.details-block{background:#0b1120;border:1px solid #1e293b;border-radius:10px;padding:1.1rem;font-size:0.9rem;line-height:1.7;white-space:pre-wrap;margin-top:0.5rem;}
-.locked-box{background:#1e1033;border:1px dashed #4c1d95;color:#c4b5fd;border-radius:12px;padding:2rem;text-align:center;font-size:0.9rem;}
+.details-block{background:#faf9fe;border:1px solid #e4e4ef;border-radius:10px;padding:1.1rem;font-size:0.9rem;line-height:1.7;white-space:pre-wrap;margin-top:0.5rem;color:#2b2540;}
+.locked-box{background:#efeafe;border:1px dashed #c4b5fd;color:#5b3bd4;border-radius:12px;padding:2rem;text-align:center;font-size:0.9rem;}
+.objective{background:#eef0ff;border:1px solid #c7ccfb;border-left:4px solid #4b45e0;border-radius:12px;padding:1.1rem 1.3rem;margin-bottom:1.75rem;}
+.objective .ob-title{font-weight:800;font-size:0.95rem;color:#3a34b8;margin-bottom:0.4rem;}
+.objective .ob-body{font-size:0.86rem;color:#3b3a52;line-height:1.6;}
+.objective .ob-steps{margin-top:0.6rem;font-size:0.82rem;color:#5b5a6e;line-height:1.7;}
+.objective a{color:#4b45e0;text-decoration:none;font-weight:600;}
+.objective code{font-family:'JetBrains Mono',monospace;background:#fff;border:1px solid #d3d3e0;border-radius:5px;padding:1px 6px;color:#5b3bd4;font-size:0.85em;}
 </style></head><body>
 <?php
 }
@@ -554,7 +712,7 @@ function render_topbar($me) {
   </div>
   <div class="acct">
     <span class="twofa-pill <?php echo $me['twofa_enabled']?'on':'off'; ?>"><?php echo $me['twofa_enabled'] ? '2FA on' : '2FA off'; ?></span>
-    <span class="av" style="background:<?php echo avatar_color($me['username']); ?>;"><?php echo esc(avatar_letter($me['name'])); ?></span>
+    <img class="av" src="<?php echo esc(avatar_img($me['username'])); ?>" alt="">
     <span style="font-size:0.85rem;">@<?php echo esc($me['username']); ?></span>
     <a href="index.php?action=logout" class="btn">Sign out</a>
   </div>
@@ -601,8 +759,10 @@ if ($action === 'my-reports') {
     ?>
     <div class="wrap" style="max-width:720px;">
       <h1>My reports</h1>
+
+      <h2 style="font-size:1rem;margin:0.25rem 0 0.75rem;">Reports you submitted</h2>
       <?php if (empty($myProgramReports)): ?>
-        <div class="empty">You haven't submitted any reports yet. <a href="index.php?action=programs" style="color:#22d3ee;">Browse programs.</a></div>
+        <div class="empty" style="padding:1.5rem 0;">You haven't submitted any reports yet. <a href="index.php?action=programs" style="color:#4b45e0;">Browse programs.</a></div>
       <?php else: foreach ($myProgramReports as $r): ?>
       <a class="report-row" href="index.php?action=report&id=<?php echo (int)$r['id']; ?>">
         <div>
@@ -610,6 +770,18 @@ if ($action === 'my-reports') {
           <div class="meta"><?php echo esc($r['program_name']); ?> · <?php echo esc($r['status']); ?></div>
         </div>
         <span class="sev-badge" style="background:<?php echo sev_color($r['severity']); ?>;"><?php echo esc($r['severity']); ?></span>
+      </a>
+      <?php endforeach; endif; ?>
+
+      <?php if (!empty($myCollaborations)): ?>
+      <h2 style="font-size:1rem;margin:2rem 0 0.75rem;">Reports you're collaborating on <span style="font-weight:500;color:#6b6a7d;font-size:0.82rem;">· bounty split with the reporter</span></h2>
+      <?php foreach ($myCollaborations as $r): ?>
+      <a class="report-row" href="index.php?action=report&id=<?php echo (int)$r['id']; ?>">
+        <div>
+          <div style="font-weight:600;"><?php echo esc($r['title']); ?></div>
+          <div class="meta"><?php echo esc($r['program_name']); ?> <?php echo $r['requires_2fa'] ? '🔒' : ''; ?> · by @<?php echo esc($r['owner_username']); ?> · <?php echo fmt_bounty_amt($r['min_bounty']); ?>–<?php echo fmt_bounty_amt($r['max_bounty']); ?> bounty</div>
+        </div>
+        <span class="status-pill accepted" style="margin-left:0;">Collaborator</span>
       </a>
       <?php endforeach; endif; ?>
     </div>
@@ -627,6 +799,8 @@ if ($action === 'report') {
     $isOwner = ((int)$report['reporter_id'] === $myId);
     $allowed = can_view_report($db, $myId, $report);
     $collabs = report_collaborators($db, $id);
+    $acceptedCollabs = array_filter($collabs, fn($c) => $c['status'] === 'accepted');
+    $splitWays = 1 + count($acceptedCollabs); // reporter + accepted collaborators
     ?>
     <div class="wrap" style="max-width:720px;">
       <a href="index.php?action=my-reports" class="back-link">← My Reports</a>
@@ -636,6 +810,11 @@ if ($action === 'report') {
           <div class="sub" style="margin-top:0;">Program: <strong><?php echo esc($program['name']); ?></strong> <?php echo $program['requires_2fa'] ? '<span class="badge-2fa">🔒 2FA required to submit</span>' : ''; ?></div>
         </div>
         <span class="sev-badge" style="background:<?php echo sev_color($report['severity']); ?>;"><?php echo esc($report['severity']); ?></span>
+      </div>
+
+      <div style="background:#e7f6ee;border:1px solid #a7e3c3;color:#1f7a44;border-radius:10px;padding:0.7rem 1rem;font-size:0.85rem;margin-top:1rem;">
+        💰 Bounty <strong><?php echo fmt_bounty_amt($program['min_bounty']); ?> – <?php echo fmt_bounty_amt($program['max_bounty']); ?></strong>
+        <?php if ($splitWays > 1): ?>· split <?php echo $splitWays; ?> ways (reporter + <?php echo count($acceptedCollabs); ?> collaborator<?php echo count($acceptedCollabs) === 1 ? '' : 's'; ?>)<?php endif; ?>
       </div>
 
       <?php if ($allowed): ?>
@@ -649,22 +828,23 @@ if ($action === 'report') {
         <div class="locked-box" style="margin-top:1.5rem;">🔒 You don't have access to this report's details.</div>
       <?php endif; ?>
 
-      <h2 style="font-size:1rem;margin-top:1.75rem;">Collaborators</h2>
+      <h2 style="font-size:1rem;margin-top:1.75rem;">Collaborators <span style="font-weight:500;color:#6b6a7d;font-size:0.82rem;">· they share this report and split its bounty</span></h2>
       <?php if (empty($collabs)): ?>
-        <div style="color:#64748b;font-size:0.85rem;">No collaborators yet.</div>
+        <div style="color:#6b6a7d;font-size:0.85rem;">No collaborators yet.</div>
       <?php else: foreach ($collabs as $c): ?>
         <div class="collab-row">
-          <span class="av" style="background:<?php echo avatar_color($c['username']); ?>;"><?php echo esc(avatar_letter($c['name'])); ?></span>
+          <img class="av" src="<?php echo esc(avatar_img($c['username'])); ?>" alt="">
           <div>@<?php echo esc($c['username']); ?> <span style="color:#64748b;font-size:0.78rem;"><?php echo $c['twofa_enabled'] ? '(2FA on)' : '(2FA off)'; ?></span></div>
           <span class="status-pill <?php echo esc($c['status']); ?>"><?php echo esc(ucfirst($c['status'])); ?></span>
         </div>
       <?php endforeach; endif; ?>
 
       <?php if ($isOwner): ?>
-      <form method="POST" action="index.php?action=add-collaborator" style="margin-top:1.25rem;display:flex;gap:0.5rem;">
+      <div style="font-size:0.82rem;color:#6b6a7d;margin-top:1.25rem;margin-bottom:0.4rem;">Add a collaborator to split this report's bounty — they'll be able to participate in it inside <strong><?php echo esc($program['name']); ?></strong>.</div>
+      <form method="POST" action="index.php?action=add-collaborator" style="display:flex;gap:0.5rem;">
         <input type="hidden" name="report_id" value="<?php echo (int)$id; ?>">
-        <input name="username" placeholder="Invite by username" required>
-        <button class="btn btn-primary" type="submit">Invite collaborator</button>
+        <input name="username" placeholder="Invite a researcher by username">
+        <button class="btn btn-primary" type="submit">Add collaborator</button>
       </form>
       <?php endif; ?>
     </div>
@@ -696,22 +876,70 @@ if ($action === 'program') {
     exit;
 }
 
-// ── Default: Programs list ───────────────────────────────────────────────────────
-render_head('Programs'); render_topbar($me);
+// ── Default: Opportunity Discovery (HackerOne-style programs list) ───────────────
+// Display-only metadata so each program renders as a HackerOne opportunity card.
+$oppMeta = [
+    'nimbus-cloud'     => ['tag'=>'Updated','managed'=>'Triaged by HackerOne, Retesting','gold'=>true, 'assets'=>['Domain'=>18,'Api'=>4,'AndroidPlayStore'=>2,'IosAppStore'=>2],'reports'=>'1.4k','people'=>420,'resp'=>96],
+    'ledgerly'         => ['tag'=>'Updated','managed'=>'Triaged by HackerOne, Collaboration','gold'=>true, 'assets'=>['Domain'=>12,'SmartContract'=>2,'OtherAsset'=>3],'reports'=>'880','people'=>210,'resp'=>92],
+    'kettlebird'       => ['tag'=>'','managed'=>'Collaboration','gold'=>false,'assets'=>['Domain'=>9,'Wildcard'=>3,'AndroidPlayStore'=>2],'reports'=>'3.2k','people'=>610,'resp'=>88],
+    'northwind-retail' => ['tag'=>'Updated','managed'=>'Retesting, Collaboration','gold'=>true, 'assets'=>['Domain'=>14,'Api'=>3,'OtherAsset'=>5],'reports'=>'1.1k','people'=>330,'resp'=>90],
+    'pinboard-notes'   => ['tag'=>'','managed'=>'Collaboration','gold'=>false,'assets'=>['Domain'=>6,'IosAppStore'=>1],'reports'=>'540','people'=>150,'resp'=>84],
+];
+
+render_head('Opportunity Discovery'); render_topbar($me);
 ?>
-<div class="wrap">
-  <h1>Programs</h1>
-  <div class="sub">Pick a program and submit a vulnerability report.</div>
-  <div class="grid">
-    <?php foreach ($programs as $p): ?>
-    <a class="pcard" href="index.php?action=program&slug=<?php echo esc($p['slug']); ?>">
-      <div class="thumb" style="background:<?php echo esc($p['grad']); ?>;"><?php echo esc($p['name']); ?></div>
-      <div class="body">
-        <div style="font-weight:700;"><?php echo esc($p['name']); ?><?php echo $p['requires_2fa'] ? ' 🔒' : ''; ?></div>
-        <div class="dsc"><?php echo esc($p['description']); ?></div>
-        <div class="meta"><span class="bounty">$<?php echo number_format($p['min_bounty']); ?>–$<?php echo number_format($p['max_bounty']); ?></span><span style="color:#64748b;"><?php echo $p['requires_2fa'] ? '2FA required' : 'Open'; ?></span></div>
+<div class="hero"><div class="hero-in">
+  <div class="eyebrow">Find the best opportunities for your skills and wallet</div>
+  <h2 class="htitle">Opportunity Discovery</h2>
+</div></div>
+
+<div class="search-card">
+  <div class="search-head">
+    <div class="count">We have <?php echo count($programs); ?> opportunities for you</div>
+    <div class="filters">
+      <div class="f">Program type<select><option>All programs</option></select></div>
+      <div class="f">Asset type<select><option>All assets</option></select></div>
+      <div class="f">Industry<select><option>All industries</option></select></div>
+    </div>
+  </div>
+  <div class="search-row">
+    <div class="sbox">🔍 <input placeholder="Search for programs"></div>
+    <button class="btn btn-primary" style="padding:0.65rem 1.5rem;">Search</button>
+  </div>
+</div>
+
+<div class="popular"><strong style="color:#21183c;">Popular now</strong>
+  <span class="ptag">Bounty</span><span class="ptag">Domain</span><span class="ptag">Internet &amp; Online Services</span><span class="ptag">2FA bypass</span>
+</div>
+
+<div class="section-h" style="margin-top:2.5rem;">Campaigns &amp; top-paying opportunities</div>
+<div class="wrap" style="padding-top:0;">
+  <div class="opp-grid">
+    <?php foreach ($programs as $p): $m = $oppMeta[$p['slug']] ?? ['tag'=>'','managed'=>'Collaboration','gold'=>false,'assets'=>['Domain'=>5],'reports'=>'300','people'=>100,'resp'=>85]; ?>
+    <div class="opp-card">
+      <div class="oc-head">
+        <img class="oc-logo" src="<?php echo esc(prog_square_logo($p['name'])); ?>" alt="">
+        <div class="oc-name"><?php echo esc($p['name']); ?></div>
+        <div class="oc-star">&#9734;</div>
       </div>
-    </a>
+      <div class="oc-body">
+        <?php if ($m['tag']): ?><div class="oc-tag"><?php echo esc($m['tag']); ?></div><?php endif; ?>
+        <div class="oc-label">Bounty</div>
+        <div class="oc-managed"><?php echo esc($m['managed']); ?></div>
+        <?php if ($p['requires_2fa']): ?><div class="badge-2fa" style="margin-bottom:0.8rem;">🔒 2FA required to submit</div><?php endif; ?>
+        <div class="asset-pills">
+          <?php foreach ($m['assets'] as $al => $ac): ?><span class="asset-pill"><span><?php echo esc($al); ?></span><b><?php echo (int)$ac; ?></b></span><?php endforeach; ?>
+        </div>
+        <?php if ($m['gold']): ?><div class="oc-gold">🏅 Gold Standard</div><?php endif; ?>
+        <div class="oc-bounty"><?php echo fmt_bounty_amt($p['min_bounty']); ?> – <?php echo fmt_bounty_amt($p['max_bounty']); ?></div>
+        <div class="oc-stats">
+          <span>🐛 <?php echo esc($m['reports']); ?></span>
+          <span>👥 <?php echo (int)$m['people']; ?></span>
+          <span><span class="dot">●</span> <?php echo (int)$m['resp']; ?>%</span>
+        </div>
+        <a class="oc-cta" href="index.php?action=program&slug=<?php echo esc($p['slug']); ?>">See details</a>
+      </div>
+    </div>
     <?php endforeach; ?>
   </div>
 </div>

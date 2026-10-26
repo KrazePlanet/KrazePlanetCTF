@@ -64,6 +64,24 @@ $db->query("CREATE TABLE IF NOT EXISTS lovable_stars (
     PRIMARY KEY (user_id, project_id)
 )") or die('init error');
 
+// ── Two ready accounts from the report's "Steps to Reproduce" ────────────────────
+// Both are FREE plan — the paywall-bypass bug is about a free user keeping Pro-only
+// roles. Shown as one-click options in the login modal. Password for both: password123
+$LOVABLE_SEED_ACCOUNTS = [
+    ['Ziad (User)',     'ziadmomen188@gmail.com',       'free'],
+    ['Ziad (Attacker)', 'ziadmomen@wearehackerone.com', 'free'],
+];
+foreach ($LOVABLE_SEED_ACCOUNTS as $sa) {
+    $chk = $db->prepare("SELECT id FROM lovable_users WHERE email=?");
+    $chk->bind_param('s', $sa[1]); $chk->execute();
+    if (!$chk->get_result()->fetch_row()) {
+        $h = password_hash('password123', PASSWORD_BCRYPT);
+        $ins = $db->prepare("INSERT INTO lovable_users (name, email, password_hash, plan) VALUES (?,?,?,?)");
+        $ins->bind_param('ssss', $sa[0], $sa[1], $h, $sa[2]);
+        $ins->execute();
+    }
+}
+
 function esc($s) { return htmlspecialchars((string)$s, ENT_QUOTES, 'UTF-8'); }
 function base_url() {
     $scheme = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
@@ -196,17 +214,22 @@ if ($action === 'login') {
             $dest = $_GET['next'] ?? 'index.php';
             header('Location: ' . $dest); exit;
         }
-        $authError = 'Invalid email or password.';
+        // Failed login reopens the Home login modal with an error.
+        header('Location: index.php?login=1&err=1'); exit;
     }
-    render_auth('login', $authError);
-    exit;
+    // A GET to ?action=login just opens the Home page with the login modal.
+    header('Location: index.php?login=1'); exit;
 }
 
-// ── Everything below requires login ──────────────────────────────────────────────
-if (!$me) {
-    $next = urlencode($_SERVER['REQUEST_URI'] ?? 'index.php');
-    header('Location: index.php?action=login&next=' . $next);
-    exit;
+// ── The Home page is public (like Lovable's own landing). Guests can browse it and
+//    open the login modal; anything that needs a real account still requires login. ──
+$guest = !$me;
+if ($guest && $action !== 'home') {
+    header('Location: index.php?login=1'); exit;
+}
+if ($guest) {
+    // display-only placeholder so the Home chrome renders for a logged-out visitor
+    $me = ['id' => 0, 'name' => 'Guest', 'email' => '', 'plan' => 'free'];
 }
 $myId = (int)$me['id'];
 $plan = $me['plan'];
@@ -973,7 +996,13 @@ $joined = $_SESSION['joined_notice'] ?? null; unset($_SESSION['joined_notice']);
 $joinErr = $_SESSION['join_error'] ?? null; unset($_SESSION['join_error']);
 ?>
 <div class="main">
-  <div class="topbar"><div><strong>Home</strong></div><?php render_acct($me); ?></div>
+  <div class="topbar"><div><strong>Home</strong></div>
+    <?php if ($guest): ?>
+      <button class="btn-login" type="button" onclick="openLovableLogin()">Login</button>
+    <?php else: ?>
+      <?php render_acct($me); ?>
+    <?php endif; ?>
+  </div>
   <div class="wrap">
     <?php if ($joined): ?><div class="notice">You joined <strong><?php echo esc($joined['project']); ?></strong> as <strong><?php echo esc(ucfirst($joined['role'])); ?></strong>.</div><?php endif; ?>
     <?php if ($joinErr): ?><div class="warn"><?php echo esc($joinErr); ?></div><?php endif; ?>
@@ -996,6 +1025,82 @@ $joinErr = $_SESSION['join_error'] ?? null; unset($_SESSION['join_error']);
     </div>
   </div>
 </div>
+
+<?php if ($guest): ?>
+<style>
+.btn-login{background:linear-gradient(135deg,#7c3aed,#a855f7);border:none;color:#fff;font-size:0.88rem;font-weight:600;padding:0.5rem 1.1rem;border-radius:9px;cursor:pointer;}
+.btn-login:hover{filter:brightness(1.08);}
+.lm-backdrop{position:fixed;inset:0;background:rgba(5,5,8,0.7);display:none;align-items:center;justify-content:center;z-index:1000;backdrop-filter:blur(2px);}
+.lm-backdrop.open{display:flex;}
+.lm-wrap{max-width:92vw;}
+.lm-brand{display:flex;align-items:center;gap:0.6rem;justify-content:center;font-weight:800;font-size:1.3rem;margin-bottom:1.25rem;color:#fff;}
+.lm-brand .logo{width:30px;height:30px;border-radius:9px;background:linear-gradient(135deg,#f97316,#ec4899,#8b5cf6);}
+.lm-card{position:relative;background:#141418;border:1px solid #26262c;border-radius:16px;padding:2rem;}
+.lm-close{position:absolute;top:0.9rem;right:1rem;background:none;border:none;color:#8a8a93;font-size:1.4rem;line-height:1;cursor:pointer;}
+.lm-close:hover{color:#fff;}
+.lm-card h2{font-size:1.3rem;margin:0 0 0.35rem;color:#fff;}
+.lm-card .lm-sub{color:#8a8a93;font-size:0.88rem;margin:0 0 1.4rem;}
+.lm-card label{display:block;font-size:0.8rem;color:#a1a1aa;margin:0.9rem 0 0.35rem;}
+.lm-card input{width:100%;background:#0d0d10;border:1px solid #2a2a30;color:#e5e5ea;border-radius:9px;padding:0.7rem 0.8rem;font-size:0.92rem;}
+.lm-card input:focus{outline:none;border-color:#7c3aed;}
+.lm-btn{width:100%;margin-top:1.4rem;background:linear-gradient(135deg,#7c3aed,#a855f7);border:none;color:#fff;padding:0.75rem;border-radius:9px;font-size:0.95rem;font-weight:600;cursor:pointer;}
+.lm-btn:hover{filter:brightness(1.08);}
+.lm-alt{text-align:center;margin-top:1.25rem;font-size:0.86rem;color:#8a8a93;}
+.lm-alt a{color:#a78bfa;text-decoration:none;}
+.lm-err{background:#2e0505;border:1px solid #dc262655;color:#fca5a5;padding:0.7rem 0.9rem;border-radius:9px;font-size:0.85rem;margin-bottom:1rem;}
+.lm-accounts{margin-top:1.25rem;border-top:1px solid #26262c;padding-top:1rem;}
+.lm-acc-title{font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:0.4px;color:#8a8a93;margin-bottom:0.6rem;}
+.lm-acc-row{display:flex;align-items:center;gap:0.6rem;border:1px solid #26262c;border-radius:9px;padding:0.5rem 0.6rem;margin-top:0.5rem;}
+.lm-acc-badge{font-size:0.68rem;font-weight:700;padding:0.15rem 0.5rem;border-radius:7px;flex-shrink:0;}
+.lm-acc-badge.user{background:#0b2e22;color:#4ade80;border:1px solid #166534;}
+.lm-acc-badge.attacker{background:#2e0b0b;color:#fca5a5;border:1px solid #7f1d1d;}
+.lm-acc-email{flex:1;min-width:0;font-size:0.76rem;color:#c7c7cf;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.lm-acc-btn{flex-shrink:0;background:#26262c;border:1px solid #35353d;color:#e5e5ea;font-size:0.78rem;font-weight:600;padding:0.4rem 0.7rem;border-radius:7px;cursor:pointer;}
+.lm-acc-btn:hover{background:#30303a;}
+</style>
+<div class="lm-backdrop" id="lovableLoginModal">
+  <div class="lm-wrap">
+    <div class="lm-brand"><span class="logo"></span> Lovable</div>
+    <div class="lm-card">
+      <button class="lm-close" type="button" onclick="closeLovableLogin()" aria-label="Close">&times;</button>
+      <h2>Welcome back</h2>
+      <p class="lm-sub">Log in to continue building.</p>
+      <?php if (!empty($_GET['err'])): ?><div class="lm-err">Invalid email or password.</div><?php endif; ?>
+      <form method="POST" action="index.php?action=login">
+        <label>Email</label><input name="email" type="email" placeholder="you@example.com" required>
+        <label>Password</label><input name="password" type="password" placeholder="••••••••" required>
+        <button class="lm-btn" type="submit">Log in</button>
+      </form>
+      <div class="lm-alt">New to Lovable? <a href="index.php?action=register">Create an account</a></div>
+
+      <div class="lm-accounts">
+        <div class="lm-acc-title">Test accounts · password: password123</div>
+        <form method="POST" action="index.php?action=login" class="lm-acc-row">
+          <input type="hidden" name="email" value="ziadmomen188@gmail.com">
+          <input type="hidden" name="password" value="password123">
+          <span class="lm-acc-badge user">User</span>
+          <span class="lm-acc-email">ziadmomen188@gmail.com</span>
+          <button class="lm-acc-btn" type="submit">Log in &rarr;</button>
+        </form>
+        <form method="POST" action="index.php?action=login" class="lm-acc-row">
+          <input type="hidden" name="email" value="ziadmomen@wearehackerone.com">
+          <input type="hidden" name="password" value="password123">
+          <span class="lm-acc-badge attacker">Attacker</span>
+          <span class="lm-acc-email">ziadmomen@wearehackerone.com</span>
+          <button class="lm-acc-btn" type="submit">Log in &rarr;</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+function openLovableLogin(){ document.getElementById('lovableLoginModal').classList.add('open'); }
+function closeLovableLogin(){ document.getElementById('lovableLoginModal').classList.remove('open'); }
+document.getElementById('lovableLoginModal').addEventListener('click', function(e){ if (e.target === this) closeLovableLogin(); });
+document.addEventListener('keydown', function(e){ if (e.key === 'Escape') closeLovableLogin(); });
+<?php if (!empty($_GET['login']) || !empty($_GET['err'])): ?>openLovableLogin();<?php endif; ?>
+</script>
+<?php endif; ?>
 </body></html>
 <?php
 // End
