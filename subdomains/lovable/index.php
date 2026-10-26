@@ -3,11 +3,13 @@
 // A multi-account replica of Lovable used for hands-on web-security practice.
 // Students register their own accounts, build projects, and share them.
 //
-// The intended flaw (mirrors HackerOne #3591764 / Lovable VDP): the "View access"
-// (read-only) invite role — and the "Viewer"/"Admin" member roles — are Pro-only,
-// but the gate exists ONLY on the client (greyed-out options + a non-functional
-// checkout). The server endpoints that persist those roles never verify the
-// account's plan, so a free-plan user who replays the request keeps the Pro role.
+// The intended flaw (mirrors HackerOne #3591764 / Lovable VDP): a project's share
+// invite link can be set to "View access" (read-only), which is a Pro-only feature.
+// The gate exists ONLY on the client — the dropdown option is greyed out and the
+// checkout can't complete on a free plan. But the server endpoint that persists the
+// link's access level (POST /projects/{id}/magic-codes {"access_level":"read"}) never
+// verifies the account's plan, so a free-plan user who replays the request keeps the
+// Pro "View access" link. Anyone opening that link then joins the project as a viewer.
 
 session_start();
 
@@ -62,6 +64,17 @@ $db->query("CREATE TABLE IF NOT EXISTS lovable_stars (
     user_id INT NOT NULL,
     project_id INT NOT NULL,
     PRIMARY KEY (user_id, project_id)
+)") or die('init error');
+
+// Pending email invites — a person added by email who doesn't have an account yet.
+// The invite is turned into a real membership automatically when they sign up.
+$db->query("CREATE TABLE IF NOT EXISTS lovable_invites (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    project_id INT NOT NULL,
+    email VARCHAR(150) NOT NULL,
+    role ENUM('admin','editor','viewer') NOT NULL DEFAULT 'viewer',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE KEY uniq_proj_email (project_id, email)
 )") or die('init error');
 
 // ── Two ready accounts from the report's "Steps to Reproduce" ────────────────────
@@ -137,6 +150,33 @@ function project_members($db, $projectId) {
     while ($row = $res->fetch_assoc()) $out[] = $row;
     return $out;
 }
+function pending_invites($db, $projectId) {
+    // Emails invited to the project that haven't created an account yet.
+    $st = $db->prepare("SELECT email, role FROM lovable_invites WHERE project_id=? ORDER BY created_at ASC");
+    $st->bind_param('i', $projectId); $st->execute();
+    $out = []; $res = $st->get_result();
+    while ($row = $res->fetch_assoc()) $out[] = $row;
+    return $out;
+}
+function apply_pending_invites($db, $userId, $email) {
+    // Convert any pending email invites for this address into real memberships,
+    // so an invited person has access the moment they sign in — no link needed.
+    if (!$userId || $email === '') return;
+    $st = $db->prepare("SELECT project_id, role FROM lovable_invites WHERE email=?");
+    $st->bind_param('s', $email); $st->execute();
+    $rows = []; $res = $st->get_result();
+    while ($r = $res->fetch_assoc()) $rows[] = $r;
+    foreach ($rows as $r) {
+        $pid = (int)$r['project_id']; $role = $r['role'];
+        $ins = $db->prepare("INSERT INTO lovable_members (project_id, user_id, role) VALUES (?,?,?)
+            ON DUPLICATE KEY UPDATE role=IF(role='owner','owner',VALUES(role))");
+        $ins->bind_param('iis', $pid, $userId, $role); $ins->execute();
+    }
+    if ($rows) {
+        $del = $db->prepare("DELETE FROM lovable_invites WHERE email=?");
+        $del->bind_param('s', $email); $del->execute();
+    }
+}
 function is_starred($db, $userId, $projectId) {
     $st = $db->prepare("SELECT 1 FROM lovable_stars WHERE user_id=? AND project_id=?");
     $st->bind_param('ii', $userId, $projectId);
@@ -159,17 +199,23 @@ function avatar_letter($name) {
     return strtoupper(mb_substr(trim($name), 0, 1) ?: 'U');
 }
 
+// Real template cover photos (Unsplash). If a browser is offline the <img> is
+// dropped via onerror and the gradient underneath shows instead.
+$IMG = fn($id) => "https://images.unsplash.com/{$id}?w=640&q=70&auto=format&fit=crop";
+$MAG_PHOTO = $IMG('photo-1504384308090-c894fdcc538d'); // editorial / magazine hero
 $TEMPLATES = [
-    ['name' => 'Lovable slides', 'desc' => 'Code-powered presentation builder', 'grad' => 'linear-gradient(135deg,#ec4899,#f97316)'],
-    ['name' => 'Ecommerce Store Website Template', 'desc' => 'Premium design for webstore', 'grad' => 'linear-gradient(135deg,#0ea5e9,#6366f1)'],
-    ['name' => 'Discover events near you', 'desc' => 'Browse popular events by category', 'grad' => 'linear-gradient(135deg,#22c55e,#0ea5e9)'],
-    ['name' => 'Article Title — Hero Content Showcase', 'desc' => 'Nexus blog / magazine template', 'grad' => 'linear-gradient(135deg,#64748b,#1e293b)'],
-    ['name' => 'AI Film Production Without Limits', 'desc' => 'Cinematic AI showcase reel', 'grad' => 'linear-gradient(135deg,#111827,#7c3aed)'],
-    ['name' => 'SaaS Landing Page', 'desc' => 'Convert visitors into signups', 'grad' => 'linear-gradient(135deg,#f43f5e,#8b5cf6)'],
+    ['name' => 'Lovable slides', 'desc' => 'Code-powered presentation builder', 'grad' => 'linear-gradient(135deg,#ec4899,#f97316)', 'img' => $IMG('photo-1540575467063-178a50c2df87')],
+    ['name' => 'Ecommerce Store Website Template', 'desc' => 'Premium design for webstore', 'grad' => 'linear-gradient(135deg,#0ea5e9,#6366f1)', 'img' => $IMG('photo-1556742049-0cfed4f6a45d')],
+    ['name' => 'Discover events near you', 'desc' => 'Browse popular events by category', 'grad' => 'linear-gradient(135deg,#22c55e,#0ea5e9)', 'img' => $IMG('photo-1492684223066-81342ee5ff30')],
+    ['name' => 'Article Title — Hero Content Showcase', 'desc' => 'Nexus blog / magazine template', 'grad' => 'linear-gradient(135deg,#64748b,#1e293b)', 'img' => $MAG_PHOTO],
+    ['name' => 'AI Film Production Without Limits', 'desc' => 'Cinematic AI showcase reel', 'grad' => 'linear-gradient(135deg,#111827,#7c3aed)', 'img' => $IMG('photo-1485846234645-a62644f84728')],
+    ['name' => 'SaaS Landing Page', 'desc' => 'Convert visitors into signups', 'grad' => 'linear-gradient(135deg,#f43f5e,#8b5cf6)', 'img' => $IMG('photo-1551288049-bebda4e38f71')],
 ];
 
 $action = $_GET['action'] ?? 'home';
 $me = current_user($db);
+// Any pending email invites for this signed-in user become memberships right away.
+if ($me) apply_pending_invites($db, (int)$me['id'], strtolower($me['email']));
 
 // ── Auth: logout ─────────────────────────────────────────────────────────────────
 if ($action === 'logout') { session_destroy(); header('Location: index.php?action=login'); exit; }
@@ -312,6 +358,20 @@ if ($action === 'set-role') {
     echo json_encode(['ok'=>true, 'role'=>$role]); exit;
 }
 
+// ── Cancel a pending email invite ────────────────────────────────────────────────
+if ($action === 'cancel-invite' && $_SERVER['REQUEST_METHOD'] === 'POST') {
+    header('Content-Type: application/json');
+    $projectId = (int)($_GET['project_id'] ?? 0);
+    $email = strtolower(trim($_GET['email'] ?? ''));
+    $proj = get_project_by_id($db, $projectId);
+    if ($proj && ((int)$proj['owner_id'] === $myId || role_in_project($db,$myId,$projectId)==='admin')) {
+        $st = $db->prepare("DELETE FROM lovable_invites WHERE project_id=? AND email=?");
+        $st->bind_param('is', $projectId, $email); $st->execute();
+        echo json_encode(['ok'=>true]); exit;
+    }
+    http_response_code(403); echo json_encode(['error'=>'forbidden']); exit;
+}
+
 // ── Join a project via invite link ───────────────────────────────────────────────
 if ($action === 'join') {
     $code = $_GET['code'] ?? '';
@@ -342,14 +402,28 @@ if ($action === 'add-member' && $_SERVER['REQUEST_METHOD'] === 'POST') {
     $projectId = (int)($_POST['project_id'] ?? 0);
     $email = strtolower(trim($_POST['email'] ?? ''));
     $proj = get_project_by_id($db, $projectId);
-    if ($proj && ((int)$proj['owner_id'] === $myId || role_in_project($db,$myId,$projectId)==='admin')) {
+    // Access follows the current Invite link option:
+    //   View access (read) → viewer,  Edit access (write) → editor.
+    $mcCur = magic_code($db, $projectId);
+    $role = ($mcCur && $mcCur['access_level'] === 'read') ? 'viewer' : 'editor';
+    if ($proj && filter_var($email, FILTER_VALIDATE_EMAIL)
+        && ((int)$proj['owner_id'] === $myId || role_in_project($db,$myId,$projectId)==='admin')) {
         $st = $db->prepare("SELECT id FROM lovable_users WHERE email=?");
         $st->bind_param('s', $email); $st->execute();
         $u = $st->get_result()->fetch_assoc();
         if ($u && (int)$u['id'] !== $myId) {
-            $st = $db->prepare("INSERT INTO lovable_members (project_id, user_id, role) VALUES (?,?, 'editor')
-                ON DUPLICATE KEY UPDATE role=role");
-            $st->bind_param('ii', $projectId, $u['id']); $st->execute();
+            // Existing account → grant access NOW. They see the project immediately
+            // (in "Shared with me") with this role — no need to open the invite link.
+            $st = $db->prepare("INSERT INTO lovable_members (project_id, user_id, role) VALUES (?,?,?)
+                ON DUPLICATE KEY UPDATE role=IF(role='owner','owner',VALUES(role))");
+            $st->bind_param('iis', $projectId, $u['id'], $role); $st->execute();
+            $_SESSION['share_notice'] = ucfirst($role) . " access granted to {$email}.";
+        } elseif (!$u) {
+            // No account yet → remember the invite; auto-applied when they sign up.
+            $st = $db->prepare("INSERT INTO lovable_invites (project_id, email, role) VALUES (?,?,?)
+                ON DUPLICATE KEY UPDATE role=VALUES(role)");
+            $st->bind_param('iss', $projectId, $email, $role); $st->execute();
+            $_SESSION['share_notice'] = "Invited {$email} as " . ucfirst($role) . " — they'll get access as soon as they sign up.";
         }
     }
     header('Location: index.php?action=project&id=' . $projectId); exit;
@@ -535,7 +609,10 @@ h1{font-size:1.5rem;margin:0 0 0.25rem;}
 .chip{background:#232329;border:1px solid #333;border-radius:20px;padding:0.35rem 0.8rem;font-size:0.78rem;color:#c7c7cf;cursor:pointer;}
 .chip:hover{background:#2c2c33;}
 .tcard{background:#18181c;border:1px solid #2a2a30;border-radius:12px;overflow:hidden;}
-.tcard .thumb{height:130px;display:flex;align-items:center;justify-content:center;color:#ffffffcc;font-weight:700;text-align:center;padding:0.75rem;font-size:0.85rem;}
+.tcard .thumb{position:relative;height:150px;display:flex;align-items:flex-end;justify-content:flex-start;overflow:hidden;}
+.tcard .thumb .thumb-img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:0;}
+.tcard .thumb::after{content:'';position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,0.05) 40%,rgba(0,0,0,0.6));z-index:1;}
+.tcard .thumb .thumb-label{position:relative;z-index:2;color:#fff;font-weight:700;font-size:0.84rem;line-height:1.25;padding:0.75rem 0.85rem;text-shadow:0 1px 8px rgba(0,0,0,.65);}
 .tcard .body{padding:0.85rem 0.9rem;}
 .tcard .body .n{font-weight:600;font-size:0.9rem;}
 .tcard .body .d{color:#8a8a93;font-size:0.78rem;margin-top:0.15rem;}
@@ -558,6 +635,8 @@ h1{font-size:1.5rem;margin:0 0 0.25rem;}
 .add-row input:focus{outline:none;border-color:#7c3aed;}
 .add-btn{background:linear-gradient(135deg,#7c3aed,#a855f7);border:none;color:#fff;border-radius:9px;padding:0 1.1rem;font-size:0.85rem;font-weight:600;cursor:pointer;}
 .add-btn:hover{filter:brightness(1.08);}
+.add-hint{font-size:0.75rem;color:#8a8a93;margin:0.1rem 0 0.2rem;}
+.add-hint strong{color:#c7c7cf;font-weight:600;}
 .sec-label{margin-top:1.4rem;margin-bottom:0.3rem;font-size:0.82rem;color:#8a8a93;font-weight:500;}
 .acc-row{display:flex;align-items:center;justify-content:space-between;padding:0.55rem 0;gap:0.5rem;}
 .who{font-size:0.88rem;display:flex;align-items:center;gap:0.7rem;min-width:0;}
@@ -566,6 +645,8 @@ h1{font-size:1.5rem;margin:0 0 0.25rem;}
 .who-txt small{color:#8a8a93;font-size:0.74rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .who .mav{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,#22c55e,#0ea5e9);display:inline-flex;align-items:center;justify-content:center;font-size:0.8rem;font-weight:700;flex-shrink:0;}
 .who .mav.ghost{background:#26262e;border:1px solid #33333c;font-size:0.85rem;}
+.who .mav.pending{background:#1a1a20;border:1px dashed #4a4a54;color:#9a9aa2;}
+.pending-tag{font-size:0.6rem;font-weight:700;letter-spacing:0.4px;text-transform:uppercase;color:#fbbf24;background:#fbbf2420;border:1px solid #fbbf2440;border-radius:7px;padding:0.12rem 0.45rem;}
 .owner-tag{font-size:0.82rem;color:#8a8a93;padding-right:0.35rem;}
 /* custom dropdown */
 .dd{position:relative;flex-shrink:0;}
@@ -603,8 +684,56 @@ input[type=checkbox].toggle{width:36px;height:20px;-webkit-appearance:none;appea
 input[type=checkbox].toggle:checked{background:#7c3aed;}
 input[type=checkbox].toggle::before{content:'';position:absolute;top:2px;left:2px;width:16px;height:16px;background:#fff;border-radius:50%;transition:.15s;}
 input[type=checkbox].toggle:checked::before{left:18px;}
-.toast{position:fixed;bottom:1.25rem;right:1.25rem;background:#27272e;border:1px solid #3a3a44;color:#e5e5ea;padding:0.7rem 1rem;border-radius:10px;font-size:0.82rem;display:none;box-shadow:0 4px 16px rgba(0,0,0,.4);}
+.toast{position:fixed;bottom:1.5rem;left:50%;transform:translateX(-50%);max-width:min(440px,92vw);background:#27272e;border:1px solid #3a3a44;color:#e5e5ea;padding:0.75rem 1.1rem;border-radius:10px;font-size:0.84rem;line-height:1.4;display:none;box-shadow:0 8px 28px rgba(0,0,0,.55);z-index:2000;text-align:center;word-break:break-word;}
 .viewpill{font-size:0.7rem;color:#c4b5fd;background:#7c3aed22;border:1px solid #7c3aed44;border-radius:8px;padding:0.2rem 0.6rem;}
+/* ── project workspace top bar (matches report) ── */
+.proj-actions{display:flex;align-items:center;gap:0.5rem;}
+.btn-upgrade{background:linear-gradient(135deg,#f59e0b,#f97316);border:none;color:#1a1a1a;font-weight:700;}
+.btn-upgrade:hover{filter:brightness(1.07);}
+.btn-publish{background:linear-gradient(135deg,#7c3aed,#a855f7);border:none;color:#fff;font-weight:600;}
+.btn-publish:hover{filter:brightness(1.1);}
+.share-avs{display:inline-flex;align-items:center;margin-right:0.15rem;}
+.share-avs i{width:16px;height:16px;border-radius:50%;display:inline-block;margin-right:-6px;border:1.5px solid #18181c;}
+.share-avs i:nth-child(1){background:linear-gradient(135deg,#ec4899,#f97316);}
+.share-avs i:nth-child(2){background:linear-gradient(135deg,#22c55e,#0ea5e9);}
+/* ── left AI chat panel ── */
+.chatside{width:340px;flex-shrink:0;border-right:1px solid #202024;display:flex;flex-direction:column;background:#0c0c0f;min-width:0;}
+.chat-scroll{flex:1;overflow-y:auto;padding:1.1rem 1rem 0.5rem;}
+.chat-msg{display:flex;gap:0.6rem;}
+.chat-ava{width:26px;height:26px;border-radius:7px;background:linear-gradient(135deg,#f97316,#ec4899,#8b5cf6);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:0.8rem;}
+.chat-bubble{font-size:0.84rem;color:#c3c3cc;line-height:1.55;min-width:0;}
+.chat-bubble p{margin:0 0 0.75rem;}
+.chat-bubble b{color:#f0f0f4;font-weight:600;}
+.chat-bubble ul{margin:0 0 0.75rem;padding-left:0;list-style:none;}
+.chat-bubble ul li{margin-bottom:0.6rem;padding-left:0.95rem;position:relative;}
+.chat-bubble ul li::before{content:'•';position:absolute;left:0;color:#8b5cf6;}
+.chat-fb{display:flex;gap:1rem;color:#5f5f68;font-size:0.92rem;margin:0.25rem 0 0 2.25rem;}
+.chat-fb span{cursor:pointer;}
+.chat-fb span:hover{color:#c7c7cf;}
+.chat-input{display:flex;align-items:center;gap:0.5rem;margin:0.75rem;padding:0.55rem 0.6rem 0.55rem 0.8rem;background:#18181c;border:1px solid #2a2a30;border-radius:12px;}
+.chat-input input{flex:1;background:transparent;border:none;outline:none;color:#e5e5ea;font-size:0.85rem;font-family:inherit;}
+.chat-input .send{width:30px;height:30px;border-radius:8px;border:none;background:#2a2a30;color:#c7c7cf;cursor:pointer;font-size:0.95rem;flex-shrink:0;}
+.chat-input .send:hover{background:#7c3aed;color:#fff;}
+/* ── live magazine preview ── */
+.canvas{flex:1;padding:1.5rem;overflow-y:auto;background:#0d0d10;min-width:0;}
+.previewbox{border:1px solid #23232a;border-radius:14px;overflow:hidden;background:#0f0f13;min-height:440px;}
+.mag-top{display:flex;align-items:center;justify-content:space-between;gap:1rem;padding:1.1rem 1.6rem;flex-wrap:wrap;}
+.mag-logo{font-weight:800;letter-spacing:0.5px;color:#fff;font-size:1.1rem;}
+.mag-nav{display:flex;gap:1.4rem;font-size:0.68rem;letter-spacing:0.9px;color:#b9b9c2;}
+.mag-hero{position:relative;margin:0 1.6rem 1.6rem;border-radius:14px;overflow:hidden;min-height:340px;display:flex;align-items:center;isolation:isolate;}
+.mag-hero-bg{position:absolute;inset:0;z-index:-1;background:
+  radial-gradient(130% 120% at 18% 8%, rgba(255,196,128,0.30), transparent 48%),
+  radial-gradient(120% 120% at 85% 92%, rgba(131,86,217,0.34), transparent 55%),
+  linear-gradient(130deg,#2a1d15 0%,#1b1620 48%,#100e18 100%);}
+.mag-hero-bg img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;}
+.mag-hero-bg::after{content:'';position:absolute;inset:0;background:linear-gradient(90deg,transparent 22%,rgba(8,7,12,0.55) 52%,rgba(8,7,12,0.82) 80%);}
+.mag-hero-text{position:relative;margin-left:auto;width:54%;padding:2rem 2.2rem;color:#fff;}
+.mag-cat{font-size:0.68rem;letter-spacing:1.6px;color:#fff;opacity:0.82;margin-bottom:0.85rem;}
+.mag-hero-text h2{font-size:1.95rem;line-height:1.12;margin:0 0 1rem;font-weight:800;letter-spacing:-0.5px;}
+.mag-author{font-size:0.65rem;letter-spacing:1.1px;color:#e5e5ea;opacity:0.72;margin-bottom:1rem;}
+.mag-hero-text p{font-size:0.85rem;line-height:1.55;opacity:0.9;margin:0 0 1.5rem;}
+.mag-btn{display:inline-block;border:1px solid #ffffff66;border-radius:9px;padding:0.55rem 1.15rem;font-size:0.78rem;color:#fff;letter-spacing:0.3px;}
+@media(max-width:720px){.chatside{display:none;}.mag-hero-text{width:auto;}.mag-hero-bg::after{background:linear-gradient(180deg,transparent,rgba(8,7,12,0.7));}}
 </style></head><body>
 <?php
 }
@@ -692,7 +821,9 @@ if ($action === 'project') {
     $isOwner = ($myRole === 'owner');
     $mc = ensure_magic_code($db, $projectId);
     $members = project_members($db, $projectId);
+    $pendingInvites = pending_invites($db, $projectId);
     $inviteLink = base_url() . "?action=join&code={$mc['code']}";
+    $shareNotice = $_SESSION['share_notice'] ?? null; unset($_SESSION['share_notice']);
 
     render_head($proj['name']);
     ?>
@@ -703,23 +834,54 @@ if ($action === 'project') {
           <strong><?php echo esc($proj['name']); ?></strong>
           <?php if (!$canEdit): ?><span class="viewpill">View only</span><?php endif; ?>
         </div>
-        <div style="display:flex;gap:0.5rem;align-items:center;">
-          <?php if ($canEdit): ?><button class="btn" onclick="openShare()">Share</button><button class="btn btn-primary">Publish</button><?php endif; ?>
-          <?php render_acct($me); ?>
+        <div class="proj-actions">
+          <?php if ($canEdit): ?><button class="btn" onclick="openShare()"><span class="share-avs"><i></i><i></i></span> Share</button><?php endif; ?>
+          <a href="index.php?action=billing" class="btn btn-upgrade">⚡ Upgrade</a>
+          <?php if ($canEdit): ?><button class="btn btn-publish">Publish</button><?php endif; ?>
+          <span class="av" title="<?php echo esc($me['name']); ?>"><?php echo esc(avatar_letter($me['name'])); ?></span>
+          <a href="index.php?action=logout" class="btn" style="padding:0.4rem 0.7rem;">Log out</a>
         </div>
       </div>
       <div class="editor">
-        <div class="side">
-          <p><b>Content &amp; Functionality:</b></p>
-          <p>Customize the content, add a backend, implement full search, add comments, set up a newsletter.</p>
-          <p style="margin-top:1.5rem;"><b>Which direction interests you most?</b></p>
+        <div class="chatside">
+          <div class="chat-scroll">
+            <div class="chat-msg">
+              <div class="chat-ava">✦</div>
+              <div class="chat-bubble">
+                <p><b>Content &amp; Functionality:</b></p>
+                <ul>
+                  <li><b>Customize the content</b> — Replace placeholder text/images with your actual blog posts, categories, and branding</li>
+                  <li><b>Add a backend</b> — Use Lovable Cloud to store posts in a database, add user authentication, and enable dynamic content management</li>
+                  <li><b>Implement full search</b> — Make the search feature functional with filters by category, date, and keywords</li>
+                  <li><b>Add comments</b> — Let readers engage with post discussions</li>
+                  <li><b>Set up a newsletter</b> — Capture emails and send subscribers new post updates</li>
+                </ul>
+                <p>Which direction interests you most?</p>
+              </div>
+            </div>
+            <div class="chat-fb"><span title="Good response">👍</span><span title="Bad response">👎</span><span title="Copy">⧉</span><span title="Retry">⟳</span></div>
+          </div>
+          <div class="chat-input">
+            <input placeholder="Ask Lovable to edit this page..." <?php echo $canEdit?'':'disabled'; ?>>
+            <button class="send" type="button">↑</button>
+          </div>
         </div>
         <div class="canvas">
-          <div class="previewbox" style="background:<?php echo esc($proj['grad']); ?>;color:#fff;">
-            <div style="font-weight:800;letter-spacing:1px;opacity:0.85;">nexus</div>
-            <div style="margin-top:2rem;font-size:1.5rem;font-weight:700;max-width:65%;"><?php echo esc($proj['name']); ?></div>
-            <div style="margin-top:0.75rem;opacity:0.85;max-width:65%;font-size:0.9rem;">Featured article description — this is where your main content excerpt would appear to give readers a preview of the full article.</div>
-            <div style="margin-top:2rem;display:inline-block;border:1px solid #ffffff55;border-radius:8px;padding:0.5rem 1rem;font-size:0.85rem;">READ MORE →</div>
+          <div class="previewbox">
+            <div class="mag-top">
+              <span class="mag-logo">nexus</span>
+              <nav class="mag-nav"><span>ALL POST</span><span>BUSINESS</span><span>TECHNOLOGY</span><span>PODCAST</span></nav>
+            </div>
+            <div class="mag-hero">
+              <div class="mag-hero-bg"><img src="<?php echo esc($MAG_PHOTO); ?>" alt="" onerror="this.remove()"></div>
+              <div class="mag-hero-text">
+                <div class="mag-cat">FEATURED</div>
+                <h2><?php echo esc($proj['name']); ?></h2>
+                <div class="mag-author">AUTHOR NAME / WRITER</div>
+                <p>Featured article description — this is where your main content excerpt would appear to give readers a preview of the full article.</p>
+                <span class="mag-btn">READ MORE →</span>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -734,9 +896,10 @@ if ($action === 'project') {
         <h2>Share project <span class="x" onclick="closeShare()">&times;</span></h2>
         <form class="add-row" method="POST" action="index.php?action=add-member">
           <input type="hidden" name="project_id" value="<?php echo (int)$projectId; ?>">
-          <input name="email" type="email" placeholder="Add people">
+          <input name="email" type="email" placeholder="Add people by email" required>
           <button class="add-btn" type="submit">Add</button>
         </form>
+        <div class="add-hint">People you add get access right away, at the level set in the <strong>Invite link</strong> option below.</div>
 
         <div class="sec-label">Project access</div>
         <?php foreach ($members as $mem):
@@ -751,28 +914,25 @@ if ($action === 'project') {
           <?php if ($isRowOwner): ?>
             <div class="owner-tag">Owner</div>
           <?php else: ?>
-            <div class="dd" data-kind="role" data-uid="<?php echo (int)$mem['uid']; ?>">
-              <button type="button" class="dd-trigger" onclick="toggleDD(this)"><span class="dd-cur"><?php echo esc($roleLabels[$mem['role']] ?? 'Editor'); ?></span> <span class="cv">⌄</span></button>
-              <div class="dd-menu">
-                <div class="dd-opt<?php echo $plan!=='pro'?' pro-locked':''; ?>" onclick="pickRole(this,'admin')">
-                  <span class="dd-ic">◆</span>
-                  <div class="dd-body"><div class="dd-t">Admin <span class="pro-tag">Pro</span></div><div class="dd-d">Full access to manage the project</div></div>
-                </div>
-                <div class="dd-opt" onclick="pickRole(this,'editor')">
-                  <span class="dd-ic">✎</span>
-                  <div class="dd-body"><div class="dd-t">Editor</div><div class="dd-d">Can edit the project</div></div>
-                </div>
-                <div class="dd-opt<?php echo $plan!=='pro'?' pro-locked':''; ?>" onclick="pickRole(this,'viewer')">
-                  <span class="dd-ic">◉</span>
-                  <div class="dd-body"><div class="dd-t">Viewer <span class="pro-tag">Pro</span></div><div class="dd-d">Can view the project only</div></div>
-                </div>
-                <div class="dd-opt danger" onclick="pickRole(this,'remove')">
-                  <span class="dd-ic">✕</span>
-                  <div class="dd-body"><div class="dd-t">Remove</div><div class="dd-d">Revoke this member's access</div></div>
-                </div>
-              </div>
+            <div style="display:flex;align-items:center;gap:0.6rem;">
+              <span style="font-size:0.85rem;color:#c7c7cf;"><?php echo esc($roleLabels[$mem['role']] ?? 'Editor'); ?></span>
+              <?php if ($isOwner): ?><button type="button" title="Remove" onclick="removeMember(<?php echo (int)$mem['uid']; ?>)" style="background:none;border:none;color:#8a8a93;cursor:pointer;font-size:1rem;line-height:1;">&times;</button><?php endif; ?>
             </div>
           <?php endif; ?>
+        </div>
+        <?php endforeach; ?>
+
+        <?php foreach ($pendingInvites as $inv): ?>
+        <div class="acc-row">
+          <div class="who">
+            <span class="mav pending"><?php echo esc(strtoupper(mb_substr($inv['email'], 0, 1) ?: '?')); ?></span>
+            <div class="who-txt"><span class="nm"><?php echo esc($inv['email']); ?></span><small>Pending · hasn't signed up yet</small></div>
+          </div>
+          <div style="display:flex;align-items:center;gap:0.55rem;">
+            <span class="pending-tag">Invited</span>
+            <span style="font-size:0.85rem;color:#c7c7cf;"><?php echo esc($roleLabels[$inv['role']] ?? 'Viewer'); ?></span>
+            <?php if ($isOwner): ?><button type="button" title="Cancel invite" onclick="cancelInvite('<?php echo esc($inv['email']); ?>')" style="background:none;border:none;color:#8a8a93;cursor:pointer;font-size:1rem;line-height:1;">&times;</button><?php endif; ?>
+          </div>
         </div>
         <?php endforeach; ?>
 
@@ -813,7 +973,7 @@ if ($action === 'project') {
     const PROJECT_ID = <?php echo (int)$projectId; ?>;
     function openShare(){ document.getElementById('overlay').classList.add('open'); }
     function closeShare(){ document.getElementById('overlay').classList.remove('open'); closeAllDD(); }
-    function showToast(m){ const t=document.getElementById('toast'); t.textContent=m; t.style.display='block'; setTimeout(()=>t.style.display='none',2500); }
+    function showToast(m){ const t=document.getElementById('toast'); t.textContent=m; t.style.display='block'; clearTimeout(window.__toastT); window.__toastT=setTimeout(()=>t.style.display='none',3800); }
     function copyLink(){ const i=document.getElementById('inviteLink'); i.select(); navigator.clipboard.writeText(i.value); showToast('Invite link copied'); }
     function closeAllDD(){ document.querySelectorAll('.dd.open').forEach(d=>d.classList.remove('open')); }
     function toggleDD(btn){ const dd=btn.closest('.dd'); const was=dd.classList.contains('open'); closeAllDD(); if(!was) dd.classList.add('open'); }
@@ -830,13 +990,18 @@ if ($action === 'project') {
       fetch('?action=magic-codes&project_id='+PROJECT_ID,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({access_level:value})})
         .then(r=>r.json()).then(()=>location.reload());
     }
-    function pickRole(opt, role){
-      closeAllDD();
-      const dd = opt.closest('.dd'); const userId = dd.getAttribute('data-uid');
-      if ((role==='viewer'||role==='admin') && PLAN !== 'pro') { showToast('Upgrade to Pro to assign that role.'); return; }
-      fetch('?action=set-role&project_id='+PROJECT_ID+'&user_id='+userId,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({role:role})})
+    function removeMember(userId){
+      fetch('?action=set-role&project_id='+PROJECT_ID+'&user_id='+userId,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({role:'remove'})})
         .then(r=>r.json()).then(()=>location.reload());
     }
+    function cancelInvite(email){
+      fetch('?action=cancel-invite&project_id='+PROJECT_ID+'&email='+encodeURIComponent(email),{method:'POST'})
+        .then(r=>r.json()).then(()=>location.reload());
+    }
+    <?php if (!empty($shareNotice)): ?>
+    openShare();
+    showToast(<?php echo json_encode($shareNotice); ?>);
+    <?php endif; ?>
     </script>
     <?php endif; ?>
     </body></html>
@@ -886,7 +1051,10 @@ if ($action === 'templates') {
         <div class="grid">
           <?php foreach ($TEMPLATES as $t): ?>
           <div class="tcard">
-            <div class="thumb" style="background:<?php echo esc($t['grad']); ?>;"><?php echo esc($t['name']); ?></div>
+            <div class="thumb" style="background:<?php echo esc($t['grad']); ?>;">
+              <?php if (!empty($t['img'])): ?><img class="thumb-img" src="<?php echo esc($t['img']); ?>" alt="" loading="lazy" onerror="this.remove()"><?php endif; ?>
+              <span class="thumb-label"><?php echo esc($t['name']); ?></span>
+            </div>
             <div class="body"><div class="n"><?php echo esc($t['name']); ?></div><div class="d"><?php echo esc($t['desc']); ?></div>
               <button class="btn btn-primary use" onclick="openRemix('<?php echo esc($t['name']); ?>')">Use template</button></div>
           </div>
