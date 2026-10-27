@@ -4,25 +4,42 @@
 // Email sending configured via SMTP (codeshackio mail configuration)
 
 session_start();
-// Resilient PHPMailer & Composer Loader
-if (file_exists(__DIR__ . '/vendor/autoload.php')) {
-    require_once __DIR__ . '/vendor/autoload.php';
-} elseif (file_exists(__DIR__ . '/../codeshackio/vendor/autoload.php')) {
-    require_once __DIR__ . '/../codeshackio/vendor/autoload.php';
-} elseif (file_exists(__DIR__ . '/PHPMailer/PHPMailer.php')) {
-    require_once __DIR__ . '/PHPMailer/Exception.php';
-    require_once __DIR__ . '/PHPMailer/PHPMailer.php';
-    require_once __DIR__ . '/PHPMailer/SMTP.php';
-} elseif (file_exists('/opt/lampp/htdocs/PHPMailer/PHPMailer.php')) {
-    require_once '/opt/lampp/htdocs/PHPMailer/Exception.php';
-    require_once '/opt/lampp/htdocs/PHPMailer/PHPMailer.php';
-    require_once '/opt/lampp/htdocs/PHPMailer/SMTP.php';
+
+// NOTE: SMTP delivery removed for this lab. The confirmation email is rendered
+// into a simulated "recipient inbox" (Gmail-style panel) on the right instead
+// of being emailed. The first/last name is still echoed raw into the message
+// body, so a stored HTML-injection payload renders in the recipient's inbox.
+
+/**
+ * Build the confirmation email HTML body. $first and $last are echoed RAW —
+ * intentionally vulnerable (HTML injection, HackerOne #1374017).
+ */
+function renderConfirmBody($first, $last, $experience) {
+    return '
+    <div style="max-width:560px;margin:0 auto;background:#ffffff;border-radius:12px;border:1px solid #e5e7eb;overflow:hidden;box-shadow:0 4px 12px rgba(0,0,0,0.05);font-family:Arial,sans-serif;">
+      <div style="background:#1e2a3a;padding:24px;text-align:center;">
+        <h2 style="color:#ffffff;margin:0;font-size:22px;letter-spacing:-0.5px;">HackerOne Pentest Community</h2>
+      </div>
+      <div style="padding:32px 24px;">
+        <h2 style="color:#1e2a3a;margin-top:0;font-size:20px;">Thank you for applying!</h2>
+        <div style="font-size:15px;color:#4b5563;line-height:1.6;margin-bottom:16px;">
+          Hi ' . $first . ' ' . $last . ',
+        </div>
+        <p style="font-size:15px;color:#4b5563;line-height:1.6;">We have received your application to join the <strong>HackerOne Pentest Community</strong>. Our team will review your submission and reach out within 5–7 business days.</p>
+        <p style="font-size:15px;color:#4b5563;line-height:1.6;">In the meantime, feel free to continue earning on our platform.</p>
+        <div style="margin:24px 0;">
+          <a href="#" style="background:#25a244;color:#ffffff;padding:12px 24px;border-radius:6px;text-decoration:none;font-weight:bold;display:inline-block;">View Your Dashboard →</a>
+        </div>
+        <p style="font-size:14px;color:#6b7280;">If you have any questions, please reach out to <a href="#" style="color:#25a244;">support@hackerone.com</a>.</p>
+        <hr style="border:none;border-top:1px solid #f3f4f6;margin:24px 0;">
+        <div style="font-size:13px;color:#6b7280;">
+          <strong>Application Summary</strong><br>
+          Experience: ' . htmlspecialchars($experience, ENT_QUOTES, 'UTF-8') . '<br>
+          Applied: ' . date('F j, Y') . '
+        </div>
+      </div>
+    </div>';
 }
-
-use PHPMailer\PHPMailer\PHPMailer;
-use PHPMailer\PHPMailer\Exception;
-
-require_once __DIR__ . '/../../config/mail.php';
 
 // ── Database (auto-created on first run) ────────────────────────────────────
 mysqli_report(MYSQLI_REPORT_OFF);
@@ -53,12 +70,14 @@ if ($conn) {
 }
 
 $submitted = false;
-$mailSent = false;
-$mailError = '';
 $first = '';
 $last = '';
 $email = '';
 $experience = '3-5';
+
+if (!isset($_SESSION['inbox'])) {
+    $_SESSION['inbox'] = [];
+}
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'apply') {
     // ⚠ VULNERABLE — first and last name stored raw, no sanitization
@@ -86,52 +105,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
     }
 
     if ($email) {
-        $mail = new PHPMailer(true);
-        try {
-            configureKrazeMailer($mail, 'noreply@hackerone.com', 'HackerOne');
-            $mail->addAddress($email);
-            $mail->isHTML(true);
-            $mail->Subject = 'Your HackerOne Pentest Community Application';
-
-            // HTML Email Body — $first and $last echoed raw so HTML payloads trigger in the recipient email
-            $emailBody = '
-            <!DOCTYPE html>
-            <html>
-            <head><meta charset="utf-8"></head>
-            <body style="font-family:Arial,sans-serif;background:#f4f6f8;padding:20px;margin:0;">
-            <div style="max-width:560px;margin:0 auto;background:#ffffff;border-radius:12px;border:1px solid #e5e7eb;overflow:hidden;box-shadow:0 4px 12px rgba(0,0,0,0.05);">
-              <div style="background:#1e2a3a;padding:24px;text-align:center;">
-                <h2 style="color:#ffffff;margin:0;font-size:22px;letter-spacing:-0.5px;">HackerOne Pentest Community</h2>
-              </div>
-              <div style="padding:32px 24px;">
-                <h2 style="color:#1e2a3a;margin-top:0;font-size:20px;">Thank you for applying!</h2>
-                <div style="font-size:15px;color:#4b5563;line-height:1.6;margin-bottom:16px;">
-                  Hi ' . $first . ' ' . $last . ',
-                </div>
-                <p style="font-size:15px;color:#4b5563;line-height:1.6;">We have received your application to join the <strong>HackerOne Pentest Community</strong>. Our team will review your submission and reach out within 5–7 business days.</p>
-                <p style="font-size:15px;color:#4b5563;line-height:1.6;">In the meantime, feel free to continue earning on our platform.</p>
-                <div style="margin:24px 0;">
-                  <a href="#" style="background:#25a244;color:#ffffff;padding:12px 24px;border-radius:6px;text-decoration:none;font-weight:bold;display:inline-block;">View Your Dashboard →</a>
-                </div>
-                <p style="font-size:14px;color:#6b7280;">If you have any questions, please reach out to <a href="#" style="color:#25a244;">support@hackerone.com</a>.</p>
-                <hr style="border:none;border-top:1px solid #f3f4f6;margin:24px 0;">
-                <div style="font-size:13px;color:#6b7280;">
-                  <strong>Application Summary</strong><br>
-                  Experience: ' . htmlspecialchars($experience, ENT_QUOTES, 'UTF-8') . '<br>
-                  Applied: ' . date('F j, Y') . '
-                </div>
-              </div>
-            </div>
-            </body>
-            </html>
-            ';
-
-            $mail->Body = $emailBody;
-            $mail->send();
-            $mailSent = true;
-        } catch (Exception $e) {
-            $mailError = 'Mail Error: ' . $mail->ErrorInfo;
-        }
+        // Deliver the confirmation into the simulated recipient inbox instead of
+        // sending over SMTP. First/last name kept raw so the HTML payload renders.
+        array_unshift($_SESSION['inbox'], [
+            'first'      => $first,
+            'last'       => $last,
+            'email'      => $email,
+            'experience' => $experience,
+            'time'       => time(),
+        ]);
     }
 }
 
@@ -178,7 +160,37 @@ body{font-family:'Inter',sans-serif;background:#f4f6f8;color:#1a1a2e;line-height
 .hero-stat-label{font-size:.72rem;color:rgba(255,255,255,.55);text-transform:uppercase;letter-spacing:.06em;margin-top:2px;}
 
 /* ── Main layout ──────────────────────────────────────────────────────────── */
-.main{flex:1;max-width:900px;margin:0 auto;width:100%;padding:36px 16px 48px;}
+.main{flex:1;max-width:1420px;margin:0 auto;width:100%;padding:36px 16px 48px;display:flex;gap:24px;align-items:flex-start;}
+.content-col{flex:1;min-width:0;}
+@media(max-width:1100px){.main{flex-wrap:wrap;}}
+
+/* ── Gmail-style Inbox (recipient view) ───────────────────────────────────── */
+.inbox{width:420px;flex-shrink:0;background:#fff;border-radius:12px;box-shadow:0 2px 16px rgba(0,0,0,.08);overflow:hidden;display:flex;flex-direction:column;position:sticky;top:24px;}
+@media(max-width:1100px){.inbox{width:100%;position:static;}}
+.inbox-top{display:flex;align-items:center;gap:10px;padding:14px 18px;border-bottom:1px solid #f1f3f4;}
+.inbox-glogo{font-size:1.05rem;font-weight:700;display:flex;align-items:center;gap:6px;}
+.inbox-glogo .g-m{color:#ea4335;}.inbox-glogo .g-a1{color:#fbbc05;}.inbox-glogo .g-i{color:#34a853;}.inbox-glogo .g-l{color:#4285f4;}
+.inbox-search{flex:1;background:#eaf1fb;border-radius:8px;padding:7px 12px;font-size:.74rem;color:#80868b;display:flex;align-items:center;gap:8px;}
+.inbox-tabs{display:flex;padding:0 6px;border-bottom:1px solid #f1f3f4;}
+.inbox-tab{padding:10px 16px;font-size:.76rem;font-weight:600;color:#5f6368;border-bottom:3px solid transparent;}
+.inbox-tab.active{color:#1a73e8;border-bottom-color:#1a73e8;}
+.inbox-list{flex:1;overflow-y:auto;max-height:640px;}
+.inbox-empty{padding:48px 24px;text-align:center;color:#9aa0a6;font-size:.82rem;}
+.inbox-empty svg{width:40px;height:40px;stroke:#dadce0;margin-bottom:12px;}
+details.mail{border-bottom:1px solid #f1f3f4;}
+summary.mail-row{list-style:none;display:flex;align-items:center;gap:12px;padding:12px 16px;cursor:pointer;transition:box-shadow .12s,background .12s;}
+summary.mail-row::-webkit-details-marker{display:none;}
+summary.mail-row:hover{box-shadow:inset 1px 0 0 #dadce0,inset -1px 0 0 #dadce0,0 1px 2px rgba(60,64,67,.15);z-index:1;}
+details.mail[open] summary.mail-row{background:#f2f6fc;font-weight:600;}
+.mail-avatar{width:36px;height:36px;border-radius:50%;background:#25a244;color:#fff;display:flex;align-items:center;justify-content:center;font-size:.9rem;font-weight:700;flex-shrink:0;}
+.mail-meta{flex:1;min-width:0;}
+.mail-from{font-size:.8rem;color:#202124;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.mail-subject{font-size:.76rem;color:#202124;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.mail-snippet{font-size:.72rem;color:#5f6368;font-weight:400;}
+.mail-time{font-size:.68rem;color:#5f6368;flex-shrink:0;}
+.mail-body{padding:16px 18px 22px;background:#f8f9fb;border-top:1px solid #f1f3f4;}
+.mail-to{font-size:.72rem;color:#5f6368;margin-bottom:12px;}
+.mail-to strong{color:#202124;}
 
 /* ── Section heading ──────────────────────────────────────────────────────── */
 .section-tag{display:inline-block;background:#ecfdf5;border:1px solid #a7f3d0;border-radius:4px;padding:3px 10px;font-size:.7rem;font-weight:700;color:#065f46;text-transform:uppercase;letter-spacing:.07em;margin-bottom:10px;}
@@ -257,6 +269,7 @@ textarea.form-input{resize:vertical;min-height:90px;line-height:1.55;}
 
 <!-- Main -->
 <main class="main">
+<div class="content-col">
 
 <?php if ($showForm): ?>
 <!-- ═══════════════════════════════════════════════════════════════════════ -->
@@ -265,7 +278,7 @@ textarea.form-input{resize:vertical;min-height:90px;line-height:1.55;}
   <div style="margin-bottom:24px;">
     <div class="section-tag">Community Application</div>
     <h2 class="section-title">Apply Now</h2>
-    <p class="section-sub">Fill in your details below. A confirmation email will be sent to the address you provide. Your name will appear in the email exactly as entered.</p>
+    <p class="section-sub">Fill in your details below. A confirmation email will be delivered to the inbox panel on the right. Your name will appear in the email exactly as entered.</p>
     <?php if ($dbError): ?>
     <div style="background:#fef2f2;border:1px solid #fecaca;color:#dc2626;padding:10px 14px;border-radius:8px;font-size:.8rem;">
       <strong>Database Warning:</strong> <?= htmlspecialchars($dbError, ENT_QUOTES, 'UTF-8') ?> — submissions will not be stored.
@@ -309,7 +322,7 @@ textarea.form-input{resize:vertical;min-height:90px;line-height:1.55;}
             <label class="form-label" for="email">Email Address <span class="req">*</span></label>
             <input class="form-input" type="email" id="email" name="email"
               value="" required>
-            <div class="form-hint">Confirmation email will be sent here via SMTP.</div>
+            <div class="form-hint">The confirmation will appear in the recipient inbox panel on the right.</div>
           </div>
           <div class="form-group">
             <label class="form-label" for="linkedin">LinkedIn Profile</label>
@@ -355,7 +368,7 @@ textarea.form-input{resize:vertical;min-height:90px;line-height:1.55;}
         </div>
 
         <button class="btn-submit" type="submit">Submit Application →</button>
-        <p class="form-footer-note">By submitting this form you agree to our Terms of Service and Privacy Policy.<br>A confirmation email will be sent from <strong>noreply@krazeplanet.com</strong>.</p>
+        <p class="form-footer-note">By submitting this form you agree to our Terms of Service and Privacy Policy.<br>A confirmation email will arrive from <strong>noreply@hackerone.com</strong>.</p>
       </form>
     </div>
   </div>
@@ -370,14 +383,9 @@ textarea.form-input{resize:vertical;min-height:90px;line-height:1.55;}
     </div>
     <h2 style="font-size:1.5rem;font-weight:800;color:#1e2a3a;margin-bottom:10px;">Application Submitted!</h2>
     <p style="font-size:.92rem;color:#4b5563;line-height:1.65;margin-bottom:24px;">
-      A confirmation email has been sent to <strong><?= htmlspecialchars($email, ENT_QUOTES, 'UTF-8') ?></strong>.<br>Please check your inbox.
+      A confirmation email has been delivered to <strong><?= htmlspecialchars($email, ENT_QUOTES, 'UTF-8') ?></strong>.<br>Check the inbox panel on the right.
     </p>
 
-    <?php if ($mailError): ?>
-      <div style="background:#fef2f2;border:1px solid #fecaca;color:#dc2626;padding:12px 16px;border-radius:8px;font-size:.82rem;margin-bottom:20px;text-align:left;">
-        <strong>Email Delivery Warning:</strong> <?= htmlspecialchars($mailError, ENT_QUOTES, 'UTF-8') ?>
-      </div>
-    <?php endif; ?>
     <?php if ($dbError): ?>
       <div style="background:#fef2f2;border:1px solid #fecaca;color:#dc2626;padding:12px 16px;border-radius:8px;font-size:.82rem;margin-bottom:20px;text-align:left;">
         <strong>Database Warning:</strong> <?= htmlspecialchars($dbError, ENT_QUOTES, 'UTF-8') ?> — application not stored.
@@ -388,6 +396,55 @@ textarea.form-input{resize:vertical;min-height:90px;line-height:1.55;}
   </div>
 
 <?php endif; ?>
+</div><!-- /.content-col -->
+
+<!-- Recipient Inbox (Gmail-style) -->
+<aside class="inbox">
+  <div class="inbox-top">
+    <div class="inbox-glogo">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#ea4335" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+      <span><span class="g-m">M</span><span class="g-a1">a</span><span class="g-i">i</span><span class="g-l">l</span></span>
+    </div>
+    <div class="inbox-search">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#80868b" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      Search mail
+    </div>
+  </div>
+  <div class="inbox-tabs">
+    <div class="inbox-tab active">Primary</div>
+    <div class="inbox-tab">Promotions</div>
+    <div class="inbox-tab">Social</div>
+  </div>
+  <div class="inbox-list">
+    <?php if (empty($_SESSION['inbox'])): ?>
+      <div class="inbox-empty">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+        <div>Your inbox is empty.</div>
+        <div style="font-size:.72rem;margin-top:4px;">Submit an application to see the confirmation arrive here.</div>
+      </div>
+    <?php else: foreach ($_SESSION['inbox'] as $i => $msg): ?>
+      <details class="mail"<?= $i === 0 ? ' open' : '' ?>>
+        <summary class="mail-row">
+          <div class="mail-avatar">H</div>
+          <div class="mail-meta">
+            <div class="mail-from">HackerOne &lt;noreply@hackerone.com&gt;</div>
+            <div class="mail-subject">Your HackerOne Pentest Community Application
+              <span class="mail-snippet">— Thank you for applying!…</span>
+            </div>
+          </div>
+          <div class="mail-time"><?= date('g:i A', (int)$msg['time']) ?></div>
+        </summary>
+        <div class="mail-body">
+          <div class="mail-to">to <strong><?= htmlspecialchars($msg['email'], ENT_QUOTES, 'UTF-8') ?></strong></div>
+          <?php
+            // ⚠ first/last name rendered RAW — HTML injection renders in the recipient's inbox
+            echo renderConfirmBody($msg['first'], $msg['last'], $msg['experience']);
+          ?>
+        </div>
+      </details>
+    <?php endforeach; endif; ?>
+  </div>
+</aside>
 </main>
 
 <footer style="background:#1e2a3a;padding:16px 32px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;flex-shrink:0;">

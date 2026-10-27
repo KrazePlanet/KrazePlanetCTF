@@ -1,24 +1,37 @@
 <?php
 session_start();
-// Resilient PHPMailer & Composer Loader
-if (file_exists(__DIR__ . '/vendor/autoload.php')) {
-    require_once __DIR__ . '/vendor/autoload.php';
-} elseif (file_exists(__DIR__ . '/../codeshackio/vendor/autoload.php')) {
-    require_once __DIR__ . '/../codeshackio/vendor/autoload.php';
-} elseif (file_exists(__DIR__ . '/PHPMailer/PHPMailer.php')) {
-    require_once __DIR__ . '/PHPMailer/Exception.php';
-    require_once __DIR__ . '/PHPMailer/PHPMailer.php';
-    require_once __DIR__ . '/PHPMailer/SMTP.php';
-} elseif (file_exists('/opt/lampp/htdocs/PHPMailer/PHPMailer.php')) {
-    require_once '/opt/lampp/htdocs/PHPMailer/Exception.php';
-    require_once '/opt/lampp/htdocs/PHPMailer/PHPMailer.php';
-    require_once '/opt/lampp/htdocs/PHPMailer/SMTP.php';
+
+// NOTE: SMTP delivery removed for this lab. Invitations are rendered into a
+// simulated "recipient inbox" (Gmail-style panel) on the right instead of
+// being emailed. The nickname is still echoed raw into the message body, so a
+// stored HTML-injection payload renders right there in the recipient's inbox.
+
+/**
+ * Build the invitation email HTML body. $nickname is echoed RAW — intentionally
+ * vulnerable (stored HTML injection, HackerOne #57914).
+ */
+function renderInviteBody($nickname) {
+    return '
+    <div style="max-width:520px;margin:0 auto;background:#ffffff;border-radius:12px;border:1px solid #e2e8f0;overflow:hidden;box-shadow:0 4px 12px rgba(0,0,0,0.05);font-family:Arial,sans-serif;">
+      <div style="background:#6c3be4;padding:20px;text-align:center;">
+        <h2 style="color:#ffffff;margin:0;font-size:20px;">Romit</h2>
+      </div>
+      <div style="padding:28px 24px;">
+        <h3 style="color:#1a1a2e;margin-top:0;font-size:18px;">You have been invited to Romit!</h3>
+        <p style="font-size:14px;color:#4a5568;line-height:1.6;">Hi there,</p>
+        <p style="font-size:14px;color:#4a5568;line-height:1.6;">A Romit wallet has been shared with you. The user: <strong>' . $nickname . '</strong> has shared their wallet with you and invited you to join Romit.</p>
+        <p style="font-size:14px;color:#4a5568;line-height:1.6;">Click below to accept the wallet invitation and get started:</p>
+        <div style="margin:24px 0;">
+          <a href="#" style="background:#6c3be4;color:#ffffff;padding:12px 24px;border-radius:6px;text-decoration:none;font-weight:bold;display:inline-block;">Accept Wallet Invitation</a>
+        </div>
+        <p style="font-size:13px;color:#a0aec0;">If you did not expect this invitation, you can safely ignore this email.</p>
+        <hr style="border:none;border-top:1px solid #edf2f7;margin:24px 0;">
+        <div style="font-size:12px;color:#a0aec0;text-align:center;">
+          © 2015 Romit, Inc. · 535 Mission St, San Francisco, CA
+        </div>
+      </div>
+    </div>';
 }
-
-use PHPMailer\PHPMailer\PHPMailer;
-use PHPMailer\PHPMailer\Exception;
-
-require_once __DIR__ . '/../../config/mail.php';
 
 // ── Database (auto-created on first run) ────────────────────────────────────
 mysqli_report(MYSQLI_REPORT_OFF);
@@ -69,7 +82,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
 // ── Handle Share Wallet ─────────────────────────────────────────────────────
 $share_sent = false;
 $share_email = '';
-$mailError = '';
+
+if (!isset($_SESSION['inbox'])) {
+    $_SESSION['inbox'] = [];
+}
 
 // Load persisted nickname (DB is source of truth, falls back to session/default)
 $nickname = $_SESSION['nickname'] ?? '';
@@ -99,48 +115,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
     }
 
     if ($share_email) {
-        $mail = new PHPMailer(true);
-        try {
-            configureKrazeMailer($mail, 'noreply@krazeplanet.com', 'Romit');
-            $mail->Timeout    = 3;
-            $mail->addAddress($share_email);
-            $mail->isHTML(true);
-            $mail->Subject = 'You have been invited to Romit!';
-
-            // HTML Email Body — $nickname echoed raw so HTML payloads trigger in recipient email
-            $emailBody = '
-            <!DOCTYPE html>
-            <html>
-            <head><meta charset="utf-8"></head>
-            <body style="font-family:Arial,sans-serif;background:#f3f4f8;padding:20px;margin:0;">
-            <div style="max-width:520px;margin:0 auto;background:#ffffff;border-radius:12px;border:1px solid #e2e8f0;overflow:hidden;box-shadow:0 4px 12px rgba(0,0,0,0.05);">
-              <div style="background:#6c3be4;padding:20px;text-align:center;">
-                <h2 style="color:#ffffff;margin:0;font-size:20px;">Romit</h2>
-              </div>
-              <div style="padding:28px 24px;">
-                <h3 style="color:#1a1a2e;margin-top:0;font-size:18px;">You have been invited to Romit!</h3>
-                <p style="font-size:14px;color:#4a5568;line-height:1.6;">Hi there,</p>
-                <p style="font-size:14px;color:#4a5568;line-height:1.6;">A Romit wallet has been shared with you. The user: <strong>' . $nickname . '</strong> has shared their wallet with you and invited you to join Romit.</p>
-                <p style="font-size:14px;color:#4a5568;line-height:1.6;">Click below to accept the wallet invitation and get started:</p>
-                <div style="margin:24px 0;">
-                  <a href="#" style="background:#6c3be4;color:#ffffff;padding:12px 24px;border-radius:6px;text-decoration:none;font-weight:bold;display:inline-block;">Accept Wallet Invitation</a>
-                </div>
-                <p style="font-size:13px;color:#a0aec0;">If you did not expect this invitation, you can safely ignore this email.</p>
-                <hr style="border:none;border-top:1px solid #edf2f7;margin:24px 0;">
-                <div style="font-size:12px;color:#a0aec0;text-align:center;">
-                  © 2015 Romit, Inc. · 535 Mission St, San Francisco, CA
-                </div>
-              </div>
-            </div>
-            </body>
-            </html>
-            ';
-
-            $mail->Body = $emailBody;
-            $mail->send();
-        } catch (Exception $e) {
-            $mailError = 'Mail Error: ' . $mail->ErrorInfo;
-        }
+        // Deliver the invitation into the simulated recipient inbox instead of
+        // sending over SMTP. Nickname kept raw so the HTML payload renders.
+        array_unshift($_SESSION['inbox'], [
+            'to'       => $share_email,
+            'nickname' => $nickname,
+            'time'     => time(),
+        ]);
     }
 }
 ?>
@@ -168,7 +149,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 .hdr-balance{background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.25);border-radius:20px;padding:4px 12px;color:#fff;font-size:.75rem;font-weight:600;}
 
 /* ── Layout ───────────────────────────────────────────────────────────────── */
-.layout{display:flex;flex:1;max-width:1000px;margin:0 auto;width:100%;padding:24px 16px;gap:20px;}
+.layout{display:flex;flex:1;max-width:1440px;margin:0 auto;width:100%;padding:24px 16px;gap:20px;align-items:flex-start;}
+@media(max-width:1100px){.layout{flex-wrap:wrap;}}
 
 /* ── Sidebar ──────────────────────────────────────────────────────────────── */
 .sidebar{width:220px;flex-shrink:0;display:flex;flex-direction:column;gap:12px;}
@@ -229,6 +211,34 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 .alert{padding:10px 14px;border-radius:7px;font-size:.78rem;font-weight:500;margin-bottom:14px;display:flex;align-items:center;gap:8px;}
 .alert-success{background:#ecfdf5;border:1px solid #a7f3d0;color:#065f46;}
 .alert-info{background:#eff6ff;border:1px solid #bfdbfe;color:#1e40af;}
+
+/* ── Gmail-style Inbox (recipient view) ───────────────────────────────────── */
+.inbox{width:400px;flex-shrink:0;background:#fff;border-radius:12px;box-shadow:0 1px 4px rgba(0,0,0,.07);overflow:hidden;align-self:stretch;display:flex;flex-direction:column;}
+@media(max-width:1100px){.inbox{width:100%;}}
+.inbox-top{display:flex;align-items:center;gap:10px;padding:14px 18px;border-bottom:1px solid #f1f3f4;}
+.inbox-glogo{font-size:1.05rem;font-weight:700;color:#5f6368;display:flex;align-items:center;gap:6px;}
+.inbox-glogo .g-m{color:#ea4335;}.inbox-glogo .g-a1{color:#fbbc05;}.inbox-glogo .g-i{color:#34a853;}.inbox-glogo .g-l{color:#4285f4;}.inbox-glogo .g-a2{color:#34a853;}.inbox-glogo .g-i2{color:#ea4335;}.inbox-glogo .g-l2{color:#fbbc05;}
+.inbox-search{flex:1;background:#eaf1fb;border-radius:8px;padding:7px 12px;font-size:.74rem;color:#80868b;display:flex;align-items:center;gap:8px;}
+.inbox-tabs{display:flex;padding:0 6px;border-bottom:1px solid #f1f3f4;}
+.inbox-tab{padding:10px 16px;font-size:.76rem;font-weight:600;color:#5f6368;border-bottom:3px solid transparent;}
+.inbox-tab.active{color:#1a73e8;border-bottom-color:#1a73e8;}
+.inbox-list{flex:1;overflow-y:auto;}
+.inbox-empty{padding:48px 24px;text-align:center;color:#9aa0a6;font-size:.82rem;}
+.inbox-empty svg{width:40px;height:40px;stroke:#dadce0;margin-bottom:12px;}
+details.mail{border-bottom:1px solid #f1f3f4;}
+summary.mail-row{list-style:none;display:flex;align-items:center;gap:12px;padding:12px 16px;cursor:pointer;transition:box-shadow .12s,background .12s;}
+summary.mail-row::-webkit-details-marker{display:none;}
+summary.mail-row:hover{box-shadow:inset 1px 0 0 #dadce0,inset -1px 0 0 #dadce0,0 1px 2px rgba(60,64,67,.15);z-index:1;}
+details.mail[open] summary.mail-row{background:#f2f6fc;font-weight:600;}
+.mail-avatar{width:36px;height:36px;border-radius:50%;background:#6c3be4;color:#fff;display:flex;align-items:center;justify-content:center;font-size:.9rem;font-weight:700;flex-shrink:0;}
+.mail-meta{flex:1;min-width:0;}
+.mail-from{font-size:.8rem;color:#202124;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.mail-subject{font-size:.76rem;color:#202124;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.mail-snippet{font-size:.72rem;color:#5f6368;}
+.mail-time{font-size:.68rem;color:#5f6368;flex-shrink:0;}
+.mail-body{padding:16px 18px 22px;background:#f8f9fb;border-top:1px solid #f1f3f4;}
+.mail-to{font-size:.72rem;color:#5f6368;margin-bottom:12px;}
+.mail-to strong{color:#202124;}
 </style>
 </head>
 <body>
@@ -364,13 +374,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
           <?php if ($share_sent): ?>
             <div class="alert alert-success">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>
-              Wallet invitation email sent to <strong><?= htmlspecialchars($share_email, ENT_QUOTES, 'UTF-8') ?></strong>.
+              Invitation delivered to <strong><?= htmlspecialchars($share_email, ENT_QUOTES, 'UTF-8') ?></strong> — check the inbox on the right.
             </div>
-            <?php if ($mailError): ?>
-            <div class="alert" style="background:#fef2f2;border:1px solid #fecaca;color:#dc2626;">
-              Email Delivery Warning: <?= htmlspecialchars($mailError, ENT_QUOTES, 'UTF-8') ?>
-            </div>
-            <?php endif; ?>
           <?php else: ?>
             <div class="alert alert-info">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
@@ -384,7 +389,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
               <label class="form-label" for="phone">Recipient Email Address</label>
               <input class="form-input" type="email" id="phone" name="phone"
                 placeholder="recipient@example.com" autocomplete="off" required>
-              <div class="form-hint">The recipient will receive a Romit wallet invitation email via SMTP.</div>
+              <div class="form-hint">The invitation will appear in the recipient inbox panel on the right.</div>
             </div>
             <button class="btn btn-success" type="submit">Send Wallet Invitation</button>
           </form>
@@ -392,6 +397,54 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
       </div>
     </div>
   </main>
+
+  <!-- Recipient Inbox (Gmail-style) -->
+  <aside class="inbox">
+    <div class="inbox-top">
+      <div class="inbox-glogo">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#ea4335" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+        <span><span class="g-m">M</span><span class="g-a1">a</span><span class="g-i">i</span><span class="g-l">l</span></span>
+      </div>
+      <div class="inbox-search">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#80868b" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        Search mail
+      </div>
+    </div>
+    <div class="inbox-tabs">
+      <div class="inbox-tab active">Primary</div>
+      <div class="inbox-tab">Promotions</div>
+      <div class="inbox-tab">Social</div>
+    </div>
+    <div class="inbox-list">
+      <?php if (empty($_SESSION['inbox'])): ?>
+        <div class="inbox-empty">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+          <div>Your inbox is empty.</div>
+          <div style="font-size:.72rem;margin-top:4px;">Send a wallet invitation to see it arrive here.</div>
+        </div>
+      <?php else: foreach ($_SESSION['inbox'] as $i => $inv): ?>
+        <details class="mail"<?= $i === 0 ? ' open' : '' ?>>
+          <summary class="mail-row">
+            <div class="mail-avatar">R</div>
+            <div class="mail-meta">
+              <div class="mail-from">Romit &lt;noreply@romit.io&gt;</div>
+              <div class="mail-subject">You have been invited to Romit!
+                <span class="mail-snippet">— A Romit wallet has been shared with you…</span>
+              </div>
+            </div>
+            <div class="mail-time"><?= date('g:i A', (int)$inv['time']) ?></div>
+          </summary>
+          <div class="mail-body">
+            <div class="mail-to">to <strong><?= htmlspecialchars($inv['to'], ENT_QUOTES, 'UTF-8') ?></strong></div>
+            <?php
+              // ⚠ nickname rendered RAW — stored HTML injection renders in the recipient's inbox
+              echo renderInviteBody($inv['nickname']);
+            ?>
+          </div>
+        </details>
+      <?php endforeach; endif; ?>
+    </div>
+  </aside>
 </div>
 
 <footer style="text-align:center;padding:16px;font-size:.7rem;color:#b0bdd0;border-top:1px solid #e8ecf0;background:#fff;margin-top:16px;">
