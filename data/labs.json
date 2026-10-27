@@ -497,12 +497,6 @@
       "access": "/subdomains/censys"
     },
     {
-      "title": "DOM XSS - document.write sink using source location.search",
-      "difficulty": "Easy",
-      "report": "",
-      "access": "/subdomains/useruploads"
-    },
-    {
       "title": "DOM XSS - HackerOne",
       "difficulty": "Medium",
       "report": "https://hackerone.com/reports/474656",
