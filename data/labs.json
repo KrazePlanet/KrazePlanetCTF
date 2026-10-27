@@ -715,12 +715,6 @@
       "difficulty": "Hard",
       "report": "https://hackerone.com/reports/3099816",
       "access": "/subdomains/manipulating"
-    },
-    {
-      "title": "Reflected XSS via Unvalidated / Open Redirect in Uber",
-      "difficulty": "Hard",
-      "report": "https://hackerone.com/reports/125791",
-      "access": "/subdomains/demonstrates"
     }
   ],
   "No Rate Limiting": [
