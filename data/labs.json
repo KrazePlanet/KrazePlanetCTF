@@ -239,12 +239,6 @@
       "access": "/subdomains/cookbook"
     },
     {
-      "title": "Reflected XSS - Path Based",
-      "difficulty": "Easy",
-      "report": "",
-      "access": "/subdomains/path-fetch"
-    },
-    {
       "title": "Reflected XSS - Script & Img Tag Filter",
       "difficulty": "Medium",
       "report": "",
@@ -575,6 +569,12 @@
       "access": "/subdomains/planet"
     },
     {
+      "title": "Reflected XSS - Path Based",
+      "difficulty": "Secure",
+      "report": "",
+      "access": "/subdomains/path-fetch"
+    },
+    {
       "title": "Reflected XSS - Cloud Instance Console",
       "difficulty": "Secure",
       "report": "",
@@ -681,24 +681,6 @@
       "access": "/subdomains/zaption"
     },
     {
-      "title": "Open Redirect on Fastly VDP",
-      "difficulty": "Hard",
-      "report": "https://hackerone.com/reports/2265413",
-      "access": "/subdomains/fastly"
-    },
-    {
-      "title": "Open redirect vulnerability in index.php",
-      "difficulty": "Hard",
-      "report": "https://hackerone.com/reports/439075",
-      "access": "/subdomains/cheers"
-    },
-    {
-      "title": "Open Redirection on Uber",
-      "difficulty": "Hard",
-      "report": "https://hackerone.com/reports/119236",
-      "access": "/subdomains/calendar"
-    },
-    {
       "title": "Open Redirect on Affirm",
       "difficulty": "Hard",
       "report": "https://hackerone.com/reports/1213580",
@@ -714,25 +696,7 @@
       "title": "Open Redirect on HackerOne Events",
       "difficulty": "Hard",
       "report": "https://hackerone.com/reports/1028345",
-      "access": "/subdomains/validation"
-    },
-    {
-      "title": "Open Redirect on HackerOne",
-      "difficulty": "Hard",
-      "report": "https://hackerone.com/reports/562417",
-      "access": "/subdomains/reviewing"
-    },
-    {
-      "title": "Open Redirect Vulnerability in OAuth Flow Leading to Potential Phishing Attack",
-      "difficulty": "Hard",
-      "report": "https://hackerone.com/reports/3099816",
-      "access": "/subdomains/manipulating"
-    },
-    {
-      "title": "Open redirect in \"Language change\"",
-      "difficulty": "Hard",
-      "report": "https://hackerone.com/reports/52035",
-      "access": "/subdomains/language"
+      "access": "/subdomains/hackevents"
     },
     {
       "title": "Open Redirect via \"next\" parameter in third-party authentication",
@@ -745,6 +709,12 @@
       "difficulty": "Hard",
       "report": "https://hackerone.com/reports/692154",
       "access": "/subdomains/vendhq"
+    },
+    {
+      "title": "Open Redirect Vulnerability in OAuth Flow Leading to Potential Phishing Attack",
+      "difficulty": "Hard",
+      "report": "https://hackerone.com/reports/3099816",
+      "access": "/subdomains/manipulating"
     },
     {
       "title": "Reflected XSS via Unvalidated / Open Redirect in Uber",

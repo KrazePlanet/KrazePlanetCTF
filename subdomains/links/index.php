@@ -1,31 +1,16 @@
 <?php
-// Lab 302 — Open Redirect via URL Path Routing (Omise)
-// Based on HackerOne Report #504751 (Omise — Severity: Low 3.3, $100 bounty)
-// Vulnerability: PHP router reads REQUEST_URI, strips /index.php, passes remainder to header("Location:")
-// Attack: index.php////bing.com/?www.omise.co/?category=interview&page=2
-//         ↑ "////bing.com/" is in the PATH — browser normalises → //bing.com/ → external redirect
+// Omise blog
 
-// ── Absolute base URL for attack links (prevents browser treating index.php as hostname) ──────
-$scheme   = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
-$labBase  = $scheme . '://' . $_SERVER['HTTP_HOST'] . '/index.php';
+// ── URL path routing ──────────────────────────────────────────────────────────
+// The front controller (.htaccess) routes every unmatched path here, keeping the
+// original request path. The router hands that path straight to the Location
+// header so legacy deep links keep resolving.
+$requestUri = $_SERVER['REQUEST_URI'];                              // e.g. ////bing.com/?... or /index.php?category=..
+$redirectPath = preg_replace('#^/index\.php#', '', $requestUri);    // drop an optional /index.php prefix
 
-// ── URL Path Routing Logic (the vulnerable part) ──────────────────────────────
-$scriptName  = $_SERVER['SCRIPT_NAME'];   // /index.php
-$requestUri  = $_SERVER['REQUEST_URI'];   // /index.php////bing.com/?www.omise.co/...
-$queryString = $_SERVER['QUERY_STRING'];  // www.omise.co/?category=interview&page=2
-
-// Extract everything after /index.php in the URL path
-$afterScript = '';
-if (strpos($requestUri, $scriptName) === 0) {
-    $remainder = substr($requestUri, strlen($scriptName));
-    // Treat as path redirect only if it has content beyond a single slash
-    // ////bing.com/ ← this is the attack payload embedded in the path
-    if (strlen($remainder) > 1 && substr($remainder, 0, 1) === '/') {
-        $afterScript = $remainder;
-    }
-}
-
-$hasRedirect = !empty($afterScript);
+// A bare blog request ("/", "/index.php", "/?category=..") has no path to follow;
+// anything else is treated as a redirect target.
+$hasRedirect = (isset($redirectPath[1]) && $redirectPath[0] === '/' && $redirectPath[1] !== '?');
 
 // ── Blog data (no database — fully stateless) ─────────────────────────────────
 $articles = [
@@ -69,11 +54,8 @@ $totalPages = max(1, ceil(count($filtered) / $perPage));
 $currentPage= min($currentPage, $totalPages);
 $pageItems  = array_slice($filtered, ($currentPage-1)*$perPage, $perPage);
 
-// ── Instant open redirect — no interstitial, no warning ──────────────────────────────
-// ⚠ VULNERABLE: ////bing.com/ passed raw to Location header
-// Browser normalises → //bing.com/ (protocol-relative) → external redirect
 if ($hasRedirect) {
-    header('Location: ' . $afterScript);
+    header('Location: ' . $redirectPath);
     exit;
 }
 ?>
@@ -157,15 +139,13 @@ a{text-decoration:none;color:inherit;}
 .om-sidebar-item-title{font-size:.8rem;color:#333;line-height:1.4;}
 .om-sidebar-item-title:hover{color:#00b777;}
 
-/* Lab attack panel */
-.om-attack-panel{background:#fff8f3;border:1px solid #fb923c;border-radius:8px;padding:20px;}
-.om-attack-title{font-size:.82rem;font-weight:700;color:#7c2d12;margin-bottom:10px;display:flex;align-items:center;gap:6px;}
-.om-attack-row{display:flex;flex-direction:column;gap:6px;margin-top:8px;}
-.om-attack-link{font-family:monospace;font-size:.72rem;background:#fff;border:1px solid #fed7aa;border-radius:4px;padding:5px 8px;color:#c2410c;word-break:break-all;cursor:pointer;display:block;}
-.om-attack-link:hover{background:#fff7ed;}
-.om-attack-label{font-size:.68rem;color:#9a3412;font-weight:600;text-transform:uppercase;letter-spacing:.4px;margin-top:6px;}
-.om-attack-blocked{background:#f0fdf4;border-color:#bbf7d0;color:#166534;}
-.om-attack-bypasses{background:#fff7ed;border-color:#fed7aa;color:#9a3412;}
+/* ── Newsletter card ──────────────────────────────────────────────────────── */
+.om-news-card{background:linear-gradient(135deg,#00b777,#009d66);border-radius:8px;padding:20px;color:#fff;}
+.om-news-title{font-size:.9rem;font-weight:700;margin-bottom:6px;}
+.om-news-text{font-size:.76rem;opacity:.9;line-height:1.5;margin-bottom:12px;}
+.om-news-form{display:flex;flex-direction:column;gap:8px;}
+.om-news-form input{border:none;border-radius:5px;padding:9px 11px;font-size:.8rem;outline:none;}
+.om-news-form button{background:#003d26;color:#fff;border:none;border-radius:5px;padding:9px;font-size:.8rem;font-weight:700;cursor:pointer;}
 
 /* ── Footer ──────────────────────────────────────────────────────────────── */
 .om-footer{background:#0d2b1c;color:#8aab98;margin-top:40px;padding:40px 24px 20px;}
@@ -295,29 +275,14 @@ a{text-decoration:none;color:inherit;}
       <?php endforeach; ?>
     </div>
 
-    <!-- Lab attack panel -->
-    <div class="om-attack-panel">
-      <div class="om-attack-title">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#7c2d12" stroke-width="2.5"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-        Lab 302 — Attack Payloads
-      </div>
-      <div style="font-size:.75rem;color:#7c2d12;line-height:1.5;margin-bottom:10px;">
-        The server router reads <code style="background:#fee2e2;padding:0 3px;border-radius:2px;">REQUEST_URI</code>, strips <code style="background:#fee2e2;padding:0 3px;border-radius:2px;">/index.php</code>, and passes the rest to <code style="background:#fee2e2;padding:0 3px;border-radius:2px;">header("Location:")</code>.<br><br>
-        <strong>Normal URL (safe):</strong>
-      </div>
-      <code class="om-attack-link om-attack-blocked">index.php?category=interview&amp;page=2</code>
-      <div class="om-attack-label" style="margin-top:12px;">⚠ Attack — external domain in PATH:</div>
-      <div class="om-attack-row">
-        <a href="<?php echo $labBase; ?>////bing.com/?www.omise.co/?category=interview&page=2" class="om-attack-link om-attack-bypasses"><?php echo htmlspecialchars($labBase); ?>////bing.com/?www.omise.co/?category=interview&amp;page=2</a>
-        <a href="<?php echo $labBase; ?>////evil.com/?www.omise.co" class="om-attack-link om-attack-bypasses"><?php echo htmlspecialchars($labBase); ?>////evil.com/?www.omise.co</a>
-        <a href="<?php echo $labBase; ?>/%2f%2f%2fbing.com%2f?www.omise.co" class="om-attack-link om-attack-bypasses"><?php echo htmlspecialchars($labBase); ?>/%2f%2f%2fbing.com%2f?www.omise.co (URL-encoded)</a>
-      </div>
-      <div style="font-size:.7rem;color:#9a3412;margin-top:10px;line-height:1.5;">
-        <strong>How:</strong> <code style="background:#fee2e2;padding:0 3px;border-radius:2px;">////bing.com/</code> in Location header → browser normalises → <code style="background:#fee2e2;padding:0 3px;border-radius:2px;">//bing.com/</code> (protocol-relative) → external redirect
-      </div>
-      <div style="margin-top:10px;padding-top:10px;border-top:1px solid #fed7aa;font-size:.7rem;color:#9a3412;">
-        📄 <a href="https://hackerone.com/reports/504751" target="_blank" style="color:#c2410c;text-decoration:underline;">HackerOne #504751</a> · Omise · $100 · Low 3.3
-      </div>
+    <!-- Newsletter -->
+    <div class="om-news-card">
+      <div class="om-news-title">Developer Newsletter</div>
+      <div class="om-news-text">Get the latest on payments, APIs and security — straight to your inbox, once a month.</div>
+      <form class="om-news-form" action="index.php" method="get">
+        <input type="email" name="email" placeholder="you@company.com">
+        <button type="submit">Subscribe</button>
+      </form>
     </div>
 
   </aside>
@@ -344,10 +309,10 @@ a{text-decoration:none;color:inherit;}
     </div>
   </div>
   <div class="om-footer-bottom">
-    <span>© 2019 Omise Co., Ltd. — Security Lab for Educational Purposes</span>
+    <span>© 2019 Omise Co., Ltd. All rights reserved.</span>
     <a href="index.php">Blog</a>
-    <a href="https://hackerone.com/reports/504751" target="_blank">HackerOne #504751</a>
-    <a href="index.php">← Back to Labs</a>
+    <a href="index.php">Privacy</a>
+    <a href="index.php">Terms</a>
   </div>
 </div>
 

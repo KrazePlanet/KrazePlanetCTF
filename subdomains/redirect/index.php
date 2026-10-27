@@ -1,306 +1,90 @@
 <?php
-// Lab 1: Basic Open Redirect - URL Parameter
-// Vulnerability: Direct redirect without validation
+// DevPulse — daily developer news
 
-$redirect_url = $_GET['url'] ?? '';
-
-if (!empty($redirect_url)) {
-    // Vulnerable: No validation of the redirect URL
-    header("Location: " . $redirect_url);
-    exit();
+// Outbound links are routed through the site so clicks can be counted before the
+// reader is sent on to the original article. The destination comes straight from
+// the ?url= parameter.
+$url = $_GET['url'] ?? '';
+if ($url !== '') {
+    header('Location: ' . $url);
+    exit;
 }
+
+$stories = [
+    ['title' => 'PostgreSQL 17 ships with faster vacuum and incremental backups',
+     'source' => 'postgresql.org', 'url' => 'https://www.postgresql.org/about/news/',
+     'snippet' => 'The latest release focuses on operational wins: a rewritten vacuum, incremental base backups, and big improvements to high-concurrency write workloads.',
+     'tag' => 'Databases', 'time' => '2h ago'],
+    ['title' => 'A practical guide to HTTP caching headers in 2026',
+     'source' => 'developer.mozilla.org', 'url' => 'https://developer.mozilla.org/en-US/docs/Web/HTTP/Caching',
+     'snippet' => 'Cache-Control, ETag, and the stale-while-revalidate directive explained with real request/response traces you can copy.',
+     'tag' => 'Web', 'time' => '5h ago'],
+    ['title' => 'Rust 1.84 stabilises async closures',
+     'source' => 'blog.rust-lang.org', 'url' => 'https://blog.rust-lang.org/',
+     'snippet' => 'Async closures land on stable, closing a long-standing ergonomics gap for people writing async-heavy libraries and services.',
+     'tag' => 'Languages', 'time' => '8h ago'],
+    ['title' => 'How we cut our Kubernetes bill by 40% without losing capacity',
+     'source' => 'engineering.example.com', 'url' => 'https://kubernetes.io/blog/',
+     'snippet' => 'Right-sizing requests, bin-packing with topology spread, and moving batch jobs to spot nodes — the numbers behind each change.',
+     'tag' => 'Infra', 'time' => '11h ago'],
+    ['title' => 'The case for boring technology, revisited',
+     'source' => 'news.ycombinator.com', 'url' => 'https://news.ycombinator.com/',
+     'snippet' => 'Choosing well-understood tools is still the highest-leverage decision most teams can make. A look at where the idea holds and where it breaks.',
+     'tag' => 'Opinion', 'time' => '1d ago'],
+];
 ?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LinkDash — URL Shortener & Link Management</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    <style>
-        :root {
-            --primary: #0d9488;
-            --primary-dark: #0f766e;
-            --primary-light: #ccfbf1;
-            --accent: #f59e0b;
-            --text-dark: #1f2937;
-            --text-muted: #6b7280;
-            --border: #e5e7eb;
-            --bg-white: #ffffff;
-            --bg-soft: #f0fdfa;
-            --shadow: 0 4px 24px rgba(13,148,136,0.12);
-            --radius: 12px;
-        }
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
-            background: var(--bg-white);
-            color: var(--text-dark);
-            line-height: 1.6;
-        }
-        a { text-decoration: none; }
-
-        /* NAV */
-        .navbar-custom {
-            padding: 16px 0;
-            background: var(--bg-white);
-            border-bottom: 1px solid var(--border);
-            position: sticky;
-            top: 0;
-            z-index: 100;
-        }
-        .navbar-custom .container {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            max-width: 1100px;
-            margin: 0 auto;
-            padding: 0 24px;
-        }
-        .logo {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-size: 22px;
-            font-weight: 700;
-            color: var(--primary);
-        }
-        .logo i { font-size: 24px; }
-        .nav-links { display: flex; align-items: center; gap: 28px; }
-        .nav-links a {
-            font-size: 14px;
-            color: var(--text-muted);
-            font-weight: 500;
-            transition: color 0.2s;
-        }
-        .nav-links a:hover { color: var(--primary); }
-        .btn-signup {
-            background: var(--primary);
-            color: #fff;
-            border: none;
-            padding: 8px 20px;
-            border-radius: 6px;
-            font-size: 14px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-        .btn-signup:hover {
-            background: var(--primary-dark);
-            transform: translateY(-1px);
-            box-shadow: 0 4px 12px rgba(13,148,136,0.3);
-        }
-
-        /* HERO */
-        .hero {
-            text-align: center;
-            padding: 80px 24px 60px;
-            background: linear-gradient(180deg, var(--bg-soft) 0%, var(--bg-white) 100%);
-        }
-        .hero h1 {
-            font-size: 44px;
-            font-weight: 800;
-            color: var(--text-dark);
-            margin-bottom: 14px;
-            letter-spacing: -0.5px;
-        }
-        .hero h1 span { color: var(--primary); }
-        .hero p {
-            font-size: 17px;
-            color: var(--text-muted);
-            max-width: 530px;
-            margin: 0 auto 36px;
-        }
-
-        .url-box {
-            max-width: 640px;
-            margin: 0 auto;
-            background: var(--bg-white);
-            border: 1px solid var(--border);
-            border-radius: var(--radius);
-            padding: 6px;
-            display: flex;
-            align-items: center;
-            box-shadow: var(--shadow);
-        }
-        .url-box input {
-            flex: 1;
-            border: none;
-            padding: 14px 18px;
-            font-size: 15px;
-            outline: none;
-            background: transparent;
-            color: var(--text-dark);
-        }
-        .url-box input::placeholder { color: #9ca3af; }
-        .url-box button {
-            background: var(--primary);
-            color: #fff;
-            border: none;
-            padding: 12px 28px;
-            border-radius: 8px;
-            font-size: 15px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s;
-            white-space: nowrap;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-        .url-box button:hover {
-            background: var(--primary-dark);
-            transform: translateY(-1px);
-        }
-
-        .hero-stats {
-            display: flex;
-            justify-content: center;
-            gap: 48px;
-            margin-top: 48px;
-        }
-        .stat-item { text-align: center; }
-        .stat-item .num {
-            font-size: 28px;
-            font-weight: 800;
-            color: var(--primary);
-        }
-        .stat-item .label {
-            font-size: 13px;
-            color: var(--text-muted);
-            margin-top: 2px;
-        }
-
-        /* FEATURES */
-        .features {
-            padding: 80px 24px;
-            max-width: 1100px;
-            margin: 0 auto;
-        }
-        .features h2 {
-            text-align: center;
-            font-size: 30px;
-            font-weight: 700;
-            margin-bottom: 48px;
-        }
-        .feat-grid {
-            display: grid;
-            grid-template-columns: repeat(3,1fr);
-            gap: 28px;
-        }
-        @media (max-width: 768px) {
-            .feat-grid { grid-template-columns: 1fr; }
-            .hero h1 { font-size: 32px; }
-            .hero-stats { gap: 24px; flex-wrap: wrap; }
-        }
-        .feat-card {
-            border: 1px solid var(--border);
-            border-radius: var(--radius);
-            padding: 28px;
-            text-align: center;
-            transition: box-shadow 0.3s, transform 0.2s;
-            background: var(--bg-white);
-        }
-        .feat-card:hover {
-            box-shadow: var(--shadow);
-            transform: translateY(-3px);
-        }
-        .feat-card .icon {
-            width: 56px; height: 56px;
-            border-radius: 14px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 0 auto 16px;
-            font-size: 22px;
-            color: #fff;
-        }
-        .feat-card h3 { font-size: 17px; font-weight: 600; margin-bottom: 8px; }
-        .feat-card p { font-size: 13px; color: var(--text-muted); line-height: 1.5; }
-
-        /* FOOTER */
-        .footer {
-            text-align: center;
-            padding: 24px;
-            border-top: 1px solid var(--border);
-            font-size: 13px;
-            color: var(--text-muted);
-            background: var(--bg-white);
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DevPulse — Daily developer news</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--accent:#e11d48;--ink:#18181b;--muted:#71717a;--line:#e4e4e7;--bg:#fafafa;--white:#fff;}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);color:var(--ink);line-height:1.6;}
+a{text-decoration:none;color:inherit;}
+.top{background:var(--white);border-bottom:1px solid var(--line);position:sticky;top:0;z-index:10;}
+.top-in{max-width:760px;margin:0 auto;padding:16px 20px;display:flex;align-items:center;gap:20px;}
+.logo{font-size:20px;font-weight:800;letter-spacing:-.4px;display:flex;align-items:center;gap:8px;}
+.logo .dot{width:11px;height:11px;border-radius:50%;background:var(--accent);display:inline-block;}
+.top-nav{display:flex;gap:18px;margin-left:auto;font-size:14px;font-weight:500;color:var(--muted);}
+.top-nav a:hover{color:var(--ink);}
+.wrap{max-width:760px;margin:0 auto;padding:28px 20px 60px;}
+.lead{font-size:13px;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;font-weight:600;margin-bottom:18px;}
+.story{background:var(--white);border:1px solid var(--line);border-radius:12px;padding:20px 22px;margin-bottom:16px;transition:box-shadow .15s;}
+.story:hover{box-shadow:0 6px 24px rgba(0,0,0,.06);}
+.story-meta{display:flex;align-items:center;gap:10px;font-size:12.5px;color:var(--muted);margin-bottom:9px;}
+.tag{background:#fef2f2;color:var(--accent);font-weight:600;font-size:11.5px;padding:2px 9px;border-radius:20px;}
+.story h2{font-size:18px;font-weight:700;line-height:1.35;margin-bottom:8px;letter-spacing:-.2px;}
+.story h2 a:hover{color:var(--accent);}
+.story p{font-size:14.5px;color:#3f3f46;margin-bottom:14px;}
+.read{display:inline-flex;align-items:center;gap:6px;font-size:13.5px;font-weight:600;color:var(--accent);}
+.read:hover{gap:9px;}
+.foot{max-width:760px;margin:0 auto;padding:24px 20px 40px;font-size:13px;color:var(--muted);text-align:center;border-top:1px solid var(--line);}
+</style>
 </head>
 <body>
+<header class="top">
+  <div class="top-in">
+    <span class="logo"><span class="dot"></span>DevPulse</span>
+    <nav class="top-nav"><a href="/">Top</a><a href="/">New</a><a href="/">Jobs</a><a href="/">About</a></nav>
+  </div>
+</header>
 
-    <nav class="navbar-custom">
-        <div class="container">
-            <a href="#" class="logo"><i class="fas fa-link"></i>LinkDash</a>
-            <div class="nav-links">
-                <a href="#">Features</a>
-                <a href="#">Pricing</a>
-                <a href="#">API</a>
-                <a href="#">Login</a>
-                <button class="btn-signup">Sign Up Free</button>
-            </div>
-        </div>
-    </nav>
+<main class="wrap">
+  <div class="lead">Today's top stories</div>
+  <?php foreach ($stories as $s): ?>
+  <article class="story">
+    <div class="story-meta"><span class="tag"><?php echo htmlspecialchars($s['tag']); ?></span><span><?php echo htmlspecialchars($s['source']); ?></span><span>·</span><span><?php echo htmlspecialchars($s['time']); ?></span></div>
+    <h2><a href="/?url=<?php echo urlencode($s['url']); ?>"><?php echo htmlspecialchars($s['title']); ?></a></h2>
+    <p><?php echo htmlspecialchars($s['snippet']); ?></p>
+    <a class="read" href="/?url=<?php echo urlencode($s['url']); ?>">Read at <?php echo htmlspecialchars($s['source']); ?> &rarr;</a>
+  </article>
+  <?php endforeach; ?>
+</main>
 
-    <section class="hero">
-        <h1>Shorten links. <span>Grow smarter.</span></h1>
-        <p>LinkDash transforms your long URLs into short, trackable links. Share them anywhere and see who clicks.</p>
-
-        <div class="url-box">
-            <input type="text" id="urlInput" placeholder="Paste your long URL here..." value="<?php echo htmlspecialchars($redirect_url ?: ''); ?>">
-            <button onclick="window.location.href='?url='+encodeURIComponent(document.getElementById('urlInput').value)"><i class="fas fa-bolt"></i> Shorten</button>
-        </div>
-
-        <div class="hero-stats">
-            <div class="stat-item"><div class="num">2.4M</div><div class="label">Links Created</div></div>
-            <div class="stat-item"><div class="num">847M</div><div class="label">Clicks Tracked</div></div>
-            <div class="stat-item"><div class="num">98.6%</div><div class="label">Uptime</div></div>
-        </div>
-    </section>
-
-    <section class="features">
-        <h2>Everything you need to manage links</h2>
-        <div class="feat-grid">
-            <div class="feat-card">
-                <div class="icon" style="background:linear-gradient(135deg,#0d9488,#14b8a6);"><i class="fas fa-chart-line"></i></div>
-                <h3>Real-Time Analytics</h3>
-                <p>Track clicks, geographic data, device types, and referral sources for every link you share.</p>
-            </div>
-            <div class="feat-card">
-                <div class="icon" style="background:linear-gradient(135deg,#2563eb,#3b82f6);"><i class="fas fa-globe"></i></div>
-                <h3>Custom Domains</h3>
-                <p>Use your own domain for branded short links that build trust and increase click-through rates.</p>
-            </div>
-            <div class="feat-card">
-                <div class="icon" style="background:linear-gradient(135deg,#7c3aed,#8b5cf6);"><i class="fas fa-qrcode"></i></div>
-                <h3>QR Code Generator</h3>
-                <p>Generate QR codes for any shortened link — perfect for print, packaging, and offline campaigns.</p>
-            </div>
-            <div class="feat-card">
-                <div class="icon" style="background:linear-gradient(135deg,#f59e0b,#fbbf24);"><i class="fas fa-shield-alt"></i></div>
-                <h3>Link Rotation</h3>
-                <p>Set up rotating destination URLs for A/B testing or traffic distribution across multiple pages.</p>
-            </div>
-            <div class="feat-card">
-                <div class="icon" style="background:linear-gradient(135deg,#ef4444,#f87171);"><i class="fas fa-clock"></i></div>
-                <h3>Expiration Rules</h3>
-                <p>Set automatic expiration dates for time-sensitive campaigns. Links self-disable after the set date.</p>
-            </div>
-            <div class="feat-card">
-                <div class="icon" style="background:linear-gradient(135deg,#0d9488,#14b8a6);"><i class="fas fa-plug"></i></div>
-                <h3>API Access</h3>
-                <p>Integrate LinkDash into your workflow with our REST API. Bulk create, update, and analyze links.</p>
-            </div>
-        </div>
-    </section>
-
-    <footer class="footer">
-        &copy; 2026 LinkDash. All rights reserved. | URL Shortener &amp; Link Management Platform
-    </footer>
-
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<footer class="foot">&copy; 2026 DevPulse — curated developer news, updated daily.</footer>
 </body>
 </html>

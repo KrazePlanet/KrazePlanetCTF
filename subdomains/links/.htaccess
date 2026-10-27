@@ -1,0 +1,8 @@
+RewriteEngine On
+
+# Front controller: route any request that isn't a real file or directory to
+# index.php, keeping the original request path intact so the blog's router can
+# resolve it.
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^ index.php [L]

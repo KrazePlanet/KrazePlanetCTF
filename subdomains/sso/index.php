@@ -1,38 +1,25 @@
 <?php
-// Lab 304 — Open Redirect via \@ Validator Bypass (Tumblr / Automattic)
-// Based on HackerOne Report #2812583 (Automattic/Tumblr — Low, Resolved Nov 4, 2024)
-// Vulnerability: parse_url() sees www.tumblr.com as host for "evil.com\@www.tumblr.com"
-//               but browser normalises \ → / and navigates to evil.com instead
+// Tumblr dashboard
 
-// ── Base URL for attack panel links (relative to current page) ─────────────
 $labBase = '';
 
 // ── Logout + redirect handler ──────────────────────────────────────────────
 $action     = $_GET['action'] ?? '';
 $redirectTo = $_GET['redirect_to'] ?? '';
-$blocked    = false;
-$blockedUrl = '';
-$blockedHost = '';
 
 if ($action === 'logout' && $redirectTo !== '') {
-    // Developer's validator — uses parse_url() to extract host
-    // Intended to only allow same-domain redirects after logout
+    // Only same-site destinations are allowed after logout: the host is pulled
+    // out with parse_url() and checked against an allow-list.
     $host = parse_url($redirectTo, PHP_URL_HOST);
-
     $allowedHosts = ['tumblr.com', 'www.tumblr.com'];
 
     if (in_array($host, $allowedHosts, true)) {
-        // ⚠ VULNERABLE: "evil.com\@www.tumblr.com" passes this check
-        // parse_url() treats @ as userinfo separator → host = www.tumblr.com ✓
-        // but browser normalises \ to / → navigates to evil.com
         header('Location: ' . $redirectTo);
         exit;
-    } else {
-        // Validator correctly blocks raw external URLs (e.g. ?redirect_to=https://evil.com)
-        $blocked    = true;
-        $blockedUrl = $redirectTo;
-        $blockedHost = $host ?? '(none)';
     }
+    // Anything else just goes back to the dashboard.
+    header('Location: /');
+    exit;
 }
 
 // ── Blog post data ─────────────────────────────────────────────────────────
@@ -64,7 +51,7 @@ $posts = [
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title><?php echo $blocked ? 'Redirect Blocked — Tumblr' : 'Tumblr — Dashboard'; ?></title>
+<title>Tumblr — Dashboard</title>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
 body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;font-size:14px;background:#f2f2f2;color:#222;}
@@ -84,22 +71,6 @@ a{text-decoration:none;color:inherit;}
 .tb-avatar-menu a:last-child{border-bottom:none;color:#e63946;}
 .tb-avatar-menu a:hover{background:#f8f8f8;}
 .tb-new-post{background:#ff4500;color:#fff;border:none;border-radius:20px;padding:7px 16px;font-size:.78rem;font-weight:700;cursor:pointer;font-family:inherit;}
-
-/* ── Blocked Banner ───────────────────────────────────────────────────────── */
-.tb-blocked-wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;background:#f2f2f2;padding:24px;}
-.tb-blocked-card{background:#fff;border-radius:10px;box-shadow:0 4px 20px rgba(0,0,0,.1);max-width:580px;width:100%;overflow:hidden;}
-.tb-blocked-header{background:#35465c;padding:20px 24px;color:#fff;}
-.tb-blocked-header h2{font-size:1.1rem;font-weight:800;margin-bottom:4px;}
-.tb-blocked-header p{font-size:.8rem;opacity:.8;}
-.tb-blocked-body{padding:24px;}
-.tb-blocked-row{margin-bottom:16px;}
-.tb-blocked-label{font-size:.68rem;font-weight:700;color:#888;text-transform:uppercase;letter-spacing:.6px;margin-bottom:6px;}
-.tb-blocked-val{background:#f8f8f8;border:1px solid #e0e0e0;border-radius:5px;padding:9px 12px;font-family:monospace;font-size:.8rem;color:#333;word-break:break-all;}
-.tb-blocked-val.bad{background:#fef2f2;border-color:#fca5a5;color:#991b1b;}
-.tb-blocked-val.good{background:#f0fdf4;border-color:#bbf7d0;color:#166534;}
-.tb-blocked-info{background:#eff6ff;border:1px solid #bfdbfe;border-radius:6px;padding:14px;font-size:.8rem;color:#1e40af;line-height:1.6;}
-.tb-blocked-info code{background:#dbeafe;padding:0 4px;border-radius:3px;}
-.tb-back-btn{display:inline-block;margin-top:16px;background:#35465c;color:#fff;border-radius:6px;padding:9px 18px;font-size:.82rem;font-weight:700;}
 
 /* ── Layout ──────────────────────────────────────────────────────────────── */
 .tb-layout{max-width:1060px;margin:0 auto;padding:24px 16px;display:grid;grid-template-columns:1fr 280px;gap:24px;align-items:start;}
@@ -139,24 +110,6 @@ a{text-decoration:none;color:inherit;}
 .tb-blog-stat-val{font-weight:700;color:#35465c;}
 .tb-logout-btn{display:block;width:100%;margin-top:14px;text-align:center;background:#35465c;color:#fff;border-radius:4px;padding:9px;font-size:.78rem;font-weight:700;}
 .tb-logout-btn:hover{background:#2c3a4d;}
-
-/* ── Attack Panel ────────────────────────────────────────────────────────── */
-.tb-attack{background:#fff8f3;border:1px solid #fb923c;border-radius:4px;padding:16px;}
-.tb-attack-title{font-size:.78rem;font-weight:700;color:#7c2d12;margin-bottom:8px;display:flex;align-items:center;gap:5px;}
-.tb-attack-desc{font-size:.72rem;color:#7c2d12;line-height:1.5;margin-bottom:10px;}
-.tb-attack-label{font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.4px;margin-top:10px;margin-bottom:4px;}
-.tb-attack-label.safe{color:#166534;}
-.tb-attack-label.blocked{color:#991b1b;}
-.tb-attack-label.bypass{color:#92400e;}
-.tb-attack-code{font-family:monospace;font-size:.64rem;border-radius:4px;padding:6px 8px;word-break:break-all;display:block;margin:3px 0;}
-.tb-attack-code.safe{background:#f0fdf4;border:1px solid #bbf7d0;color:#166534;}
-.tb-attack-code.blocked{background:#fef2f2;border:1px solid #fca5a5;color:#991b1b;}
-.tb-attack-code.bypass{background:#fff7ed;border:1px solid #fed7aa;color:#c2410c;}
-.tb-attack-code a{color:inherit;display:block;}
-.tb-attack-note{font-size:.68rem;color:#9a3412;margin-top:10px;line-height:1.5;}
-.tb-attack-key{background:#fef3c7;border:1px solid #fde68a;border-radius:4px;padding:8px;font-size:.7rem;color:#78350f;margin-top:10px;line-height:1.5;}
-.tb-attack-ref{margin-top:10px;padding-top:10px;border-top:1px solid #fed7aa;font-size:.67rem;color:#9a3412;}
-.tb-attack-ref a{color:#c2410c;text-decoration:underline;}
 </style>
 </head>
 <body>
@@ -184,39 +137,6 @@ a{text-decoration:none;color:inherit;}
   </div>
 </div>
 
-<?php if ($blocked): ?>
-<!-- ── Redirect Blocked Page ──────────────────────────────────────────────── -->
-<div class="tb-blocked-wrap">
-  <div class="tb-blocked-card">
-    <div class="tb-blocked-header">
-      <h2>🛡 Redirect Blocked</h2>
-      <p>The validator detected an unauthorized redirect destination</p>
-    </div>
-    <div class="tb-blocked-body">
-      <div class="tb-blocked-row">
-        <div class="tb-blocked-label">Attempted redirect_to value</div>
-        <div class="tb-blocked-val bad"><?php echo htmlspecialchars($blockedUrl); ?></div>
-      </div>
-      <div class="tb-blocked-row">
-        <div class="tb-blocked-label">Host extracted by parse_url()</div>
-        <div class="tb-blocked-val bad"><?php echo htmlspecialchars($blockedHost); ?> — not in allowed list</div>
-      </div>
-      <div class="tb-blocked-row">
-        <div class="tb-blocked-label">Allowed hosts</div>
-        <div class="tb-blocked-val good">tumblr.com, www.tumblr.com</div>
-      </div>
-      <div class="tb-blocked-info">
-        <strong>The validator works for raw external URLs.</strong><br>
-        <code>parse_url('<?php echo htmlspecialchars($blockedUrl); ?>', PHP_URL_HOST)</code>
-        → <code><?php echo htmlspecialchars($blockedHost); ?></code> → blocked ✓<br><br>
-        But try the <strong>bypass</strong> — use <code>evil.com\@www.tumblr.com</code> and the same validator will <em>pass it</em> while the browser goes to evil.com.
-      </div>
-      <a href="<?php echo $labBase; ?>" class="tb-back-btn">← Back to Dashboard</a>
-    </div>
-  </div>
-</div>
-
-<?php else: ?>
 <!-- ── Dashboard ──────────────────────────────────────────────────────────── -->
 <div class="tb-layout">
 
@@ -281,9 +201,7 @@ a{text-decoration:none;color:inherit;}
 
 <!-- Footer -->
 <div style="background:#35465c;color:rgba(255,255,255,.4);padding:20px;text-align:center;font-size:.72rem;margin-top:24px;">
-  © 2024 Tumblr Inc. — Security Lab for Educational Purposes
+  © 2024 Tumblr Inc.
 </div>
-
-<?php endif; ?>
 </body>
 </html>
