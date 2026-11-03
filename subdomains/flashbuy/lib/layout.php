@@ -60,7 +60,8 @@ a{color:var(--p2);text-decoration:none}a:hover{color:var(--p)}
 .deal-card:hover{border-color:var(--p);box-shadow:0 8px 28px rgba(249,115,22,.15);transform:translateY(-3px)}
 .deal-badge{position:absolute;top:10px;left:10px;background:var(--p);color:#fff;font-size:.6rem;font-weight:800;padding:3px 9px;border-radius:4px;text-transform:uppercase;letter-spacing:.5px;z-index:1}
 .limit-badge{position:absolute;top:10px;right:10px;background:var(--dark);color:#fff;font-size:.6rem;font-weight:700;padding:3px 8px;border-radius:4px;z-index:1}
-.deal-thumb{padding:28px 20px;display:flex;align-items:center;justify-content:center;font-size:5rem;background:linear-gradient(135deg,#fff8f3,#fff3e8)}
+.deal-thumb{height:200px;display:flex;align-items:center;justify-content:center;font-size:5rem;background:linear-gradient(135deg,#fff8f3,#fff3e8);overflow:hidden}
+.deal-thumb img{width:100%;height:100%;object-fit:cover;display:block}
 .deal-info{padding:14px 16px;flex:1;display:flex;flex-direction:column;gap:4px}
 .deal-brand{font-size:.68rem;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.6px}
 .deal-name{font-size:.9rem;font-weight:700;color:var(--text);line-height:1.35}
@@ -196,7 +197,11 @@ function deal_card(array $p, bool $bought=false): void {
   <?php if($p['deal_label']):?><div class="deal-badge"><?=h($p['deal_label'])?></div><?php endif;?>
   <div class="limit-badge">Limit: <?=$p['limit_per_user']?>/customer</div>
   <a href="<?=url("product/{$p['id']}")?>">
-    <div class="deal-thumb"><?=h($p['emoji'])?></div>
+    <div class="deal-thumb">
+      <?php if(!empty($p['image_url'])):?>
+      <img src="<?=h($p['image_url'])?>" alt="<?=h($p['name'])?>" loading="lazy">
+      <?php else:?><?=h($p['emoji'])?><?php endif;?>
+    </div>
   </a>
   <div class="deal-info">
     <div class="deal-brand"><?=h($p['brand'])?> · <?=h($p['category'])?></div>

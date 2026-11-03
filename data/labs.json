@@ -783,18 +783,6 @@
       "difficulty": "Hard",
       "report": "https://hackerone.com/reports/1060541",
       "access": "/subdomains/resend"
-    },
-    {
-      "title": "Exploiting Rate Limit Bypass in Email Change Functionality",
-      "difficulty": "Hard",
-      "report": "",
-      "access": "/subdomains/infomaniak"
-    },
-    {
-      "title": "Rate Limit Bypass in Recovery Email Change Functionality.",
-      "difficulty": "Hard",
-      "report": "",
-      "access": "/subdomains/infomaniak-recovery"
     }
   ],
   "Race Condition": [

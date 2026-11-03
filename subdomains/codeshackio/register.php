@@ -60,7 +60,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 // Send OTP email
                 $mail = new PHPMailer(true);
                 try {
-                    configureKrazeMailer($mail, 'noreply@codeshack.io', 'CodeShack');
+                    configureKrazeMailer($mail, null, 'CodeShack');
+                    $mail->addReplyTo('noreply@codeshack.io', 'CodeShack');
                     $mail->addAddress($email_val, $username_val);
                     $mail->isHTML(true);
                     $mail->Subject = 'Your Verification Code - CodeShack';

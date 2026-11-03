@@ -1,10 +1,27 @@
 <?php
 session_start();
 
-// NOTE: SMTP delivery removed for this lab. Invitations are rendered into a
-// simulated "recipient inbox" (Gmail-style panel) on the right instead of
-// being emailed. The nickname is still echoed raw into the message body, so a
-// stored HTML-injection payload renders right there in the recipient's inbox.
+if (empty($_SESSION['romit_user_id'])) {
+    header('Location: login.php');
+    exit;
+}
+
+require_once __DIR__ . '/db.php';
+require_once __DIR__ . '/mailer.php';
+
+// Load logged-in user
+$current_user = null;
+$stmt_u = $conn->prepare("SELECT id, email, nickname FROM lab57914_users WHERE id = ?");
+$stmt_u->bind_param('i', $_SESSION['romit_user_id']);
+$stmt_u->execute();
+$res_u = $stmt_u->get_result();
+$current_user = $res_u->fetch_assoc();
+$stmt_u->close();
+if (!$current_user) {
+    session_destroy();
+    header('Location: login.php');
+    exit;
+}
 
 /**
  * Build the invitation email HTML body. $nickname is echoed RAW — intentionally
@@ -33,95 +50,33 @@ function renderInviteBody($nickname) {
     </div>';
 }
 
-// ── Database (auto-created on first run) ────────────────────────────────────
-mysqli_report(MYSQLI_REPORT_OFF);
-$db       = null;
-$dbError  = '';
-$database = 'KrazePlanet_DB';
-
-$conn = @mysqli_connect('127.0.0.1', 'root', '') ?: @mysqli_connect((getenv('DB_HOST') ?: (file_exists('/.dockerenv') ? 'krazeplanet' : '127.0.0.1')), 'root', '');
-if ($conn) {
-    @mysqli_query($conn, "CREATE DATABASE IF NOT EXISTS `$database` DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci");
-    @mysqli_select_db($conn, $database);
-    @mysqli_query($conn, "CREATE TABLE IF NOT EXISTS lab57914_users (
-        id INT AUTO_INCREMENT PRIMARY KEY,
-        email VARCHAR(255) NOT NULL UNIQUE,
-        nickname TEXT,
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-    )");
-    @mysqli_query($conn, "CREATE TABLE IF NOT EXISTS lab57914_invites (
-        id INT AUTO_INCREMENT PRIMARY KEY,
-        from_email VARCHAR(255) DEFAULT '',
-        to_email VARCHAR(255) DEFAULT '',
-        nickname TEXT,
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-    )");
-    @mysqli_query($conn, "INSERT IGNORE INTO lab57914_users (email, nickname) VALUES ('user@romit.io', 'Romit')");
-    $db = $conn;
-} else {
-    $dbError = 'DB connection failed: ' . mysqli_connect_error();
-}
-
-// ── Handle Nickname Save ────────────────────────────────────────────────────
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'save_nickname') {
-    // ⚠ VULNERABLE — nickname stored raw, no sanitization
-    $nickname_raw = $_POST['nickname'] ?? '';
-    $_SESSION['nickname'] = $nickname_raw;
-    if ($db) {
-        $stmt = mysqli_prepare($db, "UPDATE lab57914_users SET nickname = ? WHERE email = 'user@romit.io'");
-        if ($stmt) {
-            mysqli_stmt_bind_param($stmt, 's', $nickname_raw);
-            mysqli_stmt_execute($stmt);
-            mysqli_stmt_close($stmt);
-        }
-    }
-    header('Location: ' . $_SERVER['PHP_SELF'] . '?saved=1#settings');
-    exit;
-}
+// ── DB is already connected via config/database.php ─────────────────────────
+$db      = $conn;
+$dbError = $conn ? '' : 'DB connection failed.';
 
 // ── Handle Share Wallet ─────────────────────────────────────────────────────
-$share_sent = false;
-$share_email = '';
+$share_result = null; // true = sent, false = failed, null = not attempted
+$share_email  = '';
 
-if (!isset($_SESSION['inbox'])) {
-    $_SESSION['inbox'] = [];
-}
-
-// Load persisted nickname (DB is source of truth, falls back to session/default)
-$nickname = $_SESSION['nickname'] ?? '';
-if ($db) {
-    $res = mysqli_query($db, "SELECT nickname FROM lab57914_users WHERE email = 'user@romit.io' LIMIT 1");
-    if ($res && ($row = mysqli_fetch_assoc($res)) && $row['nickname'] !== null && $row['nickname'] !== '') {
-        $nickname = $row['nickname'];
-    }
-}
-if ($nickname === '') {
-    $nickname = 'Romit';
-}
-$saved = isset($_GET['saved']);
+// Nickname from DB (source of truth)
+$nickname = $current_user['nickname'] !== null && $current_user['nickname'] !== ''
+    ? $current_user['nickname'] : 'Romit';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'share_wallet') {
-    $share_sent = true;
     $share_email = trim($_POST['phone'] ?? '');
 
-    // Persist invitation record (nickname stored raw — intentionally vulnerable)
-    if ($db && $share_email) {
-        $stmt = mysqli_prepare($db, "INSERT INTO lab57914_invites (from_email, to_email, nickname) VALUES ('user@romit.io', ?, ?)");
-        if ($stmt) {
-            mysqli_stmt_bind_param($stmt, 'ss', $share_email, $nickname);
-            mysqli_stmt_execute($stmt);
-            mysqli_stmt_close($stmt);
-        }
-    }
-
     if ($share_email) {
-        // Deliver the invitation into the simulated recipient inbox instead of
-        // sending over SMTP. Nickname kept raw so the HTML payload renders.
-        array_unshift($_SESSION['inbox'], [
-            'to'       => $share_email,
-            'nickname' => $nickname,
-            'time'     => time(),
-        ]);
+        // Persist invitation record (nickname stored raw — intentionally vulnerable)
+        if ($db) {
+            $stmt = mysqli_prepare($db, "INSERT INTO lab57914_invites (from_email, to_email, nickname) VALUES (?, ?, ?)");
+            if ($stmt) {
+                mysqli_stmt_bind_param($stmt, 'sss', $current_user['email'], $share_email, $nickname);
+                mysqli_stmt_execute($stmt);
+                mysqli_stmt_close($stmt);
+            }
+        }
+        // Send real invitation email — nickname is embedded RAW (the vulnerability)
+        $share_result = sendWalletInvite($share_email, $nickname);
     }
 }
 ?>
@@ -255,11 +210,15 @@ details.mail[open] summary.mail-row{background:#f2f6fc;font-weight:600;}
     <a href="#">Dashboard</a>
     <a href="#">Send</a>
     <a href="#">Request</a>
-    <a href="#" class="active">Settings</a>
+    <a href="profile.php">Profile</a>
+    <a href="index.php" class="active">Settings</a>
   </nav>
   <div class="header-right">
     <span class="hdr-balance">$124.50</span>
-    <div class="hdr-avatar">U</div>
+    <div class="hdr-avatar" title="<?= htmlspecialchars($current_user['email'], ENT_QUOTES) ?>">
+      <?= htmlspecialchars(strtoupper(substr($current_user['email'], 0, 1)), ENT_QUOTES) ?>
+    </div>
+    <a href="logout.php" style="color:rgba(255,255,255,.75);font-size:.75rem;font-weight:600;text-decoration:none;margin-left:4px;padding:5px 10px;border-radius:4px;transition:background .15s;" onmouseover="this.style.background='rgba(255,255,255,.15)'" onmouseout="this.style.background=''">Log out</a>
   </div>
 </header>
 
@@ -281,7 +240,8 @@ details.mail[open] summary.mail-row{background:#f2f6fc;font-weight:600;}
       <a class="snav-item" href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>Dashboard</a>
       <a class="snav-item" href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></svg>Send Money</a>
       <a class="snav-item" href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><polyline points="19 12 12 19 5 12"/></svg>Request Money</a>
-      <a class="snav-item active" href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>Settings</a>
+      <a class="snav-item" href="profile.php"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>Profile</a>
+      <a class="snav-item active" href="index.php"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>Settings</a>
     </div>
 
     <div class="sidebar-tx">
@@ -307,58 +267,11 @@ details.mail[open] summary.mail-row{background:#f2f6fc;font-weight:600;}
   <!-- Main -->
   <main class="main">
     <div>
-      <h1 class="page-title">Account Settings</h1>
-      <p class="page-sub">Manage your Romit profile and wallet sharing preferences.</p>
+      <h1 class="page-title">Settings</h1>
+      <p class="page-sub">Share your Romit wallet with friends and family.</p>
     </div>
 
     <div style="display:flex;flex-direction:column;gap:16px;">
-      <!-- Profile Settings card -->
-      <div class="card" id="settings">
-        <div class="card-header">
-          <div class="card-header-icon" style="background:#f3f0fd;">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#6c3be4" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-          </div>
-          <div>
-            <div class="card-header-title">Profile Settings</div>
-            <div class="card-header-sub">Your display name shown to recipients</div>
-          </div>
-        </div>
-        <div class="card-body">
-          <?php if ($saved): ?>
-          <div class="alert alert-success">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>
-            Nickname saved!
-          </div>
-          <?php endif; ?>
-          <?php if ($dbError): ?>
-          <div class="alert" style="background:#fef2f2;border:1px solid #fecaca;color:#dc2626;">
-            Database unavailable — nickname will only persist in this session. (<?= htmlspecialchars($dbError, ENT_QUOTES, 'UTF-8') ?>)
-          </div>
-          <?php endif; ?>
-
-          <form method="POST" action="<?= $_SERVER['PHP_SELF'] ?>">
-            <input type="hidden" name="action" value="save_nickname">
-            <div class="form-group">
-              <label class="form-label" for="nickname">Nickname</label>
-              <input class="form-input" type="text" id="nickname" name="nickname"
-                value="<?= htmlspecialchars($nickname, ENT_QUOTES, 'UTF-8') ?>"
-                placeholder='e.g. "> <a href="evil.com">Click me</a> <!--'
-                autocomplete="off">
-              <div class="form-hint">Shown to users when you share your Romit wallet.</div>
-            </div>
-            <div class="form-group">
-              <label class="form-label" for="email_addr">Email</label>
-              <input class="form-input" type="email" id="email_addr" name="email_addr"
-                value="user@romit.io" disabled>
-            </div>
-            <div style="display:flex;gap:8px;">
-              <button class="btn btn-primary" type="submit">Save Changes</button>
-              <button class="btn btn-outline" type="reset">Reset</button>
-            </div>
-          </form>
-        </div>
-      </div>
-
       <!-- Share Wallet card -->
       <div class="card">
         <div class="card-header">
@@ -371,15 +284,15 @@ details.mail[open] summary.mail-row{background:#f2f6fc;font-weight:600;}
           </div>
         </div>
         <div class="card-body">
-          <?php if ($share_sent): ?>
+          <?php if ($share_result === true): ?>
             <div class="alert alert-success">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>
-              Invitation delivered to <strong><?= htmlspecialchars($share_email, ENT_QUOTES, 'UTF-8') ?></strong> — check the inbox on the right.
+              Invitation sent to <strong><?= htmlspecialchars($share_email, ENT_QUOTES, 'UTF-8') ?></strong>.
             </div>
-          <?php else: ?>
-            <div class="alert alert-info">
+          <?php elseif ($share_result === false): ?>
+            <div class="alert" style="background:#fef2f2;border:1px solid #fecaca;color:#dc2626;">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-              Your current nickname "<strong><?= htmlspecialchars(substr($nickname, 0, 40), ENT_QUOTES, 'UTF-8') ?></strong>" will appear in the email.
+              Failed to send invitation. Please try again.
             </div>
           <?php endif; ?>
 
@@ -389,7 +302,7 @@ details.mail[open] summary.mail-row{background:#f2f6fc;font-weight:600;}
               <label class="form-label" for="phone">Recipient Email Address</label>
               <input class="form-input" type="email" id="phone" name="phone"
                 placeholder="recipient@example.com" autocomplete="off" required>
-              <div class="form-hint">The invitation will appear in the recipient inbox panel on the right.</div>
+              <div class="form-hint">An invitation email will be sent to the recipient.</div>
             </div>
             <button class="btn btn-success" type="submit">Send Wallet Invitation</button>
           </form>
@@ -398,53 +311,6 @@ details.mail[open] summary.mail-row{background:#f2f6fc;font-weight:600;}
     </div>
   </main>
 
-  <!-- Recipient Inbox (Gmail-style) -->
-  <aside class="inbox">
-    <div class="inbox-top">
-      <div class="inbox-glogo">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#ea4335" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
-        <span><span class="g-m">M</span><span class="g-a1">a</span><span class="g-i">i</span><span class="g-l">l</span></span>
-      </div>
-      <div class="inbox-search">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#80868b" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-        Search mail
-      </div>
-    </div>
-    <div class="inbox-tabs">
-      <div class="inbox-tab active">Primary</div>
-      <div class="inbox-tab">Promotions</div>
-      <div class="inbox-tab">Social</div>
-    </div>
-    <div class="inbox-list">
-      <?php if (empty($_SESSION['inbox'])): ?>
-        <div class="inbox-empty">
-          <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
-          <div>Your inbox is empty.</div>
-          <div style="font-size:.72rem;margin-top:4px;">Send a wallet invitation to see it arrive here.</div>
-        </div>
-      <?php else: foreach ($_SESSION['inbox'] as $i => $inv): ?>
-        <details class="mail"<?= $i === 0 ? ' open' : '' ?>>
-          <summary class="mail-row">
-            <div class="mail-avatar">R</div>
-            <div class="mail-meta">
-              <div class="mail-from">Romit &lt;noreply@romit.io&gt;</div>
-              <div class="mail-subject">You have been invited to Romit!
-                <span class="mail-snippet">— A Romit wallet has been shared with you…</span>
-              </div>
-            </div>
-            <div class="mail-time"><?= date('g:i A', (int)$inv['time']) ?></div>
-          </summary>
-          <div class="mail-body">
-            <div class="mail-to">to <strong><?= htmlspecialchars($inv['to'], ENT_QUOTES, 'UTF-8') ?></strong></div>
-            <?php
-              // ⚠ nickname rendered RAW — stored HTML injection renders in the recipient's inbox
-              echo renderInviteBody($inv['nickname']);
-            ?>
-          </div>
-        </details>
-      <?php endforeach; endif; ?>
-    </div>
-  </aside>
 </div>
 
 <footer style="text-align:center;padding:16px;font-size:.7rem;color:#b0bdd0;border-top:1px solid #e8ecf0;background:#fff;margin-top:16px;">

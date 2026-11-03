@@ -69,7 +69,9 @@ function page_home(): void {
     <div class="hero-visual">
       <?php foreach($mini as $p):?>
       <a href="<?=url("product/{$p['id']}")?>" class="mini-deal" style="text-decoration:none">
-        <div class="mini-emoji"><?=h($p['emoji'])?></div>
+        <div class="mini-emoji" style="<?=!empty($p['image_url'])?'width:40px;height:40px;border-radius:8px;overflow:hidden;font-size:0':''?>">
+          <?php if(!empty($p['image_url'])):?><img src="<?=h($p['image_url'])?>" alt="" style="width:100%;height:100%;object-fit:cover"><?php else:?><?=h($p['emoji'])?><?php endif;?>
+        </div>
         <div class="mini-info">
           <div class="mini-name"><?=h($p['name'])?></div>
           <div class="mini-price"><?=inr($p['sale_price'])?> <span style="color:#6b7280;font-weight:400;text-decoration:line-through;font-size:.65rem"><?=inr($p['original_price'])?></span></div>
@@ -134,8 +136,10 @@ function page_product(int $id): void {
   <div style="display:grid;grid-template-columns:1fr 1fr;gap:32px;align-items:start">
     <!-- Image Panel -->
     <div>
-      <div class="card" style="aspect-ratio:1/1;display:flex;align-items:center;justify-content:center;font-size:10rem;background:linear-gradient(135deg,#fff8f3,#fff3e8);position:relative">
-        <?=h($p['emoji'])?>
+      <div class="card" style="aspect-ratio:1/1;overflow:hidden;background:linear-gradient(135deg,#fff8f3,#fff3e8);position:relative;display:flex;align-items:center;justify-content:center">
+        <?php if(!empty($p['image_url'])):?>
+        <img src="<?=h($p['image_url'])?>" alt="<?=h($p['name'])?>" style="width:100%;height:100%;object-fit:cover;display:block">
+        <?php else:?><span style="font-size:10rem"><?=h($p['emoji'])?></span><?php endif;?>
         <div style="position:absolute;top:14px;left:14px;background:var(--p);color:#fff;font-size:.7rem;font-weight:800;padding:4px 10px;border-radius:5px"><?=$disc?>% OFF</div>
         <?php if($p['stock']<=3&&$p['stock']>0):?>
         <div style="position:absolute;bottom:14px;left:0;right:0;background:rgba(220,38,38,.9);color:#fff;font-size:.75rem;font-weight:700;text-align:center;padding:8px">
@@ -146,8 +150,10 @@ function page_product(int $id): void {
       <!-- Thumbnails (decorative) -->
       <div style="display:flex;gap:8px;margin-top:12px">
         <?php for($i=0;$i<4;$i++):?>
-        <div style="flex:1;aspect-ratio:1;background:linear-gradient(135deg,#fff8f3,#fff3e8);border:<?=$i===0?'2px solid var(--p)':'1px solid var(--border)'?>;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:1.4rem;cursor:pointer">
-          <?=h($p['emoji'])?>
+        <div style="flex:1;aspect-ratio:1;overflow:hidden;background:linear-gradient(135deg,#fff8f3,#fff3e8);border:<?=$i===0?'2px solid var(--p)':'1px solid var(--border)'?>;border-radius:8px;display:flex;align-items:center;justify-content:center;cursor:pointer">
+          <?php if(!empty($p['image_url'])):?>
+          <img src="<?=h($p['image_url'])?>" alt="" style="width:100%;height:100%;object-fit:cover">
+          <?php else:?><span style="font-size:1.4rem"><?=h($p['emoji'])?></span><?php endif;?>
         </div>
         <?php endfor;?>
       </div>

@@ -17,6 +17,23 @@ session_set_cookie_params(['path' => BASE, 'httponly' => true, 'samesite' => 'La
 session_name('FLASHBUYSID');
 session_start();
 
+function migrate(PDO $pdo): void {
+    $pdo->exec("ALTER TABLE products ADD COLUMN IF NOT EXISTS image_url VARCHAR(500) DEFAULT ''");
+    // Backfill Unsplash image URLs for existing rows — no-op once already set
+    $imgs = [
+        ['%Galaxy S25%',   'https://images.unsplash.com/photo-1610945415295-d9bbf067e59c?w=500&q=80&auto=format&fit=crop'],
+        ['%iPhone 16%',    'https://images.unsplash.com/photo-1592750475338-74b7b21085ab?w=500&q=80&auto=format&fit=crop'],
+        ['%PlayStation%',  'https://images.unsplash.com/photo-1607853202273-797f1c22a38e?w=500&q=80&auto=format&fit=crop'],
+        ['%MacBook%',      'https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=500&q=80&auto=format&fit=crop'],
+        ['%Dyson%',        'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=500&q=80&auto=format&fit=crop'],
+        ['%Apple Watch%',  'https://images.unsplash.com/photo-1546868871-7041f2a55e12?w=500&q=80&auto=format&fit=crop'],
+        ['%Bose%',         'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=500&q=80&auto=format&fit=crop'],
+        ['%QLED%',         'https://images.unsplash.com/photo-1593359677879-a4bb92f4834c?w=500&q=80&auto=format&fit=crop'],
+    ];
+    $st = $pdo->prepare("UPDATE products SET image_url=? WHERE name LIKE ? AND (image_url IS NULL OR image_url='')");
+    foreach ($imgs as [$pat, $url]) $st->execute([$url, $pat]);
+}
+
 function db(): PDO {
     static $pdo = null;
     if ($pdo) return $pdo;
@@ -32,6 +49,8 @@ function db(): PDO {
         $pdo=new PDO("mysql:host=$host;dbname=$name;charset=utf8mb4",$user,$pass,$opt);
         install_schema($pdo);
     }
+    // Always run on first connect of this process — idempotent migrations
+    migrate($pdo);
     return $pdo;
 }
 
@@ -49,10 +68,12 @@ function install_schema(PDO $pdo, bool $reset=false): void {
         id INT AUTO_INCREMENT PRIMARY KEY, name VARCHAR(255) NOT NULL,
         brand VARCHAR(100), category VARCHAR(80),
         description TEXT, emoji VARCHAR(8) DEFAULT '📦',
+        image_url VARCHAR(500) DEFAULT '',
         original_price INT NOT NULL, sale_price INT NOT NULL,
         stock INT NOT NULL DEFAULT 10, limit_per_user INT NOT NULL DEFAULT 1,
         deal_label VARCHAR(60) DEFAULT 'Flash Deal',
         rating DECIMAL(2,1) DEFAULT 4.4, review_count INT DEFAULT 0)");
+
 
     $pdo->exec("CREATE TABLE IF NOT EXISTS orders (
         id INT AUTO_INCREMENT PRIMARY KEY, user_id INT NOT NULL,
@@ -63,34 +84,42 @@ function install_schema(PDO $pdo, bool $reset=false): void {
 
     /* SEED PRODUCTS */
     if ((int)$pdo->query("SELECT COUNT(*) FROM products")->fetchColumn()===0) {
-        // [name, brand, category, description, emoji, original_price, sale_price, stock, limit, deal_label, rating, reviews]
+        // [name, brand, category, description, emoji, image_url, original_price, sale_price, stock, limit, deal_label, rating, reviews]
         $products = [
             ['Samsung Galaxy S25 Ultra','Samsung','Smartphones',
              '6.9" QHD+ Dynamic AMOLED · Snapdragon 8 Elite · 200MP camera · 5000mAh · S Pen included',
-             '📱',89999,54999,5,1,'Best Phone Deal',4.7,12847],
+             '📱','https://images.unsplash.com/photo-1610945415295-d9bbf067e59c?w=500&q=80&auto=format&fit=crop',
+             89999,54999,5,1,'Best Phone Deal',4.7,12847],
             ['Apple iPhone 16 Pro Max','Apple','Smartphones',
              '6.9" Super Retina XDR · A18 Pro chip · 48MP triple camera system · 4422mAh · Titanium build',
-             '📱',139900,89999,3,1,'Lowest Ever Price',4.8,9234],
+             '📱','https://images.unsplash.com/photo-1592750475338-74b7b21085ab?w=500&q=80&auto=format&fit=crop',
+             139900,89999,3,1,'Lowest Ever Price',4.8,9234],
             ['Sony PlayStation 5 Slim','Sony','Gaming',
              'PlayStation 5 Slim console with DualSense controller · Ultra HD Blu-ray · 1TB SSD · CFI-2000',
-             '🎮',54990,34999,8,1,'Festival Offer',4.9,6721],
+             '🎮','https://images.unsplash.com/photo-1607853202273-797f1c22a38e?w=500&q=80&auto=format&fit=crop',
+             54990,34999,8,1,'Festival Offer',4.9,6721],
             ['Apple MacBook Air M3','Apple','Laptops',
              '13.6" Liquid Retina · Apple M3 8-core CPU · 8GB RAM · 256GB SSD · 18-hr battery · MagSafe',
-             '💻',114900,79999,4,1,'Education Offer',4.8,4512],
+             '💻','https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=500&q=80&auto=format&fit=crop',
+             114900,79999,4,1,'Education Offer',4.8,4512],
             ['Dyson V15 Detect Absolute','Dyson','Home Appliances',
              'Laser dust detection · 60-min run time · HEPA filtration · 240AW suction · 7 attachments',
-             '🌀',52900,36999,10,1,'Clearance Sale',4.6,3287],
+             '🌀','https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=500&q=80&auto=format&fit=crop',
+             52900,36999,10,1,'Clearance Sale',4.6,3287],
             ['Apple Watch Series 10 GPS 46mm','Apple','Wearables',
              'Always-On Retina display · ECG · Blood oxygen · Crash detection · 36hr battery · IP6X',
-             '⌚',46900,31999,6,1,'Wearable Deal',4.7,7823],
+             '⌚','https://images.unsplash.com/photo-1546868871-7041f2a55e12?w=500&q=80&auto=format&fit=crop',
+             46900,31999,6,1,'Wearable Deal',4.7,7823],
             ['Bose QuietComfort 45','Bose','Audio',
              'Industry-leading ANC · 24-hr battery · TriPort acoustic system · USB-C · Multipoint connection',
-             '🎧',35000,18999,12,1,'Sound Deal',4.5,5641],
+             '🎧','https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=500&q=80&auto=format&fit=crop',
+             35000,18999,12,1,'Sound Deal',4.5,5641],
             ['Samsung 65" QLED 4K Smart TV','Samsung','Televisions',
              'Neo QLED 4K · 144Hz · Quantum HDR 32X · Dolby Atmos · 4.2.2ch 60W · Gaming Hub · 2024 model',
-             '📺',189990,94999,5,1,'Biggest Discount',4.6,2918],
+             '📺','https://images.unsplash.com/photo-1593359677879-a4bb92f4834c?w=500&q=80&auto=format&fit=crop',
+             189990,94999,5,1,'Biggest Discount',4.6,2918],
         ];
-        $si=$pdo->prepare("INSERT INTO products(name,brand,category,description,emoji,original_price,sale_price,stock,limit_per_user,deal_label,rating,review_count) VALUES(?,?,?,?,?,?,?,?,?,?,?,?)");
+        $si=$pdo->prepare("INSERT INTO products(name,brand,category,description,emoji,image_url,original_price,sale_price,stock,limit_per_user,deal_label,rating,review_count) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?)");
         foreach($products as $p) $si->execute($p);
     }
 
