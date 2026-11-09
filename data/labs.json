@@ -215,10 +215,10 @@
       "access": "/subdomains/pubmed"
     },
     {
-      "title": "Reflected XSS - BigBasket: Online Supermarket Catalog",
+      "title": "Reflected XSS - FreshCart: Online Grocery Store",
       "difficulty": "Easy",
       "report": "",
-      "access": "/subdomains/bigbasket"
+      "access": "/subdomains/freshcart"
     },
     {
       "title": "Reflected XSS - Global Site Search Portal",
