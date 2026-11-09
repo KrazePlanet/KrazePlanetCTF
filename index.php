@@ -1338,6 +1338,21 @@ $blogUrl = fn($name) => 'https://blog.krazeplanet.com/templates/blog-post.html?i
           }
 
           const targetLabId = this.getAttribute('data-lab-id');
+
+          // Snapshot current state so we can revert on server error
+          const prevSolvedLabs = [...solvedLabs];
+          const prevBookmarkedLabs = [...bookmarkedLabs];
+
+          // Optimistic UI update — toggle immediately without waiting for server
+          if (solvedLabs.includes(targetLabId)) {
+            solvedLabs = solvedLabs.filter(id => id !== targetLabId);
+          } else {
+            solvedLabs = [...solvedLabs, targetLabId];
+          }
+          updateAllLabCardsUI();
+          updateProgressBar();
+          updateSearch();
+
           const formData = new FormData();
           formData.append('lab_id', targetLabId);
 
@@ -1358,24 +1373,43 @@ $blogUrl = fn($name) => 'https://blog.krazeplanet.com/templates/blog-post.html?i
             .then(res => res.json())
             .then(res => {
               if (res.requireLogin) {
+                // Revert optimistic update and show login
+                solvedLabs = prevSolvedLabs;
+                bookmarkedLabs = prevBookmarkedLabs;
+                updateAllLabCardsUI();
+                updateProgressBar();
+                updateSearch();
                 if (typeof openLoginModal === 'function') {
                   openLoginModal();
                 } else {
                   const modalEl = document.getElementById('loginModal');
-                  if (modalEl) {
-                    const m = bootstrap.Modal.getOrCreateInstance(modalEl);
-                    m.show();
-                  }
+                  if (modalEl) bootstrap.Modal.getOrCreateInstance(modalEl).show();
                 }
                 return;
               }
               if (res.success && res.data) {
+                // Sync with authoritative server state
                 solvedLabs = res.data.solvedLabs || [];
                 bookmarkedLabs = res.data.bookmarkedLabs || [];
                 updateAllLabCardsUI();
                 updateProgressBar();
                 updateSearch();
+              } else {
+                // Server error — revert
+                solvedLabs = prevSolvedLabs;
+                bookmarkedLabs = prevBookmarkedLabs;
+                updateAllLabCardsUI();
+                updateProgressBar();
+                updateSearch();
               }
+            })
+            .catch(() => {
+              // Network error — revert
+              solvedLabs = prevSolvedLabs;
+              bookmarkedLabs = prevBookmarkedLabs;
+              updateAllLabCardsUI();
+              updateProgressBar();
+              updateSearch();
             });
         });
 

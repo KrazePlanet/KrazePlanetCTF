@@ -999,6 +999,19 @@ $tasks = krazeSsoCall('tasks')['tasks'] ?? [];
         if (solvedBtn) {
           e.preventDefault();
           const targetLabId = solvedBtn.getAttribute('data-lab-id');
+
+          // Snapshot for revert on server error
+          const prevSolvedLabs = [...solvedLabs];
+          const prevBookmarkedLabs = [...bookmarkedLabs];
+
+          // Optimistic UI update — toggle immediately
+          if (solvedLabs.includes(targetLabId)) {
+            solvedLabs = solvedLabs.filter(id => id !== targetLabId);
+          } else {
+            solvedLabs = [...solvedLabs, targetLabId];
+          }
+          updateAllTaskLabButtons();
+
           const formData = new FormData();
           formData.append('lab_id', targetLabId);
 
@@ -1006,6 +1019,9 @@ $tasks = krazeSsoCall('tasks')['tasks'] ?? [];
             .then(res => res.json())
             .then(res => {
               if (res.requireLogin) {
+                solvedLabs = prevSolvedLabs;
+                bookmarkedLabs = prevBookmarkedLabs;
+                updateAllTaskLabButtons();
                 if (typeof openLoginModal === 'function') openLoginModal();
                 return;
               }
@@ -1013,7 +1029,16 @@ $tasks = krazeSsoCall('tasks')['tasks'] ?? [];
                 solvedLabs = res.data.solvedLabs || [];
                 bookmarkedLabs = res.data.bookmarkedLabs || [];
                 updateAllTaskLabButtons();
+              } else {
+                solvedLabs = prevSolvedLabs;
+                bookmarkedLabs = prevBookmarkedLabs;
+                updateAllTaskLabButtons();
               }
+            })
+            .catch(() => {
+              solvedLabs = prevSolvedLabs;
+              bookmarkedLabs = prevBookmarkedLabs;
+              updateAllTaskLabButtons();
             });
         }
 
