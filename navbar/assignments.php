@@ -972,6 +972,7 @@ $tasks = krazeSsoCall('tasks')['tasks'] ?? [];
 
       // Tracks in-flight toggle_solved requests per lab so rapid clicks cancel the stale one
       const solvedToggleControllers = {};
+      const bookmarkToggleControllers = {};
 
       // Bookmark click listener
       document.addEventListener('click', function(e) {
@@ -979,13 +980,37 @@ $tasks = krazeSsoCall('tasks')['tasks'] ?? [];
         if (starBtn) {
           e.preventDefault();
           const targetLabId = starBtn.getAttribute('data-lab-id');
+
+          // Abort any in-flight request for this lab
+          if (bookmarkToggleControllers[targetLabId]) {
+            bookmarkToggleControllers[targetLabId].abort();
+          }
+          const abortCtrl = new AbortController();
+          bookmarkToggleControllers[targetLabId] = abortCtrl;
+
+          // Snapshot for revert
+          const prevSolvedLabs = [...solvedLabs];
+          const prevBookmarkedLabs = [...bookmarkedLabs];
+
+          // Optimistic UI update — toggle immediately
+          if (bookmarkedLabs.includes(targetLabId)) {
+            bookmarkedLabs = bookmarkedLabs.filter(id => id !== targetLabId);
+          } else {
+            bookmarkedLabs = [...bookmarkedLabs, targetLabId];
+          }
+          updateAllTaskLabButtons();
+
           const formData = new FormData();
           formData.append('lab_id', targetLabId);
 
-          fetch('portal.php?action=toggle_bookmark', { method: 'POST', body: formData })
+          fetch('portal.php?action=toggle_bookmark', { method: 'POST', body: formData, signal: abortCtrl.signal })
             .then(res => res.json())
             .then(res => {
+              delete bookmarkToggleControllers[targetLabId];
               if (res.requireLogin) {
+                solvedLabs = prevSolvedLabs;
+                bookmarkedLabs = prevBookmarkedLabs;
+                updateAllTaskLabButtons();
                 if (typeof openLoginModal === 'function') openLoginModal();
                 return;
               }
@@ -993,7 +1018,18 @@ $tasks = krazeSsoCall('tasks')['tasks'] ?? [];
                 solvedLabs = res.data.solvedLabs || [];
                 bookmarkedLabs = res.data.bookmarkedLabs || [];
                 updateAllTaskLabButtons();
+              } else {
+                solvedLabs = prevSolvedLabs;
+                bookmarkedLabs = prevBookmarkedLabs;
+                updateAllTaskLabButtons();
               }
+            })
+            .catch(err => {
+              if (err.name === 'AbortError') return;
+              delete bookmarkToggleControllers[targetLabId];
+              solvedLabs = prevSolvedLabs;
+              bookmarkedLabs = prevBookmarkedLabs;
+              updateAllTaskLabButtons();
             });
         }
 

@@ -1250,8 +1250,9 @@ $blogUrl = fn($name) => 'https://blog.krazeplanet.com/templates/blog-post.html?i
         });
       }
 
-      // Tracks in-flight toggle_solved requests per lab so rapid clicks cancel the stale one
+      // Tracks in-flight toggle requests per lab so rapid clicks cancel the stale one
       const solvedToggleControllers = {};
+      const bookmarkToggleControllers = {};
 
       // Inject Solved & Bookmark Toggle Buttons into every lab-card
       allLabCards.forEach((card) => {
@@ -1287,21 +1288,46 @@ $blogUrl = fn($name) => 'https://blog.krazeplanet.com/templates/blog-post.html?i
           }
 
           const targetLabId = this.getAttribute('data-lab-id');
+
+          // Abort any in-flight request for this lab
+          if (bookmarkToggleControllers[targetLabId]) {
+            bookmarkToggleControllers[targetLabId].abort();
+          }
+          const abortCtrl = new AbortController();
+          bookmarkToggleControllers[targetLabId] = abortCtrl;
+
+          // Snapshot for revert
+          const prevSolvedLabs = [...solvedLabs];
+          const prevBookmarkedLabs = [...bookmarkedLabs];
+
+          // Optimistic UI update — toggle immediately
+          if (bookmarkedLabs.includes(targetLabId)) {
+            bookmarkedLabs = bookmarkedLabs.filter(id => id !== targetLabId);
+          } else {
+            bookmarkedLabs = [...bookmarkedLabs, targetLabId];
+          }
+          updateAllLabCardsUI();
+          updateBookmarkTabCount();
+          updateSearch();
+
           const formData = new FormData();
           formData.append('lab_id', targetLabId);
 
-          fetch('/navbar/portal.php?action=toggle_bookmark', { method: 'POST', body: formData })
+          fetch('/navbar/portal.php?action=toggle_bookmark', { method: 'POST', body: formData, signal: abortCtrl.signal })
             .then(res => res.json())
             .then(res => {
+              delete bookmarkToggleControllers[targetLabId];
               if (res.requireLogin) {
+                solvedLabs = prevSolvedLabs;
+                bookmarkedLabs = prevBookmarkedLabs;
+                updateAllLabCardsUI();
+                updateBookmarkTabCount();
+                updateSearch();
                 if (typeof openLoginModal === 'function') {
                   openLoginModal();
                 } else {
                   const modalEl = document.getElementById('loginModal');
-                  if (modalEl) {
-                    const m = bootstrap.Modal.getOrCreateInstance(modalEl);
-                    m.show();
-                  }
+                  if (modalEl) bootstrap.Modal.getOrCreateInstance(modalEl).show();
                 }
                 return;
               }
@@ -1311,7 +1337,22 @@ $blogUrl = fn($name) => 'https://blog.krazeplanet.com/templates/blog-post.html?i
                 updateAllLabCardsUI();
                 updateBookmarkTabCount();
                 updateSearch();
+              } else {
+                solvedLabs = prevSolvedLabs;
+                bookmarkedLabs = prevBookmarkedLabs;
+                updateAllLabCardsUI();
+                updateBookmarkTabCount();
+                updateSearch();
               }
+            })
+            .catch(err => {
+              if (err.name === 'AbortError') return;
+              delete bookmarkToggleControllers[targetLabId];
+              solvedLabs = prevSolvedLabs;
+              bookmarkedLabs = prevBookmarkedLabs;
+              updateAllLabCardsUI();
+              updateBookmarkTabCount();
+              updateSearch();
             });
         });
 
