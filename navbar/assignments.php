@@ -970,6 +970,9 @@ $tasks = krazeSsoCall('tasks')['tasks'] ?? [];
         });
       }
 
+      // Tracks in-flight toggle_solved requests per lab so rapid clicks cancel the stale one
+      const solvedToggleControllers = {};
+
       // Bookmark click listener
       document.addEventListener('click', function(e) {
         const starBtn = e.target.closest('.btn-star-toggle');
@@ -1000,6 +1003,13 @@ $tasks = krazeSsoCall('tasks')['tasks'] ?? [];
           e.preventDefault();
           const targetLabId = solvedBtn.getAttribute('data-lab-id');
 
+          // Abort any in-flight request for this lab (rapid clicking sends stale toggles)
+          if (solvedToggleControllers[targetLabId]) {
+            solvedToggleControllers[targetLabId].abort();
+          }
+          const abortCtrl = new AbortController();
+          solvedToggleControllers[targetLabId] = abortCtrl;
+
           // Snapshot for revert on server error
           const prevSolvedLabs = [...solvedLabs];
           const prevBookmarkedLabs = [...bookmarkedLabs];
@@ -1015,9 +1025,10 @@ $tasks = krazeSsoCall('tasks')['tasks'] ?? [];
           const formData = new FormData();
           formData.append('lab_id', targetLabId);
 
-          fetch('portal.php?action=toggle_solved', { method: 'POST', body: formData })
+          fetch('portal.php?action=toggle_solved', { method: 'POST', body: formData, signal: abortCtrl.signal })
             .then(res => res.json())
             .then(res => {
+              delete solvedToggleControllers[targetLabId];
               if (res.requireLogin) {
                 solvedLabs = prevSolvedLabs;
                 bookmarkedLabs = prevBookmarkedLabs;
@@ -1035,7 +1046,9 @@ $tasks = krazeSsoCall('tasks')['tasks'] ?? [];
                 updateAllTaskLabButtons();
               }
             })
-            .catch(() => {
+            .catch(err => {
+              if (err.name === 'AbortError') return; // new click took over — UI already correct
+              delete solvedToggleControllers[targetLabId];
               solvedLabs = prevSolvedLabs;
               bookmarkedLabs = prevBookmarkedLabs;
               updateAllTaskLabButtons();

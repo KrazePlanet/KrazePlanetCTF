@@ -1250,6 +1250,9 @@ $blogUrl = fn($name) => 'https://blog.krazeplanet.com/templates/blog-post.html?i
         });
       }
 
+      // Tracks in-flight toggle_solved requests per lab so rapid clicks cancel the stale one
+      const solvedToggleControllers = {};
+
       // Inject Solved & Bookmark Toggle Buttons into every lab-card
       allLabCards.forEach((card) => {
         const labLink = card.querySelector('a.btn-ACCESS')?.getAttribute('data-lab-id') || '';
@@ -1339,6 +1342,13 @@ $blogUrl = fn($name) => 'https://blog.krazeplanet.com/templates/blog-post.html?i
 
           const targetLabId = this.getAttribute('data-lab-id');
 
+          // Abort any in-flight request for this lab (rapid clicking sends stale toggles)
+          if (solvedToggleControllers[targetLabId]) {
+            solvedToggleControllers[targetLabId].abort();
+          }
+          const abortCtrl = new AbortController();
+          solvedToggleControllers[targetLabId] = abortCtrl;
+
           // Snapshot current state so we can revert on server error
           const prevSolvedLabs = [...solvedLabs];
           const prevBookmarkedLabs = [...bookmarkedLabs];
@@ -1369,9 +1379,10 @@ $blogUrl = fn($name) => 'https://blog.krazeplanet.com/templates/blog-post.html?i
           }
           formData.append('difficulty', diffText);
 
-          fetch('/navbar/portal.php?action=toggle_solved', { method: 'POST', body: formData })
+          fetch('/navbar/portal.php?action=toggle_solved', { method: 'POST', body: formData, signal: abortCtrl.signal })
             .then(res => res.json())
             .then(res => {
+              delete solvedToggleControllers[targetLabId];
               if (res.requireLogin) {
                 // Revert optimistic update and show login
                 solvedLabs = prevSolvedLabs;
@@ -1403,7 +1414,9 @@ $blogUrl = fn($name) => 'https://blog.krazeplanet.com/templates/blog-post.html?i
                 updateSearch();
               }
             })
-            .catch(() => {
+            .catch(err => {
+              if (err.name === 'AbortError') return; // new click took over — UI already correct
+              delete solvedToggleControllers[targetLabId];
               // Network error — revert
               solvedLabs = prevSolvedLabs;
               bookmarkedLabs = prevBookmarkedLabs;
