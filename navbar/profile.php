@@ -17,11 +17,18 @@ if (!in_array($activeTab, $allowedTabs)) {
 }
 
 // Profile, solved labs, bookmarks, in-progress labs and notifications all come
-// from the central login server in one call.
-$bundle = krazeSsoCall('profile_bundle');
-if (!krazeLoggedIn()) {
-    header('Location: ' . krazeLoginUrl($_SERVER['REQUEST_URI']));
-    exit;
+// from the central login server in one call — cached in session for 90s so
+// switching between tabs doesn't repeat the SSO round-trip.
+$_pbCache = $_SESSION['profile_bundle_cache'] ?? null;
+if ($_pbCache && $_pbCache['at'] > time() - 90) {
+    $bundle = $_pbCache['data'];
+} else {
+    $bundle = krazeSsoCall('profile_bundle');
+    if (!krazeLoggedIn()) {
+        header('Location: ' . krazeLoginUrl($_SERVER['REQUEST_URI']));
+        exit;
+    }
+    $_SESSION['profile_bundle_cache'] = ['at' => time(), 'data' => $bundle];
 }
 $user = $bundle['user'] ?? null;
 $solvedLabs = $bundle['solved'] ?? [];
@@ -810,6 +817,7 @@ function handleProfileUpdate(e) {
       btn.innerText = 'Update';
       if (data.success) {
         showAlert('profileUpdateAlert', 'Profile updated successfully!', true);
+        fetch('/navbar/portal.php?action=clear_profile_cache');
       } else {
         showAlert('profileUpdateAlert', data.error || 'Failed to update profile.', false);
       }
@@ -839,6 +847,7 @@ function handleSettingsUpdate(e) {
       btn.innerText = 'Save Settings';
       if (data.success) {
         showAlert('settingsAlert', 'Account settings saved successfully!', true);
+        fetch('/navbar/portal.php?action=clear_profile_cache');
       } else {
         showAlert('settingsAlert', data.error || 'Failed to update settings.', false);
       }
@@ -882,7 +891,10 @@ function handleAccountImport(e) {
       btn.innerHTML = '<i class="bi bi-box-arrow-in-down me-1"></i> Import';
       if (data.success) {
         showAlert('importAlert', data.message, true);
-        setTimeout(() => { location.reload(); }, 1500);
+        // Clear profile cache so the reload shows fresh imported data
+        fetch('/navbar/portal.php?action=clear_profile_cache').finally(() => {
+          setTimeout(() => { location.reload(); }, 1500);
+        });
       } else {
         showAlert('importAlert', data.error || 'Import failed.', false);
       }

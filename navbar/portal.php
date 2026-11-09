@@ -24,6 +24,11 @@ function labDifficulty($labId, $rawDiff) {
 }
 
 switch ($action) {
+    case 'clear_profile_cache':
+        unset($_SESSION['profile_bundle_cache']);
+        echo json_encode(['success' => true]);
+        exit;
+
     case 'get_notifications':
         if (!krazeLoggedIn()) {
             echo json_encode(['success' => true, 'notifications' => []]);
