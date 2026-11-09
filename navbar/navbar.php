@@ -12,12 +12,8 @@ $user_avatar = !empty($_SESSION['avatar']) ? $_SESSION['avatar'] : ('https://api
 $recent_notifications = [];
 $unread_count = 0;
 
-if (krazeLoggedIn()) {
-    $recent_notifications = krazeRecentNotifications();
-    foreach ($recent_notifications as $n) {
-        if (empty($n['is_read'])) $unread_count++;
-    }
-}
+// Notifications are lazy-loaded via JS (get_notifications in portal.php)
+// so the page renders without waiting for the SSO round-trip.
 
 $baseDomain = getKrazeBaseDomain();
 ?>
@@ -518,9 +514,7 @@ $baseDomain = getKrazeBaseDomain();
           <div class="dropdown">
             <button class="btn btn-nav-notification" type="button" data-bs-toggle="dropdown" aria-expanded="false" title="Notifications">
               <i class="bi bi-bell-fill"></i>
-              <?php if ($unread_count > 0 || empty($recent_notifications)): ?>
-                <span class="notif-badge-purple" id="navNotifDot"></span>
-              <?php endif; ?>
+              <span class="notif-badge-purple" id="navNotifDot" style="display:none"></span>
             </button>
 
             <div class="dropdown-menu dropdown-menu-dark dropdown-menu-end custom-nav-dropdown notif-dropdown-menu-box">
@@ -531,23 +525,8 @@ $baseDomain = getKrazeBaseDomain();
                 <button type="button" class="btn btn-link p-0 text-secondary text-decoration-none small" style="font-size: 11px;" onclick="dismissNavNotif(event)">Mark read</button>
               </div>
 
-              <div class="py-1" style="max-height: 280px; overflow-y: auto;">
-                <?php if (!empty($recent_notifications)): ?>
-                  <?php foreach ($recent_notifications as $n): ?>
-                    <a href="<?= htmlspecialchars($n['link'] ?? 'assignments.php') ?>" class="notif-item-row <?= empty($n['is_read']) ? 'unread' : '' ?>">
-                      <div class="rounded-circle <?= htmlspecialchars($n['icon_bg'] ?? 'bg-info bg-opacity-10 text-info') ?> p-2 d-flex align-items-center justify-content-center flex-shrink-0" style="width: 32px; height: 32px; font-size: 13px;">
-                        <i class="bi <?= htmlspecialchars($n['icon'] ?? 'bi-bell-fill') ?>"></i>
-                      </div>
-                      <div class="flex-grow-1" style="overflow: hidden;">
-                        <div class="text-light fw-semibold small text-truncate" style="font-size: 12.5px;"><?= htmlspecialchars($n['title']) ?></div>
-                        <div class="text-secondary small text-truncate" style="font-size: 11px;"><?= htmlspecialchars($n['message']) ?></div>
-                        <div class="text-muted small mt-1" style="font-size: 10px;"><i class="bi bi-clock me-1"></i> <?= date('M d, H:i', strtotime($n['created_at'])) ?></div>
-                      </div>
-                    </a>
-                  <?php endforeach; ?>
-                <?php else: ?>
-                  <div class="text-center py-3 text-secondary small">No notifications</div>
-                <?php endif; ?>
+              <div class="py-1" id="kp-notif-list" style="max-height: 280px; overflow-y: auto;">
+                <div class="text-center py-3 text-secondary small"><i class="bi bi-hourglass-split me-1"></i>Loading…</div>
               </div>
 
               <div class="p-2 border-top border-secondary border-opacity-25 text-center bg-dark bg-opacity-50">
@@ -687,6 +666,56 @@ function dismissNavNotif(e) {
   if (dot) dot.style.display = 'none';
   document.querySelectorAll('.notif-item-row.unread').forEach(item => item.classList.remove('unread'));
 }
+
+<?php if (krazeLoggedIn()): ?>
+// Lazy-load notifications after page render — avoids blocking the page on the SSO round-trip
+(function () {
+  function kpEsc(str) {
+    const d = document.createElement('div');
+    d.appendChild(document.createTextNode(String(str || '')));
+    return d.innerHTML;
+  }
+  function kpFmtDate(iso) {
+    try {
+      const d = new Date(iso);
+      const mo = d.toLocaleString('en-US', { month: 'short' });
+      const dy = d.getDate();
+      const hh = String(d.getHours()).padStart(2, '0');
+      const mm = String(d.getMinutes()).padStart(2, '0');
+      return mo + ' ' + dy + ', ' + hh + ':' + mm;
+    } catch (_) { return iso || ''; }
+  }
+  fetch('/navbar/portal.php?action=get_notifications')
+    .then(r => r.json())
+    .then(res => {
+      const list = document.getElementById('kp-notif-list');
+      const dot  = document.getElementById('navNotifDot');
+      if (!list) return;
+      const notifs = res.notifications || [];
+      const unread = notifs.filter(n => !n.is_read).length;
+      if (dot) dot.style.display = unread > 0 ? '' : 'none';
+      if (!notifs.length) {
+        list.innerHTML = '<div class="text-center py-3 text-secondary small">No notifications</div>';
+        return;
+      }
+      list.innerHTML = notifs.map(n => `
+        <a href="${kpEsc(n.link || 'assignments.php')}" class="notif-item-row ${n.is_read ? '' : 'unread'}">
+          <div class="rounded-circle ${kpEsc(n.icon_bg || 'bg-info bg-opacity-10 text-info')} p-2 d-flex align-items-center justify-content-center flex-shrink-0" style="width:32px;height:32px;font-size:13px;">
+            <i class="bi ${kpEsc(n.icon || 'bi-bell-fill')}"></i>
+          </div>
+          <div class="flex-grow-1" style="overflow:hidden;">
+            <div class="text-light fw-semibold small text-truncate" style="font-size:12.5px;">${kpEsc(n.title)}</div>
+            <div class="text-secondary small text-truncate" style="font-size:11px;">${kpEsc(n.message)}</div>
+            <div class="text-muted small mt-1" style="font-size:10px;"><i class="bi bi-clock me-1"></i>${kpEsc(kpFmtDate(n.created_at))}</div>
+          </div>
+        </a>`).join('');
+    })
+    .catch(() => {
+      const list = document.getElementById('kp-notif-list');
+      if (list) list.innerHTML = '<div class="text-center py-3 text-secondary small">Could not load notifications</div>';
+    });
+})();
+<?php endif; ?>
 
 function handleUserLogout(e) {
   if (e && e.preventDefault) e.preventDefault();

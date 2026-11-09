@@ -157,6 +157,8 @@ if (!empty($action)) {
             exit;
         }
 
+        unset($_SESSION['tasks_cache']); // invalidate tasks cache on write
+
         notifyTaggedUsers($assigned_users, $title, $category_name, $submission_date, $description, $labs_data);
 
         echo json_encode([
@@ -181,6 +183,7 @@ if (!empty($action)) {
         }
 
         $res = krazeSsoCall('task_delete', ['task_id' => $taskId]);
+        if (!empty($res['success'])) unset($_SESSION['tasks_cache']); // invalidate tasks cache on delete
         echo json_encode(!empty($res['success'])
             ? ['success' => true, 'message' => 'Assignment deleted successfully.']
             : ['success' => false, 'message' => $res['error'] ?? 'Could not delete the assignment.']);
@@ -189,7 +192,14 @@ if (!empty($action)) {
 }
 
 // ---------------- HTML VIEW ----------------
-$tasks = krazeSsoCall('tasks')['tasks'] ?? [];
+// Cache tasks for 90 seconds — invalidated on save/delete above
+$_tasksCache = $_SESSION['tasks_cache'] ?? null;
+if ($_tasksCache && $_tasksCache['at'] > time() - 90) {
+    $tasks = $_tasksCache['data'];
+} else {
+    $tasks = krazeSsoCall('tasks')['tasks'] ?? [];
+    $_SESSION['tasks_cache'] = ['at' => time(), 'data' => $tasks];
+}
 ?>
 <!doctype html>
 <html lang="en">

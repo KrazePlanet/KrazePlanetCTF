@@ -24,6 +24,23 @@ function labDifficulty($labId, $rawDiff) {
 }
 
 switch ($action) {
+    case 'get_notifications':
+        if (!krazeLoggedIn()) {
+            echo json_encode(['success' => true, 'notifications' => []]);
+            exit;
+        }
+        // Reuse the existing session cache; refresh every 5 minutes
+        $nc = $_SESSION['notif_cache'] ?? null;
+        if (!$nc || $nc['at'] < time() - 300) {
+            $res = krazeSsoCall('notifications', ['limit' => 5]);
+            $items = !empty($res['success']) ? ($res['notifications'] ?? []) : [];
+            $_SESSION['notif_cache'] = ['at' => time(), 'items' => $items];
+        } else {
+            $items = $nc['items'];
+        }
+        echo json_encode(['success' => true, 'notifications' => $items]);
+        exit;
+
     case 'get_state':
         if (!krazeLoggedIn()) {
             echo json_encode(['success' => true, 'data' => $guest]);

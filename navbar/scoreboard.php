@@ -56,12 +56,20 @@ $userInRankings = false;
 $currentUserRank = null;
 
 // Rankings cover every student on every KrazePlanet site (central login server).
-$board = krazeSsoCall('scoreboard', [
-    'period'  => $isAllTime ? 'all' : 'month',
-    'year'    => $selectedYear,
-    'month'   => $selectedMonth,
-    'country' => $selectedCountry,
-]);
+// Cache per parameter set for 2 minutes to avoid a blocking SSO call on every load.
+$_scoreCacheKey = 'score_' . md5(($isAllTime ? 'all' : 'month') . '|' . $selectedYear . '|' . $selectedMonth . '|' . $selectedCountry);
+$_scoreCache = $_SESSION[$_scoreCacheKey] ?? null;
+if ($_scoreCache && $_scoreCache['at'] > time() - 120) {
+    $board = $_scoreCache['data'];
+} else {
+    $board = krazeSsoCall('scoreboard', [
+        'period'  => $isAllTime ? 'all' : 'month',
+        'year'    => $selectedYear,
+        'month'   => $selectedMonth,
+        'country' => $selectedCountry,
+    ]);
+    $_SESSION[$_scoreCacheKey] = ['at' => time(), 'data' => $board];
+}
 $me = $board['me'] ?? null;
 $loggedInUserId = $me['id'] ?? null;
 
