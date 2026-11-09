@@ -500,7 +500,7 @@ $baseDomain = getKrazeBaseDomain();
           <a class="nav-pill-link <?php echo ($current_page === 'assignments.php') ? 'active' : ''; ?>" href="/navbar/assignments.php">Assignments</a>
           <a class="nav-pill-link <?php echo ($current_page === 'scoreboard.php') ? 'active' : ''; ?>" href="/navbar/scoreboard.php">Scoreboard</a>
           <a class="nav-pill-link <?php echo ($current_page === 'https://academy.krazeplanet.com') ? 'active' : ''; ?>" href="https://academy.krazeplanet.com" target="_blank" rel="noopener noreferrer">Courses</a>
-          <a class="nav-pill-link <?php echo ($current_page === 'ctf.php') ? 'active' : ''; ?>" href="/navbar/ctf.php">CTF</a>
+          <a class="nav-pill-link" href="https://kzctf.com" target="_blank" rel="noopener">CTF</a>
           <a class="nav-pill-link <?php echo ($current_page === 'about.php') ? 'active' : ''; ?>" href="/navbar/about.php">About</a>
           <a class="nav-pill-link <?php echo ($current_page === 'contact.php') ? 'active' : ''; ?>" href="/navbar/contact.php">Contact</a>
         </div>
