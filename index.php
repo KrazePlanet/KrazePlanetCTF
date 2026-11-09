@@ -1188,6 +1188,32 @@ $blogUrl = fn($name) => 'https://blog.krazeplanet.com/templates/blog-post.html?i
       let solvedLabs = [];
       let bookmarkedLabs = [];
 
+      // PHP-inlined session user id — lets us key the localStorage cache per user
+      const KP_SESSION_UID = <?php echo (int)($_SESSION['user_id'] ?? 0); ?>;
+      const KP_STATE_KEY   = 'kp_lab_state_' + KP_SESSION_UID;
+
+      function kpSaveStateCache() {
+        if (!KP_SESSION_UID) return;
+        try {
+          localStorage.setItem(KP_STATE_KEY, JSON.stringify({ solvedLabs, bookmarkedLabs }));
+        } catch (_) {}
+      }
+
+      function kpClearStateCache() {
+        try { localStorage.removeItem(KP_STATE_KEY); } catch (_) {}
+      }
+
+      // Apply cached state instantly before the network fetch returns
+      if (KP_SESSION_UID) {
+        try {
+          const cached = JSON.parse(localStorage.getItem(KP_STATE_KEY) || 'null');
+          if (cached) {
+            solvedLabs = cached.solvedLabs || [];
+            bookmarkedLabs = cached.bookmarkedLabs || [];
+          }
+        } catch (_) {}
+      }
+
       // Fetch User State from Backend MySQL Database
       function fetchUserState() {
         fetch('/navbar/portal.php?action=get_state')
@@ -1198,6 +1224,12 @@ $blogUrl = fn($name) => 'https://blog.krazeplanet.com/templates/blog-post.html?i
               currentUsername = res.data.username;
               solvedLabs = res.data.solvedLabs || [];
               bookmarkedLabs = res.data.bookmarkedLabs || [];
+
+              if (isLoggedIn) {
+                kpSaveStateCache();
+              } else {
+                kpClearStateCache();
+              }
 
               updateAllLabCardsUI();
               updateProgressBar();
@@ -1334,6 +1366,7 @@ $blogUrl = fn($name) => 'https://blog.krazeplanet.com/templates/blog-post.html?i
               if (res.success && res.data) {
                 solvedLabs = res.data.solvedLabs || [];
                 bookmarkedLabs = res.data.bookmarkedLabs || [];
+                kpSaveStateCache();
                 updateAllLabCardsUI();
                 updateBookmarkTabCount();
                 updateSearch();
@@ -1443,6 +1476,7 @@ $blogUrl = fn($name) => 'https://blog.krazeplanet.com/templates/blog-post.html?i
                 // Sync with authoritative server state
                 solvedLabs = res.data.solvedLabs || [];
                 bookmarkedLabs = res.data.bookmarkedLabs || [];
+                kpSaveStateCache();
                 updateAllLabCardsUI();
                 updateProgressBar();
                 updateSearch();
@@ -1470,6 +1504,13 @@ $blogUrl = fn($name) => 'https://blog.krazeplanet.com/templates/blog-post.html?i
         labAction.appendChild(starBtn);
         labAction.appendChild(solvedBtn);
       });
+
+      // Apply cached state immediately after buttons are in the DOM
+      if (solvedLabs.length || bookmarkedLabs.length) {
+        updateAllLabCardsUI();
+        updateProgressBar();
+        updateBookmarkTabCount();
+      }
 
       function updateProgressBar() {
         const solvedCount = solvedLabs.length;
