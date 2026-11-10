@@ -849,13 +849,13 @@
       "access": "/subdomains/pc"
     },
     {
-      "title": "The Unseen Layer",
+      "title": "PulseMetrics - Production Source Map Exposure (.js.map) & Internal API Discovery",
       "difficulty": "Easy",
       "report": "",
       "access": "/subdomains/analytics"
     },
     {
-      "title": "Under the Hood",
+      "title": "CampusCloud - Exposed Debug Interface & Production Environment Disclosure",
       "difficulty": "Easy",
       "report": "",
       "access": "/subdomains/campuscloud"

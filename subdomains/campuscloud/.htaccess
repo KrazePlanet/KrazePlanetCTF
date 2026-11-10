@@ -1,0 +1,14 @@
+DirectorySlash Off
+
+RewriteEngine On
+
+# Internal rewrite for debug directory and subroutes so no external 301 is issued
+RewriteRule ^debug/?$ debug/index.php [L]
+RewriteRule ^debug/info/?$ debug/info.php [L]
+RewriteRule ^debug/environment/?$ debug/environment.php [L]
+RewriteRule ^debug/status/?$ debug/status.php [L]
+
+<FilesMatch "\.(php|txt|json)$">
+    Header set X-Content-Type-Options "nosniff"
+</FilesMatch>
+

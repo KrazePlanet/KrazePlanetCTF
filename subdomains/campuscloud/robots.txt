@@ -1,0 +1,6 @@
+User-agent: *
+Disallow: /debug/
+Disallow: /admin/
+Disallow: /api/internal/
+Disallow: /storage/backups/
+

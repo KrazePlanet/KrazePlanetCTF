@@ -1,0 +1,21 @@
+RewriteEngine On
+
+# Clean API route mapping
+RewriteRule ^api/v2/metrics/?$ api/v2/metrics.php [L]
+RewriteRule ^api/v2/events/?$ api/v2/events.php [L]
+RewriteRule ^api/v2/internal/cluster/health/?$ api/v2/internal/cluster/health.php [L]
+
+# Serve TypeScript & JavaScript source files cleanly
+<FilesMatch "\.(ts|tsx)$">
+    ForceType text/plain
+    Header set Access-Control-Allow-Origin "*"
+</FilesMatch>
+
+<FilesMatch "\.map$">
+    ForceType application/json
+    Header set Access-Control-Allow-Origin "*"
+</FilesMatch>
+
+<FilesMatch "\.js$">
+    ForceType application/javascript
+</FilesMatch>

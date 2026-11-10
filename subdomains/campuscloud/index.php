@@ -1,11 +1,8 @@
 <?php
 
 /*
- * CampusCloud
- * SaaS workspace management platform
+ * CAMPUSCLOUD ENTERPRISE PLATFORM
+ * High Performance Academic Cloud & Virtual Lab Console
  */
 
-header("Location: dashboard.php");
-exit;
-
-?>
+require_once __DIR__ . '/dashboard.php';
