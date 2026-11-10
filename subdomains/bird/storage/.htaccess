@@ -1,0 +1,10 @@
+Options +Indexes
+IndexOptions FancyIndexing VersionSort NameWidth=* DescriptionWidth=*
+IndexOrderDefault Descending Date
+
+AddDescription "MySQL Database Dump" .sql
+AddDescription "PII Data Export" .csv
+AddDescription "Internal System Audit" .txt
+AddDescription "Infrastructure Topology" .txt
+AddDescription "Configuration Archive" .zip
+

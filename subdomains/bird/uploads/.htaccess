@@ -1,0 +1,8 @@
+Options +Indexes
+IndexOptions FancyIndexing VersionSort NameWidth=* DescriptionWidth=*
+IndexOrderDefault Descending Date
+
+AddDescription "Official Academic Transcript" .pdf
+AddDescription "Applicant Identity Document" .jpg .jpeg .png
+AddDescription "Financial & Tax Declaration" .pdf .txt
+

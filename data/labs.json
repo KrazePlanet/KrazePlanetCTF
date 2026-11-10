@@ -837,13 +837,13 @@
   ],
   "Information Disclosure": [
     {
-      "title": "The Forgotten Release",
+      "title": "Riverview Admissions - Source Code Backup & Sensitive PII Disclosure",
       "difficulty": "Easy",
       "report": "",
       "access": "/subdomains/bird"
     },
     {
-      "title": "Open to the World",
+      "title": "Threadline - Version Control (.git) Exposure & Credential Recovery",
       "difficulty": "Easy",
       "report": "",
       "access": "/subdomains/pc"

@@ -1,4 +1,13 @@
-<FilesMatch "\.php\.bak$">
+DirectorySlash Off
+
+RewriteEngine On
+
+# Internal rewrite for directories so no 301 redirect is issued
+RewriteRule ^admin/?$ admin/index.php [L]
+RewriteRule ^storage/?$ storage/index.php [L]
+RewriteRule ^uploads/?$ uploads/index.php [L]
+
+<FilesMatch "\.(php\.bak|bak|old|backup)$">
     ForceType text/plain
     SetHandler default-handler
 </FilesMatch>

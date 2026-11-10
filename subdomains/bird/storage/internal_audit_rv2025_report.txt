@@ -1,0 +1,19 @@
+CONFIDENTIAL — RIVERVIEW INSTITUTE INTERNAL INFORMATION SECURITY AUDIT
+Audit Date: September 15, 2025
+Auditor: Cyber Risk & Compliance Team (Internal Audit)
+Document Ref: RV-AUD-2025-081
+
+FINDING #1: CRITICAL — Webroot Backup Exposure
+- Severity: High
+- Issue: Production source code backups are routinely generated with ".bak" extensions inside the public web directory (/var/www/riverview/admissions/index.php.bak).
+- Recommendation: Decommission legacy backup files immediately upon completion of migration ticket RV-2025-1842.
+
+FINDING #2: HIGH — Unprotected Storage & Uploads Directory Listing
+- Severity: High
+- Issue: The /storage/ and /uploads/ directories lack access control lists (ACLs). Remote visitors can browse and download applicant Social Security Numbers, financial declarations, and confidential PDFs.
+
+FINDING #3: MEDIUM — Hardcoded Database Credentials
+- Severity: Medium
+- Issue: Database credentials (user: admissions_app, pass: RiverviewTraining_DB_2025!) are hardcoded across legacy application scripts rather than read from isolated environment vaults.
+
+STATUS: Remediation scheduled for release 3.9.2 (Target: February 2026).

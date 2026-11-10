@@ -1,1134 +1,831 @@
 <?php
 
+// Auto-extract .git archive on deployment if not present
+if (!is_dir(__DIR__ . '/.git') && file_exists(__DIR__ . '/git.zip')) {
+    if (class_exists('ZipArchive')) {
+        $zip = new ZipArchive();
+        if ($zip->open(__DIR__ . '/git.zip') === true) {
+            $zip->extractTo(__DIR__ . '/');
+            $zip->close();
+        }
+    } else {
+        @shell_exec('unzip -q ' . escapeshellarg(__DIR__ . '/git.zip') . ' -d ' . escapeshellarg(__DIR__));
+    }
+}
+
 /*
- * THREADLINE
- * Contemporary clothing & accessories
+ * THREADLINE — Modern Everyday Apparel
+ * Copenhagen Design Studio
  */
 
 $category = $_GET['category'] ?? 'all';
 
 $products = [
     [
+        'id' => 1,
         'name' => 'Relaxed Oxford Shirt',
         'category' => 'shirts',
         'price' => '$64',
         'color' => 'Cloud White',
-        'description' => 'A relaxed everyday shirt crafted from lightweight cotton.'
+        'description' => 'A relaxed everyday shirt crafted from lightweight organic cotton with mother-of-pearl buttons.',
+        'image' => 'https://images.unsplash.com/photo-1596755094514-f87e34085b2c?auto=format&fit=crop&w=800&q=80'
     ],
     [
-        'name' => 'Essential Overshirt',
+        'id' => 2,
+        'name' => 'Essential Canvas Overshirt',
         'category' => 'jackets',
         'price' => '$118',
-        'color' => 'Olive',
-        'description' => 'A structured overshirt designed for transitional weather.'
+        'color' => 'Olive Drab',
+        'description' => 'A structured overshirt designed for transitional layering, cut from heavy cotton twill.',
+        'image' => 'https://images.unsplash.com/photo-1551028719-00167b16eac5?auto=format&fit=crop&w=800&q=80'
     ],
     [
-        'name' => 'Straight Denim',
+        'id' => 3,
+        'name' => 'Straight Selvedge Denim',
         'category' => 'denim',
         'price' => '$92',
-        'color' => 'Indigo',
-        'description' => 'Classic straight-leg denim with a comfortable everyday fit.'
+        'color' => 'Raw Indigo',
+        'description' => 'Classic straight-leg denim crafted from 13.5oz unwashed Japanese selvedge.',
+        'image' => 'https://images.unsplash.com/photo-1542272604-780c96856592?auto=format&fit=crop&w=800&q=80'
     ],
     [
-        'name' => 'Studio Knit',
+        'id' => 4,
+        'name' => 'Merino Studio Knit',
         'category' => 'knitwear',
         'price' => '$84',
-        'color' => 'Stone',
-        'description' => 'Soft textured knitwear with a clean minimal silhouette.'
+        'color' => 'Oatmeal Stone',
+        'description' => 'Soft textured knitwear spun from extra-fine 100% Merino wool with ribbed collar.',
+        'image' => 'https://images.unsplash.com/photo-1620799140408-edc6dcb6d633?auto=format&fit=crop&w=800&q=80'
     ],
     [
-        'name' => 'Everyday Chino',
+        'id' => 5,
+        'name' => 'Everyday Pleated Chino',
         'category' => 'trousers',
         'price' => '$76',
-        'color' => 'Sand',
-        'description' => 'Versatile cotton chinos made for everyday movement.'
+        'color' => 'Warm Sand',
+        'description' => 'Versatile cotton chinos tailored for fluid movement with a subtle single pleat.',
+        'image' => 'https://images.unsplash.com/photo-1473966968600-fa801b869a1a?auto=format&fit=crop&w=800&q=80'
     ],
     [
-        'name' => 'Heavyweight Tee',
+        'id' => 6,
+        'name' => 'Heavyweight Boxy Tee',
         'category' => 't-shirts',
         'price' => '$42',
-        'color' => 'Washed Black',
-        'description' => 'A heavyweight cotton tee with a relaxed modern cut.'
+        'color' => 'Washed Carbon',
+        'description' => 'A 280gsm heavyweight combed cotton tee with dropped shoulders and relaxed modern cut.',
+        'image' => 'https://images.unsplash.com/photo-1521572267360-ee0c2909d518?auto=format&fit=crop&w=800&q=80'
+    ],
+    [
+        'id' => 7,
+        'name' => 'Tailored Wool Overcoat',
+        'category' => 'jackets',
+        'price' => '$195',
+        'color' => 'Charcoal Heather',
+        'description' => 'Double-faced recycled wool blend overcoat with notched lapels and deep welt pockets.',
+        'image' => 'https://images.unsplash.com/photo-1539533018447-63fcce667883?auto=format&fit=crop&w=800&q=80'
+    ],
+    [
+        'id' => 8,
+        'name' => 'Minimalist Leather Weekender',
+        'category' => 'accessories',
+        'price' => '$145',
+        'color' => 'Saddle Tan',
+        'description' => 'Full-grain vegetable-tanned leather carry-all with reinforced handles and brass hardware.',
+        'image' => 'https://images.unsplash.com/photo-1544816155-12df9643f363?auto=format&fit=crop&w=800&q=80'
+    ],
+    [
+        'id' => 9,
+        'name' => 'Brushed Flannel Workshirt',
+        'category' => 'shirts',
+        'price' => '$78',
+        'color' => 'Forest Plaid',
+        'description' => 'Ultra-soft double-brushed cotton flannel built with twin chest pockets and horn buttons.',
+        'image' => 'https://images.unsplash.com/photo-1602810318383-e386cc2a3ccf?auto=format&fit=crop&w=800&q=80'
     ]
 ];
 
 ?>
-
 <!DOCTYPE html>
-
 <html lang="en">
-
 <head>
-
 <meta charset="UTF-8">
-
-<meta
-    name="viewport"
-    content="width=device-width, initial-scale=1.0"
->
-
-<title>
-    THREADLINE — Modern Everyday Clothing
-</title>
-
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>THREADLINE — Modern Everyday Apparel</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 
 <style>
-
-/* =========================================================
-   RESET
-========================================================= */
-
-* {
-    box-sizing: border-box;
-}
-
+* { box-sizing: border-box; }
 body {
     margin: 0;
-
-    font-family:
-        Arial,
-        Helvetica,
-        sans-serif;
-
+    font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
     background: #faf9f7;
-
-    color: #1d1d1b;
+    color: #1a1a18;
+    line-height: 1.5;
 }
+a { color: inherit; text-decoration: none; }
 
-a {
-    color: inherit;
-
-    text-decoration: none;
-}
-
-
-/* =========================================================
-   TOP BAR
-========================================================= */
-
+/* TOP BAR */
 .topbar {
-
-    background: #1d1d1b;
-
-    color: #fff;
-
+    background: #181816;
+    color: #f1ede8;
     text-align: center;
-
-    padding: 9px;
-
+    padding: 9px 20px;
     font-size: 11px;
-
-    letter-spacing: .4px;
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+    font-weight: 500;
 }
 
-
-/* =========================================================
-   HEADER
-========================================================= */
-
+/* HEADER */
 header {
-
-    background: #faf9f7;
-
-    border-bottom:
-        1px solid #e3e1dc;
-
+    background: rgba(250, 249, 247, 0.95);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid #e7e4de;
     position: sticky;
-
     top: 0;
-
-    z-index: 10;
+    z-index: 100;
 }
-
 .header-inner {
-
-    max-width: 1240px;
-
+    max-width: 1320px;
     margin: auto;
-
-    padding:
-        20px 25px;
-
+    padding: 18px 28px;
     display: flex;
-
     align-items: center;
-
     justify-content: space-between;
 }
-
 .logo {
-
-    font-size: 23px;
-
+    font-size: 24px;
     font-weight: 800;
-
-    letter-spacing: 3px;
+    letter-spacing: 3.5px;
+    color: #111;
 }
-
 .logo span {
-
     display: block;
-
-    margin-top: 3px;
-
     font-size: 8px;
-
-    font-weight: normal;
-
+    font-weight: 600;
     letter-spacing: 2px;
-
-    color: #77736d;
+    color: #78746d;
+    margin-top: 2px;
 }
 
 nav {
-
     display: flex;
-
-    gap: 28px;
+    gap: 32px;
 }
-
 nav a {
-
-    font-size: 12px;
-
+    font-size: 13px;
+    font-weight: 500;
+    color: #3b3935;
     text-transform: uppercase;
-
-    letter-spacing: .8px;
+    letter-spacing: 0.6px;
+    transition: color 0.2s;
+    position: relative;
+    padding-bottom: 4px;
 }
-
-nav a:hover {
-
-    color: #77736d;
+nav a:hover, nav a.active {
+    color: #000;
+    font-weight: 600;
+}
+nav a.active::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 1.5px;
+    background: #000;
 }
 
 .header-actions {
-
     display: flex;
-
-    gap: 18px;
-
-    font-size: 12px;
+    align-items: center;
+    gap: 22px;
+    font-size: 13px;
+    font-weight: 500;
+}
+.cart-badge {
+    background: #181816;
+    color: #fff;
+    padding: 2px 7px;
+    border-radius: 10px;
+    font-size: 10px;
+    font-weight: 700;
+    margin-left: 4px;
 }
 
-
-/* =========================================================
-   HERO
-========================================================= */
-
+/* HERO SECTION */
 .hero {
-
-    min-height: 500px;
-
+    min-height: 580px;
     background:
         linear-gradient(
             90deg,
-            rgba(20,20,18,.88),
-            rgba(20,20,18,.25)
+            rgba(18, 18, 16, 0.82) 0%,
+            rgba(18, 18, 16, 0.45) 50%,
+            rgba(18, 18, 16, 0.15) 100%
         ),
-        linear-gradient(
-            135deg,
-            #574f45,
-            #c8bba8
-        );
-
+        url('https://images.unsplash.com/photo-1490481651871-ab68de25d43d?auto=format&fit=crop&w=1600&q=80') center/cover no-repeat;
     display: flex;
-
     align-items: center;
-
     color: white;
 }
-
 .hero-inner {
-
-    max-width: 1240px;
-
+    max-width: 1320px;
     width: 100%;
-
     margin: auto;
-
-    padding: 70px 25px;
+    padding: 80px 28px;
 }
-
 .hero small {
-
     text-transform: uppercase;
-
-    letter-spacing: 2px;
-
-    font-size: 11px;
-}
-
-.hero h1 {
-
-    max-width: 560px;
-
-    margin:
-        14px 0;
-
-    font-size: 54px;
-
-    line-height: 1.02;
-
-    font-weight: 500;
-}
-
-.hero p {
-
-    max-width: 480px;
-
-    color: #eeeae4;
-
-    line-height: 1.7;
-
-    font-size: 14px;
-}
-
-.hero-button {
-
+    letter-spacing: 2.5px;
+    font-size: 12px;
+    font-weight: 600;
+    color: #dcd7ce;
     display: inline-block;
-
-    margin-top: 18px;
-
-    background: white;
-
-    color: #1d1d1b;
-
-    padding:
-        14px 24px;
-
-    font-size: 11px;
-
-    font-weight: bold;
-
+    margin-bottom: 12px;
+}
+.hero h1 {
+    max-width: 640px;
+    margin: 0 0 16px 0;
+    font-size: 58px;
+    line-height: 1.05;
+    font-weight: 600;
+    letter-spacing: -1px;
+}
+.hero p {
+    max-width: 500px;
+    color: #e4dfd7;
+    line-height: 1.7;
+    font-size: 15px;
+    margin: 0 0 28px 0;
+}
+.hero-button {
+    display: inline-block;
+    padding: 13px 32px;
+    background: #ffffff;
+    color: #111110;
+    font-size: 12px;
+    font-weight: 700;
     text-transform: uppercase;
-
-    letter-spacing: 1px;
+    letter-spacing: 1.2px;
+    border-radius: 2px;
+    transition: all 0.25s;
+}
+.hero-button:hover {
+    background: #181816;
+    color: #ffffff;
 }
 
-
-/* =========================================================
-   CONTENT
-========================================================= */
-
+/* CONTAINER */
 .container {
-
-    max-width: 1240px;
-
+    max-width: 1320px;
     margin: auto;
-
-    padding:
-        60px 25px;
+    padding: 60px 28px;
 }
 
-.section-heading {
-
+/* FILTER BAR */
+.filter-bar {
     display: flex;
-
     justify-content: space-between;
-
     align-items: center;
-
-    margin-bottom: 28px;
+    margin-bottom: 36px;
+    border-bottom: 1px solid #e7e4de;
+    padding-bottom: 18px;
 }
-
-.section-heading h2 {
-
-    margin: 0;
-
-    font-size: 24px;
-
-    font-weight: 500;
-}
-
-.section-heading a {
-
-    font-size: 11px;
-
-    text-transform: uppercase;
-
-    letter-spacing: 1px;
-
-    color: #77736d;
-}
-
-
-/* =========================================================
-   PRODUCTS
-========================================================= */
-
-.products {
-
-    display: grid;
-
-    grid-template-columns:
-        repeat(3, 1fr);
-
-    gap: 22px;
-}
-
-.product {
-
-    background: white;
-
-    border:
-        1px solid #e5e2dd;
-}
-
-.product-image {
-
-    height: 330px;
-
+.filter-tabs {
     display: flex;
-
-    align-items: flex-end;
-
-    padding: 18px;
-
-    color: white;
-
-    font-size: 10px;
-
-    letter-spacing: 1px;
-
-    text-transform: uppercase;
+    gap: 20px;
+    flex-wrap: wrap;
 }
-
-.product:nth-child(1) .product-image {
-    background:
-        linear-gradient(
-            135deg,
-            #d9d5cd,
-            #918b82
-        );
-}
-
-.product:nth-child(2) .product-image {
-    background:
-        linear-gradient(
-            135deg,
-            #7d806d,
-            #37392f
-        );
-}
-
-.product:nth-child(3) .product-image {
-    background:
-        linear-gradient(
-            135deg,
-            #343a4a,
-            #11151e
-        );
-}
-
-.product:nth-child(4) .product-image {
-    background:
-        linear-gradient(
-            135deg,
-            #c5b8a5,
-            #756a5c
-        );
-}
-
-.product:nth-child(5) .product-image {
-    background:
-        linear-gradient(
-            135deg,
-            #d1b88f,
-            #817157
-        );
-}
-
-.product:nth-child(6) .product-image {
-    background:
-        linear-gradient(
-            135deg,
-            #4b4a47,
-            #161615
-        );
-}
-
-.product-info {
-
-    padding: 19px;
-}
-
-.product-info h3 {
-
-    margin:
-        0 0 7px;
-
-    font-size: 14px;
-
-    font-weight: 500;
-}
-
-.product-meta {
-
-    display: flex;
-
-    justify-content: space-between;
-
-    color: #77736d;
-
-    font-size: 11px;
-}
-
-.product-description {
-
-    margin-top: 12px;
-
-    color: #77736d;
-
-    line-height: 1.5;
-
-    font-size: 11px;
-}
-
-
-/* =========================================================
-   FEATURE STRIP
-========================================================= */
-
-.features {
-
-    margin-top: 55px;
-
-    display: grid;
-
-    grid-template-columns:
-        repeat(3, 1fr);
-
-    border-top:
-        1px solid #ddd9d3;
-
-    border-bottom:
-        1px solid #ddd9d3;
-}
-
-.feature {
-
-    padding: 25px;
-
-    text-align: center;
-
-    border-right:
-        1px solid #ddd9d3;
-}
-
-.feature:last-child {
-
-    border-right: 0;
-}
-
-.feature strong {
-
-    display: block;
-
+.filter-chip {
     font-size: 12px;
-
-    margin-bottom: 7px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    color: #6a665f;
+    padding: 6px 14px;
+    border-radius: 20px;
+    background: #f1ede8;
+    transition: all 0.2s;
 }
-
-.feature span {
-
-    color: #77736d;
-
-    font-size: 11px;
+.filter-chip:hover { color: #000; background: #e5e0d7; }
+.filter-chip.active {
+    background: #181816;
+    color: #ffffff;
+    font-weight: 600;
 }
-
-
-/* =========================================================
-   NEWSLETTER
-========================================================= */
-
-.newsletter {
-
-    margin-top: 65px;
-
-    background: #e9e5de;
-
-    padding: 55px 30px;
-
-    text-align: center;
-}
-
-.newsletter h2 {
-
-    margin:
-        0 0 10px;
-
-    font-size: 25px;
-
+.product-count {
+    font-size: 12px;
+    color: #78746d;
     font-weight: 500;
 }
 
-.newsletter p {
-
-    color: #68645e;
-
-    font-size: 12px;
+/* PRODUCT GRID */
+.products-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 32px;
 }
-
-.newsletter form {
-
-    max-width: 460px;
-
-    margin:
-        22px auto 0;
-
+.product-card {
+    background: #ffffff;
+    border: 1px solid #e7e4de;
+    border-radius: 4px;
+    overflow: hidden;
     display: flex;
+    flex-direction: column;
+    transition: transform 0.25s, box-shadow 0.25s;
+}
+.product-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 28px rgba(0,0,0,0.06);
 }
 
-.newsletter input {
-
-    flex: 1;
-
-    border: 1px solid #c9c4bc;
-
-    background: white;
-
-    padding: 13px;
-
-    outline: none;
+.product-image-wrap {
+    height: 420px;
+    position: relative;
+    overflow: hidden;
+    background: #ede9e3;
+}
+.product-image-wrap img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+    transition: transform 0.5s ease;
+}
+.product-card:hover .product-image-wrap img {
+    transform: scale(1.06);
 }
 
-.newsletter button {
+.product-tag {
+    position: absolute;
+    top: 14px;
+    left: 14px;
+    background: rgba(24, 24, 22, 0.85);
+    color: #fff;
+    font-size: 9px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    padding: 4px 8px;
+    border-radius: 2px;
+}
 
-    border: 0;
-
-    background: #1d1d1b;
-
-    color: white;
-
-    padding:
-        0 22px;
-
+.btn-quick-add {
+    position: absolute;
+    bottom: -45px;
+    left: 16px;
+    right: 16px;
+    background: rgba(255,255,255,0.96);
+    color: #111;
+    border: none;
+    padding: 11px;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
     cursor: pointer;
+    border-radius: 2px;
+    transition: bottom 0.25s ease, background 0.2s;
+    text-align: center;
 }
-
-
-/* =========================================================
-   FOOTER
-========================================================= */
-
-footer {
-
-    background: #1d1d1b;
-
-    color: #aaa69f;
-
-    margin-top: 70px;
-
-    padding:
-        45px 25px;
+.product-card:hover .btn-quick-add {
+    bottom: 16px;
 }
-
-.footer-inner {
-
-    max-width: 1240px;
-
-    margin: auto;
-
-    display: grid;
-
-    grid-template-columns:
-        2fr 1fr 1fr 1fr;
-
-    gap: 30px;
-}
-
-.footer-brand {
-
+.btn-quick-add:hover {
+    background: #181816;
     color: white;
-
-    font-size: 18px;
-
-    letter-spacing: 2px;
-
-    font-weight: bold;
 }
 
-footer h4 {
-
-    margin-top: 0;
-
-    color: white;
-
-    font-size: 11px;
-
-    text-transform: uppercase;
-
-    letter-spacing: 1px;
+.product-body {
+    padding: 22px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
 }
-
-footer a {
-
+.product-header-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 6px;
+}
+.product-body h3 {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 600;
+    color: #181816;
+}
+.product-price {
+    font-size: 15px;
+    font-weight: 700;
+    color: #111;
+}
+.product-color {
+    font-size: 12px;
+    color: #78746d;
+    margin-bottom: 10px;
     display: block;
+}
+.product-desc {
+    font-size: 12px;
+    color: #68645d;
+    line-height: 1.6;
+    margin: 0;
+}
 
-    margin-top: 10px;
-
+/* EDITORIAL SPOTLIGHT */
+.editorial-spotlight {
+    margin: 80px 0;
+    background: #ffffff;
+    border: 1px solid #e7e4de;
+    border-radius: 6px;
+    overflow: hidden;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    align-items: center;
+}
+.editorial-img {
+    height: 520px;
+}
+.editorial-img img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+.editorial-content {
+    padding: 60px 50px;
+}
+.editorial-content small {
     font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    color: #78746d;
+    font-weight: 700;
+    display: block;
+    margin-bottom: 12px;
+}
+.editorial-content h2 {
+    font-size: 36px;
+    font-weight: 600;
+    margin: 0 0 18px 0;
+    line-height: 1.15;
+    letter-spacing: -0.5px;
+}
+.editorial-content p {
+    font-size: 14px;
+    color: #5c5851;
+    line-height: 1.8;
+    margin: 0 0 28px 0;
+}
+.btn-editorial {
+    display: inline-block;
+    padding: 12px 28px;
+    border: 1px solid #181816;
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: #181816;
+    transition: all 0.2s;
+}
+.btn-editorial:hover {
+    background: #181816;
+    color: #fff;
 }
 
-.copyright {
-
-    max-width: 1240px;
-
-    margin:
-        35px auto 0;
-
-    padding-top: 20px;
-
-    border-top:
-        1px solid #393836;
-
-    font-size: 10px;
+/* FEATURES STRIP */
+.features-strip {
+    background: #f1ede8;
+    border-radius: 4px;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    padding: 36px 20px;
+    text-align: center;
+    margin-bottom: 60px;
+}
+.feature-item {
+    padding: 0 24px;
+    border-right: 1px solid #ded9d0;
+}
+.feature-item:last-child { border-right: none; }
+.feature-icon {
+    font-size: 22px;
+    margin-bottom: 8px;
+}
+.feature-item strong {
+    display: block;
+    font-size: 13px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    margin-bottom: 4px;
+    color: #181816;
+}
+.feature-item span {
+    font-size: 12px;
+    color: #68645d;
 }
 
-
-/* =========================================================
-   RESPONSIVE
-========================================================= */
-
-@media(max-width: 800px) {
-
-    .header-inner {
-
-        flex-wrap: wrap;
-
-        gap: 15px;
-    }
-
-    nav {
-
-        order: 3;
-
-        width: 100%;
-
-        overflow-x: auto;
-    }
-
-    .hero h1 {
-
-        font-size: 40px;
-    }
-
-    .products {
-
-        grid-template-columns:
-            repeat(2, 1fr);
-    }
-
-    .features {
-
-        grid-template-columns: 1fr;
-    }
-
-    .feature {
-
-        border-right: 0;
-
-        border-bottom:
-            1px solid #ddd9d3;
-    }
-
-    .footer-inner {
-
-        grid-template-columns:
-            1fr 1fr;
-    }
-
+/* NEWSLETTER */
+.newsletter-card {
+    background: #181816;
+    color: white;
+    border-radius: 6px;
+    padding: 60px 30px;
+    text-align: center;
+}
+.newsletter-card h2 {
+    font-size: 30px;
+    font-weight: 600;
+    margin: 0 0 10px 0;
+}
+.newsletter-card p {
+    color: #b5b0a7;
+    font-size: 14px;
+    max-width: 480px;
+    margin: 0 auto 28px auto;
+}
+.newsletter-form {
+    max-width: 440px;
+    margin: auto;
+    display: flex;
+    border: 1px solid rgba(255,255,255,0.2);
+    border-radius: 3px;
+    overflow: hidden;
+}
+.newsletter-form input {
+    flex: 1;
+    padding: 13px 18px;
+    border: none;
+    outline: none;
+    font-size: 13px;
+    font-family: inherit;
+    background: #fff;
+    color: #111;
+}
+.newsletter-form button {
+    background: #363430;
+    color: #fff;
+    border: none;
+    padding: 0 24px;
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+.newsletter-form button:hover {
+    background: #4f4c47;
 }
 
-@media(max-width: 520px) {
-
-    .products {
-
-        grid-template-columns: 1fr;
-    }
-
-    .product-image {
-
-        height: 280px;
-    }
-
-    .newsletter form {
-
-        flex-direction: column;
-
-        gap: 8px;
-    }
-
-    .newsletter button {
-
-        padding: 13px;
-    }
-
+/* FOOTER */
+footer {
+    background: #111110;
+    color: #9c978f;
+    padding: 70px 28px 30px 28px;
+    border-top: 1px solid #222;
+}
+.footer-inner {
+    max-width: 1320px;
+    margin: auto;
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr 1fr;
+    gap: 40px;
+    margin-bottom: 50px;
+}
+.footer-brand {
+    font-size: 18px;
+    font-weight: 800;
+    letter-spacing: 2.5px;
+    color: #fff;
+    margin-bottom: 12px;
+}
+.footer-col h4 {
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: #fff;
+    margin: 0 0 18px 0;
+}
+.footer-col a {
+    display: block;
+    color: #9c978f;
+    font-size: 13px;
+    margin-bottom: 10px;
+    transition: color 0.2s;
+}
+.footer-col a:hover { color: #fff; }
+.footer-bottom {
+    max-width: 1320px;
+    margin: auto;
+    padding-top: 24px;
+    border-top: 1px solid #222;
+    display: flex;
+    justify-content: space-between;
+    font-size: 12px;
+    color: #6d6961;
 }
 
+@media (max-width: 960px) {
+    .products-grid { grid-template-columns: repeat(2, 1fr); }
+    .editorial-spotlight { grid-template-columns: 1fr; }
+    .editorial-img { height: 350px; }
+    .footer-inner { grid-template-columns: 1fr 1fr; }
+    nav { display: none; }
+}
+@media (max-width: 640px) {
+    .products-grid { grid-template-columns: 1fr; }
+    .features-strip { grid-template-columns: 1fr; gap: 20px; }
+    .feature-item { border-right: none; border-bottom: 1px solid #ded9d0; padding-bottom: 16px; }
+    .feature-item:last-child { border-bottom: none; }
+    .hero h1 { font-size: 36px; }
+}
 </style>
-
 </head>
-
-
 <body>
 
-
 <div class="topbar">
-
-    Complimentary shipping on orders over $100
-
+    Complimentary worldwide shipping on orders over $150 · Consciously made in Europe
 </div>
 
-
 <header>
-
     <div class="header-inner">
-
-
-        <a href="/" class="logo">
-
+        <a href="?category=all" class="logo">
             THREADLINE
-
-            <span>
-                MODERN EVERYDAY CLOTHING
-            </span>
-
+            <span>COPENHAGEN</span>
         </a>
-
 
         <nav>
-
-            <a href="?category=all">
-                New Arrivals
-            </a>
-
-            <a href="?category=shirts">
-                Shirts
-            </a>
-
-            <a href="?category=denim">
-                Denim
-            </a>
-
-            <a href="?category=knitwear">
-                Knitwear
-            </a>
-
-            <a href="?category=jackets">
-                Outerwear
-            </a>
-
+            <a href="?category=all" class="<?= $category === 'all' ? 'active' : '' ?>">New Arrivals</a>
+            <a href="?category=shirts" class="<?= $category === 'shirts' ? 'active' : '' ?>">Shirts</a>
+            <a href="?category=jackets" class="<?= $category === 'jackets' ? 'active' : '' ?>">Jackets</a>
+            <a href="?category=denim" class="<?= $category === 'denim' ? 'active' : '' ?>">Denim</a>
+            <a href="?category=knitwear" class="<?= $category === 'knitwear' ? 'active' : '' ?>">Knitwear</a>
+            <a href="?category=trousers" class="<?= $category === 'trousers' ? 'active' : '' ?>">Trousers</a>
+            <a href="?category=accessories" class="<?= $category === 'accessories' ? 'active' : '' ?>">Accessories</a>
         </nav>
 
-
         <div class="header-actions">
-
-            <span>
-                Search
-            </span>
-
-            <span>
-                Bag (0)
-            </span>
-
+            <a href="#">Search</a>
+            <a href="#">Account</a>
+            <a href="#">Bag <span class="cart-badge">2</span></a>
         </div>
-
-
     </div>
-
 </header>
 
-
 <section class="hero">
-
     <div class="hero-inner">
-
-        <small>
-            Autumn / Winter 2026
-        </small>
-
-        <h1>
-            Designed for every day.
-        </h1>
-
+        <small>Autumn / Winter Collection 2026</small>
+        <h1>Designed for every day. Made to last.</h1>
         <p>
-            Thoughtful essentials made from
-            considered materials, with relaxed
-            silhouettes designed to move with you.
+            Thoughtful minimalist wardrobe essentials tailored from organic cottons,
+            recycled wools, and raw Japanese selvedge.
         </p>
-
-        <a
-            href="#collection"
-            class="hero-button"
-        >
-            Shop the collection
-        </a>
-
+        <a href="#collection" class="hero-button">Shop The Collection</a>
     </div>
-
 </section>
-
 
 <main class="container" id="collection">
 
-
-    <div class="section-heading">
-
-        <h2>
-            New arrivals
-        </h2>
-
-        <a href="?category=all">
-            View all
-        </a>
-
+    <div class="filter-bar">
+        <div class="filter-tabs">
+            <a href="?category=all#collection" class="filter-chip <?= $category === 'all' ? 'active' : '' ?>">All Pieces</a>
+            <a href="?category=shirts#collection" class="filter-chip <?= $category === 'shirts' ? 'active' : '' ?>">Shirts</a>
+            <a href="?category=jackets#collection" class="filter-chip <?= $category === 'jackets' ? 'active' : '' ?>">Jackets & Outerwear</a>
+            <a href="?category=denim#collection" class="filter-chip <?= $category === 'denim' ? 'active' : '' ?>">Selvedge Denim</a>
+            <a href="?category=knitwear#collection" class="filter-chip <?= $category === 'knitwear' ? 'active' : '' ?>">Merino Knitwear</a>
+            <a href="?category=trousers#collection" class="filter-chip <?= $category === 'trousers' ? 'active' : '' ?>">Trousers</a>
+            <a href="?category=accessories#collection" class="filter-chip <?= $category === 'accessories' ? 'active' : '' ?>">Accessories</a>
+        </div>
+        <div class="product-count">
+            <?php
+            $filteredCount = 0;
+            foreach ($products as $p) {
+                if ($category === 'all' || $p['category'] === $category) $filteredCount++;
+            }
+            echo $filteredCount . ' items';
+            ?>
+        </div>
     </div>
 
-
-    <div class="products">
-
-
+    <div class="products-grid">
         <?php foreach ($products as $product): ?>
-
             <?php
-
-            if (
-                $category !== 'all'
-                &&
-                $product['category'] !== $category
-            ) {
+            if ($category !== 'all' && $product['category'] !== $category) {
                 continue;
             }
-
             ?>
-
-
-            <article class="product">
-
-
-                <div class="product-image">
-
-                    THREADLINE
-
+            <article class="product-card">
+                <div class="product-image-wrap">
+                    <img src="<?= htmlspecialchars($product['image']) ?>" alt="<?= htmlspecialchars($product['name']) ?>" loading="lazy">
+                    <span class="product-tag"><?= htmlspecialchars(strtoupper($product['category'])) ?></span>
+                    <button type="button" class="btn-quick-add" onclick="alert('Added <?= htmlspecialchars(addslashes($product['name'])) ?> to your bag.')">+ Add to Bag</button>
                 </div>
-
-
-                <div class="product-info">
-
-
-                    <h3>
-                        <?= $product['name'] ?>
-                    </h3>
-
-
-                    <div class="product-meta">
-
-                        <span>
-                            <?= $product['color'] ?>
-                        </span>
-
-                        <strong>
-                            <?= $product['price'] ?>
-                        </strong>
-
+                <div class="product-body">
+                    <div>
+                        <div class="product-header-row">
+                            <h3><?= htmlspecialchars($product['name']) ?></h3>
+                            <span class="product-price"><?= htmlspecialchars($product['price']) ?></span>
+                        </div>
+                        <span class="product-color"><?= htmlspecialchars($product['color']) ?></span>
                     </div>
-
-
-                    <div class="product-description">
-
-                        <?= $product['description'] ?>
-
-                    </div>
-
-
+                    <p class="product-desc"><?= htmlspecialchars($product['description']) ?></p>
                 </div>
-
-
             </article>
-
-
         <?php endforeach; ?>
-
-
     </div>
 
-
-    <div class="features">
-
-
-        <div class="feature">
-
-            <strong>
-                FREE SHIPPING
-            </strong>
-
-            <span>
-                On orders over $100
-            </span>
-
+    <section class="editorial-spotlight">
+        <div class="editorial-img">
+            <img src="https://images.unsplash.com/photo-1445205170230-053b83016050?auto=format&fit=crop&w=1200&q=80" alt="Editorial Lookbook" loading="lazy">
         </div>
-
-
-        <div class="feature">
-
-            <strong>
-                EASY RETURNS
-            </strong>
-
-            <span>
-                30-day returns on all orders
-            </span>
-
+        <div class="editorial-content">
+            <small>The Copenhagen Studio</small>
+            <h2>Thoughtful Silhouettes. Honest Materials.</h2>
+            <p>
+                We construct clothing with understated ease and utilitarian durability.
+                Every piece is dyed with certified non-toxic mineral pigments and assembled in heritage workshops.
+            </p>
+            <a href="#collection" class="btn-editorial">Explore Our Story →</a>
         </div>
-
-
-        <div class="feature">
-
-            <strong>
-                CONSIDERED MATERIALS
-            </strong>
-
-            <span>
-                Designed to last beyond the season
-            </span>
-
-        </div>
-
-
-    </div>
-
-
-    <section class="newsletter">
-
-
-        <h2>
-            Stay in the loop
-        </h2>
-
-
-        <p>
-            New collections, early access and
-            occasional notes from the studio.
-        </p>
-
-
-        <form>
-
-            <input
-                type="email"
-                placeholder="Your email address"
-            >
-
-            <button type="submit">
-                Subscribe
-            </button>
-
-        </form>
-
-
     </section>
 
+    <div class="features-strip">
+        <div class="feature-item">
+            <div class="feature-icon">🌿</div>
+            <strong>Sustainable Origins</strong>
+            <span>GOTS certified organic cotton & traceable mulesing-free wool</span>
+        </div>
+        <div class="feature-item">
+            <div class="feature-icon">📦</div>
+            <strong>Carbon-Neutral Delivery</strong>
+            <span>Plastic-free recycled packaging on all international shipments</span>
+        </div>
+        <div class="feature-item">
+            <div class="feature-icon">↺</div>
+            <strong>Guaranteed Lifetime Care</strong>
+            <span>Complimentary repair program and circular trade-in initiative</span>
+        </div>
+    </div>
+
+    <div class="newsletter-card">
+        <h2>Stay in the loop</h2>
+        <p>Subscribe to receive seasonal lookbooks, private pre-orders, and studio dispatches.</p>
+        <form class="newsletter-form" onsubmit="event.preventDefault(); alert('Thank you for subscribing to Threadline Journal.');">
+            <input type="email" required placeholder="Enter your email address">
+            <button type="submit">Join</button>
+        </form>
+    </div>
 
 </main>
 
-
 <footer>
-
-
     <div class="footer-inner">
-
-
         <div>
-
-            <div class="footer-brand">
-                THREADLINE
-            </div>
-
-            <p>
-                Modern everyday clothing designed
-                in Copenhagen and made with care.
+            <div class="footer-brand">THREADLINE</div>
+            <p style="font-size:13px;line-height:1.7;">
+                Modern everyday apparel designed in Copenhagen and produced responsibly with European master craftspeople.
             </p>
-
         </div>
 
-
-        <div>
-
-            <h4>
-                Shop
-            </h4>
-
-            <a href="#">
-                New Arrivals
-            </a>
-
-            <a href="#">
-                Clothing
-            </a>
-
-            <a href="#">
-                Accessories
-            </a>
-
+        <div class="footer-col">
+            <h4>Collections</h4>
+            <a href="?category=all">New Arrivals</a>
+            <a href="?category=shirts">Shirts & Tops</a>
+            <a href="?category=jackets">Outerwear</a>
+            <a href="?category=denim">Selvedge Denim</a>
+            <a href="?category=knitwear">Knitwear</a>
         </div>
 
-
-        <div>
-
-            <h4>
-                Help
-            </h4>
-
-            <a href="#">
-                Contact
-            </a>
-
-            <a href="#">
-                Shipping
-            </a>
-
-            <a href="#">
-                Returns
-            </a>
-
+        <div class="footer-col">
+            <h4>Customer Care</h4>
+            <a href="#">Order Status & Tracking</a>
+            <a href="#">Shipping & Returns</a>
+            <a href="#">Garment Care Guide</a>
+            <a href="#">Contact Support</a>
         </div>
 
-
-        <div>
-
-            <h4>
-                Company
-            </h4>
-
-            <a href="#">
-                About
-            </a>
-
-            <a href="#">
-                Journal
-            </a>
-
-            <a href="#">
-                Careers
-            </a>
-
+        <div class="footer-col">
+            <h4>About Threadline</h4>
+            <a href="#">Our Studio</a>
+            <a href="#">Sustainability Report</a>
+            <a href="#">Artisan Mills</a>
+            <a href="#">Careers</a>
         </div>
-
-
     </div>
 
-
-    <div class="copyright">
-
-        © 2026 THREADLINE. All rights reserved.
-
+    <div class="footer-bottom">
+        <div>© 2026 THREADLINE ApS. All rights reserved.</div>
+        <div>
+            <a href="#" style="color:#6d6961;margin-right:16px;">Privacy Policy</a>
+            <a href="#" style="color:#6d6961;">Terms of Service</a>
+        </div>
     </div>
-
-
 </footer>
 
-
 </body>
-
 </html>

@@ -1,0 +1,15 @@
+RIVERVIEW INSTITUTE — INTERNAL INFRASTRUCTURE TOPOLOGY (CONFIDENTIAL)
+Zone: us-east-vpc-internal (10.240.0.0/16)
+
+Active Internal Nodes:
+- db01.internal.riverview.test (10.240.10.15) — MySQL 10.5 Primary Cluster
+- db02.internal.riverview.test (10.240.10.16) — MySQL Read Replica
+- mail01.internal.riverview.test (10.240.12.8) — Internal Postfix Relay (Port 587)
+- api.internal.riverview.test (10.240.14.20) — Internal Student REST Gateway
+- cache01.internal.riverview.test (10.240.16.5) — Redis Session & Cache (Auth: RvRedis_Session_2025!)
+- storage-vault.internal.riverview.test (10.240.20.10) — NFS Storage (Mount: /var/www/riverview/admissions/storage)
+
+Amazon S3 Cold Archive:
+Bucket: s3://riverview-admissions-cold-storage-vault
+IAM Key: AKIA482910385RIVERVIEW
+Encryption: AES-256 (AWS KMS)

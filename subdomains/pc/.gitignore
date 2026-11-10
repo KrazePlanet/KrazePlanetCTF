@@ -1,0 +1,7 @@
+.DS_Store
+/vendor/
+/cache/
+config/database.php
+config/stripe.php
+config/aws.php
+.env
