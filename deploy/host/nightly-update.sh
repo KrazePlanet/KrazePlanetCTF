@@ -10,7 +10,14 @@
 # Output is logged to deploy/nightly-update.log (kept to the last ~2000 lines).
 set -u
 
-cd "$(dirname "$(readlink -f "$0")")/.." || exit 1   # /opt/krazeplanet/deploy
+# Resolve deploy dir: works whether called from its canonical location inside
+# the repo (/opt/krazeplanet/deploy/host/) or from a copy in /usr/local/sbin/.
+_candidate="$(dirname "$(readlink -f "$0")")/.."
+if [ -f "$_candidate/.env" ] && [ -f "$_candidate/docker-compose.yml" ]; then
+    cd "$_candidate" || exit 1
+else
+    cd /opt/krazeplanet/deploy || exit 1
+fi
 DEPLOY="$(pwd)"
 REPO="$(cd .. && pwd)"                                 # /opt/krazeplanet
 LOG="$DEPLOY/nightly-update.log"
