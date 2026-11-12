@@ -1,0 +1,7 @@
+user_id,full_name,email,phone,date_of_birth,country,card_brand,card_last4,national_id_ref,kyc_status,uploaded_document_path
+USR-90381,John Doe,john.doe@example.test,+1-617-555-0118,1988-05-14,US,Visa,4532,NID-4410982,verified,/uploads/passport_scan_john_doe_2023.jpg
+USR-90407,Sarah Miller,sarah.miller@example.test,+1-415-555-0142,1994-01-29,US,Mastercard,5412,NID-6629104,verified,/uploads/national_id_sarah_miller_2024.jpg
+USR-90412,Ahmed Hassan,ahmed.hassan@example.test,+44-20-7946-0192,1991-11-12,GB,Visa,4916,NID-8840219,verified,/uploads/passport_scan_ahmed_hassan_2024.jpg
+USR-90455,Emily Ross,emily.ross@example.test,+1-617-555-0177,1992-07-18,US,Mastercard,5298,DL-MA-9941203,verified,/uploads/drivers_license_emily_ross.jpg
+USR-90489,James Huang,james.huang@example.test,+1-206-555-0163,1989-03-04,US,Visa,4111,DL-WA-7731840,pending_manual_review,/uploads/drivers_license_james_hw_2024.jpg
+

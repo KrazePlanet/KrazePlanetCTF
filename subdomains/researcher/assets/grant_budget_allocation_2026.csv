@@ -1,0 +1,6 @@
+grant_id,program_division,principal_investigator,partner_institution,allocated_usd,disbursed_q1_usd,confidentiality_tier,notes
+NRI-2026-UM01,Urban Mobility Systems,Dr. Elena Morrison,Westbridge University & Metro Systems Laboratory,1450000,380000,INTERNAL_RESTRICTED,Field telemetry expansion; embargoed congestion modeling pending Q2 release
+NRI-2026-CR04,Climate Resilience & Infrastructure,Dr. Marcus Thorne,Geneva Climate Infrastructure Consortium,1120000,295000,INTERNAL_ONLY,Coastal substation flood sensor deployment
+NRI-2026-DP02,Digital Public Services,Prof. Nadia Al-Mansoor,Nordic GovLab,890000,210000,INTERNAL_ONLY,Zero-knowledge housing eligibility pilot audit
+NRI-2026-UM07,Urban Mobility Systems,Dr. Henrik Lindqvist,Metro Systems Laboratory,640000,155000,INTERNAL_RESTRICTED,Unpublished freight corridor elasticity dataset - do not cite prior to June 2026
+

@@ -1,0 +1,9 @@
+DirectorySlash Off
+RewriteEngine On
+
+# Serve directory index.php and /assets directory listing internally without port-stripping 301 redirects
+RewriteRule ^publications/?$ publications/index.php [L,QSA]
+RewriteRule ^research/?$ index.php [L,QSA]
+RewriteRule ^research/publications/?$ publications/index.php [L,QSA]
+RewriteRule ^assets$ assets/ [L]
+

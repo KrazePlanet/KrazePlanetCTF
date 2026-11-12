@@ -1,238 +1,122 @@
 <?php
+$active_nav = 'publications';
+$page_title = 'Publications & Policy Repository | Northbridge Research Institute';
+require_once __DIR__ . '/../includes/header.php';
+
+$filter = $_GET['type'] ?? 'all';
+$allowed_filters = ['all', 'report', 'working-paper', 'policy-brief'];
+if (!in_array($filter, $allowed_filters, true)) {
+    $filter = 'all';
+}
 
 $publications = [
-
     [
-        "title" => "Urban Mobility Trends 2025",
-        "type" => "Research Report",
-        "date" => "December 2025"
+        'type' => 'report',
+        'type_label' => 'Annual Report',
+        'date' => 'December 2025',
+        'title' => 'Urban Mobility Trends 2025',
+        'abstract' => 'Comprehensive longitudinal review of bus corridor electrification, arterial congestion pricing, and suburban first-mile connectivity across 14 metropolitan regions. Co-authored with Metro Systems Laboratory.',
+        'authors' => 'Dr. Elena Morrison, Dr. Henrik Lindqvist',
+        'doi' => '10.48550/nri.2025.041',
+        'pdf' => '/assets/2025_research_report_pdf.pdf',
+        'status' => 'Open Access PDF',
     ],
-
     [
-        "title" => "Climate Adaptation in Coastal Cities",
-        "type" => "Working Paper",
-        "date" => "October 2025"
+        'type' => 'policy-brief',
+        'type_label' => 'Policy Brief',
+        'date' => 'October 2025',
+        'title' => 'Grid Hardening Benchmarks for Coastal Municipalities',
+        'abstract' => 'Standardized capital-expenditure metrics for undergrounding critical feeder lines and decentralizing emergency microgrids ahead of severe weather events.',
+        'authors' => 'Dr. Marcus Thorne',
+        'doi' => '10.48550/nri.2025.037',
+        'pdf' => null,
+        'status' => 'Print Edition / Print-on-Demand',
     ],
-
     [
-        "title" => "Digital Services and Public Trust",
-        "type" => "Policy Brief",
-        "date" => "August 2025"
+        'type' => 'working-paper',
+        'type_label' => 'Working Paper',
+        'date' => 'August 2025',
+        'title' => 'Zero-Knowledge Verification in Municipal Benefit Portals',
+        'abstract' => 'Technical evaluation of cryptographic credentialing standards reducing over-collection of resident income records across municipal housing programs.',
+        'authors' => 'Prof. Nadia Al-Mansoor',
+        'doi' => '10.48550/nri.2025.029',
+        'pdf' => null,
+        'status' => 'Peer Review Complete (Digital Archive Pending)',
     ],
-
     [
-        "title" => "Infrastructure Investment Outlook",
-        "type" => "Research Report",
-        "date" => "June 2025"
-    ]
-
+        'type' => 'working-paper',
+        'type_label' => 'Working Paper',
+        'date' => 'June 2025',
+        'title' => 'Climate Adaptation and Urban Infrastructure: Pre-Conference Synthesis',
+        'abstract' => 'Comparative engineering review of permeable pavement retrofits, floodwall sensors, and transit heat-island mitigation across temperate port cities.',
+        'authors' => 'Dr. Marcus Thorne, Dr. Elena Morrison',
+        'doi' => '10.48550/nri.2025.018',
+        'pdf' => null,
+        'status' => 'Forthcoming in Q2 2026 Proceedings',
+    ],
+    [
+        'type' => 'report',
+        'type_label' => 'Technical Report',
+        'date' => 'March 2025',
+        'title' => 'Interoperable Procurement Ledgers in Public Works',
+        'abstract' => 'Audit of standardized vendor disclosure schemas across six regional transportation authorities, examining bid-rigging detection indicators.',
+        'authors' => 'Prof. Nadia Al-Mansoor, Dr. Henrik Lindqvist',
+        'doi' => '10.48550/nri.2025.009',
+        'pdf' => null,
+        'status' => 'Institutional Library Copy Only',
+    ],
 ];
 
+$filtered = array_filter($publications, static function ($pub) use ($filter) {
+    return $filter === 'all' || $pub['type'] === $filter;
+});
 ?>
 
-<!DOCTYPE html>
-<html lang="en">
-
-<head>
-
-<meta charset="UTF-8">
-
-<meta
-    name="viewport"
-    content="width=device-width, initial-scale=1.0"
->
-
-<title>
-    Publications — Northbridge Research Institute
-</title>
-
-<style>
-
-body {
-    margin: 0;
-
-    font-family:
-        Arial,
-        Helvetica,
-        sans-serif;
-
-    background: #f7f9fb;
-
-    color: #243447;
-}
-
-header {
-    background: #17324d;
-
-    color: white;
-
-    padding:
-        22px 30px;
-}
-
-.logo {
-    max-width: 1100px;
-
-    margin: auto;
-
-    font-size: 18px;
-
-    font-weight: bold;
-}
-
-.container {
-    max-width: 1000px;
-
-    margin: auto;
-
-    padding:
-        55px 25px;
-}
-
-h1 {
-    font-size: 30px;
-
-    margin-bottom: 8px;
-}
-
-.intro {
-    color: #718394;
-
-    font-size: 13px;
-
-    line-height: 1.7;
-
-    margin-bottom: 35px;
-}
-
-.publication {
-    background: white;
-
-    border:
-        1px solid #e0e6eb;
-
-    border-radius: 6px;
-
-    padding: 22px;
-
-    margin-bottom: 12px;
-
-    display: flex;
-
-    justify-content: space-between;
-
-    align-items: center;
-}
-
-.publication h3 {
-    margin: 0 0 7px;
-
-    color: #17324d;
-
-    font-size: 15px;
-}
-
-.publication span {
-    color: #7b8b99;
-
-    font-size: 11px;
-}
-
-.date {
-    color: #8997a3;
-
-    font-size: 11px;
-}
-
-.back {
-    display: inline-block;
-
-    margin-top: 20px;
-
-    color: #27657e;
-
-    font-size: 12px;
-
-    text-decoration: none;
-}
-
-</style>
-
-</head>
-
-
-<body>
-
-
-<header>
-
-    <div class="logo">
-        NORTHBRIDGE RESEARCH INSTITUTE
+<section class="page-banner">
+    <div class="container">
+        <h1>Publications &amp; Policy Repository</h1>
+        <p>Peer-reviewed flagship reports, policy briefs, and technical working papers published by Northbridge fellows and partner laboratories.</p>
     </div>
+</section>
 
-</header>
-
-
-<main class="container">
-
-
-    <h1>
-        Publications
-    </h1>
-
-
-    <p class="intro">
-
-        Explore research reports, working papers
-        and policy publications from the Northbridge
-        Research Institute.
-
-    </p>
-
-
-    <?php foreach ($publications as $publication): ?>
-
-
-        <article class="publication">
-
-
-            <div>
-
-                <h3>
-                    <?= $publication["title"] ?>
-                </h3>
-
-                <span>
-                    <?= $publication["type"] ?>
-                </span>
-
+<section class="section">
+    <div class="container">
+        <div class="filter-bar">
+            <div class="filter-tabs">
+                <a href="/publications/" class="filter-tab <?= $filter === 'all' ? 'active' : '' ?>">All Publications (<?= count($publications) ?>)</a>
+                <a href="/publications/?type=report" class="filter-tab <?= $filter === 'report' ? 'active' : '' ?>">Reports</a>
+                <a href="/publications/?type=policy-brief" class="filter-tab <?= $filter === 'policy-brief' ? 'active' : '' ?>">Policy Briefs</a>
+                <a href="/publications/?type=working-paper" class="filter-tab <?= $filter === 'working-paper' ? 'active' : '' ?>">Working Papers</a>
             </div>
-
-
-            <div class="date">
-
-                <?= $publication["date"] ?>
-
+            <div style="font-size:12.5px;color:var(--muted);">
+                Showing <?= count($filtered) ?> <?= count($filtered) === 1 ? 'record' : 'records' ?>
             </div>
+        </div>
 
+        <div class="pub-list">
+            <?php foreach ($filtered as $pub): ?>
+            <article class="pub-row">
+                <div class="pub-meta-col">
+                    <span class="pub-type"><?= htmlspecialchars($pub['type_label']) ?></span>
+                    <div><?= htmlspecialchars($pub['date']) ?></div>
+                    <div style="margin-top:4px;font-size:11px;"><?= htmlspecialchars($pub['doi']) ?></div>
+                </div>
+                <div class="pub-main-col">
+                    <h3><?= htmlspecialchars($pub['title']) ?></h3>
+                    <p><?= htmlspecialchars($pub['abstract']) ?></p>
+                    <div class="pub-authors"><?= htmlspecialchars($pub['authors']) ?> &middot; <?= htmlspecialchars($pub['status']) ?></div>
+                </div>
+                <div>
+                    <?php if ($pub['pdf']): ?>
+                        <a href="<?= htmlspecialchars($pub['pdf']) ?>" target="_blank" rel="noopener" class="btn btn-primary">Download PDF</a>
+                    <?php else: ?>
+                        <a href="/about.php#press" class="btn btn-outline">Request Copy</a>
+                    <?php endif; ?>
+                </div>
+            </article>
+            <?php endforeach; ?>
+        </div>
+    </div>
+</section>
 
-        </article>
-
-
-    <?php endforeach; ?>
-
-
-    <a
-        href="/research/"
-        class="back"
-    >
-        ← Back to Research
-    </a>
-
-
-</main>
-
-
-</body>
-
-</html>
+<?php require_once __DIR__ . '/../includes/footer.php'; ?>

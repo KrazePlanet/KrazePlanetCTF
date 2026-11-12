@@ -1,0 +1,21 @@
+NORTHBRIDGE RESEARCH INSTITUTE — RESEARCH PROGRAMS OFFICE
+DOCUMENT CLASSIFICATION: INTERNAL — NOT FOR PUBLIC DISTRIBUTION
+EFFECTIVE: Q1–Q2 2026 PUBLICATION CYCLE
+
+1. Urban Mobility Systems: Unreleased Corridor Congestion Audit
+   - Manuscript File: internal_review_pdf.pdf
+   - Lead Investigator: Dr. Elena Morrison (Westbridge University / Metro Systems Laboratory)
+   - Review Status: Technical audit complete; provisional 14–18% off-peak congestion reduction findings under municipal partner verification
+   - Public Embargo Lift: Pending Metro Transit Authority sign-off (Targeted June 2026)
+   - Distribution Restriction: Do NOT link on public /publications/ repository or distribute to press contacts prior to sign-off.
+
+2. Climate Adaptation and Urban Infrastructure (Working Draft v0.8)
+   - Manuscript File: conference_draft_pdf.pdf
+   - Lead Authors: Dr. Marcus Thorne, Dr. Elena Morrison
+   - Review Status: Working draft submitted to Geneva Urban Infrastructure Symposium program committee
+   - Public Embargo Lift: Post-symposium proceedings publication (May 2026)
+
+3. Urban Mobility Trends 2025 (Final Flagship Release)
+   - Manuscript File: 2025_research_report_pdf.pdf
+   - Review Status: Cleared for open access distribution (Published December 2025, DOI 10.48550/nri.2025.041)
+

@@ -1,0 +1,8 @@
+employee_id,full_name,work_email,personal_email,department,title,annual_salary_usd,ssn_last4,home_address
+EMP-1001,Rachel Vance,r.vance@kestreledge.test,rachel.vance84@gmail.com,Engineering,VP of Platform Engineering,235000,4812,"410 Clarendon St, Boston, MA 02116"
+EMP-1002,Marcus Sterling,m.sterling@kestreledge.test,msterling.fin@outlook.com,Compliance,Head of AML & KYC Operations,192000,9031,"88 Pine St, Apt 14C, New York, NY 10005"
+EMP-1003,Nadia Kowalski,n.kowalski@kestreledge.test,nadiakowalski@proton.me,Engineering,Staff Infrastructure Engineer,205000,1174,"214 Spear St, San Francisco, CA 94105"
+EMP-1004,Devon Brooks,d.brooks@kestreledge.test,devon.brooks91@gmail.com,Finance,Senior Treasury Analyst,142000,6649,"150 N Riverside Plaza, Chicago, IL 60606"
+EMP-1005,Hannah Alverez,h.alverez@kestreledge.test,halverez@gmail.com,Security,Application Security Lead,198000,3308,"600 Congress Ave, Austin, TX 78701"
+EMP-1006,Trevor Lin,t.lin@kestreledge.test,trevorlin.work@yahoo.com,Operations,Settlement Operations Manager,136000,7290,"401 Terry Ave N, Seattle, WA 98109"
+

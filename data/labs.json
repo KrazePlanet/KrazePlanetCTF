@@ -861,25 +861,25 @@
       "access": "/subdomains/campuscloud"
     },
     {
-      "title": "The Research Vault",
+      "title": "Northbridge Institute - Directory Listing & Pre-Publication Document Disclosure",
       "difficulty": "Easy",
       "report": "",
       "access": "/subdomains/researcher"
     },
     {
-      "title": "Behind the Profile",
+      "title": "Peerstack Developer Profiles - Excessive Data Exposure & PII Leak via Profile API",
       "difficulty": "Easy",
       "report": "",
       "access": "/subdomains/profiler"
     },
     {
-      "title": "CDN Directory Listing - PII Exposed",
+      "title": "KestrelEdge CDN - Misconfigured Directory Listing & KYC PII Disclosure",
       "difficulty": "Hard",
       "report": "",
       "access": "/subdomains/edge"
     },
     {
-      "title": "VaultTech - JWT Token Credential Reuse Across Admin Panels",
+      "title": "VaultTech - Hardcoded Admin Credentials in JavaScript & Credential Reuse",
       "difficulty": "Hard",
       "report": "",
       "access": "/subdomains/vault"
@@ -889,48 +889,6 @@
       "difficulty": "Hard",
       "report": "https://hackerone.com/reports/1703733",
       "access": "/subdomains/mtnng"
-    },
-    {
-      "title": "Information Disclosure in /skills call",
-      "difficulty": "Hard",
-      "report": "https://hackerone.com/reports/188719",
-      "access": "/subdomains/skills"
-    },
-    {
-      "title": "User sensitive information disclosure",
-      "difficulty": "Hard",
-      "report": "https://hackerone.com/reports/975047",
-      "access": "/subdomains/wechat"
-    },
-    {
-      "title": "Information disclosure of another company bug on video",
-      "difficulty": "Hard",
-      "report": "https://hackerone.com/reports/1886143",
-      "access": "/subdomains/company"
-    },
-    {
-      "title": "Information disclosure by sending a GIF",
-      "difficulty": "Hard",
-      "report": "https://hackerone.com/reports/1801427",
-      "access": "/subdomains/voyager-api"
-    },
-    {
-      "title": "Partial disclosure of report activity through new \"Export as .zip\" feature",
-      "difficulty": "Hard",
-      "report": "https://hackerone.com/reports/182358",
-      "access": "/subdomains/rawreports"
-    },
-    {
-      "title": "Possible PII Disclosure via Advanced Vetting Process",
-      "difficulty": "Hard",
-      "report": "https://hackerone.com/reports/2421796",
-      "access": "/subdomains/acceptance"
-    },
-    {
-      "title": "Sensitive information disclosure to shared access user via streamlabs platform api",
-      "difficulty": "Hard",
-      "report": "https://hackerone.com/reports/1072893",
-      "access": "/subdomains/platform"
     }
   ],
   "Username/Email Enumeration": [

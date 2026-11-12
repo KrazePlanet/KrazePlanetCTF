@@ -1,0 +1,5 @@
+DirectorySlash Off
+RewriteEngine On
+
+RewriteRule ^admin/?$ admin.php [L,QSA]
+RewriteRule ^manage/?$ manage.php [L,QSA]

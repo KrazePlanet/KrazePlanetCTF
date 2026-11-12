@@ -1,0 +1,5 @@
+DirectorySlash Off
+RewriteEngine On
+
+RewriteRule ^(nc|admin)$ includes/dir_redirect.php?dir=$1 [L]
+RewriteRule ^nc/admin/?$ includes/dir_redirect.php?dir=admin [L]

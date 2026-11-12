@@ -1,0 +1,13 @@
+# KestrelEdge / HarborLine Financial Infrastructure — Staging Origin Credentials
+# Generated: 2024-03-14T08:12:00Z
+# Environment: staging-us-east-1 (edge-origin-02.internal.kestreledge.test)
+
+STRIPE_STAGING_SECRET_KEY=sk_test_51P9xLmK2nV8rQwZp04192837465aBcDeFgHiJkLmNoPqRsTuVwXyZ
+KYC_VENDOR_WEBHOOK_SECRET=whsec_kestrel_staging_89a4c2d1f7e0384910293847
+OBJECT_STORAGE_ENDPOINT=https://s3.us-east-1.internal.kestreledge.test
+OBJECT_STORAGE_BUCKET=kestrel-kyc-compliance-archive
+OBJECT_STORAGE_ACCESS_KEY=AKIAIOSFODNN7KESTREL24
+OBJECT_STORAGE_SECRET_KEY=wJalrXUtnFEMI/K7MDENG/bPxRfiCYKESTRELKEY
+INTERNAL_REDIS_DSN=redis://:kestrel_stage_rd_99182@10.22.4.18:6379/2
+DB_READ_REPLICA_URI=postgresql://reporting_ro:KestrelRo_2024!@10.22.4.30:5432/ledger_staging
+

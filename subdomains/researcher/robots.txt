@@ -1,0 +1,6 @@
+User-agent: *
+Disallow: /includes/
+Disallow: /admin/
+Disallow: /internal/
+Sitemap: /publications/
+

@@ -1,439 +1,179 @@
 <?php
-
-$projects = [
-    [
-        "title" => "Urban Mobility Systems",
-        "description" =>
-            "Studying transportation patterns and sustainable mobility across rapidly growing cities."
-    ],
-    [
-        "title" => "Climate Resilience",
-        "description" =>
-            "Developing practical models for communities adapting to changing environmental conditions."
-    ],
-    [
-        "title" => "Digital Public Services",
-        "description" =>
-            "Exploring how emerging technologies can improve access to essential public services."
-    ]
-];
-
+$active_nav = 'research';
+$page_title = 'Northbridge Research Institute | Science, Policy & Urban Infrastructure';
+require_once __DIR__ . '/includes/header.php';
 ?>
 
-<!DOCTYPE html>
-<html lang="en">
-
-<head>
-
-<meta charset="UTF-8">
-
-<meta
-    name="viewport"
-    content="width=device-width, initial-scale=1.0"
->
-
-<title>
-    Northbridge Research Institute
-</title>
-
-<style>
-
-* {
-    box-sizing: border-box;
-}
-
-body {
-    margin: 0;
-
-    font-family:
-        Arial,
-        Helvetica,
-        sans-serif;
-
-    color: #243447;
-
-    background: #f7f9fb;
-}
-
-header {
-    background: #17324d;
-
-    color: white;
-}
-
-.header-inner {
-    max-width: 1180px;
-
-    margin: auto;
-
-    padding: 20px 25px;
-
-    display: flex;
-
-    justify-content: space-between;
-
-    align-items: center;
-}
-
-.logo {
-    font-size: 19px;
-
-    font-weight: bold;
-
-    letter-spacing: .3px;
-}
-
-.logo small {
-    display: block;
-
-    margin-top: 5px;
-
-    color: #a9bac9;
-
-    font-size: 9px;
-
-    letter-spacing: 1.5px;
-
-    font-weight: normal;
-}
-
-nav {
-    display: flex;
-
-    gap: 25px;
-}
-
-nav a {
-    color: #d7e1e9;
-
-    text-decoration: none;
-
-    font-size: 12px;
-}
-
-nav a:hover {
-    color: white;
-}
-
-.hero {
-    background:
-        linear-gradient(
-            120deg,
-            #17324d,
-            #2d637e
-        );
-
-    color: white;
-
-    padding:
-        70px 25px;
-}
-
-.hero-inner {
-    max-width: 1180px;
-
-    margin: auto;
-}
-
-.hero h1 {
-    max-width: 680px;
-
-    margin: 0;
-
-    font-size: 42px;
-
-    line-height: 1.1;
-}
-
-.hero p {
-    max-width: 650px;
-
-    color: #d8e5ec;
-
-    font-size: 14px;
-
-    line-height: 1.8;
-
-    margin-top: 18px;
-}
-
-.container {
-    max-width: 1180px;
-
-    margin: auto;
-
-    padding:
-        55px 25px;
-}
-
-.section-title {
-    font-size: 23px;
-
-    margin-bottom: 25px;
-}
-
-.projects {
-    display: grid;
-
-    grid-template-columns:
-        repeat(3, 1fr);
-
-    gap: 20px;
-}
-
-.project {
-    background: white;
-
-    border:
-        1px solid #e0e6eb;
-
-    border-radius: 7px;
-
-    padding: 25px;
-}
-
-.project h3 {
-    margin-top: 0;
-
-    color: #17324d;
-
-    font-size: 16px;
-}
-
-.project p {
-    color: #697b8b;
-
-    font-size: 12px;
-
-    line-height: 1.7;
-}
-
-.publications {
-    margin-top: 45px;
-
-    background: white;
-
-    border:
-        1px solid #e0e6eb;
-
-    border-radius: 7px;
-
-    padding: 28px;
-}
-
-.publications h2 {
-    margin-top: 0;
-
-    font-size: 19px;
-}
-
-.publications p {
-    color: #697b8b;
-
-    font-size: 13px;
-
-    line-height: 1.7;
-}
-
-.button {
-    display: inline-block;
-
-    margin-top: 10px;
-
-    padding:
-        11px 17px;
-
-    background: #17324d;
-
-    color: white;
-
-    text-decoration: none;
-
-    border-radius: 4px;
-
-    font-size: 11px;
-
-    text-transform: uppercase;
-
-    letter-spacing: .7px;
-}
-
-footer {
-    margin-top: 40px;
-
-    background: #17324d;
-
-    color: #a9bac9;
-
-    text-align: center;
-
-    padding: 30px;
-
-    font-size: 10px;
-}
-
-@media(max-width: 750px) {
-
-    .header-inner {
-        flex-direction: column;
-
-        align-items: flex-start;
-
-        gap: 15px;
-    }
-
-    .projects {
-        grid-template-columns: 1fr;
-    }
-
-    .hero h1 {
-        font-size: 32px;
-    }
-
-}
-
-</style>
-
-</head>
-
-
-<body>
-
-
-<header>
-
-    <div class="header-inner">
-
-
-        <div class="logo">
-
-            NORTHBRIDGE RESEARCH INSTITUTE
-
-            <small>
-                SCIENCE · POLICY · INNOVATION
-            </small>
-
+<section class="hero-editorial">
+    <div class="container hero-grid">
+        <div>
+            <span class="kicker">2025 Annual Flagship Report &middot; Open Access</span>
+            <h1>Urban Mobility Trends 2025: Corridor Electrification &amp; Congestion Equity</h1>
+            <p class="hero-lead">
+                Drawing on 18 months of telemetry across fourteen metropolitan transit authorities, this flagship assessment evaluates bus rapid transit electrification, peak-hour pricing frameworks, and multimodal commuter resilience.
+            </p>
+            <div class="hero-meta">
+                <span><strong>Lead Author:</strong> Dr. Elena Morrison</span>
+                <span><strong>Published:</strong> December 2025</span>
+                <span><strong>DOI:</strong> 10.48550/nri.2025.041</span>
+            </div>
+            <div class="btn-group">
+                <a href="/assets/2025_research_report_pdf.pdf" target="_blank" rel="noopener" class="btn btn-primary">
+                    Download Full Report (PDF)
+                </a>
+                <a href="/publications/" class="btn btn-outline">
+                    Browse All Publications
+                </a>
+            </div>
         </div>
-
-
-        <nav>
-
-            <a href="/research/">
-                Research
-            </a>
-
-            <a href="/research/publications/">
-                Publications
-            </a>
-
-            <a href="#">
-                Researchers
-            </a>
-
-            <a href="#">
-                About
-            </a>
-
-        </nav>
-
-
+        <div class="hero-media">
+            <img src="https://images.unsplash.com/photo-1519501025264-65ba15a82390?auto=format&fit=crop&w=1000&q=80" alt="Aerial view of modern metropolitan transit corridor">
+            <div class="hero-caption">
+                Fig 1. Multimodal arterial corridor instrumentation &mdash; Northbridge &amp; Metro Systems Laboratory joint field study.
+            </div>
+        </div>
     </div>
-
-</header>
-
-
-<section class="hero">
-
-    <div class="hero-inner">
-
-        <h1>
-            Research for a changing world.
-        </h1>
-
-        <p>
-            Northbridge Research Institute brings
-            together scientists, engineers and policy
-            researchers to study complex challenges
-            facing communities and institutions.
-        </p>
-
-    </div>
-
 </section>
 
+<section class="section" id="programs">
+    <div class="container">
+        <div class="section-header">
+            <div>
+                <h2>Core Research Programs</h2>
+            </div>
+            <a href="/researchers.php" class="section-link">Meet Program Leads &rarr;</a>
+        </div>
 
-<main class="container">
-
-
-    <h2 class="section-title">
-        Current Research
-    </h2>
-
-
-    <div class="projects">
-
-
-        <?php foreach ($projects as $project): ?>
-
-            <article class="project">
-
-                <h3>
-                    <?= $project["title"] ?>
-                </h3>
-
-                <p>
-                    <?= $project["description"] ?>
-                </p>
-
+        <div class="programs-grid">
+            <article class="program-card">
+                <div class="program-img">
+                    <img src="https://images.unsplash.com/photo-1477959858617-67f85cf4f1df?auto=format&fit=crop&w=800&q=80" alt="Metropolitan rail and transit skyline">
+                </div>
+                <div class="program-body">
+                    <span class="program-tag">Mobility &amp; Transit</span>
+                    <h3>Urban Mobility Systems</h3>
+                    <p>
+                        Empirical modeling of public transit reliability, dynamic corridor pricing, and shared autonomous micro-transit integration in high-density cities.
+                    </p>
+                    <div class="program-footer">
+                        <span>Lead: Dr. E. Morrison</span>
+                        <span>Partner: Westbridge Univ.</span>
+                    </div>
+                </div>
             </article>
 
-        <?php endforeach; ?>
+            <article class="program-card">
+                <div class="program-img">
+                    <img src="https://images.unsplash.com/photo-1473341304170-971dccb5ac1e?auto=format&fit=crop&w=800&q=80" alt="Clean energy grid and wind turbines">
+                </div>
+                <div class="program-body">
+                    <span class="program-tag">Energy &amp; Environment</span>
+                    <h3>Climate Resilience &amp; Infrastructure</h3>
+                    <p>
+                        Long-horizon stress testing of coastal power substations, district thermal networks, and urban flood-mitigation capital planning under RCP 4.5 scenarios.
+                    </p>
+                    <div class="program-footer">
+                        <span>Lead: Dr. M. Thorne</span>
+                        <span>Partner: Geneva Climate Lab</span>
+                    </div>
+                </div>
+            </article>
 
+            <article class="program-card">
+                <div class="program-img">
+                    <img src="https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=800&q=80" alt="Global digital infrastructure network">
+                </div>
+                <div class="program-body">
+                    <span class="program-tag">Digital Governance</span>
+                    <h3>Digital Public Services</h3>
+                    <p>
+                        Architectural audits of interoperable municipal identity systems, open procurement ledgers, and privacy-preserving administrative data exchanges.
+                    </p>
+                    <div class="program-footer">
+                        <span>Lead: Prof. N. Al-Mansoor</span>
+                        <span>Partner: Nordic GovLab</span>
+                    </div>
+                </div>
+            </article>
+        </div>
 
+        <div class="stats-band">
+            <div class="stat-item">
+                <strong>42</strong>
+                <span>Peer-Reviewed Policy Reports</span>
+            </div>
+            <div class="stat-item">
+                <strong>18</strong>
+                <span>Municipal Research Partnerships</span>
+            </div>
+            <div class="stat-item">
+                <strong>14</strong>
+                <span>Resident &amp; Visiting Fellows</span>
+            </div>
+            <div class="stat-item">
+                <strong>$6.4M</strong>
+                <span>Active Civic Infrastructure Grants</span>
+            </div>
+        </div>
     </div>
+</section>
 
+<section class="section section-white">
+    <div class="container">
+        <div class="section-header">
+            <div>
+                <h2>Recent Publications &amp; Briefs</h2>
+            </div>
+            <a href="/publications/" class="section-link">View Complete Archive &rarr;</a>
+        </div>
 
-    <section class="publications">
+        <div class="pub-list">
+            <article class="pub-row">
+                <div class="pub-meta-col">
+                    <span class="pub-type">Annual Report</span>
+                    <div>December 2025</div>
+                </div>
+                <div class="pub-main-col">
+                    <h3>Urban Mobility Trends 2025</h3>
+                    <p>Comprehensive longitudinal review of bus corridor electrification, arterial congestion pricing, and suburban first-mile connectivity across 14 metropolitan regions.</p>
+                    <div class="pub-authors">Dr. Elena Morrison, Dr. Henrik Lindqvist &middot; Metro Systems Laboratory</div>
+                </div>
+                <div>
+                    <a href="/assets/2025_research_report_pdf.pdf" target="_blank" rel="noopener" class="btn btn-outline">Read PDF</a>
+                </div>
+            </article>
 
-        <h2>
-            Research Publications
-        </h2>
+            <article class="pub-row">
+                <div class="pub-meta-col">
+                    <span class="pub-type">Policy Brief</span>
+                    <div>October 2025</div>
+                </div>
+                <div class="pub-main-col">
+                    <h3>Grid Hardening Benchmarks for Coastal Municipalities</h3>
+                    <p>Standardized capital-expenditure metrics for undergrounding critical feeder lines and decentralizing emergency microgrids ahead of severe weather events.</p>
+                    <div class="pub-authors">Dr. Marcus Thorne &middot; Climate Resilience Program</div>
+                </div>
+                <div>
+                    <a href="/publications/?type=policy-brief" class="btn btn-outline">View Abstract</a>
+                </div>
+            </article>
 
-        <p>
-            Browse reports, working papers and
-            peer-reviewed research produced by
-            Northbridge researchers and partner
-            institutions.
-        </p>
+            <article class="pub-row">
+                <div class="pub-meta-col">
+                    <span class="pub-type">Working Paper</span>
+                    <div>August 2025</div>
+                </div>
+                <div class="pub-main-col">
+                    <h3>Zero-Knowledge Verification in Municipal Benefit Portals</h3>
+                    <p>Technical evaluation of cryptographic credentialing standards reducing over-collection of resident income records across municipal housing programs.</p>
+                    <div class="pub-authors">Prof. Nadia Al-Mansoor &middot; Digital Public Services Program</div>
+                </div>
+                <div>
+                    <a href="/publications/?type=working-paper" class="btn btn-outline">View Abstract</a>
+                </div>
+            </article>
+        </div>
+    </div>
+</section>
 
-        <a
-            href="/research/publications/"
-            class="button"
-        >
-            View Publications
-        </a>
-
-    </section>
-
-
-</main>
-
-
-<footer>
-
-    Northbridge Research Institute
-
-    ·
-
-    Research & Innovation Division
-
-    ·
-
-    © 2026
-
-</footer>
-
-
-</body>
-
-</html>
+<?php require_once __DIR__ . '/includes/footer.php'; ?>

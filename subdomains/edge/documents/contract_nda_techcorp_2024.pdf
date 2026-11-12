@@ -1,0 +1,26 @@
+%PDF-1.4
+1 0 obj << /Type /Catalog /Pages 2 0 R >> endobj
+2 0 obj << /Type /Pages /Kids [3 0 R] /Count 1 >> endobj
+3 0 obj << /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Contents 4 0 R /Resources << /Font << /F1 5 0 R >> >> >> endobj
+4 0 obj << /Length 566 >> stream
+BT /F1 14 Tf 50 750 Td (MUTUAL NON-DISCLOSURE AGREEMENT (CONFIDENTIAL)) Tj ET
+BT /F1 10 Tf 50 720 Td (Effective Date: January 18, 2024) Tj ET
+BT /F1 10 Tf 50 702 Td (Parties: KestrelEdge Financial Technologies Inc. and TechCorp Global Holdings Ltd.) Tj ET
+BT /F1 10 Tf 50 684 Td (Scope: Cross-border liquidity settlement rails, SWIFT ISO-20022 integration specs,) Tj ET
+BT /F1 10 Tf 50 666 Td (and sandbox KYC vendor evaluation metrics.) Tj ET
+BT /F1 10 Tf 50 648 Td (Term: Three \\(3\\) years from execution date. Internal Legal Ref: LEG-NDA-2024-089.) Tj ET
+
+endstream endobj
+5 0 obj << /Type /Font /Subtype /Type1 /BaseFont /Helvetica >> endobj
+xref
+0 6
+0000000000 65535 f 
+0000000009 00000 n 
+0000000058 00000 n 
+0000000115 00000 n 
+0000000241 00000 n 
+0000000858 00000 n 
+trailer << /Size 6 /Root 1 0 R >>
+startxref
+928
+%%EOF
