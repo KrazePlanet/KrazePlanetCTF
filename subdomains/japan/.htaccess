@@ -1,8 +1,6 @@
 RewriteEngine On
 
-# Allow every real file to be accessed normally
-RewriteCond %{REQUEST_FILENAME} -f
-RewriteRule ^ - [L]
-
-# Redirect everything else
-RewriteRule ^ https://academy.krazeplanet.com/ [R=302,L]
+# Only the site root redirects away, to a reserved .example domain that never
+# resolves, so students can't wander onto a real site. Every other path behaves
+# normally (real files are served, everything else is a plain 404).
+RewriteRule ^$ https://www.riverview-institute.example/ [R=302,L]
