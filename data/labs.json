@@ -159,7 +159,7 @@
       "access": "/subdomains/pixora"
     },
     {
-      "title": "Improper Access Control Allows Unauthorized Access to Other Patients' Lab Reports via Unvalidated Report ID",
+      "title": "Improper Access Control Allows Patients to Access the Clinician Workspace and All Patient Records",
       "difficulty": "Easy",
       "report": "",
       "access": "/subdomains/medicore"
