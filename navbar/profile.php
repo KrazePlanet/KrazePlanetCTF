@@ -111,6 +111,16 @@ if ($isOwn && $account) {
     $fullname = (string)($account['fullname'] ?? '');
     $email = (string)($account['email'] ?? ($_SESSION['user_email'] ?? ''));
     $githubRepo = (string)($account['github_repo'] ?? krazeGithubRepo());
+    $ghUser = krazeGithubUserFromRepo($githubRepo);
+    // Saved before every repo was called KrazePlanet-Reports: still works, but we say so
+    $legacyRepo = ($githubRepo !== '' && $githubRepo !== krazeReportsRepoUrl($ghUser)) ? $githubRepo : '';
+    $newRepoUrl = 'https://github.com/new?name=' . KRAZE_REPORTS_REPO . '&visibility=public&description=' . rawurlencode('My KrazePlanet lab reports');
+    // What the GitHub card shows: setup steps, "repository not found", or just the repo
+    $ghState = 'none';
+    if ($legacyRepo !== '') $ghState = 'legacy';
+    elseif ($ghUser !== '') $ghState = ($tab === 'settings' && krazeRepoExists($ghUser) === false) ? 'missing' : 'ok';
+    // Repo is there but has no README yet: offer a ready-made one (only shown when we're sure)
+    $needsReadme = $ghState === 'ok' && $tab === 'settings' && krazeRepoHasReadme($ghUser) === false;
     $accountPageUrl = krazeSsoAccountUrl();
     $publicPath = '/navbar/profile.php?user=' . urlencode($myName);
     $publicUrl = krazeSiteUrl($publicPath);
@@ -259,6 +269,43 @@ $avatarUrl = $p['avatar'] ??('https://api.dicebear.com/7.x/adventurer/svg?seed='
     .pf-status { flex-shrink: 0; font-size: 12.5px; font-weight: 700; border-radius: 999px; padding: 4px 11px; color: #fbbf24; background: rgba(251,191,36,.1); border: 1px solid rgba(251,191,36,.35); }
     .pf-status::before { content: ''; display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: currentColor; margin-right: 7px; vertical-align: 1px; }
     .pf-status.is-on { color: #34d399; background: rgba(52,211,153,.1); border-color: rgba(52,211,153,.35); }
+    /* GitHub: two short steps */
+    .gh-steps { list-style: none; counter-reset: gh; margin: 16px 0 0; padding: 0; }
+    .gh-steps > li { counter-increment: gh; position: relative; padding: 0 0 0 38px; }
+    .gh-steps > li + li { margin-top: 18px; padding-top: 18px; border-top: 1px solid rgba(255,255,255,.07); }
+    .gh-steps > li::before { content: counter(gh); position: absolute; left: 0; top: 0; width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+      font-size: 12.5px; font-weight: 700; color: var(--accent); border: 1px solid rgba(56,189,248,.4); }
+    .gh-steps > li + li::before { top: 18px; }
+    .gh-steps > li:first-child { display: flex; align-items: center; justify-content: space-between; gap: 14px; flex-wrap: wrap; }
+    .gh-step-text { font-size: 14.5px; color: #cbd5e1; line-height: 1.6; }
+    .gh-step-text strong { color: #f1f5f9; font-weight: 600; }
+    .gh-name { font-family: 'JetBrains Mono', monospace; font-size: 13.5px; color: #f1f5f9; background: rgba(255,255,255,.07); border: 1px solid rgba(255,255,255,.12); border-radius: 6px; padding: 1px 7px; }
+    .gh-create { flex-shrink: 0; }
+    .gh-steps .pf-form { margin-top: 10px; }
+    .gh-input { flex: 1; min-width: 0; display: flex; align-items: stretch; background: #070b14; border: 1px solid rgba(255,255,255,.16); border-radius: 10px; transition: border-color .15s ease, box-shadow .15s ease; }
+    .gh-input:focus-within { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(56,189,248,.18); }
+    .gh-prefix { display: flex; align-items: center; padding-left: 14px; color: var(--faint); font-size: 14.5px; white-space: nowrap; }
+    .gh-input .pf-input { border: 0; background: transparent; box-shadow: none !important; padding-left: 2px; }
+    .gh-lead { font-size: 14.5px; color: #cbd5e1; line-height: 1.6; margin: 14px 0 12px; }
+    .gh-lead strong { color: #f1f5f9; font-weight: 600; }
+    .gh-repo { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; background: #070b14; border: 1px solid rgba(255,255,255,.1); border-radius: 12px; padding: 10px 10px 10px 16px; }
+    .gh-repo-link { display: inline-flex; align-items: center; gap: 9px; min-width: 0; color: #f1f5f9 !important; font-weight: 600; font-size: 15px; text-decoration: none; overflow-wrap: anywhere; }
+    .gh-repo-link i { color: var(--muted); }
+    .gh-repo-link:hover { color: var(--accent) !important; }
+    .gh-repo-actions { display: flex; gap: 8px; flex-shrink: 0; }
+    .gh-flash { margin-top: 12px; }
+    .gh-readme { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-top: 12px; padding: 12px 12px 12px 16px; border-radius: 12px; background: rgba(56,189,248,.06); border: 1px solid rgba(56,189,248,.22); }
+    .gh-readme-text { font-size: 14px; color: #cbd5e1; display: flex; align-items: center; gap: 9px; }
+    .gh-readme-text i { color: var(--accent); }
+    #ghEdit[hidden], #ghView[hidden] { display: none; }
+    @media (max-width: 640px) {
+      .gh-repo { flex-direction: column; align-items: stretch; padding: 12px; }
+      .gh-repo-actions .pf-btn { flex: 1; }
+      .gh-readme { flex-direction: column; align-items: stretch; }
+      .gh-readme-text { align-items: flex-start; }
+    }
+    .pf-msg.warn { display: block; color: #fcd34d; background: rgba(251,191,36,.08); border: 1px solid rgba(251,191,36,.3); }
+    .pf-msg.warn strong { color: #fde68a; font-weight: 600; }
     .pf-form { margin-top: 14px; }
     .pf-label { display: block; font-size: 14px; font-weight: 600; color: #e2e8f0; margin-bottom: 8px; }
     .pf-field-row { display: flex; gap: 10px; }
@@ -468,19 +515,76 @@ $avatarUrl = $p['avatar'] ??('https://api.dicebear.com/7.x/adventurer/svg?seed='
           </div>
         </section>
 
+<?php
+          // The username box, used in the setup steps and behind "Change"
+          ob_start(); ?>
+              <form id="profileDetailsForm" class="pf-form" onsubmit="handleProfileUpdate(event)">
+                <div class="pf-field-row">
+                  <div class="gh-input">
+                    <span class="gh-prefix">github.com/</span>
+                    <input type="text" id="profileGithubRepo" class="pf-input" value="<?= $e($ghUser) ?>" placeholder="your-username" autocomplete="off" autocapitalize="off" spellcheck="false" maxlength="60" aria-label="GitHub username">
+                  </div>
+                  <button type="submit" id="btnProfileUpdateSubmit" class="pf-btn pf-btn-primary">Save</button>
+                  <?php if ($ghState === 'ok' || $ghState === 'missing'): ?><button type="button" class="pf-btn pf-btn-ghost" onclick="toggleGhEdit(false)">Cancel</button><?php endif; ?>
+                </div>
+                <div id="profileUpdateAlert" class="pf-msg" role="status" aria-live="polite"></div>
+              </form>
+<?php     $ghForm = ob_get_clean(); ?>
         <section class="pf-card" id="github">
           <header class="pf-card-head">
             <h2 class="pf-card-title"><i class="bi bi-github"></i> GitHub repository</h2>
-            <span class="pf-status <?= $githubRepo !== '' ? 'is-on' : '' ?>" id="githubStatus"><?= $githubRepo !== '' ? 'Connected' : 'Not connected' ?></span>
+            <?php if ($ghState === 'ok'): ?><span class="pf-status is-on">Connected</span>
+            <?php elseif ($ghState === 'missing'): ?><span class="pf-status">Repository not found</span>
+            <?php else: ?><span class="pf-status">Not set up</span><?php endif; ?>
           </header>
-          <form id="profileDetailsForm" class="pf-form" onsubmit="handleProfileUpdate(event)">
-            <label class="pf-label" for="profileGithubRepo">Repository link</label>
-            <div class="pf-field-row">
-              <input type="text" inputmode="url" id="profileGithubRepo" class="pf-input" value="<?= $e($githubRepo) ?>" placeholder="https://github.com/your-name/BugBountyReports" autocomplete="off" spellcheck="false">
-              <button type="submit" id="btnProfileUpdateSubmit" class="pf-btn pf-btn-primary">Save</button>
+
+<?php if ($ghState === 'ok' || $ghState === 'missing'): ?>
+          <div id="ghView">
+            <?php if ($ghState === 'ok'): ?>
+            <p class="gh-lead">Your reports are saved to this repository.</p>
+            <?php else: ?>
+            <p class="gh-lead">We couldn't find this repository on GitHub. Create it as a <strong>public</strong> repository named <code class="gh-name"><?= KRAZE_REPORTS_REPO ?></code>, then refresh this page.</p>
+            <?php endif; ?>
+            <div class="gh-repo">
+              <a class="gh-repo-link" href="<?= $e(krazeReportsRepoUrl($ghUser)) ?>" target="_blank" rel="noopener"><i class="bi bi-journal-code"></i> github.com/<?= $e($ghUser) ?>/<?= KRAZE_REPORTS_REPO ?></a>
+              <div class="gh-repo-actions">
+                <?php if ($ghState === 'missing'): ?>
+                <a class="pf-btn pf-btn-primary" href="<?= $e($newRepoUrl) ?>" target="_blank" rel="noopener"><i class="bi bi-plus-lg"></i> Create on GitHub</a>
+                <?php else: ?>
+                <a class="pf-btn pf-btn-ghost" href="<?= $e(krazeReportsRepoUrl($ghUser)) ?>" target="_blank" rel="noopener"><i class="bi bi-box-arrow-up-right"></i> Open</a>
+                <?php endif; ?>
+                <button type="button" class="pf-btn pf-btn-ghost" onclick="toggleGhEdit(true)"><i class="bi bi-pencil"></i> Change</button>
+              </div>
             </div>
-            <div id="profileUpdateAlert" class="pf-msg" role="status" aria-live="polite"></div>
-          </form>
+            <?php if ($needsReadme): ?>
+            <div class="gh-readme">
+              <div class="gh-readme-text"><i class="bi bi-file-earmark-text"></i> Your repository has no README yet. Add one so visitors know what it is.</div>
+              <a class="pf-btn pf-btn-primary" href="<?= $e(krazeReadmeUrl($ghUser, $myName)) ?>" target="_blank" rel="noopener"><i class="bi bi-plus-lg"></i> Add README</a>
+            </div>
+            <?php endif; ?>
+            <?php if ($ghState === 'ok' && ($_GET['gh'] ?? '') === 'saved'): ?>
+            <div class="pf-msg ok gh-flash">Saved. Write Report now opens this repository.</div>
+            <?php endif; ?>
+          </div>
+          <div id="ghEdit" hidden>
+            <p class="gh-lead">Enter your GitHub username.</p>
+            <?= $ghForm ?>
+          </div>
+<?php else: ?>
+          <ol class="gh-steps">
+            <li>
+              <div class="gh-step-text">Create a <strong>public</strong> repository named <code class="gh-name"><?= KRAZE_REPORTS_REPO ?></code>.</div>
+              <a class="pf-btn pf-btn-ghost gh-create" href="<?= $e($newRepoUrl) ?>" target="_blank" rel="noopener"><i class="bi bi-plus-lg"></i> Create on GitHub</a>
+            </li>
+            <li>
+              <div class="gh-step-text">Enter your GitHub username.</div>
+              <?= $ghForm ?>
+              <?php if ($legacyRepo !== ''): ?>
+              <div class="pf-msg warn">You're using <strong><?= $e(preg_replace('#^https://#', '', $legacyRepo)) ?></strong>. Reports now go to a repository named <?= KRAZE_REPORTS_REPO ?>: create it, then click Save.</div>
+              <?php endif; ?>
+            </li>
+          </ol>
+<?php endif; ?>
         </section>
 
         <section class="pf-card">
@@ -508,6 +612,7 @@ window.addEventListener('load', () => setTimeout(() => {
   if (location.hash !== '#github') return;
   const gh = document.getElementById('profileGithubRepo');
   if (!gh) return;
+  if (!gh.offsetParent) { document.getElementById('github').scrollIntoView({ block: 'center' }); return; } // already set up: just show the card
   gh.scrollIntoView({ block: 'center' });
   gh.focus({ preventScroll: true });
   gh.style.boxShadow = '0 0 0 3px rgba(56, 189, 248, 0.45)';
@@ -525,20 +630,50 @@ function copyProfileUrl() {
   });
 }
 
-// Saves the GitHub repository (the only setting a student changes here)
+// Pasting a full GitHub link works too: only the username is kept.
+function ghUsernameFrom(value) {
+  return value.trim().replace(/^@/, '').replace(/^(https?:\/\/)?(www\.)?github\.com\//i, '').split('/')[0];
+}
+document.getElementById('profileGithubRepo')?.addEventListener('paste', (e) => {
+  setTimeout(() => { e.target.value = ghUsernameFrom(e.target.value); }, 0);
+});
+
+// "Saved" note: fades out after a few seconds, and is taken out of the address
+// so a refresh doesn't show it again.
+(function () {
+  const flash = document.querySelector('.gh-flash');
+  if (!flash) return;
+  history.replaceState(null, '', 'profile.php?tab=settings' + location.hash);
+  setTimeout(() => {
+    flash.style.transition = 'opacity .4s ease';
+    flash.style.opacity = '0';
+    setTimeout(() => flash.remove(), 400);
+  }, 4000);
+})();
+
+// "Change" swaps the repository view for the username box (and back on Cancel)
+function toggleGhEdit(editing) {
+  const view = document.getElementById('ghView');
+  const edit = document.getElementById('ghEdit');
+  if (!view || !edit) return;
+  view.hidden = editing;
+  edit.hidden = !editing;
+  if (editing) document.getElementById('profileGithubRepo').focus();
+}
+
+// Saves the GitHub username (the only setting a student changes here)
 function handleProfileUpdate(e) {
   e.preventDefault();
   const btn = document.getElementById('btnProfileUpdateSubmit');
   const msg = document.getElementById('profileUpdateAlert');
-  const status = document.getElementById('githubStatus');
   const ghInput = document.getElementById('profileGithubRepo');
-  const say = (text, ok) => { msg.className = 'pf-msg ' + (ok ? 'ok' : 'err'); msg.textContent = text; };
+  const say = (text, kind) => { msg.className = 'pf-msg ' + kind; msg.textContent = text; };
   btn.disabled = true;
   btn.textContent = 'Saving...';
 
   const formData = new FormData();
   formData.append('action', 'update_github_repo');
-  formData.append('github_repo', ghInput.value.trim());
+  formData.append('github_username', ghUsernameFrom(ghInput.value));
 
   fetch('/api/auth_api.php', { method: 'POST', body: formData })
     .then(r => r.json())
@@ -546,19 +681,16 @@ function handleProfileUpdate(e) {
       btn.disabled = false;
       btn.textContent = 'Save';
       if (data.success) {
-        const repo = data.github_repo || '';
-        ghInput.value = repo; // show the cleaned-up link
-        status.textContent = repo ? 'Connected' : 'Not connected';
-        status.classList.toggle('is-on', !!repo);
-        say(repo ? 'Saved. Write Report will now use this repository.' : 'Disconnected. Write Report is turned off until you add a repository.', true);
+        // Reload so the card shows the right state: connected, or "repository not found"
+        location.replace('profile.php?tab=settings&gh=saved&t=' + Date.now() + '#github');
       } else {
-        say(data.error || 'Could not save. Please try again.', false);
+        say(data.error || 'Could not save. Please try again.', 'err');
       }
     })
     .catch(() => {
       btn.disabled = false;
       btn.textContent = 'Save';
-      say('Network error. Please try again.', false);
+      say('Network error. Please try again.', 'err');
     });
 }
 </script>

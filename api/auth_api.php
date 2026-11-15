@@ -4,6 +4,7 @@
 // (see config/sso.php); everything here forwards to its API so a student's
 // data is the same on every KrazePlanet site.
 require_once __DIR__ . '/../config/sso.php';
+require_once __DIR__ . '/../config/labs.php';
 startKrazeSession();
 header('Content-Type: application/json');
 
@@ -55,13 +56,20 @@ switch ($action) {
         }
         reply($res);
 
-    // Profile tab: the GitHub repository is the only thing a student can change there.
+    // Settings tab: the student's GitHub username. Every report repository has the same
+    // name (KrazePlanet-Reports), so the link is always github.com/<username>/KrazePlanet-Reports.
     case 'update_github_repo':
         requireLogin();
-        $res = krazeSsoCall('update_profile', ['github_repo' => trim((string)($_POST['github_repo'] ?? ''))]);
+        $user = krazeGithubUsername((string)($_POST['github_username'] ?? ''));
+        if ($user === null) {
+            reply(['success' => false, 'error' => 'Enter your GitHub username, for example: octocat']);
+        }
+        $repo = $user === '' ? '' : krazeReportsRepoUrl($user);
+        $res = krazeSsoCall('update_profile', ['github_repo' => $repo]);
         if (!empty($res['success'])) {
             krazeSetSessionUser($res['user']);
-            reply(['success' => true, 'github_repo' => $res['user']['github_repo'] ?? '']);
+            reply(['success' => true, 'github_repo' => $res['user']['github_repo'] ?? '', 'github_username' => $user,
+                   'repo_found' => $user === '' ? null : krazeRepoExists($user)]);
         }
         reply($res);
 

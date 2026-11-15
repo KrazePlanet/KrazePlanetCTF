@@ -141,7 +141,7 @@ $e = fn($v) => htmlspecialchars((string)$v, ENT_QUOTES);
     <ol class="ab-steps">
       <li><h3>Open a lab</h3><p>Start with an <strong>Easy</strong> one. Nothing to install.</p></li>
       <li><h3>Find the bug</h3><p>Stuck? Open the lab's <strong>⋯</strong> menu and click <strong>Solution</strong>.</p></li>
-      <li><h3>Write a report</h3><p>Click <strong>Write Report</strong> in the <strong>⋯</strong> menu. First, <a href="/navbar/profile.php?tab=settings#github">add your GitHub repo</a>.</p></li>
+      <li><h3>Write a report</h3><p>Click <strong>Write Report</strong> in the <strong>⋯</strong> menu. First, <a href="/navbar/profile.php?tab=settings#github">add your GitHub username</a>.</p></li>
       <li><h3>Earn points</h3><p>Mark the lab <strong>Solved</strong> and climb the <a href="/navbar/scoreboard.php">scoreboard</a>.</p></li>
     </ol>
   </section>

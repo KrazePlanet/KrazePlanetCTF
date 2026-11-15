@@ -78,7 +78,7 @@ switch ($action) {
                 if (!$check['ok']) {
                     echo json_encode(['success' => false, 'needsReport' => $check['reason'], 'reportUrl' => $check['url'] ?? '',
                         'message' => [
-                            'no_repo'     => 'Add your GitHub repository on your profile, then write the report for this lab.',
+                            'no_repo'     => 'Add your GitHub username in Settings, then write the report for this lab.',
                             'no_report'   => 'Write your report for this lab first. Then mark it solved.',
                             'unreachable' => "Couldn't reach GitHub to check your report. Please try again in a minute.",
                         ][$check['reason']]]);

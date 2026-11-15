@@ -1596,7 +1596,7 @@ MD,
                 const slug = card.getAttribute('data-lab-slug') || 'lab';
                 if (res.needsReport === 'no_repo') {
                   showToast({ icon: 'bi-github', tone: 'warn', text: res.message,
-                    href: LAB_LINKS.connectUrl, label: 'Add GitHub repo', labelIcon: 'bi-person-gear' });
+                    href: LAB_LINKS.connectUrl, label: 'Add GitHub username', labelIcon: 'bi-person-gear' });
                 } else if (res.needsReport === 'no_report') {
                   showToast({ icon: 'bi-file-earmark-x', tone: 'warn', text: res.message,
                     href: LAB_LINKS.reportRepo ? reportUrl(slug, card) : LAB_LINKS.connectUrl,
@@ -1686,7 +1686,7 @@ MD,
             <button type="button" role="menuitemcheckbox" aria-checked="${bm}" class="lab-menu-item${bm ? ' is-on-bm' : ''}" data-act="bookmark" title="${bm ? 'Remove from saved labs' : 'Save this lab for later'}">
               <i class="bi ${bm ? 'bi-bookmark-fill' : 'bi-bookmark'}"></i><span>${bm ? 'Saved' : 'Save'}</span>
             </button>
-            <button type="button" role="menuitemcheckbox" aria-checked="${solved}" class="lab-menu-item${solved ? ' is-on-solved' : ''}" data-act="solved" title="${solved ? 'Click to mark as unsolved' : 'Mark as solved (your report for this lab must be in your GitHub repo)'}">
+            <button type="button" role="menuitemcheckbox" aria-checked="${solved}" class="lab-menu-item${solved ? ' is-on-solved' : ''}" data-act="solved" title="${solved ? 'Click to mark as unsolved' : 'Mark as solved (your report for this lab must be in your KrazePlanet-Reports repository)'}">
               <i class="bi ${solved ? 'bi-check-circle-fill' : 'bi-circle'}"></i><span>Solved</span>
             </button>
           </div>
@@ -1698,7 +1698,7 @@ MD,
             ? `<a role="menuitem" class="lab-menu-item" data-act="report" href="${reportUrl(slug, card)}" target="_blank" rel="noopener noreferrer" title="New report file in ${LAB_LINKS.reportRepo}">
                  <i class="bi bi-file-earmark-text"></i><span>Write Report</span><i class="bi bi-box-arrow-up-right ext"></i>
                </a>`
-            : `<button type="button" role="menuitem" class="lab-menu-item" data-act="report" data-no-repo="1" title="Add your GitHub repository first">
+            : `<button type="button" role="menuitem" class="lab-menu-item" data-act="report" data-no-repo="1" title="Add your GitHub username first">
                  <i class="bi bi-file-earmark-text"></i><span>Write Report</span>
                </button>`}`;
 
@@ -1760,8 +1760,8 @@ MD,
       // No GitHub repo on the profile yet: explain instead of opening GitHub
       function showConnectGithubToast() {
         showToast({ icon: 'bi-github', tone: 'warn',
-          text: 'Add your GitHub repository on your profile to write bug bounty reports.',
-          href: LAB_LINKS.connectUrl, label: 'Add GitHub repo', labelIcon: 'bi-person-gear' });
+          text: 'Add your GitHub username and create a KrazePlanet-Reports repository to write reports.',
+          href: LAB_LINKS.connectUrl, label: 'Add GitHub username', labelIcon: 'bi-person-gear' });
       }
 
       allLabCards.forEach((card) => {

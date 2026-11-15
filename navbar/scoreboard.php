@@ -62,16 +62,18 @@ if (!$isAllTime && !array_filter($periodOptions, fn($o) => $o['active'])) {
 
 $search = mb_substr(trim((string)($_GET['q'] ?? '')), 0, 50);
 $page   = max(1, (int)($_GET['page'] ?? 1));
-$perPage = 50;
+// Students per page: 100 by default, 25 or 50 to choose from too.
+$perOptions = [25, 50, 100];
+$perPage = in_array((int)($_GET['per'] ?? 0), $perOptions, true) ? (int)$_GET['per'] : 100;
 
 // Links keep the other filters (and the search). Changing a filter goes back to page 1.
 function sbUrl(array $change = []) {
-    global $isAllTime, $selectedYear, $selectedMonth, $selectedCountry, $selectedCat, $search;
+    global $isAllTime, $selectedYear, $selectedMonth, $selectedCountry, $selectedCat, $search, $perPage;
     $q = ($isAllTime ? ['period' => 'all'] : ['year' => $selectedYear, 'month' => $selectedMonth])
-       + ['cat' => $selectedCat, 'country' => $selectedCountry, 'q' => $search];
+       + ['cat' => $selectedCat, 'country' => $selectedCountry, 'q' => $search, 'per' => $perPage];
     if (isset($change['period']) || isset($change['year'])) unset($q['period'], $q['year'], $q['month']);
     $q = $change + $q;
-    foreach (['cat' => '', 'q' => '', 'country' => 'ALL', 'page' => 1] as $k => $default) {
+    foreach (['cat' => '', 'q' => '', 'country' => 'ALL', 'page' => 1, 'per' => 100] as $k => $default) {
         if (isset($q[$k]) && (string)$q[$k] === (string)$default) unset($q[$k]);
     }
     return 'scoreboard.php?' . http_build_query($q);
@@ -98,7 +100,8 @@ foreach ($board['rankings'] ?? [] as $i => $r) {
 }
 
 // Top 3 get the podium (first page, no search); the table carries on from #4.
-$showPodium = $search === '' && count($rankings) >= 3;
+// Students with no solves are listed too (at the bottom), but never on the podium.
+$showPodium = $search === '' && count($rankings) >= 3 && (int)$rankings[2]['reputation_points'] > 0;
 if ($search !== '') {
     $list = array_values(array_filter($rankings, fn($r) => stripos($r['username'], $search) !== false));
 } else {
@@ -116,7 +119,7 @@ if ($myRow) {
     if ($showPodium && $myRow['rank'] <= 3) $myOnPage = true;
     foreach ($pageRows as $r) if ((int)$r['id'] === (int)$myId) $myOnPage = true;
     if (!$myOnPage && $search === '') {
-        $idx = $myRow['rank'] - 1 - (count($rankings) >= 3 ? 3 : 0);
+        $idx = $myRow['rank'] - 1 - ($search === '' && count($rankings) >= 3 && (int)$rankings[2]['reputation_points'] > 0 ? 3 : 0);
         $myPage = $idx < 0 ? 1 : intdiv($idx, $perPage) + 1;
     }
 }
@@ -178,6 +181,8 @@ function playerUrl($username) { return 'profile.php?user=' . urlencode($username
     }
     body { background: var(--bg); color: #cbd5e1; font-family: 'Inter', sans-serif; min-height: 100vh; display: flex; flex-direction: column; }
     .sb-wrap { max-width: 1320px; padding-left: 24px; padding-right: 24px; }
+    /* Room under the table so the floating "You're #N" bar never covers the pages */
+    .sb-wrap.has-bar { padding-bottom: 96px !important; }
     .mono { font-family: 'JetBrains Mono', monospace; }
 
     /* ---- Page header ---- */
@@ -279,6 +284,9 @@ function playerUrl($username) { return 'profile.php?user=' . urlencode($username
     .points small { font-size: 11px; color: var(--faint); font-weight: 600; margin-left: 4px; }
     .go { color: var(--faint); text-align: right; transition: all .15s ease; }
 
+    /* No solves yet: listed, but quieter than students with points */
+    .sb-row.is-zero .who .name, .sb-row.is-zero .points { color: var(--muted); font-weight: 500; }
+    .sb-row.is-zero .who img { opacity: .7; }
     .sb-row.me { background: rgba(56, 189, 248, 0.07); box-shadow: inset 3px 0 0 var(--accent); }
     a.sb-row.me:hover { background: rgba(56, 189, 248, 0.12); }
 
@@ -289,6 +297,16 @@ function playerUrl($username) { return 'profile.php?user=' . urlencode($username
     .pager a:hover { border-color: var(--accent); color: #fff; }
     .pager .cur { background: rgba(56,189,248,.16); border-color: rgba(56,189,248,.5); color: var(--accent); font-weight: 700; }
     .pager .off { opacity: .35; }
+    .pager .gap { border: 0; min-width: 20px; padding: 0; color: var(--faint); }
+    .sb-count strong { color: var(--text); font-weight: 600; }
+    .sb-pagination { display: flex; align-items: center; gap: 18px; flex-wrap: wrap; }
+    .sb-per { display: flex; align-items: center; gap: 8px; }
+    .sb-per-label { font-size: 13px; color: var(--muted); white-space: nowrap; }
+    .sb-per .sb-select { padding: 5px 10px; font-size: 13px; }
+    .sb-per .sb-menu { min-width: 90px; }
+    /* Opens below the button, like every other menu on the page */
+    .sb-per .sb-menu { top: calc(100% + 6px); }
+    .sb-per { position: relative; }
 
     .sb-empty { padding: 56px 20px; text-align: center; color: var(--muted); }
     .sb-empty i { font-size: 2rem; display: block; margin-bottom: 8px; color: var(--faint); }
@@ -345,7 +363,8 @@ function playerUrl($username) { return 'profile.php?user=' . urlencode($username
       .points { font-size: 14.5px; }
       .points small { display: none; }
       .sb-row.head { font-size: 10.5px; letter-spacing: .2px; }
-      .sb-footer { justify-content: center; text-align: center; }
+      .sb-footer { flex-direction: column; justify-content: center; text-align: center; }
+      .sb-pagination { justify-content: center; gap: 12px; }
       .me-bar { font-size: 13px; gap: 10px; bottom: 12px; }
     }
   </style>
@@ -354,7 +373,7 @@ function playerUrl($username) { return 'profile.php?user=' . urlencode($username
 
 <?php @include_once __DIR__ . '/navbar.php'; ?>
 
-<div class="container sb-wrap flex-grow-1 pb-5">
+<div class="container sb-wrap flex-grow-1 pb-5<?= $boardOk && (($me && $search === '') || !krazeLoggedIn()) ? ' has-bar' : '' ?>">
 
   <div class="sb-head">
     <div>
@@ -362,7 +381,7 @@ function playerUrl($username) { return 'profile.php?user=' . urlencode($username
       <p class="sb-intro">Solve labs to earn points: Easy 20, Medium 50, Hard 100, Secure 150. Most points ranks first.</p>
     </div>
     <div class="sb-stats" aria-label="Board summary">
-      <div class="sb-stat"><div class="sb-stat-label">Students ranked</div><div class="sb-stat-value"><?= number_format(count($rankings)) ?></div></div>
+      <div class="sb-stat"><div class="sb-stat-label">Students</div><div class="sb-stat-value"><?= number_format(count($rankings)) ?></div></div>
       <div class="sb-stat"><div class="sb-stat-label">Labs solved</div><div class="sb-stat-value"><?= number_format($totalLabs) ?></div></div>
       <div class="sb-stat"><div class="sb-stat-label">Points earned</div><div class="sb-stat-value"><?= number_format($totalPoints) ?></div></div>
     </div>
@@ -391,6 +410,7 @@ function playerUrl($username) { return 'profile.php?user=' . urlencode($username
         <?php else: ?><input type="hidden" name="year" value="<?= $selectedYear ?>"><input type="hidden" name="month" value="<?= $selectedMonth ?>"><?php endif; ?>
         <?php if ($selectedCat !== ''): ?><input type="hidden" name="cat" value="<?= e($selectedCat) ?>"><?php endif; ?>
         <?php if ($selectedCountry !== 'ALL'): ?><input type="hidden" name="country" value="<?= e($selectedCountry) ?>"><?php endif; ?>
+        <?php if ($perPage !== 100): ?><input type="hidden" name="per" value="<?= $perPage ?>"><?php endif; ?>
         <input type="search" name="q" value="<?= e($search) ?>" placeholder="Search students" aria-label="Search students" autocomplete="off">
       </form>
 
@@ -456,7 +476,7 @@ function playerUrl($username) { return 'profile.php?user=' . urlencode($username
       <?php endif; ?>
 
       <?php foreach ($pageRows as $r): $isMe = $myId && (int)$r['id'] === (int)$myId; ?>
-        <a class="sb-row<?= $isMe ? ' me' : '' ?>" role="row" href="<?= e(playerUrl($r['username'])) ?>" <?= $isMe ? 'id="me-anchor"' : '' ?> title="See <?= e($r['username']) ?>'s profile">
+        <a class="sb-row<?= $isMe ? ' me' : '' ?><?= (int)$r['solved_count'] === 0 ? ' is-zero' : '' ?>" role="row" href="<?= e(playerUrl($r['username'])) ?>" <?= $isMe ? 'id="me-anchor"' : '' ?> title="See <?= e($r['username']) ?>'s profile">
           <span class="rank-cell"><?= rankBadge($r['rank']) ?><?= moveBadge($r) ?></span>
           <span class="who">
             <img src="<?= e(avatarUrl($r)) ?>" alt="" loading="lazy">
@@ -469,24 +489,40 @@ function playerUrl($username) { return 'profile.php?user=' . urlencode($username
       <?php endforeach; ?>
     </div>
 
-    <?php if ($boardOk && $rankings && ($pages > 1 || ($search !== '' && $pageRows))): ?>
+    <?php if ($boardOk && $rankings && ($search === '' || $pageRows)):
+      // "Showing 1-9 of 9": page 1 counts the podium too
+      $from = ($search === '' && $showPodium) ? 1 : ($pageRows ? ($search === '' ? $pageRows[0]['rank'] : ($page - 1) * $perPage + 1) : 1);
+      $to = $pageRows ? ($search === '' ? end($pageRows)['rank'] : ($page - 1) * $perPage + count($pageRows)) : count($rankings);
+      // Page numbers: first, last, and two either side of the current one, with … for gaps
+      $nums = array_unique(array_filter([1, $page - 2, $page - 1, $page, $page + 1, $page + 2, $pages], fn($n) => $n >= 1 && $n <= $pages));
+      sort($nums); ?>
       <div class="sb-footer">
-        <span>
+        <span class="sb-count">
           <?php if ($search !== ''): ?>
             <?= count($list) ?> <?= count($list) === 1 ? 'match' : 'matches' ?> for “<?= e($search) ?>” · <a href="<?= e(sbUrl(['q' => ''])) ?>" class="text-info text-decoration-none">Clear</a>
           <?php else: ?>
-            Ranks <?= $pageRows[0]['rank'] ?>–<?= end($pageRows)['rank'] ?> of <?= number_format(count($rankings)) ?>
+            Showing <strong><?= $from ?>–<?= $to ?></strong> of <strong><?= number_format(count($rankings)) ?></strong> students
           <?php endif; ?>
         </span>
-        <?php if ($pages > 1): ?>
+        <div class="sb-pagination">
+          <div class="dropdown sb-per">
+            <span class="sb-per-label">Rows per page</span>
+            <button class="sb-select dropdown-toggle" type="button" data-bs-toggle="dropdown" data-bs-display="static" aria-expanded="false" aria-label="Rows per page"><span class="v"><?= $perPage ?></span></button>
+            <ul class="dropdown-menu dropdown-menu-end sb-menu">
+              <?php foreach ($perOptions as $n): ?>
+                <li><a class="dropdown-item <?= $n === $perPage ? 'active' : '' ?>" href="<?= e(sbUrl(['per' => $n, 'page' => 1])) ?>"><span><?= $n ?></span></a></li>
+              <?php endforeach; ?>
+            </ul>
+          </div>
           <nav class="pager" aria-label="Pages">
-            <?php if ($page > 1): ?><a href="<?= e(sbUrl(['page' => $page - 1])) ?>" aria-label="Previous page"><i class="bi bi-chevron-left"></i></a><?php else: ?><span class="off"><i class="bi bi-chevron-left"></i></span><?php endif; ?>
-            <?php for ($p = max(1, $page - 2); $p <= min($pages, $page + 2); $p++): ?>
-              <?php if ($p === $page): ?><span class="cur"><?= $p ?></span><?php else: ?><a href="<?= e(sbUrl(['page' => $p])) ?>"><?= $p ?></a><?php endif; ?>
-            <?php endfor; ?>
-            <?php if ($page < $pages): ?><a href="<?= e(sbUrl(['page' => $page + 1])) ?>" aria-label="Next page"><i class="bi bi-chevron-right"></i></a><?php else: ?><span class="off"><i class="bi bi-chevron-right"></i></span><?php endif; ?>
+            <?php if ($page > 1): ?><a href="<?= e(sbUrl(['page' => $page - 1])) ?>" aria-label="Previous page"><i class="bi bi-chevron-left"></i></a><?php else: ?><span class="off" aria-hidden="true"><i class="bi bi-chevron-left"></i></span><?php endif; ?>
+            <?php $prev = 0; foreach ($nums as $p): ?>
+              <?php if ($p - $prev > 1): ?><span class="gap">…</span><?php endif; $prev = $p; ?>
+              <?php if ($p === $page): ?><span class="cur" aria-current="page"><?= $p ?></span><?php else: ?><a href="<?= e(sbUrl(['page' => $p])) ?>"><?= $p ?></a><?php endif; ?>
+            <?php endforeach; ?>
+            <?php if ($page < $pages): ?><a href="<?= e(sbUrl(['page' => $page + 1])) ?>" aria-label="Next page"><i class="bi bi-chevron-right"></i></a><?php else: ?><span class="off" aria-hidden="true"><i class="bi bi-chevron-right"></i></span><?php endif; ?>
           </nav>
-        <?php endif; ?>
+        </div>
       </div>
     <?php endif; ?>
   </div>
@@ -532,6 +568,18 @@ function playerUrl($username) { return 'profile.php?user=' . urlencode($username
     <a class="btn-jump" href="<?= e(krazeLoginUrl('/navbar/scoreboard.php', 'signup')) ?>">Create a free account</a>
   </div>
 <?php endif; ?>
+
+<script>
+  // "Rows per page" opens downward; if that's below the screen, scroll just enough to show it.
+  document.querySelectorAll('.sb-per [data-bs-toggle="dropdown"]').forEach(function (btn) {
+    btn.addEventListener('shown.bs.dropdown', function () {
+      var menu = btn.parentElement.querySelector('.dropdown-menu');
+      if (menu && menu.getBoundingClientRect().bottom > window.innerHeight - 90) {
+        window.scrollBy({ top: menu.getBoundingClientRect().bottom - window.innerHeight + 100, behavior: 'smooth' });
+      }
+    });
+  });
+</script>
 
 <?php @include_once __DIR__ . '/../footer/footer.php'; ?>
 </body>
