@@ -1,79 +1,74 @@
 <?php
-// avatar_modal.php: "Choose avatar" Modal with Categorized Anime & Character Avatars
+// avatar_modal.php: "Choose avatar" modal, avatars grouped by art style
 
 $default_username = $_SESSION['username'] ?? 'User';
 $current_avatar = $_SESSION['avatar'] ?? ('https://api.dicebear.com/7.x/adventurer/svg?seed=' . urlencode($default_username));
 
-// Comprehensive avatar collection categorized by anime and style
-$avatar_categories = [
-    'DragonBall' => [
-        ['name' => 'Goku Ultra Instinct', 'url' => 'https://api.dicebear.com/7.x/adventurer/svg?seed=GokuUltra&hair=short01&hairColor=000000'],
-        ['name' => 'Goku Super Saiyan', 'url' => 'https://api.dicebear.com/7.x/adventurer/svg?seed=GokuSSJ&hair=short02&hairColor=ffd43b'],
-        ['name' => 'Vegeta', 'url' => 'https://api.dicebear.com/7.x/adventurer/svg?seed=VegetaPrince&hair=short03&hairColor=000000'],
-        ['name' => 'Kid Goku', 'url' => 'https://api.dicebear.com/7.x/adventurer/svg?seed=KidGoku'],
-        ['name' => 'Gohan', 'url' => 'https://api.dicebear.com/7.x/adventurer/svg?seed=GohanBeast&hairColor=ffffff'],
-        ['name' => 'Trunks', 'url' => 'https://api.dicebear.com/7.x/adventurer/svg?seed=FutureTrunks&hairColor=b197fc'],
-        ['name' => 'Piccolo', 'url' => 'https://api.dicebear.com/7.x/adventurer/svg?seed=PiccoloNamek&skinColor=8ce99a'],
-        ['name' => 'Cell', 'url' => 'https://api.dicebear.com/7.x/adventurer/svg?seed=PerfectCell&skinColor=69db7c'],
-        ['name' => 'Krillin', 'url' => 'https://api.dicebear.com/7.x/adventurer/svg?seed=KrillinZ']
-    ],
-    'OnePiece' => [
-        ['name' => 'Luffy Gear 5', 'url' => 'https://api.dicebear.com/7.x/adventurer/svg?seed=MonkeyDLuffy&hairColor=ffffff'],
-        ['name' => 'Luffy', 'url' => 'https://api.dicebear.com/7.x/adventurer/svg?seed=LuffyCaptain&hairColor=000000'],
-        ['name' => 'Zoro', 'url' => 'https://api.dicebear.com/7.x/adventurer/svg?seed=RoronoaZoro&hairColor=2b8a3e'],
-        ['name' => 'Zoro Chibi', 'url' => 'https://api.dicebear.com/7.x/adventurer/svg?seed=ZoroChibi&hairColor=40c057'],
-        ['name' => 'Nami', 'url' => 'https://api.dicebear.com/7.x/lorelei/svg?seed=NamiNavigator&hairColor=f76707'],
-        ['name' => 'Sanji', 'url' => 'https://api.dicebear.com/7.x/adventurer/svg?seed=VinsmokeSanji&hairColor=ffd43b'],
-        ['name' => 'Chopper', 'url' => 'https://api.dicebear.com/7.x/adventurer/svg?seed=TonyTonyChopper'],
-        ['name' => 'Nico Robin', 'url' => 'https://api.dicebear.com/7.x/lorelei/svg?seed=NicoRobinArchaeologist&hairColor=000000'],
-        ['name' => 'Usopp', 'url' => 'https://api.dicebear.com/7.x/adventurer/svg?seed=GodUsopp&hairColor=000000'],
-        ['name' => 'Franky', 'url' => 'https://api.dicebear.com/7.x/adventurer/svg?seed=FrankyCyborg&hairColor=339af0'],
-        ['name' => 'Brook', 'url' => 'https://api.dicebear.com/7.x/adventurer/svg?seed=SoulKingBrook'],
-        ['name' => 'Portgas D. Ace', 'url' => 'https://api.dicebear.com/7.x/adventurer/svg?seed=FireFistAce&hairColor=000000'],
-        ['name' => 'Trafalgar Law', 'url' => 'https://api.dicebear.com/7.x/adventurer/svg?seed=SurgeonOfDeathLaw&hairColor=000000']
-    ],
-    'Naruto' => [
-        ['name' => 'Naruto Uzumaki', 'url' => 'https://api.dicebear.com/7.x/adventurer/svg?seed=NarutoHokage&hairColor=ffd43b'],
-        ['name' => 'Sasuke Uchiha', 'url' => 'https://api.dicebear.com/7.x/adventurer/svg?seed=SasukeShadow&hairColor=000000'],
-        ['name' => 'Kakashi Hatake', 'url' => 'https://api.dicebear.com/7.x/adventurer/svg?seed=KakashiSensei&hairColor=ced4da'],
-        ['name' => 'Itachi Uchiha', 'url' => 'https://api.dicebear.com/7.x/adventurer/svg?seed=ItachiAkatsuki&hairColor=000000'],
-        ['name' => 'Sakura Haruno', 'url' => 'https://api.dicebear.com/7.x/lorelei/svg?seed=SakuraMedic&hairColor=f783ac'],
-        ['name' => 'Minato Namikaze', 'url' => 'https://api.dicebear.com/7.x/adventurer/svg?seed=YellowFlashMinato&hairColor=ffd43b'],
-        ['name' => 'Gaara', 'url' => 'https://api.dicebear.com/7.x/adventurer/svg?seed=GaaraSand&hairColor=c92a2a']
-    ],
-    'DemonSlayer' => [
-        ['name' => 'Tanjiro Kamado', 'url' => 'https://api.dicebear.com/7.x/adventurer/svg?seed=TanjiroSun&hairColor=862e9c'],
-        ['name' => 'Nezuko Kamado', 'url' => 'https://api.dicebear.com/7.x/lorelei/svg?seed=NezukoDemon&hairColor=000000'],
-        ['name' => 'Zenitsu Agatsuma', 'url' => 'https://api.dicebear.com/7.x/adventurer/svg?seed=ZenitsuThunder&hairColor=ffd43b'],
-        ['name' => 'Inosuke Hashibira', 'url' => 'https://api.dicebear.com/7.x/adventurer/svg?seed=InosukeBeast&hairColor=1971c2'],
-        ['name' => 'Kyojuro Rengoku', 'url' => 'https://api.dicebear.com/7.x/adventurer/svg?seed=FlameHashiraRengoku&hairColor=f76707'],
-        ['name' => 'Giyu Tomioka', 'url' => 'https://api.dicebear.com/7.x/adventurer/svg?seed=WaterHashiraGiyu&hairColor=000000']
-    ],
-    'JujutsuKaisen' => [
-        ['name' => 'Gojo Satoru', 'url' => 'https://api.dicebear.com/7.x/adventurer/svg?seed=GojoLimitless&hairColor=ffffff'],
-        ['name' => 'Ryomen Sukuna', 'url' => 'https://api.dicebear.com/7.x/adventurer/svg?seed=KingOfCursesSukuna&hairColor=f783ac'],
-        ['name' => 'Yuji Itadori', 'url' => 'https://api.dicebear.com/7.x/adventurer/svg?seed=YujiVessel&hairColor=f783ac'],
-        ['name' => 'Megumi Fushiguro', 'url' => 'https://api.dicebear.com/7.x/adventurer/svg?seed=MegumiShadows&hairColor=000000'],
-        ['name' => 'Nobara Kugisaki', 'url' => 'https://api.dicebear.com/7.x/lorelei/svg?seed=NobaraStrawDoll&hairColor=d9480f']
-    ],
-    'SpyFamily' => [
-        ['name' => 'Anya Forger', 'url' => 'https://api.dicebear.com/7.x/lorelei/svg?seed=AnyaTelepath&hairColor=f783ac'],
-        ['name' => 'Loid Forger', 'url' => 'https://api.dicebear.com/7.x/adventurer/svg?seed=TwilightLoid&hairColor=ffd43b'],
-        ['name' => 'Yor Forger', 'url' => 'https://api.dicebear.com/7.x/lorelei/svg?seed=ThornPrincessYor&hairColor=000000']
-    ],
-    'AttackOnTitan' => [
-        ['name' => 'Levi Ackerman', 'url' => 'https://api.dicebear.com/7.x/adventurer/svg?seed=CaptainLevi&hairColor=000000'],
-        ['name' => 'Eren Yeager', 'url' => 'https://api.dicebear.com/7.x/adventurer/svg?seed=ErenFounding&hairColor=343a40'],
-        ['name' => 'Mikasa Ackerman', 'url' => 'https://api.dicebear.com/7.x/lorelei/svg?seed=MikasaScout&hairColor=000000']
-    ],
-    'CyberBots' => [
-        ['name' => 'Cyber Sentinel', 'url' => 'https://api.dicebear.com/7.x/bottts/svg?seed=KrazeCyberSentinel&colors=cyan'],
-        ['name' => 'Matrix Glitch', 'url' => 'https://api.dicebear.com/7.x/bottts/svg?seed=MatrixGlitch&colors=green'],
-        ['name' => 'Shadow Bot', 'url' => 'https://api.dicebear.com/7.x/bottts/svg?seed=ShadowBotX&colors=purple'],
-        ['name' => 'Quantum Core', 'url' => 'https://api.dicebear.com/7.x/bottts/svg?seed=QuantumCore&colors=blue'],
-        ['name' => 'Vulnera Guard', 'url' => 'https://api.dicebear.com/7.x/bottts/svg?seed=VulneraGuard&colors=orange']
-    ]
+// Original cartoon avatars from DiceBear (dicebear.com), grouped by art style.
+// They are generated from a "seed" word: they are NOT any real character, so the
+// groups are named after the style, never after an anime or a franchise.
+// Seeds that students already picked are kept exactly as they were, so nobody's
+// current avatar changes.
+$dicebear = fn($style, $seed, $extra = '') => 'https://api.dicebear.com/7.x/' . $style . '/svg?seed=' . $seed . $extra;
+$avatar_groups = [
+    'Cartoon' => ['adventurer', [
+        ['GokuUltra', '&hair=short01&hairColor=000000'], ['GokuSSJ', '&hair=short02&hairColor=ffd43b'], ['VegetaPrince', '&hair=short03&hairColor=000000'],
+        ['KidGoku', ''], ['GohanBeast', '&hairColor=ffffff'], ['FutureTrunks', '&hairColor=b197fc'], ['PiccoloNamek', '&skinColor=8ce99a'],
+        ['PerfectCell', '&skinColor=69db7c'], ['KrillinZ', ''], ['MonkeyDLuffy', '&hairColor=ffffff'], ['LuffyCaptain', '&hairColor=000000'],
+        ['RoronoaZoro', '&hairColor=2b8a3e'], ['ZoroChibi', '&hairColor=40c057'], ['VinsmokeSanji', '&hairColor=ffd43b'], ['TonyTonyChopper', ''],
+        ['GodUsopp', '&hairColor=000000'], ['FrankyCyborg', '&hairColor=339af0'], ['SoulKingBrook', ''], ['FireFistAce', '&hairColor=000000'],
+        ['SurgeonOfDeathLaw', '&hairColor=000000'], ['NarutoHokage', '&hairColor=ffd43b'], ['SasukeShadow', '&hairColor=000000'],
+        ['KakashiSensei', '&hairColor=ced4da'], ['ItachiAkatsuki', '&hairColor=000000'], ['YellowFlashMinato', '&hairColor=ffd43b'],
+        ['GaaraSand', '&hairColor=c92a2a'], ['TanjiroSun', '&hairColor=862e9c'], ['ZenitsuThunder', '&hairColor=ffd43b'],
+        ['InosukeBeast', '&hairColor=1971c2'], ['FlameHashiraRengoku', '&hairColor=f76707'], ['WaterHashiraGiyu', '&hairColor=000000'],
+        ['GojoLimitless', '&hairColor=ffffff'], ['KingOfCursesSukuna', '&hairColor=f783ac'], ['YujiVessel', '&hairColor=f783ac'],
+        ['MegumiShadows', '&hairColor=000000'], ['TwilightLoid', '&hairColor=ffd43b'], ['CaptainLevi', '&hairColor=000000'],
+        ['ErenFounding', '&hairColor=343a40'],
+    ]],
+    'Portrait' => ['lorelei', [
+        ['NamiNavigator', '&hairColor=f76707'], ['NicoRobinArchaeologist', '&hairColor=000000'], ['SakuraMedic', '&hairColor=f783ac'],
+        ['NezukoDemon', '&hairColor=000000'], ['NobaraStrawDoll', '&hairColor=d9480f'], ['AnyaTelepath', '&hairColor=f783ac'],
+        ['ThornPrincessYor', '&hairColor=000000'], ['MikasaScout', '&hairColor=000000'], ['PortraitRiver', ''], ['PortraitEmber', ''],
+    ]],
+    'Robot' => ['bottts', [
+        ['KrazeCyberSentinel', '&colors=cyan'], ['MatrixGlitch', '&colors=green'], ['ShadowBotX', '&colors=purple'],
+        ['QuantumCore', '&colors=blue'], ['VulneraGuard', '&colors=orange'], ['RobotPatch', ''], ['RobotNull', ''], ['RobotPayload', ''],
+    ]],
+    'Pixel' => ['pixel-art', [
+        ['PixelRoot', ''], ['PixelShell', ''], ['PixelPacket', ''], ['PixelCookie', ''], ['PixelToken', ''],
+        ['PixelBuffer', ''], ['PixelCipher', ''], ['PixelSocket', ''], ['PixelKernel', ''], ['PixelProxy', ''],
+        ['PixelHash', ''], ['PixelNonce', ''], ['PixelSalt', ''], ['PixelHeader', ''], ['PixelQuery', ''], ['PixelRoute', ''],
+    ]],
+    'Doodle' => ['notionists', [
+        ['DoodleHunter', ''], ['DoodleScout', ''], ['DoodleTinker', ''], ['DoodleRecon', ''], ['DoodleFuzzer', ''],
+        ['DoodleAudit', ''], ['DoodleTrace', ''], ['DoodleSignal', ''], ['DoodleBeacon', ''], ['DoodleVector', ''],
+        ['DoodleSandbox', ''], ['DoodleCanary', ''], ['DoodleHoneypot', ''], ['DoodlePatch', ''], ['DoodleExploit', ''], ['DoodleScanner', ''],
+    ]],
 ];
+
+// More styles: 12 avatars each, seeded with security words (Prefix + word),
+// e.g. "ComicPayload". Adding a word here adds one avatar to every style below.
+$seedWords = ['Payload', 'Cookie', 'Token', 'Cipher', 'Exploit', 'Firewall', 'Packet', 'Kernel', 'Sandbox', 'Honeypot', 'Bounty', 'Recon'];
+foreach ([
+    'Comic'       => 'avataaars',
+    'Smiley'      => 'big-smile',
+    'Illustrated' => 'micah',
+    'Mini'        => 'miniavs',
+    'Sketch'      => 'open-peeps',
+    'Persona'     => 'personas',
+    'Emoji'       => 'fun-emoji',
+    'Scribble'    => 'croodles',
+    'Big Ears'    => 'big-ears',
+    'Thumbs'      => 'thumbs',
+] as $group => $style) {
+    $avatar_groups[$group] = [$style, array_map(fn($w) => [str_replace(' ', '', $group) . $w, ''], $seedWords)];
+}
+$avatar_categories = [];
+foreach ($avatar_groups as $group => [$style, $items]) {
+    foreach ($items as $i => [$seed, $extra]) {
+        $avatar_categories[$group][] = ['name' => $group . ' avatar ' . ($i + 1), 'url' => $dicebear($style, $seed, $extra)];
+    }
+}
 ?>
 
 <style>
@@ -238,7 +233,7 @@ $avatar_categories = [
               $isSelected = ($current_avatar === $av['url']);
             ?>
             <div class="avatar-choice-card <?= $isSelected ? 'selected' : '' ?>" data-category="<?= htmlspecialchars($cat) ?>" data-avatar-url="<?= htmlspecialchars($av['url']) ?>" title="<?= htmlspecialchars($av['name']) ?>" onclick="selectAvatar('<?= htmlspecialchars(addslashes($av['url'])) ?>', this)">
-              <img src="<?= htmlspecialchars($av['url']) ?>" alt="<?= htmlspecialchars($av['name']) ?>" loading="lazy">
+              <img src="<?= htmlspecialchars($av['url']) ?>" alt="<?= htmlspecialchars($av['name']) ?>" loading="lazy" onerror="retryAvatarImg(this)">
             </div>
           <?php endforeach; ?>
         <?php endforeach; ?>
@@ -249,6 +244,16 @@ $avatar_categories = [
 </div>
 
 <script>
+// DiceBear sometimes refuses a burst of requests (the picker loads ~75 at once).
+// Try a failed avatar again, waiting a little longer each time (up to 3 tries).
+function retryAvatarImg(img) {
+  const tries = Number(img.dataset.tries || 0);
+  if (tries >= 3) return;
+  img.dataset.tries = tries + 1;
+  const src = img.getAttribute('src');
+  setTimeout(() => { img.src = ''; img.src = src; }, 700 * (tries + 1) + Math.random() * 400);
+}
+
 function openAvatarModal(e) {
   if (e) e.preventDefault();
   const el = document.getElementById('avatarModal');
