@@ -1,6 +1,8 @@
 <?php
 require_once __DIR__ . '/config/sso.php';
-krazeRequireLogin();
+// Anyone can browse the labs. Signing in is asked for only when a visitor
+// opens a lab, bookmarks it, marks it solved or writes a report.
+startKrazeSession();
 
 // Shared data for the labs listing
 $categories = json_decode(file_get_contents(__DIR__ . '/data/labs.json'), true) ?: [];
@@ -14,11 +16,8 @@ $blogUrl = fn($name) => 'https://blog.krazeplanet.com/templates/blog-post.html?i
 
 // Per-lab slug, used by the Solution and Report links in each lab's actions menu.
 // "/subdomains/tutorialrepublic" -> "tutorialrepublic"; a full URL -> its first host label.
-$labSlug = function ($access) {
-    if (preg_match('#^/subdomains/([A-Za-z0-9_-]+)#', $access, $m)) return strtolower($m[1]);
-    $host = parse_url($access, PHP_URL_HOST);
-    return $host ? strtolower(explode('.', $host)[0]) : 'lab';
-};
+require_once __DIR__ . '/config/labs.php';
+$labSlug = fn($access) => krazeLabSlug($access); // same rule the Solved check uses (navbar/portal.php)
 
 // Solution:  blog.krazeplanet.com/templates/blog-post.html?id=<slug>
 // Report:    github.com/<repo>/new/<branch>?filename=<slug>.md&value=<template>
@@ -34,7 +33,7 @@ $labLinks = [
     'solutionBase'   => 'https://blog.krazeplanet.com/templates/blog-post.html?id=',
     'reportRepo'     => $reportRepo,
     'reportBranch'   => $reportBranch,
-    'connectUrl'     => '/navbar/profile.php?tab=profile#github',
+    'connectUrl'     => '/navbar/profile.php?tab=settings#github',
     'reportTemplate' => <<<'MD'
 ## Title
 <!-- Write a short, clear title describing the vulnerability and where it was found. Example: Stored XSS in User Profile -->
@@ -63,6 +62,15 @@ MD,
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>KrazePlanet - Web Security Training Platform</title>
+  <?php
+    $labTotal = 0;
+    foreach ($categories as $catLabs) $labTotal += is_array($catLabs) ? count($catLabs) : 0;
+    $metaDesc = "Free hands-on web security labs: {$labTotal} labs across " . count($categories) . " bug types, from XSS and SQL injection to SSRF and request smuggling. Find the vulnerability yourself, then check the solution.";
+  ?>
+  <meta name="description" content="<?= $e($metaDesc) ?>">
+  <meta property="og:title" content="KrazePlanet - Web Security Training Platform">
+  <meta property="og:description" content="<?= $e($metaDesc) ?>">
+  <meta property="og:type" content="website">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0/dist/css/bootstrap.min.css" rel="stylesheet"
   integrity="sha384-gH2yIJqKdNHPEq0n4Mqa/HGKIhSkIHeL5AyhkYV8i59U5AR6csBvApHHNl/vI1Bx" crossorigin="anonymous">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.9.1/font/bootstrap-icons.css">
@@ -93,15 +101,14 @@ MD,
     }
     
     body {
-      background: radial-gradient(circle at 50% 0%, #1e293b 0%, #0f172a 65%, #090d16 100%);
-      background-attachment: fixed;
+      background: #0a0f1c;
       color: #f8fafc;
       min-height: 100vh;
       font-family: var(--font-primary);
       -webkit-font-smoothing: antialiased;
     }
 
-    h1, h2, h3, h4, h5, h6, .hero-title, .section-title, .category-title {
+    h1, h2, h3, h4, h5, h6, .hero-title, .category-title {
       font-family: var(--font-heading);
     }
 
@@ -142,44 +149,223 @@ MD,
       box-shadow: 0 6px 20px rgba(16, 185, 129, 0.45);
     }
 
+    /* ---- Hero: pitch + action on the left, progress / proof on the right ---- */
+    .hero {
+      display: grid;
+      grid-template-columns: minmax(0, 1.55fr) minmax(280px, 1fr);
+      gap: 28px;
+      align-items: stretch;
+      padding: 32px;
+      margin-bottom: 18px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 18px;
+      background:
+        radial-gradient(900px 300px at 0% 0%, rgba(56, 189, 248, 0.10), transparent 60%),
+        linear-gradient(180deg, #0f182b, #0c1424);
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* faint grid texture, top-right */
+    .hero > * { position: relative; z-index: 1; }
+    .hero-main { display: flex; flex-direction: column; justify-content: center; min-width: 0; }
+
+    .hero-eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      width: fit-content;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: #bae6fd;
+      background: rgba(56, 189, 248, 0.1);
+      border: 1px solid rgba(56, 189, 248, 0.25);
+      border-radius: 999px;
+      padding: 4px 12px;
+      margin-bottom: 14px;
+    }
+    .hero-eyebrow .dot { width: 7px; height: 7px; border-radius: 50%; background: #34d399; box-shadow: 0 0 0 3px rgba(52, 211, 153, 0.2); }
+
     .hero-title {
-      font-size: 2.8rem;
+      font-size: 2.35rem;
       font-weight: 800;
-      background: linear-gradient(135deg, #ffffff 30%, #38bdf8 70%, #34d399 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      margin-bottom: 1rem;
-      letter-spacing: -0.5px;
+      line-height: 1.12;
+      color: #ffffff;
+      margin: 0 0 12px;
+      letter-spacing: -0.8px;
+      max-width: 620px;
+      text-wrap: balance; /* split lines evenly - no single word left on its own line */
     }
 
     .hero-subtitle {
-      font-size: 1.15rem;
-      color: #94a3b8;
-      max-width: 650px;
-      margin: 0 auto;
-      line-height: 1.6;
+      font-size: 1.08rem;
+      color: #c3cddb;
+      max-width: 560px;
+      margin: 0;
+      line-height: 1.55;
+      text-wrap: pretty;
     }
 
-    .section-title {
-      margin-top: 40px;
-      margin-bottom: 25px;
-      font-weight: 700;
-      font-size: 1.8rem;
-      position: relative;
-      padding-bottom: 10px;
-      color: #f8fafc;
+    /* Signed-in hero: "Up next" lab card */
+    .next-card {
+      margin-top: 18px;
+      padding: 18px 20px;
+      border-radius: 14px;
+      background: rgba(7, 11, 20, 0.55);
+      border: 1px solid rgba(255, 255, 255, 0.09);
+      border-left: 3px solid #38bdf8;
+    }
+    .next-card[hidden] { display: none; }
+    .nc-label { font-size: 0.74rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: #7dd3fc; margin-bottom: 6px; }
+    .nc-title { font-size: 1.12rem; font-weight: 700; color: #ffffff; line-height: 1.35; }
+    .nc-meta { display: flex; align-items: center; flex-wrap: wrap; gap: 10px; margin-top: 8px; }
+    .nc-cat { font-size: 0.86rem; color: #94a3b8; }
+    .nc-actions { display: flex; align-items: center; flex-wrap: wrap; gap: 6px 16px; margin-top: 16px; }
+    .nc-link { border: 0; background: none; padding: 4px 0; color: #94a3b8; font-size: 0.9rem; font-weight: 500; cursor: pointer; }
+    .nc-link:hover { color: #ffffff; text-decoration: underline; text-underline-offset: 3px; }
+    .next-card.nc-done { border-left-color: #34d399; }
+    .nc-when { font-size: 0.86rem; color: #64748b; display: inline-flex; align-items: center; gap: 5px; }
+    .nc-when::before { content: '\F293'; font-family: 'bootstrap-icons'; font-size: 0.8rem; } /* clock icon */
+    .nc-when[hidden] { display: none; }
+
+    .hero-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 22px; }
+    .hero-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      border-radius: 10px;
+      padding: 10px 18px;
+      border: 1px solid transparent;
+      cursor: pointer;
+      text-decoration: none;
+      transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+    }
+    .hero-btn-primary { background: #0284c7; color: #ffffff; }
+    .hero-btn-primary:hover { background: #0ea5e9; color: #ffffff; }
+    .hero-btn-ghost { color: #e2e8f0; border-color: rgba(255, 255, 255, 0.18); background: rgba(255, 255, 255, 0.03); }
+    .hero-btn-ghost:hover { color: #ffffff; border-color: rgba(255, 255, 255, 0.35); }
+    .hero-btn:focus-visible { outline: 2px solid #38bdf8; outline-offset: 2px; }
+
+    /* No box of its own: a thin divider separates it from the left side, so the hero
+       has one frame and the "Up next" card is the only box inside it. */
+    .hero-panel {
+      background: none;
+      border: 0;
+      border-left: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 0;
+      padding: 4px 0 4px 28px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 14px;
+    }
+    .hp-label { font-size: 0.8rem; font-weight: 600; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.06em; }
+    /* Progress ring + per-difficulty bars */
+    .hp-progress { display: flex; align-items: center; gap: 22px; }
+    .hp-ring { position: relative; width: 132px; height: 132px; flex-shrink: 0; }
+    .hp-ring svg { width: 100%; height: 100%; transform: rotate(-90deg); }
+    .hp-ring-track { fill: none; stroke: rgba(255, 255, 255, 0.07); stroke-width: 9; }
+    .hp-ring-fill { fill: none; stroke: url(#hpRingGrad); stroke-width: 9; stroke-linecap: round; transition: stroke-dashoffset 0.9s cubic-bezier(.2,.7,.2,1); }
+    .hp-ring-center { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
+    .hp-ring-num { font-family: var(--font-heading); font-size: 2rem; font-weight: 800; color: #ffffff; line-height: 1; }
+    .hp-ring-of { font-size: 0.78rem; color: #94a3b8; margin-top: 3px; }
+    .hp-ring-pct { font-size: 0.72rem; font-weight: 600; color: #7dd3fc; margin-top: 4px; }
+    .hp-diffs { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 9px; }
+    .hp-diff-top { display: flex; justify-content: space-between; align-items: baseline; font-size: 0.86rem; color: #cbd5e1; margin-bottom: 6px; }
+    .hp-diff-top strong { color: #ffffff; font-weight: 700; }
+    .hp-diff-of { color: #64748b; font-size: 0.8rem; }
+    .hp-diff-bar { height: 6px; border-radius: 999px; background: rgba(255, 255, 255, 0.07); overflow: hidden; }
+    .hp-diff-bar span { display: block; height: 100%; width: 0; border-radius: 999px; transition: width 0.7s ease; }
+    .hp-diff.easy .hp-diff-top > span:first-child { color: #6ee7b7; }
+    .hp-diff.medium .hp-diff-top > span:first-child { color: #fcd34d; }
+    .hp-diff.hard .hp-diff-top > span:first-child { color: #fca5a5; }
+    .hp-diff.easy .hp-diff-bar span { background: #34d399; }
+    .hp-diff.medium .hp-diff-bar span { background: #fbbf24; }
+    .hp-diff.hard .hp-diff-bar span { background: #f87171; }
+    .hp-diff.secure .hp-diff-top > span:first-child { color: #7dd3fc; }
+    .hp-diff.secure .hp-diff-bar span { background: #38bdf8; }
+    @media (max-width: 400px) {
+      .hp-progress { gap: 16px; }
+      .hp-ring { width: 112px; height: 112px; }
+      .hp-ring-num { font-size: 1.7rem; }
+    }
+    .hp-split { display: flex; flex-wrap: wrap; gap: 6px 18px; font-size: 0.86rem; color: #a3b1c6; }
+    .hp-split strong { color: #f1f5f9; font-weight: 700; margin-left: 4px; }
+    .hp-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 6px; vertical-align: 1px; }
+    .hp-dot.easy { background: #34d399; }
+    .hp-dot.medium { background: #fbbf24; }
+    .hp-dot.hard { background: #f87171; }
+    .hp-dot.secure { background: #38bdf8; }
+    .hp-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+    .hp-num { font-family: var(--font-heading); font-size: 1.85rem; font-weight: 800; color: #ffffff; line-height: 1.1; }
+    .hp-cap { font-size: 0.8rem; color: #94a3b8; line-height: 1.35; margin-top: 4px; }
+
+    /* ---- Toolbar: search + difficulty ---- */
+    .lab-toolbar {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 10px 14px;
+      margin-bottom: 6px;
+      position: sticky;
+      top: var(--kp-nav-h, 71px);
+      z-index: 20;
+      padding: 10px 0;
+      background: #0a0f1c;
+      /* a clear edge, so rows scrolling underneath don't look cut off */
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    }
+    .lt-search { position: relative; flex: 1 1 320px; max-width: 460px; }
+    .lt-search > i { position: absolute; left: 13px; top: 50%; transform: translateY(-50%); color: #64748b; font-size: 0.95rem; }
+    .lt-search input {
+      width: 100%;
+      background: #0d1526;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      color: #f1f5f9;
+      border-radius: 10px;
+      padding: 9px 36px 9px 38px;
+      font-size: 0.92rem;
+      outline: none;
+      transition: border-color 0.15s ease, box-shadow 0.15s ease;
+    }
+    .lt-search input::placeholder { color: #64748b; }
+    .lt-search input:focus { border-color: #38bdf8; box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.15); }
+    .lt-search input::-webkit-search-cancel-button { display: none; }
+    .lt-clear { position: absolute; right: 6px; top: 50%; transform: translateY(-50%); border: 0; background: transparent; color: #94a3b8; padding: 4px 8px; border-radius: 6px; }
+    .lt-clear:hover { color: #ffffff; background: rgba(255, 255, 255, 0.08); }
+    .lt-filters { display: flex; align-items: center; flex-wrap: wrap; gap: 6px; }
+    .lt-chip {
+      display: inline-flex;
+      align-items: center;
+      font-size: 0.86rem;
+      font-weight: 500;
+      color: #cbd5e1;
+      background: transparent;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 999px;
+      padding: 6px 13px;
+      cursor: pointer;
+      transition: all 0.12s ease;
+    }
+    .lt-chip:hover { border-color: rgba(255, 255, 255, 0.28); color: #ffffff; }
+    .lt-chip.is-on { background: rgba(56, 189, 248, 0.14); border-color: rgba(56, 189, 248, 0.5); color: #e0f2fe; font-weight: 600; }
+
+    @media (max-width: 1199.98px) {
+      .hero { grid-template-columns: minmax(0, 1fr); padding: 24px; }
+      .hero-panel { border-left: 0; border-top: 1px solid rgba(255, 255, 255, 0.08); padding: 20px 0 0; }
+    }
+    @media (max-width: 640px) {
+      .hero { padding: 20px 18px; gap: 18px; border-radius: 14px; }
+      .hero-title { font-size: 1.7rem; }
+      .hero-subtitle { font-size: 0.96rem; }
+      .hero-btn { flex: 1 1 auto; justify-content: center; }
+      .hp-num { font-size: 1.45rem; }
+      .lt-search { max-width: none; flex-basis: 100%; }
+      .lab-toolbar { position: static; }
     }
 
-    .section-title::after {
-      content: '';
-      position: absolute;
-      bottom: 0;
-      left: 0;
-      width: 60px;
-      height: 4px;
-      background: linear-gradient(90deg, var(--accent-green), #38bdf8);
-      border-radius: 2px;
-    }
 
     .search-container {
       background: rgba(30, 41, 59, 0.85) !important;
@@ -234,16 +420,6 @@ MD,
       box-shadow: 0 4px 14px rgba(16, 185, 129, 0.35);
     }
 
-    /* Solved Lab Styles */
-    .lab-card.is-solved {
-      border-color: rgba(16, 185, 129, 0.45) !important;
-      background: rgba(16, 185, 129, 0.08) !important;
-    }
-
-    .lab-card.is-solved .lab-badge {
-      background: rgba(16, 185, 129, 0.2);
-      color: #34d399;
-    }
 
     .btn-solved-toggle {
       background: rgba(255, 255, 255, 0.08);
@@ -281,15 +457,14 @@ MD,
       box-shadow: 0 0 12px rgba(52, 211, 153, 0.4);
     }
 
+    /* "Jump to lab": briefly highlight the row */
     @keyframes labPulse {
-      0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.8); border-color: var(--accent-green); }
-      50% { box-shadow: 0 0 0 15px rgba(16, 185, 129, 0); border-color: var(--accent-green); }
-      100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+      0%, 100% { background: transparent; }
+      30% { background: rgba(56, 189, 248, 0.16); }
     }
 
     .lab-highlight-pulse {
-      animation: labPulse 1.5s ease-in-out 2;
-      border-color: var(--accent-green) !important;
+      animation: labPulse 1.4s ease-in-out 2;
     }
 
     .btn-star-toggle {
@@ -317,12 +492,12 @@ MD,
 
     /* Per-lab "more actions" button + shared menu */
     .btn-lab-menu {
-      width: 38px;
-      height: 36px;
-      border-radius: 10px;
-      background: rgba(255, 255, 255, 0.08);
-      border: 1px solid rgba(255, 255, 255, 0.18);
-      color: #cbd5e1;
+      width: 34px;
+      height: 34px;
+      border-radius: 9px;
+      background: transparent;
+      border: 1px solid transparent;
+      color: #94a3b8;
       display: inline-flex;
       align-items: center;
       justify-content: center;
@@ -333,71 +508,63 @@ MD,
     }
     .btn-lab-menu:hover,
     .btn-lab-menu[aria-expanded="true"] {
-      background: rgba(255, 255, 255, 0.16);
-      border-color: rgba(52, 211, 153, 0.55);
+      background: rgba(255, 255, 255, 0.08);
+      border-color: rgba(255, 255, 255, 0.14);
       color: #ffffff;
     }
-    .btn-lab-menu:focus-visible { outline: 2px solid #34d399; outline-offset: 2px; }
+    .btn-lab-menu:focus-visible { outline: 2px solid #38bdf8; outline-offset: 2px; }
     .lab-card.menu-open { transform: none; }
 
+    /* Per-lab ⋯ menu: a plain dropdown like the avatar menu. Icons are grey;
+       colour is used only for the "on" state (green = solved, amber = saved). */
     .lab-menu {
       position: fixed;
       z-index: 1080;
-      width: 228px;
-      padding: 8px;
+      width: 220px;
+      padding: 6px;
       display: flex;
       flex-direction: column;
-      gap: 6px;
-      background: rgba(20, 29, 47, 0.97);
-      border: 1px solid rgba(255, 255, 255, 0.14);
-      border-radius: 14px;
-      box-shadow: 0 14px 34px rgba(0, 0, 0, 0.55), inset 0 1px 0 rgba(255, 255, 255, 0.06);
-      backdrop-filter: blur(12px);
-      animation: labMenuIn 0.14s ease-out;
+      gap: 2px;
+      background: #0f172a;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 12px;
+      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.6);
+      animation: labMenuIn 0.12s ease-out;
     }
     @keyframes labMenuIn { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: none; } }
     .lab-menu[hidden] { display: none; }
-    /* Each item is a pill, same look as the old "Mark Solved" button */
     .lab-menu-item {
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 10px;
       width: 100%;
-      padding: 7px 14px;
-      background: rgba(255, 255, 255, 0.08);
-      border: 1px solid rgba(255, 255, 255, 0.18);
-      border-radius: 10px;
+      padding: 8px 10px;
+      background: transparent;
+      border: 0;
+      border-radius: 8px;
       color: #cbd5e1;
       font-family: inherit;
-      font-size: 0.8rem;
-      font-weight: 600;
+      font-size: 0.86rem;
+      font-weight: 500;
       text-align: left;
       text-decoration: none;
       cursor: pointer;
-      transition: all 0.2s ease;
+      transition: background 0.12s ease, color 0.12s ease;
     }
     .lab-menu-item:hover,
     .lab-menu-item:focus-visible {
-      background: rgba(255, 255, 255, 0.16);
-      border-color: rgba(255, 255, 255, 0.3);
+      background: rgba(255, 255, 255, 0.07);
       color: #ffffff;
       outline: none;
     }
-    .lab-menu-item > i { font-size: 0.95rem; width: 16px; text-align: center; color: var(--ic, currentColor); }
-    .lab-menu-item .ext { margin-left: auto; font-size: 0.7rem; opacity: 0.6; color: currentColor; }
-    /* One accent per action, so each is recognisable by colour */
-    .lab-menu-item[data-act="bookmark"] { --ic: #fbbf24; }
-    .lab-menu-item[data-act="solved"]   { --ic: #34d399; }
-    .lab-menu-item[data-act="solution"] { --ic: #38bdf8; }
-    .lab-menu-item[data-act="report"]   { --ic: #a78bfa; }
-    /* Bookmark + Solved are on/off toggles: two compact buttons on one row */
-    .lab-menu-row { display: flex; gap: 6px; }
-    .lab-menu-row .lab-menu-item { justify-content: center; padding: 7px 8px; gap: 6px; }
-    .lab-menu-item.is-on-solved { background: rgba(16, 185, 129, 0.2); border-color: #10b981; color: #34d399; }
-    .lab-menu-item.is-on-solved:hover { background: rgba(16, 185, 129, 0.3); color: #6ee7b7; }
-    .lab-menu-item.is-on-bm { background: rgba(251, 191, 36, 0.14); border-color: rgba(251, 191, 36, 0.55); color: #fbbf24; }
-    .lab-menu-item.is-on-bm:hover { background: rgba(251, 191, 36, 0.24); color: #fcd34d; }
-    .lab-menu-sep { height: 1px; margin: 2px 4px; background: rgba(255, 255, 255, 0.1); }
+    .lab-menu-item > i { font-size: 0.95rem; width: 16px; text-align: center; color: #94a3b8; }
+    .lab-menu-item:hover > i { color: #e2e8f0; }
+    .lab-menu-item .ext { margin-left: auto; font-size: 0.7rem; opacity: 0.6; }
+    /* Save + Solved are on/off toggles, shown as two plain rows */
+    .lab-menu-row { display: flex; flex-direction: column; gap: 2px; }
+    .lab-menu-item.is-on-solved, .lab-menu-item.is-on-solved > i { color: #34d399; }
+    .lab-menu-item.is-on-bm, .lab-menu-item.is-on-bm > i { color: #fbbf24; }
+    .lab-menu-sep { height: 1px; margin: 4px 6px; background: rgba(255, 255, 255, 0.08); }
 
     /* "Write it up" nudge shown after a lab is marked solved */
     .solve-nudge {
@@ -411,17 +578,17 @@ MD,
       gap: 12px;
       max-width: calc(100vw - 32px);
       padding: 10px 10px 10px 16px;
-      background: rgba(20, 29, 47, 0.98);
-      border: 1px solid rgba(16, 185, 129, 0.5);
-      border-radius: 14px;
-      box-shadow: 0 14px 34px rgba(0, 0, 0, 0.55), 0 0 22px rgba(16, 185, 129, 0.18);
+      background: #0f172a;
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      border-radius: 12px;
+      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.6);
       color: #e2e8f0;
       font-size: 0.85rem;
       animation: nudgeIn 0.22s ease-out;
     }
     @keyframes nudgeIn { from { opacity: 0; transform: translate(-50%, 10px); } to { opacity: 1; transform: translateX(-50%); } }
     .solve-nudge > i { color: #34d399; font-size: 1.1rem; }
-    .solve-nudge.is-warn { border-color: rgba(251, 191, 36, 0.55); box-shadow: 0 14px 34px rgba(0, 0, 0, 0.55), 0 0 22px rgba(251, 191, 36, 0.15); }
+    .solve-nudge.is-warn { border-color: rgba(251, 191, 36, 0.4); }
     .solve-nudge.is-warn > i { color: #fbbf24; }
     .solve-nudge span { min-width: 0; }
     .solve-nudge a {
@@ -430,15 +597,15 @@ MD,
       gap: 6px;
       white-space: nowrap;
       padding: 7px 12px;
-      border-radius: 10px;
-      background: rgba(167, 139, 250, 0.16);
-      border: 1px solid rgba(167, 139, 250, 0.5);
-      color: #c4b5fd;
+      border-radius: 9px;
+      background: #0284c7;
+      border: 0;
+      color: #ffffff;
       font-weight: 600;
       font-size: 0.8rem;
       text-decoration: none;
     }
-    .solve-nudge a:hover { background: rgba(167, 139, 250, 0.26); color: #ddd6fe; }
+    .solve-nudge a:hover { background: #0ea5e9; color: #ffffff; }
     .solve-nudge button {
       border: 0;
       background: transparent;
@@ -457,15 +624,11 @@ MD,
       display: none;
       align-items: center;
       gap: 4px;
-      font-size: 0.7rem;
-      font-weight: 700;
-      padding: 3px 8px;
-      border-radius: 6px;
-      line-height: 1.4;
+      font-size: 0.8rem;
+      font-weight: 600;
+      line-height: 1.5;
     }
-    .lab-state-chip.chip-solved { background: rgba(16, 185, 129, 0.18); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.45); }
-    .lab-state-chip.chip-bm { background: rgba(251, 191, 36, 0.14); color: #fbbf24; border: 1px solid rgba(251, 191, 36, 0.4); padding: 3px 6px; }
-    .lab-card.is-solved .chip-solved,
+    .lab-state-chip.chip-bm { color: #fbbf24; }
     .lab-card.is-bookmarked .chip-bm { display: inline-flex; }
 
     #backToTopBtn:hover {
@@ -526,20 +689,29 @@ MD,
       color: inherit;
     }
 
-    /* Lab Cards Modern Styling */
+    /* ---- Lab list (one bordered list per bug type, PortSwigger-style rows) ---- */
+    :root {
+      --ll-surface: #0d1526;
+      --ll-row-hover: #111c33;
+      --ll-line: rgba(255, 255, 255, 0.07);
+      --ll-text: #f1f5f9;
+      --ll-muted: #94a3b8;
+      --ll-faint: #64748b;
+      --ll-accent: #38bdf8;
+      --ll-accent-strong: #0284c7;
+    }
+
     .category-title {
-      font-size: 1.4rem;
-      font-weight: 800;
-      color: #ffffff;
-      margin: 2.5rem 0 1.25rem 0;
-      padding: 0.5rem 0 0.5rem 1.1rem;
-      border-left: 4px solid #10b981;
-      background: linear-gradient(90deg, rgba(16, 185, 129, 0.15), transparent);
-      border-radius: 0 8px 8px 0;
-      letter-spacing: -0.3px;
-      scroll-margin-top: calc(var(--kp-nav-h, 71px) + 4px);
+      font-family: var(--font-heading);
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: var(--ll-text);
+      margin: 2.25rem 0 0.75rem;
+      padding: 0;
+      letter-spacing: -0.2px;
+      scroll-margin-top: calc(var(--kp-nav-h, 71px) + 12px);
       display: flex;
-      align-items: center;
+      align-items: baseline;
       justify-content: space-between;
       gap: 12px;
       flex-wrap: wrap;
@@ -547,271 +719,167 @@ MD,
 
     .category-writeup-link {
       font-family: var(--font-primary);
-      font-size: 0.8rem;
-      font-weight: 600;
-      color: #38bdf8;
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: var(--ll-accent);
       display: inline-flex;
       align-items: center;
-      gap: 5px;
-      padding: 4px 12px;
-      border: 1px solid rgba(56, 189, 248, 0.3);
-      border-radius: 8px;
-      background: rgba(56, 189, 248, 0.08);
+      gap: 4px;
       white-space: nowrap;
-      transition: all 0.2s ease;
     }
 
-    .category-writeup-link:hover {
-      background: rgba(56, 189, 248, 0.18);
-      border-color: rgba(56, 189, 248, 0.5);
-      color: #7dd3fc;
-    }
-
-    .category-writeup-link i { transition: transform 0.2s ease; }
-    .category-writeup-link:hover i { transform: translateX(3px); }
+    .category-writeup-link:hover { color: #7dd3fc; text-decoration: underline; text-underline-offset: 3px; }
 
     .labs-list {
       display: flex;
       flex-direction: column;
-      gap: 0.95rem;
-      margin-bottom: 2.5rem;
+      margin-bottom: 1rem;
+      background: var(--ll-surface);
+      border: 1px solid rgba(255, 255, 255, 0.09);
+      border-radius: 12px;
+      overflow: hidden;
     }
 
     .lab-card {
       display: flex;
-      background: linear-gradient(135deg, rgba(30, 41, 59, 0.95) 0%, rgba(20, 29, 47, 0.95) 100%);
-      border-radius: 14px;
-      border: 1px solid rgba(255, 255, 255, 0.14);
-      border-left: 4px solid #10b981;
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.08);
-      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-      overflow: hidden;
       align-items: center;
+      gap: 16px;
+      padding: 14px 16px 14px 12px;
+      background: transparent;
+      cursor: pointer;
       position: relative;
-      backdrop-filter: blur(12px);
+      transition: background 0.12s ease;
     }
 
-    .lab-card:hover {
-      transform: translateY(-3px);
-      background: linear-gradient(135deg, rgba(35, 48, 68, 0.98) 0%, rgba(24, 34, 53, 0.98) 100%);
-      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.5), 0 0 25px rgba(52, 211, 153, 0.25);
-      border-color: rgba(52, 211, 153, 0.6);
-      border-left-color: #34d399;
-    }
+    .lab-card + .lab-card { border-top: 1px solid var(--ll-line); }
+    .lab-card:hover { background: var(--ll-row-hover); }
+    .lab-card:hover .lab-title { color: #ffffff; }
+    .lab-card:hover .btn-ACCESS { border-color: rgba(56, 189, 248, 0.6); color: #ffffff; }
 
+    /* Number on the left; becomes a green check when solved */
     .lab-badge {
-      background: rgba(15, 23, 42, 0.95);
-      color: #ffffff;
-      padding: 1.1rem 1.35rem;
+      flex: 0 0 auto;
+      width: 36px;
+      height: 36px;
+      border-radius: 9px;
       display: flex;
       align-items: center;
-      gap: 8px;
-      font-weight: 800;
-      font-size: 0.88rem;
-      font-family: var(--font-mono);
-      letter-spacing: 0.06em;
-      text-transform: uppercase;
-      align-self: stretch;
-      min-width: 120px;
       justify-content: center;
-      border-right: 1px solid rgba(255, 255, 255, 0.14);
-      white-space: nowrap;
+      font-family: var(--font-mono);
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--ll-muted);
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid var(--ll-line);
     }
 
-    .lab-badge svg {
-      width: 20px;
-      height: 20px;
-      flex-shrink: 0;
-      fill: none;
-      stroke: #34d399;
-      stroke-width: 2.3;
-      filter: drop-shadow(0 0 6px rgba(52, 211, 153, 0.5));
-    }
+    /* Solved labs: the whole row turns green, so they're easy to spot while scrolling */
+    .lab-card.is-solved { background: rgba(52, 211, 153, 0.07); box-shadow: inset 3px 0 0 #34d399; }
+    .lab-card.is-solved:hover { background: rgba(52, 211, 153, 0.11); }
+    .lab-card.is-solved .lab-badge { color: #052e1f; background: #34d399; border-color: #34d399; font-weight: 700; }
+    .lab-card.is-solved .lab-title { color: #d1fae5; }
 
     .lab-content {
       flex: 1;
-      padding: 0.9rem 1.35rem;
+      min-width: 0;
       display: flex;
       flex-direction: column;
-      justify-content: center;
       gap: 6px;
-    }
-
-    
-    .points-tag-pill {
-      background: rgba(56, 189, 248, 0.15);
-      border: 1px solid rgba(56, 189, 248, 0.35);
-      color: #38bdf8;
-      font-size: 0.7rem;
-      font-weight: 800;
-      padding: 4px 8px;
-      border-radius: 6px;
-      letter-spacing: 0.05em;
-      font-family: var(--font-mono, monospace);
-      display: inline-flex;
-      align-items: center;
-    }
-
-    .difficulty-tag {
-      background: linear-gradient(135deg, #10b981, #047857);
-      color: #ffffff;
-      font-size: 0.7rem;
-      font-weight: 800;
-      padding: 4px 10px;
-      border-radius: 6px;
-      text-transform: uppercase;
-      letter-spacing: 0.06em;
-      display: inline-flex;
-      width: fit-content;
-      box-shadow: 0 2px 8px rgba(16, 185, 129, 0.35);
-    }
-
-    .difficulty-tag.medium {
-      background: linear-gradient(135deg, #f59e0b, #b45309);
-      color: #ffffff;
-      box-shadow: 0 2px 8px rgba(245, 158, 11, 0.35);
-    }
-
-    .difficulty-tag.hard {
-      background: linear-gradient(135deg, #f43f5e, #be123c);
-      color: #ffffff;
-      box-shadow: 0 2px 8px rgba(244, 63, 94, 0.35);
-    }
-
-    .difficulty-tag.secure {
-      background: linear-gradient(135deg, #0284c7, #0369a1);
-      color: #ffffff;
-      box-shadow: 0 2px 8px rgba(2, 132, 199, 0.35);
     }
 
     .lab-title {
-      font-size: 1.1rem;
-      font-weight: 700;
-      color: #ffffff !important;
+      font-family: var(--font-primary);
+      font-size: 0.98rem;
+      font-weight: 600;
+      line-height: 1.4;
+      color: #e2e8f0;
+      letter-spacing: -0.005em;
+    }
+
+    .lab-meta {
       display: flex;
       align-items: center;
-      gap: 8px;
-      font-family: var(--font-primary);
-      letter-spacing: -0.01em;
-    }
-
-    .lab-title svg {
-      width: 16px;
-      height: 16px;
-      stroke: #cbd5e1;
-      transition: transform 0.2s, stroke 0.2s;
-    }
-
-    .lab-card:hover .lab-title svg {
-      transform: translateX(4px);
-      stroke: #34d399;
-    }
-
-    .lab-desc {
+      flex-wrap: wrap;
+      gap: 6px 12px;
       font-size: 0.8rem;
-      color: #cbd5e1;
-      margin-top: 3px;
-      font-family: var(--font-mono);
-      letter-spacing: 0.01em;
+      color: var(--ll-muted);
     }
 
-    /* Link to the real HackerOne report. Styled as an outlined link (not a solid
-       tag) in sky blue, so it can't be mistaken for the difficulty tag next to it. */
-    .report-badge {
-      color: #7dd3fc;
-      background: rgba(56, 189, 248, 0.08);
-      border: 1px solid rgba(56, 189, 248, 0.55);
-      padding: 3px 9px;
-      border-radius: 6px;
-      text-decoration: none;
-      font-weight: 700;
+    /* Difficulty: small tinted text badge, colour only here */
+    .difficulty-tag {
+      display: inline-flex;
+      align-items: center;
       font-size: 0.74rem;
-      letter-spacing: 0.01em;
-      flex-shrink: 0;
-      cursor: pointer;
+      font-weight: 600;
+      line-height: 1.5;
+      padding: 0 8px;
+      border-radius: 6px;
+      color: #34d399;
+      background: rgba(52, 211, 153, 0.1);
+      border: 1px solid rgba(52, 211, 153, 0.28);
+    }
+    .difficulty-tag.medium { color: #fbbf24; background: rgba(251, 191, 36, 0.1); border-color: rgba(251, 191, 36, 0.3); }
+    .difficulty-tag.hard { color: #f87171; background: rgba(248, 113, 113, 0.1); border-color: rgba(248, 113, 113, 0.3); }
+    .difficulty-tag.secure { color: #7dd3fc; background: rgba(56, 189, 248, 0.1); border-color: rgba(56, 189, 248, 0.3); }
+
+    /* Link to the original public report: a neutral chip, same size as the difficulty badge.
+       The report number is in the tooltip, not on the chip. */
+    .report-badge {
       display: inline-flex;
       align-items: center;
       gap: 5px;
-      line-height: 1.35;
-      transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease, transform 0.15s ease;
+      font-size: 0.74rem;
+      font-weight: 500;
+      line-height: 1.5;
+      padding: 0 8px;
+      border-radius: 6px;
+      color: #cbd5e1;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      text-decoration: none;
+      transition: color 0.12s ease, border-color 0.12s ease, background 0.12s ease;
     }
-    .report-badge .bi { font-size: 0.85em; }
-    .report-badge .rb-num { font-family: var(--font-mono); font-weight: 600; opacity: 0.85; }
-    .report-badge .rb-ext { transition: transform 0.15s ease; }
-    .report-badge:hover {
-      background: rgba(56, 189, 248, 0.2);
-      border-color: #38bdf8;
-      color: #e0f2fe;
-      transform: translateY(-1px);
-    }
-    .report-badge:hover .rb-label { text-decoration: underline; text-underline-offset: 2px; }
-    .report-badge:hover .rb-ext { transform: translate(2px, -2px); }
-    .report-badge:focus-visible {
-      outline: 2px solid #38bdf8;
-      outline-offset: 2px;
-    }
+    .report-badge > .bi-file-earmark-text { font-size: 0.78rem; color: #94a3b8; }
+    .report-badge .rb-ext { font-size: 0.66rem; opacity: 0.6; }
+    .report-badge:hover { color: #e0f2fe; border-color: rgba(56, 189, 248, 0.5); background: rgba(56, 189, 248, 0.1); }
+    .report-badge:hover > i { color: inherit; opacity: 1; }
+    .report-badge:focus-visible { outline: 2px solid var(--ll-accent); outline-offset: 2px; }
 
     .lab-action {
-      padding: 0.85rem 1.25rem;
+      flex: 0 0 auto;
       display: flex;
       align-items: center;
-      gap: 10px;
-      flex-wrap: wrap;
+      gap: 8px;
     }
 
+    /* "Open lab": calm outlined button, the same blue as the rest of the site */
     .btn-ACCESS {
-      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-      border: 1px solid rgba(52, 211, 153, 0.4);
-      color: #ffffff;
-      text-decoration: none;
-      font-weight: 700;
-      font-size: 0.82rem;
-      padding: 8px 18px;
-      border-radius: 10px;
       display: inline-flex;
       align-items: center;
       gap: 6px;
-      transition: all 0.2s ease;
-      box-shadow: 0 4px 14px rgba(16, 185, 129, 0.35);
-      text-transform: uppercase;
-      letter-spacing: 0.04em;
+      padding: 7px 14px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: #e2e8f0;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.16);
+      border-radius: 9px;
+      text-decoration: none;
+      white-space: nowrap;
       cursor: pointer;
+      transition: background 0.12s ease, border-color 0.12s ease, color 0.12s ease;
     }
-
-    .btn-ACCESS:hover {
-      background: linear-gradient(135deg, #059669 0%, #047857 100%);
-      transform: translateY(-2px);
-      box-shadow: 0 6px 20px rgba(16, 185, 129, 0.5);
-      color: #ffffff;
-    }
-
-    .btn-ACCESS svg {
-      width: 16px;
-      height: 16px;
-      fill: none;
-      stroke: currentColor;
-      stroke-width: 2.2;
-    }
+    .btn-ACCESS i { font-size: 0.8rem; }
+    .btn-ACCESS:hover,
+    .lab-card:hover .btn-ACCESS:hover { background: var(--ll-accent-strong); border-color: var(--ll-accent-strong); color: #ffffff; }
+    .btn-ACCESS:focus-visible { outline: 2px solid var(--ll-accent); outline-offset: 2px; }
 
     @media (max-width: 768px) {
-      .lab-card {
-        flex-direction: column;
-        align-items: stretch;
-        border-radius: 14px;
-      }
-      .lab-badge {
-        border-radius: 14px 14px 0 0;
-        border-right: none;
-        border-bottom: 1px solid rgba(255, 255, 255, 0.07);
-        padding: 0.75rem 1rem;
-      }
-      .lab-content {
-        padding: 1rem;
-      }
-      .lab-action {
-        padding: 0 1rem 1rem;
-        justify-content: flex-start;
-      }
+      .lab-card { flex-wrap: wrap; gap: 10px 12px; padding: 14px; }
+      .lab-badge { width: 30px; height: 30px; font-size: 0.75rem; }
+      .lab-content { flex: 1 1 calc(100% - 46px); }
+      .lab-action { flex: 1 1 100%; padding-left: 42px; }
+      .lab-action .btn-ACCESS { flex: 1; justify-content: center; }
     }
 
         /* Modern Vexium Dark Fixed Left Sidebar */
@@ -885,11 +953,11 @@ MD,
 
     .portswigger-sidebar .sidebar-item.active-item,
     button.sidebar-item.active-item {
-      background: linear-gradient(90deg, rgba(56, 189, 248, 0.18), rgba(16, 185, 129, 0.08)) !important;
-      border: 1px solid rgba(56, 189, 248, 0.3) !important;
-      color: #38bdf8 !important;
+      background: rgba(56, 189, 248, 0.12) !important;
+      border: 1px solid transparent !important;
+      color: #7dd3fc !important;
       font-weight: 600 !important;
-      box-shadow: 0 2px 10px rgba(56, 189, 248, 0.12) !important;
+      box-shadow: none !important;
     }
 
     .sidebar-item .item-title {
@@ -959,14 +1027,14 @@ MD,
       z-index: 1025;
       align-items: center;
       gap: 8px;
-      background: linear-gradient(135deg, #0284c7, #0369a1);
-      border: 1px solid rgba(56, 189, 248, 0.45);
+      background: #0284c7;
+      border: 0;
       color: #ffffff;
-      font-weight: 700;
+      font-weight: 600;
       font-size: 0.88rem;
       padding: 10px 18px;
       border-radius: 30px;
-      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5), 0 0 16px rgba(56, 189, 248, 0.3);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
       cursor: pointer;
     }
 
@@ -1013,6 +1081,9 @@ MD,
       body.sidebar-open .sidebar-toggle-btn {
         display: none;
       }
+      /* Hidden while scrolling down (reading), back when scrolling up */
+      .sidebar-toggle-btn { transition: transform 0.25s ease, opacity 0.25s ease; }
+      body.kp-scroll-down .sidebar-toggle-btn { transform: translateY(160%); opacity: 0; pointer-events: none; }
       .sidebar-toggle-btn {
         display: inline-flex;
       }
@@ -1024,42 +1095,22 @@ MD,
     }
 
     @media (max-width: 768px) {
-      .hero-title {
-        font-size: 2rem;
-      }
-      .hero-subtitle {
-        font-size: 1rem;
-      }
-      .section-title {
-        font-size: 1.45rem;
-        margin-top: 28px;
-      }
       .category-title {
-        font-size: 1.2rem;
-        margin: 2rem 0 1rem 0;
-      }
-      .lab-badge {
-        justify-content: flex-start;
+        font-size: 1.1rem;
+        margin: 1.75rem 0 0.6rem 0;
       }
       .lab-title {
-        font-size: 1rem;
+        font-size: 0.95rem;
       }
     }
 
     @media (max-width: 480px) {
-      .hero-title {
-        font-size: 1.65rem;
-      }
       .main-content-layout {
         padding: 1.25rem 0.75rem 5rem 0.75rem !important;
       }
-      .lab-action .btn-ACCESS {
-        flex: 1 1 auto;
-        justify-content: center;
-      }
     }
 
-  
+
     @media (min-width: 992px) {
       .krazeplanet-footer {
         margin-left: 340px !important;
@@ -1090,9 +1141,118 @@ MD,
   <!-- Right Main Content Area -->
   <main class="main-content-layout">
 
-    <div class="hero-section mb-4 text-center">
-      <h1 class="hero-title">Web Security Training Platform</h1>
-      <p class="hero-subtitle">Master cybersecurity vulnerabilities through hands-on labs designed to challenge and enhance your penetration testing skills.</p>
+<?php
+  // Numbers for the hero: labs per difficulty and how many recreate a public HackerOne report.
+  $diffTotals = ['easy' => 0, 'medium' => 0, 'hard' => 0, 'secure' => 0];
+  $h1Count = 0;
+  foreach ($categories as $catLabs) {
+      foreach ((array)$catLabs as $lab) {
+          $d = strtolower((string)($lab['difficulty'] ?? ''));
+          $d = $d === 'high' ? 'hard' : $d;
+          if (isset($diffTotals[$d])) $diffTotals[$d]++;
+          if (preg_match('~hackerone\.com/reports/\d+~', (string)($lab['report'] ?? ''))) $h1Count++;
+      }
+  }
+  $signedIn = krazeLoggedIn();
+?>
+    <section class="hero">
+      <div class="hero-main">
+        <!-- Shown to everyone, so it's clear straight away that the labs are free -->
+        <div class="hero-eyebrow"><span class="dot"></span> Free · Hands-on web security labs</div>
+<?php if ($signedIn): ?>
+        <!-- Returning student: a personal greeting and their next lab, ready to open -->
+        <h1 class="hero-title">Welcome back, <?= $e($_SESSION['username'] ?? 'hacker') ?></h1>
+        <div class="next-card" id="heroNext" hidden>
+          <div class="nc-label" id="heroNextLabel">Up next</div>
+          <div class="nc-title" id="heroNextTitle"></div>
+          <div class="nc-meta">
+            <span class="difficulty-tag" id="heroNextDiff"></span>
+            <span class="nc-cat" id="heroNextCat"></span>
+            <span class="nc-when" id="heroNextWhen" hidden></span>
+          </div>
+          <div class="nc-actions">
+            <button type="button" class="hero-btn hero-btn-primary" id="heroOpenNext">Open lab <i class="bi bi-arrow-up-right"></i></button>
+            <button type="button" class="nc-link" id="heroShowNext">Show in list</button>
+          </div>
+        </div>
+        <div class="next-card nc-done" id="heroAllDone" hidden>
+          <div class="nc-title">You've solved every lab 🎉</div>
+          <div class="nc-cat">New labs are added regularly. Check back soon.</div>
+        </div>
+<?php else: ?>
+        <h1 class="hero-title">Learn web hacking by finding real bugs</h1>
+        <p class="hero-subtitle">Every lab hides a real vulnerability. Find it yourself, then check the solution.</p>
+        <div class="hero-actions">
+          <button type="button" class="hero-btn hero-btn-primary" id="heroStartBtn">
+            <i class="bi bi-play-fill"></i> <span>Start your first lab</span>
+          </button>
+          <a class="hero-btn hero-btn-ghost" href="<?= $e(krazeLoginUrl('/index.php', 'signup')) ?>">Create free account</a>
+        </div>
+<?php endif; ?>
+      </div>
+
+      <aside class="hero-panel">
+<?php if ($signedIn): ?>
+        <div class="hp-label">Your progress</div>
+        <div class="hp-progress">
+          <!-- Ring: solved / all labs -->
+          <div class="hp-ring" role="img" id="heroRingWrap" aria-label="0 of <?= (int)$labTotal ?> labs solved">
+            <svg viewBox="0 0 120 120" aria-hidden="true">
+              <defs>
+                <linearGradient id="hpRingGrad" x1="0" y1="0" x2="1" y2="1">
+                  <stop offset="0%" stop-color="#38bdf8"/>
+                  <stop offset="100%" stop-color="#34d399"/>
+                </linearGradient>
+              </defs>
+              <circle class="hp-ring-track" cx="60" cy="60" r="52"/>
+              <circle class="hp-ring-fill" id="heroRing" cx="60" cy="60" r="52" pathLength="100" stroke-dasharray="100" stroke-dashoffset="100"/>
+            </svg>
+            <div class="hp-ring-center">
+              <div class="hp-ring-num" id="heroSolved">0</div>
+              <div class="hp-ring-of">of <?= (int)$labTotal ?></div>
+              <div class="hp-ring-pct"><span id="heroPct">0</span>% solved</div>
+            </div>
+          </div>
+          <!-- Per difficulty -->
+          <div class="hp-diffs">
+<?php foreach (['easy' => 'Easy', 'medium' => 'Medium', 'hard' => 'Hard', 'secure' => 'Secure'] as $dk => $dl): ?>
+            <div class="hp-diff <?= $dk ?>">
+              <div class="hp-diff-top"><span><?= $dl ?></span><span><strong id="heroSolved<?= $dl ?>">0</strong><span class="hp-diff-of"> / <?= $diffTotals[$dk] ?></span></span></div>
+              <div class="hp-diff-bar"><span id="heroBar<?= $dl ?>" data-total="<?= $diffTotals[$dk] ?>"></span></div>
+            </div>
+<?php endforeach; ?>
+          </div>
+        </div>
+<?php else: ?>
+        <div class="hp-stats">
+          <div><div class="hp-num"><?= (int)$labTotal ?></div><div class="hp-cap">hands-on labs</div></div>
+          <div><div class="hp-num"><?= count($categories) ?></div><div class="hp-cap">bug types</div></div>
+          <div><div class="hp-num"><?= (int)$h1Count ?></div><div class="hp-cap">from public HackerOne reports</div></div>
+        </div>
+        <div class="hp-split">
+          <div><span class="hp-dot easy"></span>Easy <strong><?= $diffTotals['easy'] ?></strong></div>
+          <div><span class="hp-dot medium"></span>Medium <strong><?= $diffTotals['medium'] ?></strong></div>
+          <div><span class="hp-dot hard"></span>Hard <strong><?= $diffTotals['hard'] ?></strong></div>
+          <div><span class="hp-dot secure"></span>Secure <strong><?= $diffTotals['secure'] ?></strong></div>
+        </div>
+<?php endif; ?>
+      </aside>
+    </section>
+
+    <!-- Search and filters -->
+    <div class="lab-toolbar">
+      <div class="lt-search">
+        <i class="bi bi-search"></i>
+        <input type="search" id="labSearchInput" placeholder="Search labs, e.g. IDOR, password reset, GraphQL" autocomplete="off" aria-label="Search labs">
+        <button type="button" id="clearSearchBtn" class="lt-clear" aria-label="Clear search" style="display:none"><i class="bi bi-x-lg"></i></button>
+      </div>
+      <div class="lt-filters" role="group" aria-label="Difficulty">
+        <button type="button" class="lt-chip is-on" data-diff="all">All</button>
+        <button type="button" class="lt-chip" data-diff="easy"><span class="hp-dot easy"></span>Easy</button>
+        <button type="button" class="lt-chip" data-diff="medium"><span class="hp-dot medium"></span>Medium</button>
+        <button type="button" class="lt-chip" data-diff="hard"><span class="hp-dot hard"></span>Hard</button>
+        <button type="button" class="lt-chip" data-diff="secure" title="Secure versions of the labs: see how the bug is fixed"><span class="hp-dot secure"></span>Secure</button>
+      </div>
     </div>
 
     <!-- No Results State -->
@@ -1105,42 +1265,38 @@ MD,
       </button>
     </div>
 
-    <h2 class="section-title">Vulnerability Categories</h2>
 <?php
   // $categories, category icons and learn helpers are loaded at the top of this file.
-  $accessIcon = '<svg viewBox="0 0 24 24"><path d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"></path></svg>';
   $difficultyClass = ['medium' => 'medium', 'hard' => 'hard', 'high' => 'hard', 'secure' => 'secure'];
 
   foreach ($categories as $category => $catLabs):
-    $icon = $categoryIconSvg($categoryIconPaths[$category] ?? $defaultIconPaths);
 ?>
     <h3 class="category-title" data-category-name="<?= $e($category) ?>">
-      <span><?= $e($category) ?></span>
-      <a class="category-writeup-link" href="<?= $e($blogUrl($category)) ?>" target="_blank" rel="noopener noreferrer">Read the write-up <i class="bi bi-box-arrow-up-right"></i></a>
+      <span class="cat-name"><?= $e($category) ?></span>
+      <a class="category-writeup-link" href="<?= $e($blogUrl($category)) ?>" target="_blank" rel="noopener noreferrer">Write-up <i class="bi bi-arrow-up-right"></i></a>
     </h3>
     <div class="labs-list">
 <?php foreach ($catLabs as $lab):
         $report = trim($lab['report'] ?? '');
-        $diffCls = $difficultyClass[strtolower($lab['difficulty'])] ?? '';
+        $diffCls = $difficultyClass[strtolower($lab['difficulty'])] ?? 'easy';
         $isH1 = (bool)preg_match('~hackerone\.com/reports/(\d+)~', $report, $m);
-        $reportLabel = $isH1 ? 'HackerOne Report' : 'BugBountyTip';
-        $reportNum = $isH1 ? $m[1] : '';
+        $reportLabel = $isH1 ? 'HackerOne report' : 'Bug bounty tip';
+        $reportTitle = $isH1 ? 'Read the original HackerOne report #' . $m[1] : 'Read the bug bounty tip this lab is based on';
 ?>
       <div class="lab-card" data-lab-slug="<?= $e($labSlug($lab['access'])) ?>">
-        <div class="lab-badge"><?= $icon ?> LAB</div>
+        <div class="lab-badge" title="Lab number"><span class="lab-num">LAB</span></div>
         <div class="lab-content">
-          <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
-            <span class="difficulty-tag <?= $diffCls ?>"><?= $e($lab['difficulty']) ?></span>
-<?php if ($report !== ''): ?>
-            <a href="<?= $e($report) ?>" target="_blank" rel="noopener noreferrer" class="report-badge" title="Read the original bug report"><i class="bi bi-file-earmark-text"></i><span class="rb-label"><?= $e($reportLabel) ?></span><?php if ($reportNum !== ''): ?><span class="rb-num">#<?= $e($reportNum) ?></span><?php endif; ?><i class="bi bi-box-arrow-up-right rb-ext"></i></a>
-<?php endif; ?>
-            <span class="lab-state-chip chip-solved"><i class="bi bi-check-circle-fill"></i> Solved</span>
-            <span class="lab-state-chip chip-bm" title="Bookmarked"><i class="bi bi-star-fill"></i></span>
-          </div>
           <div class="lab-title"><?= $e($lab['title']) ?></div>
+          <div class="lab-meta">
+            <span class="difficulty-tag <?= $diffCls ?>"><?= $e(ucfirst(strtolower($lab['difficulty']))) ?></span>
+<?php if ($report !== ''): ?>
+            <a href="<?= $e($report) ?>" target="_blank" rel="noopener noreferrer" class="report-badge" title="<?= $e($reportTitle) ?>"><i class="bi bi-file-earmark-text"></i><span class="rb-label"><?= $e($reportLabel) ?></span><i class="bi bi-arrow-up-right rb-ext"></i></a>
+<?php endif; ?>
+            <span class="lab-state-chip chip-bm" title="Bookmarked"><i class="bi bi-bookmark-fill"></i> Saved</span>
+          </div>
         </div>
         <div class="lab-action">
-          <a href="<?= $e(krazeLabUrl($lab['access'])) ?>" data-lab-id="<?= $e($lab['access']) ?>" class="btn-ACCESS" target="_blank"><?= $accessIcon ?> ACCESS THE LAB</a>
+          <a href="<?= $e(krazeLabUrl($lab['access'])) ?>" data-lab-id="<?= $e($lab['access']) ?>" class="btn-ACCESS" target="_blank">Open lab <i class="bi bi-arrow-up-right"></i></a>
         </div>
       </div>
 <?php endforeach; ?>
@@ -1163,41 +1319,48 @@ MD,
       const searchInput = document.getElementById('labSearchInput');
       const clearBtn = document.getElementById('clearSearchBtn');
       const resetBtn = document.getElementById('resetSearchBtn');
-      const resultCount = document.getElementById('searchResultCount');
       const noResultsState = document.getElementById('noResultsState');
       const categorySelect = document.getElementById('categorySelect');
       const difficultySelect = document.getElementById('difficultySelect');
       const categoryPillsContainer = document.getElementById('categoryPillsContainer');
       const categoryTitles = document.querySelectorAll('.category-title');
-      const hideSolvedBtn = document.getElementById('hideSolvedBtn');
       const userProgressBar = document.getElementById('userProgressBar');
       const userProgressText = document.getElementById('userProgressText');
 
       const allLabCards = document.querySelectorAll('.lab-card');
       const totalLabs = allLabCards.length;
 
-      // Dynamically auto-number all lab badges (LAB 1, LAB 2, ..., LAB N)
+      // Number the labs 1..N across the whole list (the number turns into a ✓ once solved)
       allLabCards.forEach((card, idx) => {
+        const num = card.querySelector('.lab-num');
+        if (num) num.textContent = idx + 1;
         const badge = card.querySelector('.lab-badge');
-        if (badge) {
-          const svg = badge.querySelector('svg');
-          const svgHtml = svg ? svg.outerHTML : '<svg viewBox="0 0 24 24"><path d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"></path></svg>';
-          badge.innerHTML = `${svgHtml} LAB ${idx + 1}`;
-        }
+        if (badge) badge.title = 'Lab ' + (idx + 1);
+      });
+
+      // The whole row opens the lab (links and buttons inside it keep their own action)
+      document.addEventListener('click', (e) => {
+        const card = e.target.closest('.lab-card');
+        if (!card || e.target.closest('a, button, input, .lab-menu')) return;
+        if (window.getSelection && String(window.getSelection()).length) return; // selecting text
+        card.querySelector('a.btn-ACCESS')?.click();
       });
 
       let selectedCategory = 'all';
       let selectedDifficulty = 'all';
-      let hideSolved = false;
 
       // User State variables (synced via MySQL backend)
       let isLoggedIn = false;
       let currentUsername = '';
       let solvedLabs = [];
       let bookmarkedLabs = [];
+      let serverLastLab = null; // { id, at } - last lab opened on any device (central login server)
 
       // PHP-inlined session user id — lets us key the localStorage cache per user
       const KP_SESSION_UID = <?php echo (int)($_SESSION['user_id'] ?? 0); ?>;
+      // Visitors who aren't signed in are sent to sign in (then straight back to
+      // the lab they picked) when they open a lab or use Bookmark / Solved / Report.
+      const IS_USER_LOGGED_IN = <?php echo krazeLoggedIn() ? 'true' : 'false'; ?>;
       const KP_STATE_KEY   = 'kp_lab_state_' + KP_SESSION_UID;
 
       function kpSaveStateCache() {
@@ -1232,6 +1395,7 @@ MD,
               currentUsername = res.data.username;
               solvedLabs = res.data.solvedLabs || [];
               bookmarkedLabs = res.data.bookmarkedLabs || [];
+              serverLastLab = res.data.lastLab || null;
 
               if (isLoggedIn) {
                 kpSaveStateCache();
@@ -1363,16 +1527,19 @@ MD,
           // Snapshot current state so we can revert on server error
           const prevSolvedLabs = [...solvedLabs];
           const prevBookmarkedLabs = [...bookmarkedLabs];
+          const marking = !solvedLabs.includes(targetLabId);
 
-          // Optimistic UI update — toggle immediately without waiting for server
-          if (solvedLabs.includes(targetLabId)) {
-            solvedLabs = solvedLabs.filter(id => id !== targetLabId);
+          if (marking) {
+            // Marking as solved needs the lab's report in the student's GitHub repo,
+            // so wait for the server's check before turning the row green.
+            showToast({ icon: 'bi-hourglass-split', text: 'Checking your report on GitHub…', sticky: true });
           } else {
-            solvedLabs = [...solvedLabs, targetLabId];
+            // Un-marking is instant
+            solvedLabs = solvedLabs.filter(id => id !== targetLabId);
+            updateAllLabCardsUI();
+            updateProgressBar();
+            updateSearch();
           }
-          updateAllLabCardsUI();
-          updateProgressBar();
-          updateSearch();
 
           const formData = new FormData();
           formData.append('lab_id', targetLabId);
@@ -1417,13 +1584,26 @@ MD,
                 updateAllLabCardsUI();
                 updateProgressBar();
                 updateSearch();
+                if (marking) showToast({ icon: 'bi-check-circle-fill', text: 'Report found. Lab marked as solved.' });
+                else hideToast();
               } else {
-                // Server error — revert
+                // Not saved — put the row back as it was
                 solvedLabs = prevSolvedLabs;
                 bookmarkedLabs = prevBookmarkedLabs;
                 updateAllLabCardsUI();
                 updateProgressBar();
                 updateSearch();
+                const slug = card.getAttribute('data-lab-slug') || 'lab';
+                if (res.needsReport === 'no_repo') {
+                  showToast({ icon: 'bi-github', tone: 'warn', text: res.message,
+                    href: LAB_LINKS.connectUrl, label: 'Add GitHub repo', labelIcon: 'bi-person-gear' });
+                } else if (res.needsReport === 'no_report') {
+                  showToast({ icon: 'bi-file-earmark-x', tone: 'warn', text: res.message,
+                    href: LAB_LINKS.reportRepo ? reportUrl(slug, card) : LAB_LINKS.connectUrl,
+                    label: 'Write Report', labelIcon: 'bi-file-earmark-text', newTab: !!LAB_LINKS.reportRepo });
+                } else {
+                  showToast({ icon: 'bi-exclamation-triangle', tone: 'warn', text: res.message || 'Could not save. Please try again.' });
+                }
               }
             })
             .catch(err => {
@@ -1435,6 +1615,7 @@ MD,
               updateAllLabCardsUI();
               updateProgressBar();
               updateSearch();
+              showToast({ icon: 'bi-exclamation-triangle', tone: 'warn', text: 'Network error. Please try again.' });
             });
       }
 
@@ -1467,13 +1648,17 @@ MD,
       document.body.appendChild(labMenu);
       let labMenuTrigger = null;
 
+      // Focus goes back to the ⋯ button only for keyboard users (mouse users would
+      // otherwise see the button stay outlined after the menu closes).
+      let labMenuByKeyboard = false;
       function closeLabMenu(returnFocus) {
         if (labMenu.hidden) return;
         labMenu.hidden = true;
         if (labMenuTrigger) {
           labMenuTrigger.setAttribute('aria-expanded', 'false');
           labMenuTrigger.closest('.lab-card')?.classList.remove('menu-open');
-          if (returnFocus) labMenuTrigger.focus();
+          if (returnFocus && labMenuByKeyboard) labMenuTrigger.focus();
+          else labMenuTrigger.blur();
         }
         labMenuTrigger = null;
       }
@@ -1498,10 +1683,10 @@ MD,
 
         labMenu.innerHTML = `
           <div class="lab-menu-row">
-            <button type="button" role="menuitemcheckbox" aria-checked="${bm}" class="lab-menu-item${bm ? ' is-on-bm' : ''}" data-act="bookmark" title="${bm ? 'Remove bookmark' : 'Save this lab for later'}">
-              <i class="bi ${bm ? 'bi-star-fill' : 'bi-star'}"></i><span>${bm ? 'Saved' : 'Bookmark'}</span>
+            <button type="button" role="menuitemcheckbox" aria-checked="${bm}" class="lab-menu-item${bm ? ' is-on-bm' : ''}" data-act="bookmark" title="${bm ? 'Remove from saved labs' : 'Save this lab for later'}">
+              <i class="bi ${bm ? 'bi-bookmark-fill' : 'bi-bookmark'}"></i><span>${bm ? 'Saved' : 'Save'}</span>
             </button>
-            <button type="button" role="menuitemcheckbox" aria-checked="${solved}" class="lab-menu-item${solved ? ' is-on-solved' : ''}" data-act="solved" title="${solved ? 'Click to mark as unsolved' : 'Click to mark as solved'}">
+            <button type="button" role="menuitemcheckbox" aria-checked="${solved}" class="lab-menu-item${solved ? ' is-on-solved' : ''}" data-act="solved" title="${solved ? 'Click to mark as unsolved' : 'Mark as solved (your report for this lab must be in your GitHub repo)'}">
               <i class="bi ${solved ? 'bi-check-circle-fill' : 'bi-circle'}"></i><span>Solved</span>
             </button>
           </div>
@@ -1525,11 +1710,11 @@ MD,
           closeLabMenu(true);
           if (promptLoginIfNeeded()) return;
           toggleSolved(labId, card);
-          if (!solved) showSolveNudge(slug, card);
         });
         labMenu.querySelectorAll('a.lab-menu-item').forEach(a => a.addEventListener('click', () => closeLabMenu(false)));
         labMenu.querySelector('[data-no-repo]')?.addEventListener('click', () => {
           closeLabMenu(true);
+          if (promptLoginIfNeeded()) return;
           showConnectGithubToast();
         });
 
@@ -1542,7 +1727,8 @@ MD,
 
       // Small toast at the bottom of the screen: message + one action link + close.
       let solveNudgeTimer = null;
-      function showToast({ icon, tone, text, href, label, labelIcon, newTab }) {
+      // The action link is optional; `sticky` keeps it up until replaced (e.g. "Checking…").
+      function showToast({ icon, tone, text, href, label, labelIcon, newTab, sticky }) {
         document.getElementById('solveNudge')?.remove();
         clearTimeout(solveNudgeTimer);
         const n = document.createElement('div');
@@ -1550,17 +1736,25 @@ MD,
         n.className = 'solve-nudge' + (tone === 'warn' ? ' is-warn' : '');
         n.setAttribute('role', 'status');
         const target = newTab ? ' target="_blank" rel="noopener noreferrer"' : '';
+        const esc = (s) => String(s ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
         n.innerHTML = `<i class="bi ${icon}"></i>
-          <span>${text}</span>
-          <a href="${href}"${target}><i class="bi ${labelIcon}"></i> ${label}</a>
+          <span>${esc(text)}</span>
+          ${href ? `<a href="${esc(href)}"${target}><i class="bi ${labelIcon}"></i> ${esc(label)}</a>` : ''}
           <button type="button" aria-label="Dismiss"><i class="bi bi-x-lg"></i></button>`;
         const close = () => { clearTimeout(solveNudgeTimer); n.remove(); };
         n.querySelector('button').addEventListener('click', close);
-        n.querySelector('a').addEventListener('click', close);
-        n.addEventListener('mouseenter', () => clearTimeout(solveNudgeTimer));
-        n.addEventListener('mouseleave', () => { solveNudgeTimer = setTimeout(close, 4000); });
+        n.querySelector('a')?.addEventListener('click', close);
+        if (!sticky) {
+          n.addEventListener('mouseenter', () => clearTimeout(solveNudgeTimer));
+          n.addEventListener('mouseleave', () => { solveNudgeTimer = setTimeout(close, 4000); });
+          solveNudgeTimer = setTimeout(close, 9000);
+        }
         document.body.appendChild(n);
-        solveNudgeTimer = setTimeout(close, 9000);
+      }
+
+      function hideToast() {
+        clearTimeout(solveNudgeTimer);
+        document.getElementById('solveNudge')?.remove();
       }
 
       // No GitHub repo on the profile yet: explain instead of opening GitHub
@@ -1568,19 +1762,6 @@ MD,
         showToast({ icon: 'bi-github', tone: 'warn',
           text: 'Add your GitHub repository on your profile to write bug bounty reports.',
           href: LAB_LINKS.connectUrl, label: 'Add GitHub repo', labelIcon: 'bi-person-gear' });
-      }
-
-      // After a lab is marked solved: suggest writing it up as a report
-      function showSolveNudge(slug, card) {
-        if (!LAB_LINKS.reportRepo) {
-          showToast({ icon: 'bi-check-circle-fill',
-            text: 'Nice work! Add your GitHub repository to write it up as a bug bounty report.',
-            href: LAB_LINKS.connectUrl, label: 'Add GitHub repo', labelIcon: 'bi-github' });
-          return;
-        }
-        showToast({ icon: 'bi-check-circle-fill',
-          text: 'Nice work! Write it up as a bug bounty report.',
-          href: reportUrl(slug, card), label: 'Write Report', labelIcon: 'bi-file-earmark-text', newTab: true });
       }
 
       allLabCards.forEach((card) => {
@@ -1603,7 +1784,8 @@ MD,
           if (labMenuTrigger === trigger) { closeLabMenu(false); return; }
           closeLabMenu(false);
           openLabMenu(trigger);
-          if (e.detail === 0) labMenu.querySelector('.lab-menu-item')?.focus(); // opened by keyboard
+          labMenuByKeyboard = e.detail === 0;
+          if (labMenuByKeyboard) labMenu.querySelector('.lab-menu-item')?.focus(); // opened by keyboard
         });
         labAction.appendChild(trigger);
       });
@@ -1645,21 +1827,139 @@ MD,
         if (dropdownSolved) {
           dropdownSolved.textContent = `${solvedCount} / ${totalLabs}`;
         }
+        updateHeroNext();
+        // Hero "Your progress" panel (signed-in students only)
+        const heroSolved = document.getElementById('heroSolved');
+        if (heroSolved) {
+          const byDiff = { easy: 0, medium: 0, hard: 0, secure: 0 };
+          allLabCards.forEach((card) => {
+            const id = card.querySelector('a.btn-ACCESS')?.getAttribute('data-lab-id') || '';
+            if (!solvedLabs.includes(id)) return;
+            const d = (card.querySelector('.difficulty-tag')?.textContent || '').trim().toLowerCase();
+            if (d in byDiff) byDiff[d]++;
+          });
+          const total = byDiff.easy + byDiff.medium + byDiff.hard + byDiff.secure;
+          const pct = totalLabs ? (total / totalLabs) * 100 : 0;
+          heroSolved.textContent = total;
+          document.getElementById('heroPct').textContent = pct > 0 && pct < 1 ? '<1' : Math.round(pct);
+          // A solved lab always shows at least a small arc
+          document.getElementById('heroRing').style.strokeDashoffset = String(100 - (total > 0 ? Math.max(pct, 1.5) : 0));
+          document.getElementById('heroRingWrap').setAttribute('aria-label', `${total} of ${totalLabs} labs solved`);
+          [['easy', 'Easy'], ['medium', 'Medium'], ['hard', 'Hard'], ['secure', 'Secure']].forEach(([k, label]) => {
+            document.getElementById('heroSolved' + label).textContent = byDiff[k];
+            const bar = document.getElementById('heroBar' + label);
+            const t = Number(bar.dataset.total) || 0;
+            bar.style.width = (t && byDiff[k] ? Math.max((byDiff[k] / t) * 100, 2) : 0) + '%';
+          });
+        }
       }
 
-      if (hideSolvedBtn) {
-        hideSolvedBtn.addEventListener('click', function() {
-          hideSolved = !hideSolved;
-          if (hideSolved) {
-            this.classList.replace('btn-outline-secondary', 'btn-success');
-            this.innerHTML = `<i class="bi bi-eye me-1"></i>Showing Unsolved Only`;
-          } else {
-            this.classList.replace('btn-success', 'btn-outline-secondary');
-            this.innerHTML = `<i class="bi bi-eye-slash me-1"></i>Hide Solved`;
-          }
-          updateSearch();
-        });
+      // Difficulty filter buttons in the toolbar
+      const diffChips = document.querySelectorAll('.lt-chip[data-diff]');
+      function setDifficulty(diff) {
+        selectedDifficulty = diff;
+        diffChips.forEach((c) => c.classList.toggle('is-on', c.dataset.diff === diff));
+        if (difficultySelect) difficultySelect.value = diff;
+        updateSearch();
       }
+      diffChips.forEach((chip) => chip.addEventListener('click', () => setDifficulty(chip.dataset.diff)));
+
+      // Hero button: jump to the next unsolved lab (signed in) or the first easy lab (visitors)
+      // The lab the hero button leads to: the first unsolved easy lab (then any unsolved lab)
+      // for students, the first easy lab for visitors.
+      function nextLab() {
+        const cards = Array.from(allLabCards);
+        const idOf = (c) => c.querySelector('a.btn-ACCESS')?.getAttribute('data-lab-id') || '';
+        const diffOf = (c) => (c.querySelector('.difficulty-tag')?.textContent || '').trim().toLowerCase();
+        const target = IS_USER_LOGGED_IN
+          ? (cards.find((c) => diffOf(c) === 'easy' && !solvedLabs.includes(idOf(c))) || cards.find((c) => !solvedLabs.includes(idOf(c))))
+          : cards.find((c) => diffOf(c) === 'easy');
+        return target || cards[0] || null;
+      }
+
+      // The last lab this student opened, on any device. Offered first in the hero as
+      // "Continue where you left off" until it's solved. Saved on the central login server
+      // (works across devices) and in this browser (shows instantly, before the server answers).
+      // (var, not const: updateHeroNext can run from the early cached-state render above this line)
+      var LAST_LAB_KEY = 'kp_last_lab_' + KP_SESSION_UID;
+      function rememberLastLab(labId) {
+        if (!KP_SESSION_UID || !labId) return;
+        const entry = { id: labId, at: Date.now() };
+        try { localStorage.setItem(LAST_LAB_KEY, JSON.stringify(entry)); } catch (_) {}
+        serverLastLab = entry;
+        updateHeroNext();
+        const fd = new FormData();
+        fd.append('lab_id', labId);
+        fetch('/navbar/portal.php?action=set_last_lab', { method: 'POST', body: fd, keepalive: true }).catch(() => {});
+      }
+      function lastOpenedLab() {
+        if (!KP_SESSION_UID) return null;
+        let local = null;
+        try { local = JSON.parse(localStorage.getItem(LAST_LAB_KEY) || 'null'); } catch (_) {}
+        // whichever was opened most recently: this browser's or the server's (another device)
+        const saved = [local, serverLastLab].filter((x) => x && x.id).sort((a, b) => (b.at || 0) - (a.at || 0))[0];
+        if (!saved || solvedLabs.includes(saved.id)) return null;
+        const card = Array.from(allLabCards).find((c) => c.querySelector('a.btn-ACCESS')?.getAttribute('data-lab-id') === saved.id);
+        return card ? { card, at: saved.at } : null;
+      }
+      // What the student's hero card shows: the unsolved lab they last opened, else the next new one
+      function heroTarget() {
+        const last = lastOpenedLab();
+        return last ? { card: last.card, resumed: true, at: last.at } : { card: nextLab(), resumed: false };
+      }
+      function timeAgo(ms) {
+        const s = Math.max(0, (Date.now() - ms) / 1000);
+        if (s < 60) return 'just now';
+        if (s < 3600) return Math.floor(s / 60) + ' min ago';
+        if (s < 86400) return Math.floor(s / 3600) + (Math.floor(s / 3600) === 1 ? ' hour ago' : ' hours ago');
+        const d = Math.floor(s / 86400);
+        return d === 1 ? 'yesterday' : d + ' days ago';
+      }
+
+      function goToNextLab() {
+        const target = IS_USER_LOGGED_IN ? heroTarget().card : nextLab();
+        if (!target) return;
+        if (target.offsetParent === null && resetBtn) resetBtn.click(); // hidden by a filter: clear filters first
+        target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        target.classList.remove('lab-highlight-pulse');
+        void target.offsetWidth;
+        target.classList.add('lab-highlight-pulse');
+        setTimeout(() => target.classList.remove('lab-highlight-pulse'), 3000);
+      }
+
+      // Signed-in hero: the "Up next" card shows the next unsolved lab and opens it directly
+      function updateHeroNext() {
+        const box = document.getElementById('heroNext');
+        if (!box) return;
+        const done = document.getElementById('heroAllDone');
+        const idOf = (c) => c.querySelector('a.btn-ACCESS')?.getAttribute('data-lab-id') || '';
+        const pick = heroTarget();
+        const target = pick.card;
+        const allSolved = !target || solvedLabs.includes(idOf(target));
+        box.hidden = allSolved;
+        if (done) done.hidden = !allSolved;
+        if (allSolved) return;
+        box.classList.toggle('is-resumed', pick.resumed);
+        document.getElementById('heroNextLabel').textContent = pick.resumed ? 'Continue where you left off' : 'Up next';
+        const when = document.getElementById('heroNextWhen');
+        when.textContent = pick.resumed ? 'Opened ' + timeAgo(pick.at) : '';
+        when.hidden = !pick.resumed;
+        const diffEl = target.querySelector('.difficulty-tag');
+        const tag = document.getElementById('heroNextDiff');
+        tag.textContent = (diffEl?.textContent || '').trim();
+        tag.className = diffEl ? diffEl.className : 'difficulty-tag';
+        document.getElementById('heroNextTitle').textContent = target.querySelector('.lab-title')?.textContent.trim() || '';
+        document.getElementById('heroNextCat').textContent = target.closest('.labs-list')?.previousElementSibling?.getAttribute('data-category-name') || '';
+      }
+
+      document.getElementById('heroStartBtn')?.addEventListener('click', goToNextLab);   // visitors
+      document.getElementById('heroShowNext')?.addEventListener('click', goToNextLab);   // students
+      document.getElementById('heroOpenNext')?.addEventListener('click', () => {
+        heroTarget().card?.querySelector('a.btn-ACCESS')?.click(); // same as the lab's own "Open lab" button
+      });
+      // Another tab opened a lab: show it here too
+      window.addEventListener('storage', (e) => { if (e.key === LAST_LAB_KEY) updateHeroNext(); });
+      updateHeroNext();
 
       const categorySidebarList = document.getElementById('categorySidebarList');
 
@@ -1671,7 +1971,7 @@ MD,
         }
         const bOpt = categorySelect ? categorySelect.querySelector('option[value="bookmarked"]') : null;
         if (bOpt) {
-          bOpt.textContent = `★ Bookmarked Labs (${bCount})`;
+          bOpt.textContent = `Saved labs (${bCount})`;
         }
         const dropdownBookmark = document.getElementById('dropdownBookmarkCount');
         if (dropdownBookmark) {
@@ -1705,12 +2005,12 @@ MD,
           allItem.innerHTML = `<span class="item-title">${sidebarIcon('all')}All Vulnerabilities</span><span class="item-count">${totalLabs}</span>`;
           categorySidebarList.appendChild(allItem);
 
-          // "Bookmarked Labs" item
+          // "Saved labs" item (labs the student bookmarked)
           const bookmarkedItem = document.createElement('button');
           bookmarkedItem.type = 'button';
           bookmarkedItem.className = 'sidebar-item';
           bookmarkedItem.setAttribute('data-category', 'bookmarked');
-          bookmarkedItem.innerHTML = `<span class="item-title">${sidebarIcon('bookmarked')}Bookmarked Labs</span><span class="item-count" id="sidebarBookmarkCount">0</span>`;
+          bookmarkedItem.innerHTML = `<span class="item-title">${sidebarIcon('bookmarked')}Saved labs</span><span class="item-count" id="sidebarBookmarkCount">0</span>`;
           categorySidebarList.appendChild(bookmarkedItem);
 
           // Category Topics items
@@ -1739,9 +2039,13 @@ MD,
       }
 
       // Height of the sticky navbar plus a small gap, used when scrolling headings into view
+      // Height covered at the top of the screen: the navbar, plus the search bar when it's sticky (desktop)
       function navOffset() {
         const nav = document.querySelector('nav.navbar');
-        return (nav ? nav.getBoundingClientRect().bottom : 71) + 4;
+        let bottom = nav ? nav.getBoundingClientRect().bottom : 71;
+        const toolbar = document.querySelector('.lab-toolbar');
+        if (toolbar && getComputedStyle(toolbar).position === 'sticky') bottom += toolbar.offsetHeight;
+        return bottom + 8;
       }
 
       // Categories drawer (below 992px the sidebar slides in from the left)
@@ -1824,9 +2128,46 @@ MD,
           updateSidebarStyles();
           updateSearch();
           if (isDrawerMode()) setSidebarOpen(false);
+          spyPausedUntil = Date.now() + 1000; // let the smooth scroll finish before following again
           scrollToCategory(selectedCategory);
         });
       }
+
+      // The sidebar follows your scrolling: highlight the category you're reading.
+      // (Not while "Bookmarked/Saved" is selected - that's a filter, not a place on the page.)
+      let spyPausedUntil = 0;
+      let spyFrame = 0;
+      function followScroll() {
+        spyFrame = 0;
+        if (!categorySidebarList || selectedCategory === 'bookmarked' || Date.now() < spyPausedUntil) return;
+        const line = navOffset() + 12;
+        let current = 'all';
+        categoryTitles.forEach((t) => {
+          if (t.offsetParent !== null && t.getBoundingClientRect().top <= line) current = t.getAttribute('data-category-name');
+        });
+        let activeEl = null;
+        categorySidebarList.querySelectorAll('.sidebar-item').forEach((item) => {
+          const on = item.getAttribute('data-category') === current;
+          item.classList.toggle('active-item', on);
+          if (on) activeEl = item;
+        });
+        // keep the highlighted item visible inside the sidebar (desktop only)
+        if (activeEl && !isDrawerMode()) {
+          const box = categorySidebarList.closest('.portswigger-sidebar');
+          const r = activeEl.getBoundingClientRect(), b = box.getBoundingClientRect();
+          if (r.top < b.top + 8 || r.bottom > b.bottom - 8) box.scrollTop += r.top - b.top - b.height / 2;
+        }
+      }
+      window.addEventListener('scroll', () => { if (!spyFrame) spyFrame = requestAnimationFrame(followScroll); }, { passive: true });
+
+      // Phones: tuck the floating "Categories" button away while scrolling down, show it on scroll up
+      let lastScrollY = window.scrollY;
+      window.addEventListener('scroll', () => {
+        const y = window.scrollY;
+        if (Math.abs(y - lastScrollY) < 8) return;
+        document.body.classList.toggle('kp-scroll-down', y > lastScrollY && y > 300);
+        lastScrollY = y;
+      }, { passive: true });
 
       // Keep the same category/lab at the top of the viewport when the window is resized
       // (e.g. split screen): cards reflow taller, so the old pixel scroll position lands on an earlier category.
@@ -1892,13 +2233,7 @@ MD,
           if (!labsList || !labsList.classList.contains('labs-list')) return;
 
           const catName = catTitle.getAttribute('data-category-name') || catTitle.childNodes[0]?.textContent?.trim() || catTitle.textContent.trim();
-          const isCategorySelected = (selectedCategory !== 'bookmarked');
-
-          if (!isCategorySelected) {
-            catTitle.style.display = 'none';
-            labsList.style.display = 'none';
-            return;
-          }
+          // ("Saved labs" is handled per lab below; categories with no saved lab hide themselves)
 
           const cards = labsList.querySelectorAll('.lab-card');
           const catMatches = catName.toLowerCase().includes(query);
@@ -1907,15 +2242,9 @@ MD,
 
           cards.forEach((card) => {
             const labLink = card.querySelector('a.btn-ACCESS')?.getAttribute('data-lab-id') || '';
-            const isSolved = solvedLabs.includes(labLink);
             const isBookmarked = bookmarkedLabs.includes(labLink);
 
             if (selectedCategory === 'bookmarked' && !isBookmarked) {
-              card.style.display = 'none';
-              return;
-            }
-
-            if (hideSolved && isSolved) {
               card.style.display = 'none';
               return;
             }
@@ -1947,27 +2276,7 @@ MD,
           }
         });
 
-        if (resultCount) {
-          if (query === '' && selectedCategory === 'all' && selectedDifficulty === 'all' && !hideSolved) {
-            resultCount.textContent = `Showing all ${totalLabs} labs`;
-            if (noResultsState) noResultsState.style.display = 'none';
-          } else {
-            resultCount.textContent = `Showing ${visibleCount} of ${totalLabs} labs`;
-            if (noResultsState) {
-              if (visibleCount === 0) {
-                noResultsState.style.display = 'block';
-              } else {
-                noResultsState.style.display = 'none';
-              }
-            }
-          }
-        } else if (noResultsState) {
-          if (visibleCount === 0) {
-            noResultsState.style.display = 'block';
-          } else {
-            noResultsState.style.display = 'none';
-          }
-        }
+        if (noResultsState) noResultsState.style.display = visibleCount === 0 ? 'block' : 'none';
       }
 
       if (searchInput) searchInput.addEventListener('input', updateSearch);
@@ -1987,13 +2296,9 @@ MD,
           if (searchInput) searchInput.value = '';
           selectedCategory = 'all';
           selectedDifficulty = 'all';
-          hideSolved = false;
-          if (hideSolvedBtn) {
-            hideSolvedBtn.className = 'btn btn-sm btn-outline-secondary py-0 px-2';
-            hideSolvedBtn.innerHTML = `<i class="bi bi-eye-slash me-1"></i>Hide Solved`;
-          }
           if (categorySelect) categorySelect.value = 'all';
           if (difficultySelect) difficultySelect.value = 'all';
+          document.querySelectorAll('.lt-chip[data-diff]').forEach((c) => c.classList.toggle('is-on', c.dataset.diff === 'all'));
           updateSidebarStyles();
           if (searchInput) searchInput.focus();
           updateSearch();
@@ -2010,10 +2315,10 @@ MD,
         let foundCard = null;
 
         allLabCards.forEach((card) => {
-          const badgeText = card.querySelector('.lab-badge')?.textContent.trim() || '';
+          const labNum = card.querySelector('.lab-num')?.textContent.trim() || '';
           const href = card.querySelector('a.btn-ACCESS')?.getAttribute('data-lab-id') || '';
-          
-          if (badgeText.toLowerCase() === `lab ${targetNum}` || href === `${targetNum}.php` || href === `${targetNum}`) {
+
+          if (labNum === targetNum.replace(/^lab\s*/i, '') || href === `${targetNum}.php` || href === `${targetNum}`) {
             foundCard = card;
           }
         });
@@ -2127,6 +2432,8 @@ MD,
         // Direct navigation to lab
         window.open(labHref, '_blank');
         e.preventDefault();
+        // Remember it, so the hero can offer "Continue where you left off"
+        rememberLastLab(accessBtn.getAttribute('data-lab-id') || '');
       });
 
       document.addEventListener('click', function(e) {
@@ -2162,9 +2469,6 @@ MD,
       });
 
 
-      if (totalLabs > 0 && resultCount) {
-        resultCount.textContent = `Showing all ${totalLabs} labs`;
-      }
     });
 
     // --- Floating Back to Top Button Logic ---

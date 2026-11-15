@@ -168,6 +168,27 @@ $baseDomain = getKrazeBaseDomain();
     color: #ffffff !important;
   }
 
+  /* Visitors: one "Login" button (the login page also has "Create an account") */
+  .btn-nav-login {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: #0284c7;
+    color: #ffffff !important;
+    font-weight: 600;
+    font-size: 0.92rem;
+    padding: 7px 16px;
+    border-radius: 9px;
+    text-decoration: none;
+    white-space: nowrap;
+    transition: background 0.15s ease;
+  }
+
+  .btn-nav-login:hover,
+  .btn-nav-login:focus {
+    background: #0ea5e9;
+  }
+
   /* Profile Avatar Trigger Button */
   .btn-avatar-nav-trigger {
     background: transparent;
@@ -394,6 +415,17 @@ $baseDomain = getKrazeBaseDomain();
       justify-content: flex-start;
       padding: 11px 14px !important;
     }
+
+    #navAuthArea.is-guest {
+      flex-direction: column;
+      align-items: stretch !important;
+      gap: 8px !important;
+    }
+
+    #navAuthArea .btn-nav-login {
+      width: 100%;
+      padding: 11px 14px;
+    }
   }
 
 </style>
@@ -440,7 +472,7 @@ $baseDomain = getKrazeBaseDomain();
       </div>
 
       <!-- Right: account menu -->
-      <div id="navAuthArea" class="d-flex align-items-center gap-3 ms-xl-1 mt-2 mt-xl-0">
+      <div id="navAuthArea" class="d-flex align-items-center gap-3 ms-xl-1 mt-2 mt-xl-0<?php echo krazeLoggedIn() ? '' : ' is-guest'; ?>">
         <?php if (krazeLoggedIn()): ?>
           
           <!-- User avatar dropdown -->
@@ -459,28 +491,11 @@ $baseDomain = getKrazeBaseDomain();
                 </div>
               </li>
 
-              <!-- 1. Profile -->
               <li>
-                <a class="dropdown-item" href="/navbar/profile.php?tab=profile">
+                <a class="dropdown-item" href="/navbar/profile.php">
                   <i class="bi bi-person-fill"></i> Profile
                 </a>
               </li>
-
-
-              <!-- 3. Bookmark List -->
-              <li>
-                <a class="dropdown-item" href="/navbar/profile.php?tab=bookmarks">
-                  <i class="bi bi-bookmark-fill"></i> Bookmarks
-                </a>
-              </li>
-
-              <!-- 5. List Import (Import & Export data) -->
-              <li>
-                <a class="dropdown-item" href="/navbar/profile.php?tab=import">
-                  <i class="bi bi-arrow-down-up"></i> Import / Export
-                </a>
-              </li>
-
 
               <li><hr class="dropdown-divider"></li>
 
@@ -493,7 +508,9 @@ $baseDomain = getKrazeBaseDomain();
             </ul>
           </div>
 
-        <?php endif; /* Every page requires sign-in (krazeRequireLogin), so there is no Login button. */ ?>
+        <?php else: /* Visitors browse freely; these come back to the same page after signing in. */ ?>
+          <a class="btn-nav-login" href="<?php echo htmlspecialchars(krazeLoginUrl($_SERVER['REQUEST_URI'] ?? '/')); ?>">Login</a>
+        <?php endif; ?>
       </div>
 
     </div>

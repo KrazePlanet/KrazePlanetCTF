@@ -2,10 +2,10 @@
 // scoreboard.php - Who has the most points, this month or all time.
 // Kept deliberately simple: rank, student, labs solved, points. Everything
 // else about a student (streak, skills, activity, recent solves) lives on
-// their player page (player.php), which every row links to.
+// their profile (profile.php?user=NAME), which every row links to.
 require_once __DIR__ . '/../config/sso.php';
 require_once __DIR__ . '/../config/labs.php';
-krazeRequireLogin();
+startKrazeSession(); // public page: no sign-in needed
 $catalog = krazeLabCatalog();
 
 $current_page = 'scoreboard.php';
@@ -20,21 +20,22 @@ $selectedMonth = isset($_GET['month']) ? (int)$_GET['month'] : $curMonth;
 if ($selectedMonth < 1 || $selectedMonth > 12) $selectedMonth = $curMonth;
 if ($selectedYear < 2024 || $selectedYear > $curYear) $selectedYear = $curYear;
 
+// No flag emoji: Windows shows those as plain letters ("IN India")
 $countries = [
     'ALL' => 'All countries',
-    'IN' => '🇮🇳 India',
-    'US' => '🇺🇸 United States',
-    'GB' => '🇬🇧 United Kingdom',
-    'DE' => '🇩🇪 Germany',
-    'EG' => '🇪🇬 Egypt',
-    'AU' => '🇦🇺 Australia',
-    'TR' => '🇹🇷 Turkey',
-    'VN' => '🇻🇳 Vietnam',
-    'JP' => '🇯🇵 Japan',
-    'AE' => '🇦🇪 United Arab Emirates',
-    'BR' => '🇧🇷 Brazil',
-    'PK' => '🇵🇰 Pakistan',
-    'BD' => '🇧🇩 Bangladesh',
+    'IN' => 'India',
+    'US' => 'United States',
+    'GB' => 'United Kingdom',
+    'DE' => 'Germany',
+    'EG' => 'Egypt',
+    'AU' => 'Australia',
+    'TR' => 'Turkey',
+    'VN' => 'Vietnam',
+    'JP' => 'Japan',
+    'AE' => 'United Arab Emirates',
+    'BR' => 'Brazil',
+    'PK' => 'Pakistan',
+    'BD' => 'Bangladesh',
 ];
 $selectedCountry = strtoupper(trim((string)($_GET['country'] ?? 'ALL')));
 if (!isset($countries[$selectedCountry])) $selectedCountry = 'ALL';
@@ -76,8 +77,7 @@ function sbUrl(array $change = []) {
     return 'scoreboard.php?' . http_build_query($q);
 }
 
-// ---- Rankings (central login server, cached 2 minutes) ---------------------
-// The cache is cleared when the student marks a lab solved (navbar/portal.php).
+// ---- Rankings (central login server, live - no cache) ----------------------
 header('Cache-Control: no-store, must-revalidate');
 $req = ['period' => $isAllTime ? 'all' : 'month', 'year' => $selectedYear, 'month' => $selectedMonth, 'country' => $selectedCountry];
 if ($selectedCat !== '') $req['lab_ids'] = $catalog['byCategory'][$selectedCat];
@@ -144,9 +144,8 @@ function avatarUrl(array $r) {
     return !empty($r['avatar']) ? $r['avatar'] : 'https://api.dicebear.com/7.x/adventurer/svg?seed=' . urlencode($r['username']);
 }
 
-function playerUrl($username) { return 'player.php?user=' . urlencode($username); }
+function playerUrl($username) { return 'profile.php?user=' . urlencode($username); }
 
-$scopeLabel = $periodLabel . ($selectedCat !== '' ? ' · ' . $selectedCat : '') . ($selectedCountry !== 'ALL' ? ' · ' . $selectedCountry : '');
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -183,12 +182,8 @@ $scopeLabel = $periodLabel . ($selectedCat !== '' ? ' · ' . $selectedCat : '') 
 
     /* ---- Page header ---- */
     .sb-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 24px; flex-wrap: wrap; padding: 2.75rem 0 1.75rem; }
-    .sb-eyebrow { font-size: 12px; font-weight: 700; letter-spacing: 1.2px; text-transform: uppercase; color: var(--accent); margin-bottom: 6px; }
     .sb-title { font-family: 'Outfit', sans-serif; font-size: 2.4rem; font-weight: 800; color: #fff; letter-spacing: -0.6px; margin: 0 0 6px; }
     .sb-intro { color: var(--muted); font-size: 15px; margin: 0; }
-    .pts-easy { color: #34d399; font-weight: 700; }
-    .pts-medium { color: #fbbf24; font-weight: 700; }
-    .pts-hard { color: #f87171; font-weight: 700; }
 
     .sb-stats { display: flex; background: var(--surface); border: 1px solid var(--line); border-radius: 14px; overflow: hidden; }
     .sb-stat { padding: 12px 22px; min-width: 140px; }
@@ -210,7 +205,7 @@ $scopeLabel = $periodLabel . ($selectedCat !== '' ? ' · ' . $selectedCat : '') 
     .pod.p2 { --tier: var(--silver); }
     .pod.p3 { --tier: var(--bronze); }
     .pod.is-me { box-shadow: 0 0 0 1px rgba(56,189,248,.55) inset; }
-    .pod-place { position: absolute; top: 14px; left: 16px; font-family: 'JetBrains Mono', monospace; font-weight: 700; font-size: 13px; color: var(--tier); }
+    .pod-place { position: absolute; top: 14px; left: 16px; font-weight: 700; font-size: 13px; color: var(--tier); }
     .pod-crown { position: absolute; top: 12px; right: 16px; color: var(--gold); font-size: 18px; }
     .pod-avatar { width: 72px; height: 72px; border-radius: 50%; object-fit: cover; background: #1e293b; border: 3px solid var(--tier); margin-bottom: 12px; }
     .pod.p1 .pod-avatar { width: 88px; height: 88px; }
@@ -219,7 +214,7 @@ $scopeLabel = $periodLabel . ($selectedCat !== '' ? ' · ' . $selectedCat : '') 
     .pod.p1 .pod-points { font-size: 34px; }
     .pod-points small { font-size: 13px; color: var(--faint); font-weight: 600; margin-left: 4px; }
     .pod-sub { font-size: 13px; color: var(--muted); }
-    .you-tag { display: inline-block; color: #0b1324; background: var(--accent); font-size: 10.5px; font-weight: 800; letter-spacing: .4px; border-radius: 5px; padding: 1px 6px; margin-left: 8px; vertical-align: 2px; }
+    .you-tag { display: inline-block; color: var(--muted); border: 1px solid rgba(255,255,255,.18); font-size: 10.5px; font-weight: 700; letter-spacing: .4px; border-radius: 5px; padding: 0 6px; margin-left: 8px; vertical-align: 2px; }
 
     /* ---- Table card ---- */
     /* No overflow:hidden here - it would cut off the filter menus. Corners are rounded on the first/last parts instead. */
@@ -268,19 +263,19 @@ $scopeLabel = $periodLabel . ($selectedCat !== '' ? ' · ' . $selectedCat : '') 
 
     .rank-cell { display: flex; align-items: center; gap: 10px; }
     .rank-num { min-width: 34px; height: 30px; padding: 0 8px; border-radius: 8px; display: inline-flex; align-items: center; justify-content: center;
-      font-family: 'JetBrains Mono', monospace; font-weight: 700; font-size: 14px; color: var(--text); background: rgba(255,255,255,.05); border: 1px solid var(--line); }
+      font-variant-numeric: tabular-nums; font-weight: 700; font-size: 14px; color: var(--text); background: rgba(255,255,255,.05); border: 1px solid var(--line); }
     .rank-num.top-1 { color: #1c1404; background: var(--gold); border-color: var(--gold); }
     .rank-num.top-2 { color: #0f172a; background: var(--silver); border-color: var(--silver); }
     .rank-num.top-3 { color: #1c0d02; background: var(--bronze); border-color: var(--bronze); }
-    .move { font-size: 11.5px; font-weight: 700; font-family: 'JetBrains Mono', monospace; display: inline-flex; align-items: center; }
+    .move { font-size: 11.5px; font-weight: 700; font-variant-numeric: tabular-nums; display: inline-flex; align-items: center; }
     .move.up { color: #34d399; }
     .move.down { color: #f87171; }
 
     .who { display: flex; align-items: center; gap: 12px; min-width: 0; }
     .who img { width: 36px; height: 36px; border-radius: 50%; object-fit: cover; background: #1e293b; border: 1px solid var(--line-strong); flex-shrink: 0; }
     .who .name { font-weight: 600; color: #f8fafc; font-size: 14.5px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-    .labs { font-family: 'JetBrains Mono', monospace; font-weight: 600; color: var(--muted); font-size: 14.5px; }
-    .points { font-family: 'JetBrains Mono', monospace; font-weight: 700; color: #fff; font-size: 15.5px; }
+    .labs { font-variant-numeric: tabular-nums; font-weight: 500; color: var(--muted); font-size: 14.5px; }
+    .points { font-variant-numeric: tabular-nums; font-weight: 700; color: #fff; font-size: 15px; }
     .points small { font-size: 11px; color: var(--faint); font-weight: 600; margin-left: 4px; }
     .go { color: var(--faint); text-align: right; transition: all .15s ease; }
 
@@ -333,6 +328,7 @@ $scopeLabel = $periodLabel . ($selectedCat !== '' ? ' · ' . $selectedCat : '') 
       .pod-place { top: 8px; left: 10px; font-size: 11px; }
       .pod-crown { top: 6px; right: 10px; font-size: 14px; }
       .you-tag { margin-left: 4px; font-size: 9.5px; }
+      .who .you-tag { display: none; } /* your row is highlighted already; keep the name readable */
       .sb-search { max-width: none; flex-basis: 100%; }
       .sb-filters { width: 100%; }
       .sb-filters .dropdown { flex: 1 1 calc(50% - 4px); min-width: 0; }
@@ -362,9 +358,8 @@ $scopeLabel = $periodLabel . ($selectedCat !== '' ? ' · ' . $selectedCat : '') 
 
   <div class="sb-head">
     <div>
-      <div class="sb-eyebrow">Leaderboard · <?= e($scopeLabel) ?></div>
       <h1 class="sb-title">Scoreboard</h1>
-      <p class="sb-intro">Solve labs to earn points: <span class="pts-easy">Easy 20</span>, <span class="pts-medium">Medium 50</span>, <span class="pts-hard">Hard 100</span>. Most points ranks first.</p>
+      <p class="sb-intro">Solve labs to earn points: Easy 20, Medium 50, Hard 100, Secure 150. Most points ranks first.</p>
     </div>
     <div class="sb-stats" aria-label="Board summary">
       <div class="sb-stat"><div class="sb-stat-label">Students ranked</div><div class="sb-stat-value"><?= number_format(count($rankings)) ?></div></div>
@@ -474,15 +469,13 @@ $scopeLabel = $periodLabel . ($selectedCat !== '' ? ' · ' . $selectedCat : '') 
       <?php endforeach; ?>
     </div>
 
-    <?php if ($boardOk && $rankings): ?>
+    <?php if ($boardOk && $rankings && ($pages > 1 || ($search !== '' && $pageRows))): ?>
       <div class="sb-footer">
         <span>
           <?php if ($search !== ''): ?>
             <?= count($list) ?> <?= count($list) === 1 ? 'match' : 'matches' ?> for “<?= e($search) ?>” · <a href="<?= e(sbUrl(['q' => ''])) ?>" class="text-info text-decoration-none">Clear</a>
-          <?php elseif ($pageRows): ?>
-            Showing ranks <?= $pageRows[0]['rank'] ?>–<?= end($pageRows)['rank'] ?> of <?= number_format(count($rankings)) ?>
           <?php else: ?>
-            <?= number_format(count($rankings)) ?> ranked
+            Ranks <?= $pageRows[0]['rank'] ?>–<?= end($pageRows)['rank'] ?> of <?= number_format(count($rankings)) ?>
           <?php endif; ?>
         </span>
         <?php if ($pages > 1): ?>
@@ -493,8 +486,6 @@ $scopeLabel = $periodLabel . ($selectedCat !== '' ? ' · ' . $selectedCat : '') 
             <?php endfor; ?>
             <?php if ($page < $pages): ?><a href="<?= e(sbUrl(['page' => $page + 1])) ?>" aria-label="Next page"><i class="bi bi-chevron-right"></i></a><?php else: ?><span class="off"><i class="bi bi-chevron-right"></i></span><?php endif; ?>
           </nav>
-        <?php else: ?>
-          <span>Click a student to see their profile</span>
         <?php endif; ?>
       </div>
     <?php endif; ?>
@@ -534,6 +525,12 @@ $scopeLabel = $periodLabel . ($selectedCat !== '' ? ' · ' . $selectedCat : '') 
       if (location.hash === '#me-anchor') mine.scrollIntoView({ block: 'center' });
     })();
   </script>
+<?php elseif ($boardOk && !krazeLoggedIn()): ?>
+  <!-- Visitors: invite them to join -->
+  <div class="me-bar show" role="complementary">
+    <span>Want your name on this board?</span>
+    <a class="btn-jump" href="<?= e(krazeLoginUrl('/navbar/scoreboard.php', 'signup')) ?>">Create a free account</a>
+  </div>
 <?php endif; ?>
 
 <?php @include_once __DIR__ . '/../footer/footer.php'; ?>

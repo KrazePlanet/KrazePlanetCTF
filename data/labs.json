@@ -71,7 +71,7 @@
       "access": "/subdomains/hackers"
     },
     {
-      "title": "Authentication Bypass Leads To Complete Account TakeveOver",
+      "title": "Authentication Bypass Leads to Complete Account Takeover",
       "difficulty": "Medium",
       "report": "https://hackerone.com/reports/1709881",
       "access": "/subdomains/mtnbusiness"
@@ -239,24 +239,6 @@
       "access": "/subdomains/cookbook"
     },
     {
-      "title": "Reflected XSS - Script & Img Tag Filter",
-      "difficulty": "Medium",
-      "report": "",
-      "access": "/subdomains/support"
-    },
-    {
-      "title": "Reflected XSS - Case-Insensitive Filter Bypass",
-      "difficulty": "Medium",
-      "report": "",
-      "access": "/subdomains/directory"
-    },
-    {
-      "title": "Reflected XSS - HTML Tag Filter Bypass",
-      "difficulty": "Hard",
-      "report": "",
-      "access": "/subdomains/news"
-    },
-    {
       "title": "Reflected XSS - Page Heading",
       "difficulty": "Easy",
       "report": "",
@@ -269,6 +251,30 @@
       "access": "/subdomains/profile"
     },
     {
+      "title": "Reflected XSS - PUBG",
+      "difficulty": "Easy",
+      "report": "https://hackerone.com/reports/751870",
+      "access": "/subdomains/assets"
+    },
+    {
+      "title": "Reflected XSS - Shopify",
+      "difficulty": "Easy",
+      "report": "https://hackerone.com/reports/1940245",
+      "access": "/subdomains/go"
+    },
+    {
+      "title": "Reflected XSS - Script & Img Tag Filter",
+      "difficulty": "Medium",
+      "report": "",
+      "access": "/subdomains/support"
+    },
+    {
+      "title": "Reflected XSS - Case-Insensitive Filter Bypass",
+      "difficulty": "Medium",
+      "report": "",
+      "access": "/subdomains/directory"
+    },
+    {
       "title": "Reflected XSS - Extended Function Filter",
       "difficulty": "Medium",
       "report": "",
@@ -279,6 +285,54 @@
       "difficulty": "Medium",
       "report": "",
       "access": "/subdomains/tickets"
+    },
+    {
+      "title": "Reflected XSS - Imgur Mobile",
+      "difficulty": "Medium",
+      "report": "https://hackerone.com/reports/149855",
+      "access": "/subdomains/media"
+    },
+    {
+      "title": "Stored XSS - Shopify",
+      "difficulty": "Medium",
+      "report": "https://hackerone.com/reports/1147433",
+      "access": "/subdomains/cms"
+    },
+    {
+      "title": "Stored XSS - Acronis",
+      "difficulty": "Medium",
+      "report": "https://hackerone.com/reports/1084183",
+      "access": "/subdomains/forum"
+    },
+    {
+      "title": "DOM XSS - HackerOne",
+      "difficulty": "Medium",
+      "report": "https://hackerone.com/reports/474656",
+      "access": "/subdomains/careers"
+    },
+    {
+      "title": "DOM XSS - MyCrypto",
+      "difficulty": "Medium",
+      "report": "https://hackerone.com/reports/324303",
+      "access": "/subdomains/wallet"
+    },
+    {
+      "title": "DOM XSS - ForeScout Technologies",
+      "difficulty": "Medium",
+      "report": "https://hackerone.com/reports/704266",
+      "access": "/subdomains/gallery"
+    },
+    {
+      "title": "DOM XSS - Informatica",
+      "difficulty": "Medium",
+      "report": "https://hackerone.com/reports/1004833",
+      "access": "/subdomains/auth"
+    },
+    {
+      "title": "Reflected XSS - HTML Tag Filter Bypass",
+      "difficulty": "Hard",
+      "report": "",
+      "access": "/subdomains/news"
     },
     {
       "title": "Reflected XSS - Multi-Parameter Filter Evasion",
@@ -321,24 +375,6 @@
       "difficulty": "Hard",
       "report": "https://hackerone.com/reports/1818163",
       "access": "/subdomains/tracking"
-    },
-    {
-      "title": "Reflected XSS - PUBG",
-      "difficulty": "Low",
-      "report": "https://hackerone.com/reports/751870",
-      "access": "/subdomains/assets"
-    },
-    {
-      "title": "Reflected XSS - Shopify",
-      "difficulty": "Low",
-      "report": "https://hackerone.com/reports/1940245",
-      "access": "/subdomains/go"
-    },
-    {
-      "title": "Reflected XSS - Imgur Mobile",
-      "difficulty": "Medium",
-      "report": "https://hackerone.com/reports/149855",
-      "access": "/subdomains/media"
     },
     {
       "title": "Reflected XSS - Reddit",
@@ -389,31 +425,19 @@
       "access": "/subdomains/ads"
     },
     {
-      "title": "Stored XSS - Shopify",
-      "difficulty": "Medium",
-      "report": "https://hackerone.com/reports/1147433",
-      "access": "/subdomains/cms"
-    },
-    {
-      "title": "Stored XSS - Acronis",
-      "difficulty": "Medium",
-      "report": "https://hackerone.com/reports/1084183",
-      "access": "/subdomains/forum"
-    },
-    {
       "title": "Blind XSS - Freelance Full-Stack Developer",
       "difficulty": "Hard",
       "report": "",
       "access": "/subdomains/freelance"
     },
     {
-      "title": "Blind XSS - IssuePilot Bug reports, without the noise",
+      "title": "Blind XSS - IssuePilot Bug Tracker",
       "difficulty": "Hard",
       "report": "",
       "access": "/subdomains/issuepilot"
     },
     {
-      "title": "Blind XSS - SupportHub Customer support",
+      "title": "Blind XSS - SupportHub Customer Support",
       "difficulty": "Hard",
       "report": "",
       "access": "/subdomains/supporthub"
@@ -425,37 +449,37 @@
       "access": "/subdomains/deskflow"
     },
     {
-      "title": "Blind XSS - Safety & Trust Center · TrustDesk",
+      "title": "Blind XSS - TrustDesk Safety & Trust Center",
       "difficulty": "Hard",
       "report": "",
       "access": "/subdomains/trustdesk"
     },
     {
-      "title": "Blind XSS - Partner ecosystem · PartnerHub",
+      "title": "Blind XSS - PartnerHub Partner Portal",
       "difficulty": "Hard",
       "report": "",
       "access": "/subdomains/partnerhub"
     },
     {
-      "title": "Blind XSS - FeatureBoard - Shape what gets built",
+      "title": "Blind XSS - FeatureBoard Feature Requests",
       "difficulty": "Hard",
       "report": "",
       "access": "/subdomains/featureboard"
     },
     {
-      "title": "Blind XSS - Careers · HireFlow",
+      "title": "Blind XSS - HireFlow Careers",
       "difficulty": "Hard",
       "report": "",
       "access": "/subdomains/hireflow"
     },
     {
-      "title": "Blind XSS - Resolve with clarity · DisputeDesk",
+      "title": "Blind XSS - DisputeDesk Dispute Resolution",
       "difficulty": "Hard",
       "report": "",
       "access": "/subdomains/disputedesk"
     },
     {
-      "title": "Blind XSS - ClientFlow Simple account management",
+      "title": "Blind XSS - ClientFlow Account Management",
       "difficulty": "Hard",
       "report": "https://x.com/dirtycoder0124/status/1638397309955473408",
       "access": "/subdomains/clientflow"
@@ -497,34 +521,10 @@
       "access": "/subdomains/censys"
     },
     {
-      "title": "DOM XSS - HackerOne",
-      "difficulty": "Medium",
-      "report": "https://hackerone.com/reports/474656",
-      "access": "/subdomains/careers"
-    },
-    {
-      "title": "DOM XSS - MyCrypto",
-      "difficulty": "Medium",
-      "report": "https://hackerone.com/reports/324303",
-      "access": "/subdomains/wallet"
-    },
-    {
       "title": "DOM XSS - Starbucks",
       "difficulty": "Hard",
       "report": "https://hackerone.com/reports/396493",
       "access": "/subdomains/cafe"
-    },
-    {
-      "title": "DOM XSS - ForeScout Technologies",
-      "difficulty": "Medium",
-      "report": "https://hackerone.com/reports/704266",
-      "access": "/subdomains/gallery"
-    },
-    {
-      "title": "DOM XSS - Informatica",
-      "difficulty": "Medium",
-      "report": "https://hackerone.com/reports/1004833",
-      "access": "/subdomains/auth"
     },
     {
       "title": "Self XSS - via POST Parameter",
@@ -563,6 +563,12 @@
       "access": "/subdomains/planet"
     },
     {
+      "title": "Reflected XSS to Account Takeover",
+      "difficulty": "Hard",
+      "report": "",
+      "access": "/subdomains/pixeleet"
+    },
+    {
       "title": "Reflected XSS - Path Based",
       "difficulty": "Secure",
       "report": "",
@@ -585,12 +591,6 @@
       "difficulty": "Secure",
       "report": "",
       "access": "/subdomains/dashboard"
-    },
-    {
-      "title": "Reflected XSS to Account Takeover",
-      "difficulty": "Hard",
-      "report": "",
-      "access": "/subdomains/pixeleet"
     }
   ],
   "HTML Injection": [
@@ -663,7 +663,7 @@
       "access": "/subdomains/expedia"
     },
     {
-      "title": "Open-redirect on HackerOne",
+      "title": "Open Redirect on HackerOne",
       "difficulty": "Hard",
       "report": "https://hackerone.com/reports/57163",
       "access": "/subdomains/stranger"
@@ -899,7 +899,7 @@
       "access": "/subdomains/username_enum"
     },
     {
-      "title": "Email enumeration at SignUp page",
+      "title": "Email Enumeration on the Sign-up Page",
       "difficulty": "Easy",
       "report": "https://hackerone.com/reports/666722",
       "access": "/subdomains/exchange"
@@ -1059,6 +1059,18 @@
       "access": "/subdomains/orders"
     },
     {
+      "title": "Time-Based Blind SQLi - Automattic",
+      "difficulty": "Medium",
+      "report": "https://hackerone.com/reports/1042746",
+      "access": "/subdomains/moderation"
+    },
+    {
+      "title": "Time-Based Blind SQLi - U.S. Dept Of Defense",
+      "difficulty": "Medium",
+      "report": "https://hackerone.com/reports/2312334",
+      "access": "/subdomains/knowledge"
+    },
+    {
       "title": "User-Agent Header Blind SQL Injection",
       "difficulty": "Hard",
       "report": "",
@@ -1179,22 +1191,10 @@
       "access": "/subdomains/banners"
     },
     {
-      "title": "Time-Based Blind SQLi - Automattic",
-      "difficulty": "Medium",
-      "report": "https://hackerone.com/reports/1042746",
-      "access": "/subdomains/moderation"
-    },
-    {
       "title": "String SQLi - U.S. Dept Of Defense",
       "difficulty": "Hard",
       "report": "https://hackerone.com/reports/491191",
       "access": "/subdomains/publications"
-    },
-    {
-      "title": "Time-Based Blind SQLi - U.S. Dept Of Defense",
-      "difficulty": "Medium",
-      "report": "https://hackerone.com/reports/2312334",
-      "access": "/subdomains/knowledge"
     }
   ],
   "Cross-Site Request Forgery": [
@@ -1367,22 +1367,16 @@
       "access": "/subdomains/files"
     },
     {
-      "title": "CMS Local File Inclusion",
-      "difficulty": "Medium",
-      "report": "",
-      "access": "/subdomains/storage"
-    },
-    {
-      "title": "File Upload with LFI Vulnerability",
-      "difficulty": "Hard",
-      "report": "",
-      "access": "/subdomains/uploads"
-    },
-    {
       "title": "Image Gallery File Inclusion",
       "difficulty": "Easy",
       "report": "",
       "access": "/subdomains/archive"
+    },
+    {
+      "title": "CMS Local File Inclusion",
+      "difficulty": "Medium",
+      "report": "",
+      "access": "/subdomains/storage"
     },
     {
       "title": "Local File Inclusion - Corporate Page Routing",
@@ -1421,28 +1415,34 @@
       "access": "/subdomains/lms"
     },
     {
-      "title": "Local File Inclusion - Hospital EMR Medical Report Viewer",
-      "difficulty": "Hard",
-      "report": "",
-      "access": "/subdomains/hospital"
-    },
-    {
       "title": "Local File Inclusion - Real Estate CMS Media Loader",
       "difficulty": "Medium",
       "report": "",
       "access": "/subdomains/realestate"
     },
     {
-      "title": "Local File Inclusion - Hosting Panel Log Viewer",
-      "difficulty": "Hard",
-      "report": "",
-      "access": "/subdomains/hosting-panel"
-    },
-    {
       "title": "Local File Inclusion - E-Commerce Invoice & Template Renderer",
       "difficulty": "Medium",
       "report": "",
       "access": "/subdomains/ecommerce"
+    },
+    {
+      "title": "File Upload with LFI Vulnerability",
+      "difficulty": "Hard",
+      "report": "",
+      "access": "/subdomains/uploads"
+    },
+    {
+      "title": "Local File Inclusion - Hospital EMR Medical Report Viewer",
+      "difficulty": "Hard",
+      "report": "",
+      "access": "/subdomains/hospital"
+    },
+    {
+      "title": "Local File Inclusion - Hosting Panel Log Viewer",
+      "difficulty": "Hard",
+      "report": "",
+      "access": "/subdomains/hosting-panel"
     },
     {
       "title": "RecipeBox - Base64-Encoded Path LFI Bypass",
@@ -1486,7 +1486,7 @@
       "title": "RCE via File Upload",
       "difficulty": "Hard",
       "report": "",
-      "access": "/subdomains/pixeleet"
+      "access": "/subdomains/techgames"
     },
     {
       "title": "Unrestricted File Upload - PHP Profile Picture Leads to Remote Code Execution",
@@ -1559,6 +1559,12 @@
       "access": "/subdomains/capture"
     },
     {
+      "title": "PDF Generator - URL to PDF",
+      "difficulty": "Easy",
+      "report": "",
+      "access": "/subdomains/print"
+    },
+    {
       "title": "Port-based Timing Attack",
       "difficulty": "Medium",
       "report": "",
@@ -1583,12 +1589,6 @@
       "access": "/subdomains/cloud"
     },
     {
-      "title": "PDF Generator - URL to PDF",
-      "difficulty": "Easy",
-      "report": "",
-      "access": "/subdomains/print"
-    },
-    {
       "title": "SSRF in GSA Bounty via ?url= parameter",
       "difficulty": "Hard",
       "report": "https://hackerone.com/reports/514224",
@@ -1601,7 +1601,7 @@
       "access": "/subdomains/topsnap"
     },
     {
-      "title": "blind Server-Side Request Forgery (SSRF) allows scanning internal ports",
+      "title": "Blind SSRF Allows Scanning Internal Ports",
       "difficulty": "Hard",
       "report": "https://hackerone.com/reports/1300585",
       "access": "/subdomains/fleet"
@@ -1663,6 +1663,12 @@
       "access": "/subdomains/sms"
     },
     {
+      "title": "XXE via XML Resume Upload Starbucks China Career Portal (IIS + ASP.NET)",
+      "difficulty": "Medium",
+      "report": "https://hackerone.com/reports/500515",
+      "access": "/subdomains/careers-api"
+    },
+    {
       "title": "LFI + SSRF via XXE in SVG Emblem Editor (Rockstar Games ImageMagick)",
       "difficulty": "Hard",
       "report": "https://hackerone.com/reports/347139",
@@ -1673,12 +1679,6 @@
       "difficulty": "Hard",
       "report": "https://hackerone.com/reports/836877",
       "access": "/subdomains/images"
-    },
-    {
-      "title": "XXE via XML Resume Upload Starbucks China Career Portal (IIS + ASP.NET)",
-      "difficulty": "Medium",
-      "report": "https://hackerone.com/reports/500515",
-      "access": "/subdomains/careers-api"
     }
   ],
   "HTTP Request Smuggling": [

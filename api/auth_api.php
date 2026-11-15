@@ -65,26 +65,6 @@ switch ($action) {
         }
         reply($res);
 
-    case 'export_account_data':
-        requireLogin();
-        $res = krazeSsoCall('export');
-        if (empty($res['success'])) reply($res);
-        header('Content-Disposition: attachment; filename="krazeplanet_backup_' . preg_replace('/[^A-Za-z0-9_-]/', '', $_SESSION['username'] ?? 'user') . '_' . date('Ymd_His') . '.json"');
-        echo json_encode($res['backup'], JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
-        exit;
-
-    case 'import_account_data':
-        requireLogin();
-        $rawJson = trim($_POST['json_data'] ?? '');
-        if (isset($_FILES['backup_file']) && $_FILES['backup_file']['error'] === UPLOAD_ERR_OK) {
-            $rawJson = file_get_contents($_FILES['backup_file']['tmp_name']);
-        }
-        $data = json_decode($rawJson, true);
-        if (!is_array($data)) {
-            reply(['success' => false, 'error' => 'Invalid JSON backup format.']);
-        }
-        reply(krazeSsoCall('import', ['mode' => ($_POST['import_mode'] ?? 'merge') === 'replace' ? 'replace' : 'merge', 'data' => $data]));
-
     default:
         echo json_encode(['status' => 400, 'success' => false, 'error' => 'Invalid action.']);
         exit;

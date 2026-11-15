@@ -1,66 +1,139 @@
 <?php
-// profile.php - KrazePlanet User Dashboard: Profile, Bookmarks and Import/Export
+// profile.php - A student's profile.
+//   profile.php            your own profile: progress + account settings (sign-in needed)
+//   profile.php?user=NAME  anyone's public profile: progress only (no sign-in needed;
+//                          the scoreboard links here)
+// Progress = all-time rank, points, labs solved, solve streak, activity, skills by bug
+// type and recently solved labs, all from the central login server.
 require_once __DIR__ . '/../config/sso.php';
 require_once __DIR__ . '/../config/labs.php';
-krazeRequireLogin();
-$labCatalog = krazeLabCatalog();
-
-$userId = $_SESSION['user_id'];
-$activeTab = $_GET['tab'] ?? 'profile';
-$allowedTabs = ['profile', 'bookmarks', 'import'];
-if (!in_array($activeTab, $allowedTabs)) {
-    $activeTab = 'profile';
-}
-
-// Profile, solved labs and bookmarks all come
-// from the central login server in one call, fresh on every load, so a
-// bookmark or solve made anywhere shows up straight away. Browsers must not
-// keep a copy either (back button, tab restore).
+startKrazeSession();
 header('Cache-Control: no-store, must-revalidate');
-$bundle = krazeSsoCall('profile_bundle');
-if (!krazeLoggedIn()) {
-    header('Location: ' . krazeLoginUrl($_SERVER['REQUEST_URI']));
-    exit;
-}
-$user = $bundle['user'] ?? null;
-$solvedLabs = $bundle['solved'] ?? [];
-$bookmarkedLabs = $bundle['bookmarks'] ?? [];
-$accountPageUrl = krazeSsoAccountUrl();
 
-$username = $user['username'] ?? $_SESSION['username'] ?? 'Trainee';
-$fullname = $user['fullname'] ?? '';
-$email = $user['email'] ?? $_SESSION['user_email'] ?? 'trainee@krazeplanet.com';
-$phone = $user['phone'] ?? '';
-$githubRepo = $user['github_repo'] ?? krazeGithubRepo();
-$created_at = isset($user['created_at']) ? date('M d, Y', strtotime($user['created_at'])) : 'May 23, 2026';
-$avatarUrl = !empty($user['avatar']) ? $user['avatar'] : (!empty($_SESSION['avatar']) ? $_SESSION['avatar'] : ('https://api.dicebear.com/7.x/adventurer/svg?seed=' . urlencode($username)));
-
-$solvedCount = count($solvedLabs);
-$bookmarkCount = count($bookmarkedLabs);
-$totalLabsAvailable = 350;
-
-// Stats calculation - Sum exact points from solved labs (Easy=20, Medium=50, Hard=100)
-$totalXP = 0;
-foreach ($solvedLabs as $sl) {
-    $totalXP += intval($sl['points'] ?? 20);
+$labCatalog = krazeLabCatalog();
+$myName = (string)($_SESSION['username'] ?? '');
+$askedFor = trim((string)($_GET['user'] ?? ''));
+$isOwn = $askedFor === '' || (krazeLoggedIn() && strcasecmp($askedFor, $myName) === 0);
+if ($isOwn) {
+    krazeRequireLogin();
+    $myName = (string)($_SESSION['username'] ?? '');
 }
-if ($totalXP === 0 && $solvedCount > 0) {
-    $totalXP = $solvedCount * 20;
+$target = $isOwn ? $myName : $askedFor;
+$current_page = $isOwn ? 'profile.php' : 'scoreboard.php';
+
+// Your own profile has two tabs: History (progress) and Settings (account).
+// Other students' profiles show History only. Old links used ?tab=profile for the
+// account cards (e.g. Write Report's "Add GitHub repo"), so that opens Settings.
+$tab = strtolower((string)($_GET['tab'] ?? 'history'));
+$tab = $isOwn && in_array($tab, ['settings', 'profile'], true) ? 'settings' : 'history';
+
+// Public progress (same for own and other students)
+$res = $target !== '' ? krazeSsoCall('player', ['username' => $target]) : ['success' => false];
+$p = !empty($res['success']) ? $res['player'] : null;
+
+// Account details: own profile only
+$account = null;
+if ($isOwn) {
+    $bundle = krazeSsoCall('profile_bundle');
+    if (!krazeLoggedIn()) { header('Location: ' . krazeLoginUrl($_SERVER['REQUEST_URI'] ?? '/navbar/profile.php')); exit; }
+    $account = $bundle['user'] ?? null;
 }
-$rankTitle = "Trainee";
-if ($solvedCount >= 100) $rankTitle = "CTF Grandmaster";
-elseif ($solvedCount >= 50) $rankTitle = "Cyber Security Elite";
-elseif ($solvedCount >= 20) $rankTitle = "Pro Hunter";
-elseif ($solvedCount >= 5) $rankTitle = "Apprentice Hunter";
+if (!$p) http_response_code(404);
+
+$e = fn($v) => htmlspecialchars((string)$v, ENT_QUOTES);
+
+function profileTimeAgo($when) {
+    $t = $when ? strtotime($when) : 0;
+    if (!$t) return '';
+    $s = max(0, time() - $t);
+    if ($s < 60) return 'just now';
+    if ($s < 3600) return floor($s / 60) . 'm ago';
+    if ($s < 86400) return floor($s / 3600) . 'h ago';
+    if ($s < 86400 * 30) return floor($s / 86400) . 'd ago';
+    return date('j M Y', $t);
+}
+
+if ($p) {
+    $solved = $p['solved'];
+    // Difficulty from the lab list (so Secure labs show as Secure), else what was recorded
+    $diffCount = ['easy' => 0, 'medium' => 0, 'hard' => 0, 'secure' => 0];
+    $perDay = [];
+    $solvedIds = [];
+    foreach ($solved as $i => $s) {
+        $d = strtolower($labCatalog['byId'][$s['lab_id']]['difficulty'] ?? (string)$s['difficulty']);
+        $solved[$i]['diff'] = $d;
+        if (isset($diffCount[$d])) $diffCount[$d]++;
+        $day = substr((string)$s['solved_at'], 0, 10);
+        $perDay[$day] = ($perDay[$day] ?? 0) + 1;
+        $solvedIds[$s['lab_id']] = true;
+    }
+
+    // Skills: solved / total for every bug type on this site, best first
+    $skills = [];
+    foreach ($labCatalog['byCategory'] as $cat => $ids) {
+        $n = 0;
+        foreach ($ids as $id) if (isset($solvedIds[$id])) $n++;
+        $skills[] = ['name' => $cat, 'solved' => $n, 'total' => count($ids)];
+    }
+    usort($skills, fn($a, $b) => [$b['solved'] / max(1, $b['total']), $b['solved']] <=> [$a['solved'] / max(1, $a['total']), $a['solved']]);
+    $siteSolved = count(array_intersect_key($solvedIds, $labCatalog['byId']));
+    $siteTotal = count($labCatalog['byId']);
+
+    // Activity: the last year, one column per week (Monday at the top), like GitHub
+    $end = strtotime('today');
+    $start = strtotime('-364 days', $end);
+    $start = strtotime('-' . ((int)date('N', $start) - 1) . ' days', $start);
+    $gridEnd = strtotime('+' . (7 - (int)date('N', $end)) . ' days', $end);
+    $weeks = (int)round(($gridEnd - $start) / 604800);
+    $activeDays = 0;
+    $yearSolved = 0;
+    foreach ($perDay as $day => $n) if (strtotime($day) >= $start) { $activeDays++; $yearSolved += $n; }
+    // Month labels: placed on the first week that starts in a new month
+    $monthLabels = [];
+    for ($w = 0; $w < $weeks; $w++) {
+        $wk = strtotime('+' . ($w * 7) . ' days', $start);
+        $m = date('Y-m', strtotime('+6 days', $wk));
+        if ($w === 0 || $m !== date('Y-m', strtotime('+6 days', strtotime('-7 days', $wk)))) $monthLabels[$w] = date('M', strtotime('+6 days', $wk));
+    }
+    // Drop a label that would sit too close to the next one
+    $keys = array_keys($monthLabels);
+    foreach ($keys as $i => $w) if (isset($keys[$i + 1]) && $keys[$i + 1] - $w < 3) unset($monthLabels[$w]);
+
+    $solvedCount = count($solved);
+    $rankTitle = 'Trainee';
+    if ($solvedCount >= 100) $rankTitle = 'CTF Grandmaster';
+    elseif ($solvedCount >= 50) $rankTitle = 'Cyber Security Elite';
+    elseif ($solvedCount >= 20) $rankTitle = 'Pro Hunter';
+    elseif ($solvedCount >= 5) $rankTitle = 'Apprentice Hunter';
+}
+
+if ($isOwn && $account) {
+    $fullname = (string)($account['fullname'] ?? '');
+    $email = (string)($account['email'] ?? ($_SESSION['user_email'] ?? ''));
+    $githubRepo = (string)($account['github_repo'] ?? krazeGithubRepo());
+    $accountPageUrl = krazeSsoAccountUrl();
+    $publicPath = '/navbar/profile.php?user=' . urlencode($myName);
+    $publicUrl = krazeSiteUrl($publicPath);
+}
+// Country code (IN) -> "India" (no flag emoji: Windows shows those as plain letters)
+function profileCountry($code) {
+    $code = strtoupper(trim((string)$code));
+    if (!preg_match('/^[A-Z]{2}$/', $code)) return $code;
+    $names = ['IN' => 'India', 'US' => 'United States', 'GB' => 'United Kingdom', 'DE' => 'Germany', 'EG' => 'Egypt',
+        'AU' => 'Australia', 'TR' => 'Turkey', 'VN' => 'Vietnam', 'JP' => 'Japan', 'AE' => 'United Arab Emirates',
+        'BR' => 'Brazil', 'PK' => 'Pakistan', 'BD' => 'Bangladesh'];
+    $name = $names[$code] ?? (class_exists('Locale') ? Locale::getDisplayRegion('-' . $code, 'en') : '');
+    return $name !== '' && $name !== $code ? $name : $code;
+}
+$avatarUrl = $p['avatar'] ??('https://api.dicebear.com/7.x/adventurer/svg?seed=' . urlencode($target ?: 'student'));
 ?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>User Dashboard - KrazePlanet</title>
+  <title><?= $p ? $e($p['username']) . ($isOwn ? ' - Your profile' : ' - Profile') : 'Student not found' ?> - KrazePlanet</title>
   <link rel="icon" type="image/png" href="https://krazeplanet.com/favicon.png">
-  <!-- Fonts & Icons -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
@@ -70,349 +143,149 @@ elseif ($solvedCount >= 5) $rankTitle = "Apprentice Hunter";
 
   <style>
     :root {
-      --bg-dark: #070b14;
-      --card-bg: #0b1324;
-      --card-inner: #0f1a30;
-      --border-color: rgba(255, 255, 255, 0.08);
-      --accent-cyan: #38bdf8;
-      --accent-green: #10b981;
+      --bg: #070b14;
+      --card: #0b1324;
+      --inner: #0d1628;
+      --line: rgba(255, 255, 255, 0.08);
+      --muted: #94a3b8;
+      --faint: #64748b;
+      --accent: #38bdf8;
     }
+    body { background: var(--bg); color: #cbd5e1; font-family: 'Inter', sans-serif; min-height: 100vh; display: flex; flex-direction: column; }
+    .mono { font-family: 'JetBrains Mono', monospace; }
 
-    body {
-      background-color: var(--bg-dark);
-      color: #cbd5e1;
-      font-family: 'Inter', sans-serif;
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-    }
+    /* ---- Left: who + key numbers ---- */
+    .side-card { background: var(--card); border: 1px solid var(--line); border-radius: 18px; padding: 2rem 1.5rem 1.5rem; text-align: center; box-shadow: 0 15px 40px rgba(0,0,0,.45); }
+    .side-avatar-wrap { position: relative; display: inline-block; margin-bottom: 1rem; }
+    .side-avatar { width: 108px; height: 108px; border-radius: 50%; object-fit: cover; background: #1e293b; border: 3px solid var(--accent); }
+    .side-avatar.is-editable { cursor: pointer; }
+    .side-avatar-edit { position: absolute; bottom: 4px; right: 4px; width: 28px; height: 28px; border-radius: 50%; background: #0284c7; color: #fff; border: 2px solid var(--card); display: flex; align-items: center; justify-content: center; font-size: 12px; cursor: pointer; }
+    .side-name { font-family: 'Outfit', sans-serif; font-size: 1.4rem; font-weight: 700; color: #fff; line-height: 1.2; word-break: break-word; }
+    .you-tag { display: inline-block; vertical-align: 3px; margin-left: 6px; font-family: 'Inter', sans-serif; font-size: 10.5px; font-weight: 700; letter-spacing: .4px; color: var(--muted); border: 1px solid rgba(255,255,255,.18); border-radius: 5px; padding: 0 6px; }
+    .side-title { font-size: 13px; font-weight: 500; color: var(--muted); margin-top: 4px; }
+    .side-stats { margin: 1.25rem 0 0; text-align: left; }
+    .side-row { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,.05); font-size: 13.5px; }
+    .side-row:last-child { border-bottom: 0; }
+    .side-row dt { color: var(--muted); font-weight: 500; }
+    .side-row dd { margin: 0; color: #fff; font-weight: 700; text-align: right; font-variant-numeric: tabular-nums; }
+    .side-row .sub { display: block; font-size: 11.5px; font-weight: 500; color: var(--faint); margin-top: 2px; }
+    .side-row.is-stack { flex-wrap: wrap; }
+    .split { flex-basis: 100%; display: grid; grid-template-columns: 1fr 1fr; gap: 4px 12px; list-style: none; margin: 8px 0 0; padding: 0; font-size: 12px; color: var(--muted); }
+    .split li { display: flex; align-items: center; gap: 6px; }
+    .split li b { margin-left: auto; color: #e2e8f0; font-weight: 600; font-variant-numeric: tabular-nums; }
+    .split li.is-zero, .split li.is-zero b { color: var(--faint); }
+    .split .dot { width: 7px; height: 7px; border-radius: 50%; background: currentColor; flex-shrink: 0; }
+    .streak-fire { color: #fb923c; }
+    .c-easy { color: #34d399; } .c-medium { color: #fbbf24; } .c-hard { color: #f87171; } .c-secure { color: #7dd3fc; }
+    .side-actions { margin-top: 1.25rem; }
+    .side-btn { display: flex; align-items: center; justify-content: center; gap: 7px; width: 100%; padding: 8px 14px; border-radius: 10px; font-size: 13.5px; font-weight: 600; text-decoration: none; background: rgba(255,255,255,.04); border: 1px solid var(--line); color: #cbd5e1; transition: all .15s ease; }
+    .side-btn:hover { background: rgba(255,255,255,.08); color: #fff; }
+    .side-btn.is-danger { color: #fca5a5; }
+    .side-btn.is-danger:hover { color: #fff; border-color: rgba(248,113,113,.5); background: rgba(248,113,113,.12); }
 
-    /* Left Profile Card */
-    .profile-sidebar-card {
-      background: var(--card-bg);
-      border: 1px solid var(--border-color);
-      border-radius: 18px;
-      padding: 2rem 1.5rem;
-      text-align: center;
-      box-shadow: 0 15px 40px rgba(0,0,0,0.5);
-    }
-
-    .profile-avatar-wrapper {
-      position: relative;
-      display: inline-block;
-      margin-bottom: 1.25rem;
-    }
-
-    .profile-avatar-img {
-      width: 110px;
-      height: 110px;
-      border-radius: 50%;
-      object-fit: cover;
-      background: #1e293b;
-      border: 3px solid var(--accent-cyan);
-      box-shadow: 0 0 25px rgba(56, 189, 248, 0.4);
-      cursor: pointer;
-      transition: transform 0.2s ease, box-shadow 0.2s ease;
-    }
-
-    .profile-avatar-img:hover {
-      transform: scale(1.05);
-      box-shadow: 0 0 35px rgba(56, 189, 248, 0.6);
-    }
-
-    .profile-avatar-edit-btn {
-      position: absolute;
-      bottom: 4px;
-      right: 4px;
-      background: #0284c7;
-      color: #ffffff;
-      border: 2px solid var(--card-bg);
-      width: 28px;
-      height: 28px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 12px;
-      cursor: pointer;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.5);
-    }
-
-    .profile-username {
-      font-size: 1.35rem;
-      font-weight: 700;
-      color: #ffffff;
-      margin-bottom: 2px;
-      font-family: 'Outfit', sans-serif;
-    }
-
-    .profile-rank-badge {
-      font-size: 12px;
-      color: #38bdf8;
-      font-weight: 600;
-      margin-bottom: 1.5rem;
-      display: inline-block;
-    }
-
-    .profile-stat-row {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 9px 0;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-      font-size: 13.5px;
-    }
-
-    .profile-stat-label {
-      color: #94a3b8;
-    }
-
-    .profile-stat-val {
-      font-weight: 600;
-      color: #ffffff;
-      font-family: 'JetBrains Mono', monospace;
-    }
-
-    .profile-sidebar-actions {
-      display: flex;
-      justify-content: space-between;
-      gap: 10px;
-      margin-top: 1.75rem;
-    }
-
-    .btn-profile-subtle {
-      background: rgba(255, 255, 255, 0.05);
-      border: 1px solid var(--border-color);
-      color: #cbd5e1;
-      padding: 7px 14px;
-      border-radius: 10px;
-      font-size: 13px;
-      font-weight: 600;
-      text-decoration: none;
-      transition: all 0.2s ease;
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-    }
-
-    .btn-profile-subtle:hover {
-      background: rgba(255, 255, 255, 0.1);
-      color: #ffffff;
-    }
-
-    /* Right Tabs Container */
-    .profile-content-card {
-      background: var(--card-bg);
-      border: 1px solid var(--border-color);
-      border-radius: 18px;
-      box-shadow: 0 15px 40px rgba(0,0,0,0.5);
-      overflow: hidden;
-    }
-
-    /* Navigation Bar matching Screenshot 2 */
-    .profile-tabs-nav {
-      display: flex;
-      flex-wrap: wrap;
-      background: rgba(7, 11, 20, 0.6);
-      border-bottom: 1px solid var(--border-color);
-      padding: 0.5rem 1rem 0;
-      gap: 4px;
-    }
-
-    .profile-tab-link {
-      padding: 10px 18px;
-      color: #94a3b8;
-      text-decoration: none;
-      font-size: 13.5px;
-      font-weight: 600;
-      border-radius: 10px 10px 0 0;
-      border: 1px solid transparent;
-      border-bottom: none;
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      transition: all 0.2s ease;
-    }
-
-    .profile-tab-link:hover {
-      color: #ffffff;
-      background: rgba(255, 255, 255, 0.04);
-    }
-
-    .profile-tab-link.active {
-      color: #38bdf8;
-      background: var(--card-bg);
-      border-color: var(--border-color);
-      border-bottom: 2px solid var(--card-bg);
-      margin-bottom: -1px;
-    }
-
-    .tab-pane-box {
-      padding: 2.25rem 2rem;
-    }
-
-    /* Form Inputs matching Screenshot 2 */
-    .profile-field-row {
-      display: flex;
-      align-items: center;
-      margin-bottom: 1.25rem;
-    }
-
-    .profile-field-label {
-      width: 170px;
-      color: #94a3b8;
-      font-size: 14px;
-      font-weight: 500;
-      flex-shrink: 0;
-    }
-
-    .profile-field-control {
-      flex-grow: 1;
-      max-width: 480px;
-    }
-
-    .custom-profile-input {
-      background: rgba(7, 11, 20, 0.6) !important;
-      border: 1px solid var(--border-color) !important;
-      color: #ffffff !important;
-      border-radius: 9px !important;
-      padding: 9px 14px !important;
-      font-size: 13.5px !important;
-    }
-
-    .custom-profile-input:focus {
-      border-color: var(--accent-cyan) !important;
-      box-shadow: 0 0 12px rgba(56, 189, 248, 0.25) !important;
-    }
-
-    /* ---- Profile tab: settings cards ---- */
-    .pf { display: flex; flex-direction: column; gap: 16px; max-width: 760px; }
-    .pf-card { background: #0d1628; border: 1px solid rgba(255, 255, 255, 0.09); border-radius: 14px; padding: 20px 22px; }
+    /* ---- Right: sections ---- */
+    .main-col { display: flex; flex-direction: column; gap: 16px; }
+    /* History / Settings tabs (own profile) */
+    .pf-tabs { display: flex; gap: 6px; margin: -0.75rem 0 1.5rem; border-bottom: 1px solid var(--line); }
+    .pf-tab { flex: 0 0 auto; display: inline-flex; align-items: center; gap: 8px; padding: 10px 14px; margin-bottom: -1px; border-bottom: 2px solid transparent; color: var(--muted); font-size: 14px; font-weight: 600; text-decoration: none; transition: color .15s ease, border-color .15s ease; }
+    .pf-tab:hover { color: #fff; border-bottom-color: rgba(255,255,255,.2); }
+    .pf-tab.is-active { color: #fff; border-bottom-color: var(--accent); }
+    .pf-tab.is-active i { color: var(--accent); }
+    @media (max-width: 640px) { .pf-tab { flex: 1; justify-content: center; } }
+    .pf-card { background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 20px 22px; }
     .pf-card-head { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
-    .pf-card-head .pf-card-title:only-child { margin-bottom: 0; }
-    .pf-card-title { font-family: 'Outfit', sans-serif; font-size: 17px; font-weight: 700; color: #f8fafc; margin: 0 0 4px; display: flex; align-items: center; gap: 8px; }
-    .pf-card-desc { font-size: 14px; color: #a3b1c6; margin: 0; line-height: 1.5; }
-    .pf-card-desc strong { color: #e2e8f0; font-weight: 600; }
+    .pf-card-title { font-family: 'Outfit', sans-serif; font-size: 17px; font-weight: 700; color: #f8fafc; margin: 0; display: flex; align-items: center; gap: 8px; }
+    .pf-card-title i { color: var(--muted); font-size: 15px; }
+    .pf-card-desc { font-size: 14px; color: #a3b1c6; margin: 4px 0 0; line-height: 1.5; }
+    .pf-card-sub { font-size: 12.5px; color: var(--faint); white-space: nowrap; }
 
-    .pf-list { margin: 16px 0 0; border-top: 1px solid rgba(255, 255, 255, 0.07); }
-    .pf-item { display: grid; grid-template-columns: 170px 1fr; gap: 16px; padding: 13px 0; border-bottom: 1px solid rgba(255, 255, 255, 0.07); }
+    /* Activity heatmap */
+    .heat-scroll { overflow-x: auto; padding: 14px 0 4px; }
+    .heat-inner { display: grid; grid-template-columns: 30px minmax(0, 1fr); grid-template-rows: auto auto; column-gap: 6px; row-gap: 6px; min-width: calc(36px + var(--weeks) * 15px); }
+    .heat-months { grid-column: 2; display: grid; grid-template-columns: repeat(var(--weeks), minmax(0, 1fr)); gap: 3px; font-size: 11px; color: var(--faint); line-height: 1; }
+    .heat-months span { white-space: nowrap; }
+    .heat-days { grid-column: 1; grid-row: 2; display: grid; grid-template-rows: repeat(7, minmax(0, 1fr)); gap: 3px; font-size: 11px; color: var(--faint); }
+    .heat-days span { display: flex; align-items: center; line-height: 1; }
+    .heat { grid-column: 2; grid-row: 2; display: grid; grid-auto-flow: column; grid-template-columns: repeat(var(--weeks), minmax(0, 1fr)); grid-template-rows: repeat(7, auto); gap: 3px; }
+    .heat i { width: 100%; aspect-ratio: 1; border-radius: 3px; background: rgba(255,255,255,.06); display: block; }
+    .heat i.l1 { background: rgba(52,211,153,.35); } .heat i.l2 { background: rgba(52,211,153,.6); } .heat i.l3 { background: #34d399; }
+    .heat i.future { visibility: hidden; }
+    .heat-legend { display: flex; align-items: center; gap: 4px; font-size: 11px; color: var(--faint); margin-top: 8px; justify-content: flex-end; }
+    .heat-legend i { width: 11px; height: 11px; border-radius: 3px; display: inline-block; }
+
+    /* Skills */
+    .skills { margin-top: 10px; }
+    .skill-row { display: grid; grid-template-columns: minmax(150px, 1.2fr) 3fr 64px; gap: 12px; align-items: center; padding: 8px 0; font-size: 13.5px; color: #e2e8f0; }
+    .skill-row + .skill-row { border-top: 1px solid rgba(255,255,255,.04); }
+    .skill-bar { height: 8px; background: rgba(255,255,255,.07); border-radius: 999px; overflow: hidden; }
+    .skill-bar span { display: block; height: 100%; background: #34d399; border-radius: 999px; }
+    .skill-num { text-align: right; font-size: 13px; color: var(--muted); font-variant-numeric: tabular-nums; }
+    .skill-row.is-zero { color: var(--faint); }
+    .skills-more { display: none; }
+    .skills-more.open { display: block; }
+    .link-btn { background: none; border: 0; color: var(--accent); font-size: 13.5px; padding: 8px 0 0; }
+    .link-btn:hover { text-decoration: underline; text-underline-offset: 3px; }
+
+    /* Recently solved */
+    .solves { margin-top: 6px; }
+    .solve-item { display: flex; align-items: center; gap: 12px; padding: 11px 0; font-size: 13.5px; }
+    .solve-item + .solve-item { border-top: 1px solid rgba(255,255,255,.05); }
+    .solve-title { color: #f1f5f9; font-weight: 500; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; line-height: 1.4; }
+    .solve-cat { font-size: 12px; color: var(--faint); }
+    .diff-chip { font-size: 11px; font-weight: 600; border-radius: 6px; padding: 1px 8px; border: 1px solid; white-space: nowrap; }
+    .diff-chip.c-easy { background: rgba(52,211,153,.1); border-color: rgba(52,211,153,.3); }
+    .diff-chip.c-medium { background: rgba(251,191,36,.1); border-color: rgba(251,191,36,.3); }
+    .diff-chip.c-hard { background: rgba(248,113,113,.1); border-color: rgba(248,113,113,.3); }
+    .diff-chip.c-secure { background: rgba(56,189,248,.1); border-color: rgba(56,189,248,.3); }
+    .solve-pts { font-weight: 600; color: #e2e8f0; white-space: nowrap; font-variant-numeric: tabular-nums; min-width: 44px; text-align: right; }
+    .empty-note { color: var(--muted); font-size: 14px; padding: 14px 0 4px; }
+    .empty-note a { color: var(--accent); }
+
+    /* Account (own profile only) */
+    .pf-list { margin: 14px 0 0; border-top: 1px solid rgba(255,255,255,.07); }
+    .pf-item { display: grid; grid-template-columns: 170px 1fr; gap: 16px; padding: 13px 0; border-bottom: 1px solid rgba(255,255,255,.07); }
     .pf-item:last-child { border-bottom: 0; padding-bottom: 0; }
-    .pf-empty { font-weight: 500; color: #8b9ab1; }
-    .pf-empty a { color: #38bdf8; text-decoration: none; }
-    .pf-empty a:hover { text-decoration: underline; }
     .pf-item dt { font-size: 14px; font-weight: 500; color: #a3b1c6; }
     .pf-item dd { font-size: 15px; font-weight: 600; color: #f8fafc; margin: 0; overflow-wrap: anywhere; }
-
-    .pf-copy { display: flex; align-items: center; gap: 10px; margin-top: 14px; background: #070b14; border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 10px; padding: 6px 6px 6px 14px; }
+    .pf-empty { font-weight: 500; color: #8b9ab1; }
+    .pf-copy { display: flex; align-items: center; gap: 10px; margin-top: 14px; background: #070b14; border: 1px solid rgba(255,255,255,.1); border-radius: 10px; padding: 6px 6px 6px 14px; }
     .pf-copy-url { flex: 1; min-width: 0; font-family: 'JetBrains Mono', monospace; font-size: 13.5px; color: #e2e8f0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-
     .pf-btn { display: inline-flex; align-items: center; justify-content: center; gap: 7px; white-space: nowrap; font-size: 14px; font-weight: 600; border-radius: 9px; padding: 8px 14px; text-decoration: none; border: 1px solid transparent; cursor: pointer; transition: all .15s ease; }
-    .pf-btn-ghost { background: rgba(255, 255, 255, 0.04); border-color: rgba(255, 255, 255, 0.14); color: #e2e8f0; }
-    .pf-btn-ghost:hover { border-color: #38bdf8; color: #fff; background: rgba(56, 189, 248, 0.08); }
+    .pf-btn-ghost { background: rgba(255,255,255,.04); border-color: rgba(255,255,255,.14); color: #e2e8f0; }
+    .pf-btn-ghost:hover { border-color: var(--accent); color: #fff; background: rgba(56,189,248,.08); }
     .pf-btn-primary { background: #0284c7; color: #fff; padding: 9px 20px; }
     .pf-btn-primary:hover { background: #0ea5e9; }
     .pf-btn:disabled { opacity: .6; cursor: wait; }
-
-    .pf-status { flex-shrink: 0; font-size: 12.5px; font-weight: 700; border-radius: 999px; padding: 4px 11px; color: #fbbf24; background: rgba(251, 191, 36, 0.1); border: 1px solid rgba(251, 191, 36, 0.35); }
+    .pf-status { flex-shrink: 0; font-size: 12.5px; font-weight: 700; border-radius: 999px; padding: 4px 11px; color: #fbbf24; background: rgba(251,191,36,.1); border: 1px solid rgba(251,191,36,.35); }
     .pf-status::before { content: ''; display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: currentColor; margin-right: 7px; vertical-align: 1px; }
-    .pf-status.is-on { color: #34d399; background: rgba(52, 211, 153, 0.1); border-color: rgba(52, 211, 153, 0.35); }
-
-    .pf-form { margin-top: 16px; }
+    .pf-status.is-on { color: #34d399; background: rgba(52,211,153,.1); border-color: rgba(52,211,153,.35); }
+    .pf-form { margin-top: 14px; }
     .pf-label { display: block; font-size: 14px; font-weight: 600; color: #e2e8f0; margin-bottom: 8px; }
     .pf-field-row { display: flex; gap: 10px; }
-    .pf-input { flex: 1; min-width: 0; background: #070b14; border: 1px solid rgba(255, 255, 255, 0.16); color: #fff; border-radius: 10px; padding: 9px 14px; font-size: 14.5px; outline: none; transition: border-color .15s ease, box-shadow .15s ease; }
-    .pf-input::placeholder { color: #64748b; }
-    .pf-input:focus { border-color: #38bdf8; box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.18); }
-    .pf-hint { font-size: 13px; color: #8b9ab1; margin: 8px 0 0; line-height: 1.5; }
-    .pf-hint code { color: #cbd5e1; background: rgba(255, 255, 255, 0.06); padding: 1px 6px; border-radius: 5px; font-size: 12.5px; }
+    .pf-input { flex: 1; min-width: 0; background: #070b14; border: 1px solid rgba(255,255,255,.16); color: #fff; border-radius: 10px; padding: 9px 14px; font-size: 14.5px; outline: none; transition: border-color .15s ease, box-shadow .15s ease; }
+    .pf-input::placeholder { color: var(--faint); }
+    .pf-input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(56,189,248,.18); }
     .pf-msg { display: none; margin-top: 12px; font-size: 14px; font-weight: 500; border-radius: 9px; padding: 9px 12px; }
-    .pf-msg.ok { display: block; color: #6ee7b7; background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.35); }
-    .pf-msg.err { display: block; color: #fda4af; background: rgba(244, 63, 94, 0.1); border: 1px solid rgba(244, 63, 94, 0.35); }
+    .pf-msg.ok { display: block; color: #6ee7b7; background: rgba(16,185,129,.1); border: 1px solid rgba(16,185,129,.35); }
+    .pf-msg.err { display: block; color: #fda4af; background: rgba(244,63,94,.1); border: 1px solid rgba(244,63,94,.35); }
 
-    /* Bookmarks */
-    .bm-count { font-family: 'Inter', sans-serif; font-size: 12px; font-weight: 700; color: #cbd5e1; background: rgba(255, 255, 255, 0.08); border-radius: 999px; padding: 2px 9px; }
-    .bm-list { list-style: none; margin: 16px 0 0; padding: 0; border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 12px; overflow: hidden; }
-    .bm-row { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 14px 16px; background: #0a1222; transition: background .15s ease, opacity .2s ease; }
-    .bm-row + .bm-row { border-top: 1px solid rgba(255, 255, 255, 0.07); }
-    .bm-row:hover { background: #0f1a30; }
-    .bm-row.is-removing { opacity: .4; pointer-events: none; }
-    .bm-main { min-width: 0; }
-    .bm-title { display: block; font-size: 15px; font-weight: 600; color: #f8fafc; text-decoration: none; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-    .bm-title:hover { color: #38bdf8; }
-    .bm-meta { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; margin-top: 5px; font-size: 13px; color: #94a3b8; }
-    .bm-dot { color: #475569; }
-    .bm-diff { font-size: 11.5px; font-weight: 700; border-radius: 6px; padding: 1px 8px; border: 1px solid; }
-    .bm-diff.is-easy { color: #34d399; background: rgba(52, 211, 153, 0.1); border-color: rgba(52, 211, 153, 0.35); }
-    .bm-diff.is-medium { color: #fbbf24; background: rgba(251, 191, 36, 0.1); border-color: rgba(251, 191, 36, 0.35); }
-    .bm-diff.is-hard { color: #f87171; background: rgba(248, 113, 113, 0.1); border-color: rgba(248, 113, 113, 0.35); }
-    .bm-solved { font-size: 12.5px; font-weight: 600; color: #34d399; display: inline-flex; align-items: center; gap: 4px; }
-    .bm-actions { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
-    .bm-open { padding: 6px 12px; font-size: 13.5px; }
-    .bm-remove { width: 34px; height: 34px; border-radius: 9px; border: 1px solid transparent; background: transparent; color: #8b9ab1; display: inline-flex; align-items: center; justify-content: center; transition: all .15s ease; }
-    .bm-remove:hover { color: #f87171; background: rgba(248, 113, 113, 0.1); border-color: rgba(248, 113, 113, 0.3); }
-    .bm-empty { text-align: center; padding: 36px 16px 20px; color: #a3b1c6; }
-    .bm-empty > i { font-size: 30px; color: #64748b; }
-    .bm-empty-title { font-size: 16px; font-weight: 700; color: #f1f5f9; margin: 8px 0 4px; }
-    .bm-empty p { font-size: 14px; margin: 0; }
-    @media (max-width: 640px) {
-      .bm-row { flex-direction: column; align-items: stretch; gap: 10px; }
-      .bm-title { white-space: normal; }
-      .bm-actions .bm-open { flex: 1; }
+    .not-found { text-align: center; padding: 56px 20px; }
+    .not-found i { font-size: 2.2rem; color: var(--faint); display: block; margin-bottom: 8px; }
+
+    @media (max-width: 767.98px) {
+      /* Phones: Settings goes straight to the settings (the stats are on History) */
+      .side-col-settings { display: none; }
     }
-
-    /* Import / Export */
-    .ie-file { flex: 1; min-width: 0; display: flex; align-items: center; gap: 12px; cursor: pointer; background: #070b14; border: 1px solid rgba(255, 255, 255, 0.16);
-      border-radius: 10px; padding: 5px 12px 5px 5px; transition: border-color .15s ease; }
-    .ie-file:hover, .ie-file.is-over { border-color: #38bdf8; }
-    .ie-file-btn { flex-shrink: 0; font-size: 13.5px; font-weight: 600; color: #e2e8f0; background: rgba(255, 255, 255, 0.07); border: 1px solid rgba(255, 255, 255, 0.14); border-radius: 7px; padding: 5px 12px; }
-    .ie-file-name { font-size: 14px; color: #8b9ab1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-    .ie-file.has-file .ie-file-name { color: #f1f5f9; }
-    .ie-check { display: flex; align-items: flex-start; gap: 9px; margin-top: 14px; font-size: 14px; color: #e2e8f0; cursor: pointer; width: fit-content; }
-    .ie-check input { margin-top: 3px; width: 16px; height: 16px; accent-color: #f87171; flex-shrink: 0; }
-    .ie-check-hint { color: #8b9ab1; }
-
+    @media (max-width: 768px) {
+      .skill-row { grid-template-columns: 1fr 64px; }
+      .skill-row .skill-bar { grid-column: 1 / -1; grid-row: 2; }
+    }
     @media (max-width: 640px) {
-      .tab-pane-box.pf { padding: 1.25rem 1rem; }
       .pf-card { padding: 16px; }
-      .pf-card-head { flex-direction: column; gap: 12px; }
+      .pf-card-head { flex-direction: column; align-items: flex-start; gap: 10px; }
       .pf-item { grid-template-columns: 1fr; gap: 2px; }
       .pf-field-row { flex-direction: column; }
       .pf-field-row .pf-btn { width: 100%; }
-    }
-
-    .btn-update-profile {
-      background: #0284c7;
-      border: none;
-      color: #ffffff;
-      font-weight: 600;
-      font-size: 14px;
-      padding: 9px 24px;
-      border-radius: 9px;
-      transition: all 0.2s ease;
-      box-shadow: 0 4px 14px rgba(2, 132, 199, 0.35);
-    }
-
-    .btn-update-profile:hover {
-      background: #0369a1;
-      transform: translateY(-1px);
-    }
-
-    /* Bookmark list items */
-    .lab-progress-item {
-      background: var(--card-inner);
-      border: 1px solid var(--border-color);
-      border-radius: 12px;
-      padding: 14px 18px;
-      margin-bottom: 12px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 15px;
-      transition: border-color 0.2s ease;
-    }
-
-    .lab-progress-item:hover {
-      border-color: rgba(56, 189, 248, 0.3);
     }
   </style>
 </head>
@@ -420,244 +293,216 @@ elseif ($solvedCount >= 5) $rankTitle = "Apprentice Hunter";
 
 <?php @include_once __DIR__ . '/navbar.php'; ?>
 
-<div class="container py-5 flex-grow-1">
-  <div class="row g-4">
-    
-    <!-- LEFT SIDEBAR CARD (matching Screenshot 2) -->
-    <div class="col-lg-3 col-md-4">
-      <div class="profile-sidebar-card">
-        
-        <div class="profile-avatar-wrapper">
-          <img src="<?= htmlspecialchars($avatarUrl) ?>" alt="Avatar" class="profile-avatar-img user-menu-avatar-img" onclick="openAvatarModal(event)" title="Click to change avatar">
-          <div class="profile-avatar-edit-btn" onclick="openAvatarModal(event)" title="Change Avatar">
-            <i class="bi bi-pencil-fill"></i>
-          </div>
-        </div>
-
-        <div class="profile-username"><?= htmlspecialchars($username) ?></div>
-        <div class="profile-rank-badge"><?= htmlspecialchars($rankTitle) ?></div>
-
-        <div class="profile-stat-row">
-          <span class="profile-stat-label">Points</span>
-          <span class="profile-stat-val text-info"><?= $totalXP ?></span>
-        </div>
-
-        <div class="profile-stat-row">
-          <span class="profile-stat-label">Join date</span>
-          <span class="profile-stat-val"><?= $created_at ?></span>
-        </div>
-
-        <div class="profile-stat-row">
-          <span class="profile-stat-label">Solved Labs</span>
-          <span class="profile-stat-val text-success"><?= $solvedCount ?></span>
-        </div>
-
-        <div class="profile-stat-row">
-          <span class="profile-stat-label">Bookmarks</span>
-          <span class="profile-stat-val text-warning" id="sideBookmarkCount"><?= $bookmarkCount ?></span>
-        </div>
-
-        <div class="profile-sidebar-actions">
-          <a href="#" class="btn-profile-subtle flex-grow-1 justify-content-center text-danger" onclick="handleUserLogout(event)">
-            <i class="bi bi-box-arrow-right"></i> Log out
-          </a>
-        </div>
-
-      </div>
-    </div>
-
-    <!-- RIGHT MAIN CONTENT TABS (matching Screenshot 2 & 3) -->
-    <div class="col-lg-9 col-md-8">
-      <div class="profile-content-card">
-        
-        <!-- Tab Navigation Bar -->
-        <div class="profile-tabs-nav">
-          <a href="profile.php?tab=profile" class="profile-tab-link <?= ($activeTab === 'profile') ? 'active' : '' ?>">
-            <i class="bi bi-person-fill"></i> Profile
-          </a>
-          <a href="profile.php?tab=bookmarks" class="profile-tab-link <?= ($activeTab === 'bookmarks') ? 'active' : '' ?>">
-            <i class="bi bi-bookmark-fill"></i> Bookmarks
-            <span class="badge rounded-pill bg-warning text-dark ms-1" id="tabBookmarkCount" style="font-size: 10px;<?= $bookmarkCount > 0 ? '' : ' display:none;' ?>"><?= $bookmarkCount ?></span>
-          </a>
-          <a href="profile.php?tab=import" class="profile-tab-link <?= ($activeTab === 'import') ? 'active' : '' ?>">
-            <i class="bi bi-arrow-down-up"></i> Import / Export
-          </a>
-        </div>
-
-        <!-- 1. PROFILE TAB (matching Screenshot 2) -->
-        <?php if ($activeTab === 'profile'): ?>
-          <?php $playerPath = '/navbar/player.php?user=' . urlencode($username); $playerUrl = krazeSiteUrl($playerPath); ?>
-          <div class="tab-pane-box pf">
-
-            <!-- Account details (read-only) -->
-            <section class="pf-card">
-              <header class="pf-card-head">
-                <div>
-                  <h2 class="pf-card-title">Account details</h2>
-                </div>
-              </header>
-              <dl class="pf-list">
-                <div class="pf-item">
-                  <dt>Full name</dt>
-                  <dd><?php if (trim((string)$fullname) !== ''): ?><?= htmlspecialchars($fullname) ?><?php else: ?><span class="pf-empty">Not added</span><?php endif; ?></dd>
-                </div>
-                <div class="pf-item">
-                  <dt>Email address</dt>
-                  <dd><?= htmlspecialchars($email) ?></dd>
-                </div>
-                <div class="pf-item">
-                  <dt>Member since</dt>
-                  <dd><?= $created_at ?></dd>
-                </div>
-              </dl>
-            </section>
-
-            <!-- Public profile -->
-            <section class="pf-card">
-              <header class="pf-card-head">
-                <div>
-                  <h2 class="pf-card-title">Public profile</h2>
-                </div>
-                <a class="pf-btn pf-btn-ghost" href="<?= htmlspecialchars($playerPath) ?>"><i class="bi bi-box-arrow-up-right"></i> View</a>
-              </header>
-              <div class="pf-copy">
-                <span class="pf-copy-url" id="publicProfileUrl"><?= htmlspecialchars($playerUrl) ?></span>
-                <button type="button" class="pf-btn pf-btn-ghost" id="btnCopyProfile" onclick="copyProfileUrl()"><i class="bi bi-clipboard"></i> <span>Copy link</span></button>
-              </div>
-            </section>
-
-            <!-- GitHub repository (the only thing students change here) -->
-            <section class="pf-card" id="github">
-              <header class="pf-card-head">
-                <div>
-                  <h2 class="pf-card-title"><i class="bi bi-github"></i> GitHub repository</h2>
-                </div>
-                <span class="pf-status <?= $githubRepo !== '' ? 'is-on' : '' ?>" id="githubStatus"><?= $githubRepo !== '' ? 'Connected' : 'Not connected' ?></span>
-              </header>
-              <form id="profileDetailsForm" class="pf-form" onsubmit="handleProfileUpdate(event)">
-                <label class="pf-label" for="profileGithubRepo">Repository link</label>
-                <div class="pf-field-row">
-                  <input type="text" inputmode="url" id="profileGithubRepo" class="pf-input" value="<?= htmlspecialchars($githubRepo) ?>" placeholder="https://github.com/your-name/BugBountyReports" autocomplete="off" spellcheck="false">
-                  <button type="submit" id="btnProfileUpdateSubmit" class="pf-btn pf-btn-primary">Save</button>
-                </div>
-                <div id="profileUpdateAlert" class="pf-msg" role="status" aria-live="polite"></div>
-              </form>
-            </section>
-
-            <!-- Password (changed on the central KrazePlanet account page) -->
-            <section class="pf-card">
-              <header class="pf-card-head">
-                <div>
-                  <h2 class="pf-card-title">Password</h2>
-                  <p class="pf-card-desc">Change the password you use to sign in to KrazePlanet.</p>
-                </div>
-                <a class="pf-btn pf-btn-ghost" href="<?= htmlspecialchars($accountPageUrl) ?>" target="_blank" rel="noopener"><i class="bi bi-key"></i> Change password</a>
-              </header>
-            </section>
-
-          </div>
-        <?php endif; ?>
-
-        <!-- 3. BOOKMARK LIST TAB -->
-        <?php if ($activeTab === 'bookmarks'): ?>
-          <?php $solvedSet = array_flip(array_column($solvedLabs, 'lab_id')); ?>
-          <div class="tab-pane-box pf">
-            <section class="pf-card bm-card">
-              <header class="pf-card-head">
-                <div>
-                  <h2 class="pf-card-title">Bookmarks <span class="bm-count" id="bmCount"><?= count($bookmarkedLabs) ?></span></h2>
-                  <p class="pf-card-desc">Labs you saved to come back to.</p>
-                </div>
-                <a class="pf-btn pf-btn-ghost" href="/index.php"><i class="bi bi-grid"></i> Browse labs</a>
-              </header>
-
-              <ul class="bm-list" id="bmList"<?= empty($bookmarkedLabs) ? ' hidden' : '' ?>>
-                <?php foreach ($bookmarkedLabs as $b):
-                  $bLab = $labCatalog['byId'][$b['lab_id']] ?? null;
-                  $diff = $bLab['difficulty'] ?? '';
-                  $diff = in_array($diff, ['easy', 'medium', 'hard'], true) ? $diff : '';
-                  $isSolved = isset($solvedSet[$b['lab_id']]); ?>
-                  <li class="bm-row">
-                    <div class="bm-main">
-                      <a class="bm-title" href="<?= htmlspecialchars(krazeLabUrl($b['lab_id'])) ?>" target="_blank" rel="noopener"><?= htmlspecialchars($bLab['title'] ?? ucfirst(basename(str_replace('\\', '/', $b['lab_id'])))) ?></a>
-                      <div class="bm-meta">
-                        <?php if ($diff): ?><span class="bm-diff is-<?= $diff ?>"><?= ucfirst($diff) ?></span><?php endif; ?>
-                        <?php if ($isSolved): ?><span class="bm-solved"><i class="bi bi-check-circle-fill"></i> Solved</span><?php endif; ?>
-                        <span><?= htmlspecialchars($bLab['category'] ?? 'Another KrazePlanet site') ?></span>
-                        <span class="bm-dot">·</span>
-                        <span title="<?= htmlspecialchars($b['created_at']) ?>">Saved <?= date('M j, Y', strtotime($b['created_at'])) ?></span>
-                      </div>
-                    </div>
-                    <div class="bm-actions">
-                      <a class="pf-btn pf-btn-ghost bm-open" href="<?= htmlspecialchars(krazeLabUrl($b['lab_id'])) ?>" target="_blank" rel="noopener">Open lab <i class="bi bi-arrow-up-right"></i></a>
-                      <button type="button" class="bm-remove" title="Remove bookmark" aria-label="Remove bookmark" data-lab-id="<?= htmlspecialchars($b['lab_id']) ?>"><i class="bi bi-x-lg"></i></button>
-                    </div>
-                  </li>
-                <?php endforeach; ?>
-              </ul>
-
-              <div class="bm-empty" id="bmEmpty"<?= empty($bookmarkedLabs) ? '' : ' hidden' ?>>
-                <i class="bi bi-bookmark"></i>
-                <div class="bm-empty-title">No bookmarks yet</div>
-                <p>On the labs page, open a lab's <strong>⋯</strong> menu and choose <strong>Bookmark</strong>.</p>
-              </div>
-            </section>
-          </div>
-        <?php endif; ?>
-
-
-        <!-- 6. IMPORT / EXPORT TAB (matching Screenshot 3) -->
-        <?php if ($activeTab === 'import'): ?>
-          <div class="tab-pane-box pf">
-
-            <!-- Export -->
-            <section class="pf-card">
-              <header class="pf-card-head">
-                <div>
-                  <h2 class="pf-card-title">Export</h2>
-                  <p class="pf-card-desc">Download your solved labs and bookmarks as a JSON file.</p>
-                </div>
-                <a class="pf-btn pf-btn-ghost" href="/api/auth_api.php?action=export_account_data"><i class="bi bi-download"></i> Export</a>
-              </header>
-            </section>
-
-            <!-- Import -->
-            <section class="pf-card">
-              <header class="pf-card-head">
-                <div>
-                  <h2 class="pf-card-title">Import</h2>
-                  <p class="pf-card-desc">Upload a JSON file you exported from KrazePlanet.</p>
-                </div>
-              </header>
-
-              <form id="importAccountForm" class="pf-form" onsubmit="handleAccountImport(event)">
-                <div class="pf-field-row">
-                  <label class="ie-file" for="importFileInput" id="importDrop">
-                    <span class="ie-file-btn">Choose file</span>
-                    <span class="ie-file-name" id="importFileName">No file chosen</span>
-                    <input type="file" id="importFileInput" accept=".json,application/json" hidden>
-                  </label>
-                  <button type="submit" id="btnImportSubmit" class="pf-btn pf-btn-primary"><i class="bi bi-upload"></i> Import</button>
-                </div>
-                <label class="ie-check">
-                  <input type="checkbox" id="importReplace">
-                  <span>Replace my current progress <span class="ie-check-hint">(deletes your solved labs and bookmarks first)</span></span>
-                </label>
-                <div id="importAlert" class="pf-msg" role="status" aria-live="polite"></div>
-              </form>
-            </section>
-
-          </div>
-        <?php endif; ?>
-
-      </div>
-    </div>
-
+<div class="container-xxl py-5 flex-grow-1">
+<?php if (!$p): ?>
+  <div class="pf-card not-found">
+    <i class="bi bi-person-x"></i>
+    <div class="fw-semibold text-light">Student not found</div>
+    <div class="small text-secondary mt-1">There's no KrazePlanet student called “<?= $e($target) ?>”. <a href="scoreboard.php" class="text-info">Back to the scoreboard</a></div>
   </div>
+<?php else: ?>
+<?php if ($isOwn): ?>
+  <nav class="pf-tabs" aria-label="Profile sections">
+    <a href="profile.php?tab=history" class="pf-tab <?= $tab === 'history' ? 'is-active' : '' ?>" <?= $tab === 'history' ? 'aria-current="page"' : '' ?>><i class="bi bi-clock-history"></i> History</a>
+    <a href="profile.php?tab=settings" class="pf-tab <?= $tab === 'settings' ? 'is-active' : '' ?>" <?= $tab === 'settings' ? 'aria-current="page"' : '' ?>><i class="bi bi-gear"></i> Settings</a>
+  </nav>
+<?php endif; ?>
+  <div class="row g-4">
+
+    <!-- LEFT: who + key numbers -->
+    <div class="col-lg-3 col-md-4 <?= $tab === 'settings' ? 'side-col-settings' : '' ?>">
+      <aside class="side-card">
+        <div class="side-avatar-wrap">
+<?php if ($isOwn): ?>
+          <img src="<?= $e($avatarUrl) ?>" alt="Your avatar" class="side-avatar is-editable user-menu-avatar-img" onclick="openAvatarModal(event)" title="Change avatar">
+          <div class="side-avatar-edit" onclick="openAvatarModal(event)" title="Change avatar"><i class="bi bi-pencil-fill"></i></div>
+<?php else: ?>
+          <img src="<?= $e($avatarUrl) ?>" alt="" class="side-avatar">
+<?php endif; ?>
+        </div>
+        <div class="side-name"><?= $e($p['username']) ?><?php if ($isOwn): ?><span class="you-tag">YOU</span><?php endif; ?></div>
+        <div class="side-title"><?= $e($rankTitle) ?></div>
+
+        <dl class="side-stats">
+          <div class="side-row">
+            <dt>All-time rank</dt>
+            <dd><?= $p['rank'] ? '#' . (int)$p['rank'] : '—' ?></dd>
+          </div>
+          <div class="side-row">
+            <dt>Points</dt>
+            <dd><?= number_format((int)$p['points']) ?></dd>
+          </div>
+          <div class="side-row is-stack">
+            <dt>Labs solved</dt>
+            <dd><?= $solvedCount ?></dd>
+            <ul class="split" aria-label="Labs solved by difficulty">
+              <?php foreach (['easy' => 'Easy', 'medium' => 'Medium', 'hard' => 'Hard', 'secure' => 'Secure'] as $k => $label): ?>
+              <li class="<?= $diffCount[$k] ? '' : 'is-zero' ?>"><i class="dot c-<?= $k ?>"></i><?= $label ?> <b><?= $diffCount[$k] ?></b></li>
+              <?php endforeach; ?>
+            </ul>
+          </div>
+          <div class="side-row">
+            <dt>Solve streak</dt>
+            <dd><?= (int)$p['streak'] > 0 ? '<i class="bi bi-fire streak-fire"></i> ' : '' ?><?= (int)$p['streak'] ?> <?= (int)$p['streak'] === 1 ? 'day' : 'days' ?><span class="sub">Best: <?= (int)$p['best_streak'] ?> <?= (int)$p['best_streak'] === 1 ? 'day' : 'days' ?></span></dd>
+          </div>
+          <div class="side-row">
+            <dt>Joined</dt>
+            <dd><?= $e(date('M j, Y', strtotime($p['joined']))) ?></dd>
+          </div>
+<?php if (!empty($p['country'])): ?>
+          <div class="side-row">
+            <dt>Country</dt>
+            <dd><?= $e(profileCountry($p['country'])) ?></dd>
+          </div>
+<?php endif; ?>
+        </dl>
+
+<?php if (!$isOwn): ?>
+        <div class="side-actions">
+          <a href="scoreboard.php?period=all" class="side-btn"><i class="bi bi-arrow-left"></i> Back to scoreboard</a>
+        </div>
+<?php endif; ?>
+      </aside>
+    </div>
+
+    <!-- RIGHT: History (progress) / Settings (account, own profile only) -->
+    <div class="col-lg-9 col-md-8">
+      <div class="main-col">
+
+<?php if ($tab === 'history'): ?>
+        <section class="pf-card">
+          <header class="pf-card-head">
+            <h2 class="pf-card-title"><i class="bi bi-calendar3-week"></i> Activity</h2>
+            <span class="pf-card-sub"><?= $yearSolved ?> <?= $yearSolved === 1 ? 'lab' : 'labs' ?> solved in the last year &middot; <?= $activeDays ?> active <?= $activeDays === 1 ? 'day' : 'days' ?></span>
+          </header>
+          <div class="heat-scroll" id="heat">
+           <div class="heat-inner" style="--weeks: <?= $weeks ?>">
+            <div class="heat-months" aria-hidden="true">
+              <?php foreach ($monthLabels as $w => $label): ?><span style="grid-column: <?= $w + 1 ?> / span 3"><?= $label ?></span><?php endforeach; ?>
+            </div>
+            <div class="heat-days" aria-hidden="true"><span></span><span>Mon</span><span></span><span>Wed</span><span></span><span>Fri</span><span></span></div>
+            <div class="heat" aria-label="Labs solved per day">
+            <?php for ($t = $start; $t <= $gridEnd; $t = strtotime('+1 day', $t)):
+              $day = date('Y-m-d', $t);
+              $n = $perDay[$day] ?? 0;
+              $cls = $t > $end ? 'future' : ($n >= 4 ? 'l3' : ($n >= 2 ? 'l2' : ($n >= 1 ? 'l1' : ''))); ?>
+              <i class="<?= $cls ?>" title="<?= $e(date('D j M', $t)) ?>: <?= $n ?> <?= $n === 1 ? 'lab' : 'labs' ?>"></i>
+            <?php endfor; ?>
+            </div>
+           </div>
+          </div>
+          <script>(function(){ var h = document.getElementById('heat'); if (h) h.scrollLeft = h.scrollWidth; })();</script>
+          <div class="heat-legend">Less <i style="background: rgba(255,255,255,.06)"></i><i style="background: rgba(52,211,153,.35)"></i><i style="background: rgba(52,211,153,.6)"></i><i style="background: #34d399"></i> More</div>
+        </section>
+
+        <section class="pf-card">
+          <header class="pf-card-head">
+            <h2 class="pf-card-title"><i class="bi bi-bug"></i> Skills by bug type</h2>
+            <span class="pf-card-sub"><?= $siteSolved ?> of <?= $siteTotal ?> labs solved</span>
+          </header>
+          <div class="skills">
+          <?php foreach ($skills as $i => $s):
+            if ($i === 8): ?><div class="skills-more" id="skillsMore"><?php endif;
+            $pct = $s['total'] ? round($s['solved'] * 100 / $s['total']) : 0; ?>
+            <div class="skill-row <?= $s['solved'] ? '' : 'is-zero' ?>">
+              <div><?= $e($s['name']) ?></div>
+              <div class="skill-bar"><span style="width: <?= $pct ?>%"></span></div>
+              <div class="skill-num"><?= $s['solved'] ?>/<?= $s['total'] ?></div>
+            </div>
+          <?php endforeach; ?>
+          <?php if (count($skills) > 8): ?>
+            </div>
+            <button type="button" class="link-btn" onclick="const m=document.getElementById('skillsMore');m.classList.toggle('open');this.textContent=m.classList.contains('open')?'Show less':'Show all <?= count($skills) ?> bug types';">Show all <?= count($skills) ?> bug types</button>
+          <?php endif; ?>
+          </div>
+        </section>
+
+        <section class="pf-card">
+          <header class="pf-card-head">
+            <h2 class="pf-card-title"><i class="bi bi-check2-circle"></i> Recently solved</h2>
+          </header>
+          <?php if (!$solved): ?>
+            <div class="empty-note"><?= $isOwn ? 'You haven\'t solved a lab yet. <a href="/index.php">Pick an easy one to start.</a>' : 'No labs solved yet.' ?></div>
+          <?php else: ?>
+          <div class="solves">
+          <?php foreach (array_slice($solved, 0, 10) as $s):
+            $lab = $labCatalog['byId'][$s['lab_id']] ?? null;
+            $title = $lab ? $lab['title'] : ucfirst(basename(str_replace('\\', '/', (string)$s['lab_id']))); ?>
+            <div class="solve-item">
+              <div class="flex-grow-1" style="min-width: 0;">
+                <div class="solve-title" title="<?= $e($title) ?>"><?= $e($title) ?></div>
+                <div class="solve-cat"><?= $lab ? $e($lab['category']) : 'Lab on another KrazePlanet site' ?> <span title="<?= $e($s['solved_at']) ?>">&middot; <?= $e(profileTimeAgo($s['solved_at'])) ?></span></div>
+              </div>
+              <span class="diff-chip c-<?= $e($s['diff']) ?>"><?= $e(ucfirst($s['diff'])) ?></span>
+              <span class="solve-pts">+<?= (int)$s['points'] ?></span>
+            </div>
+          <?php endforeach; ?>
+          </div>
+          <?php endif; ?>
+        </section>
+<?php endif; ?>
+
+<?php if ($tab === 'settings' && $account): ?>
+        <section class="pf-card">
+          <h2 class="pf-card-title">Account details</h2>
+          <dl class="pf-list">
+            <div class="pf-item">
+              <dt>Full name</dt>
+              <dd><?php if (trim($fullname) !== ''): ?><?= $e($fullname) ?><?php else: ?><span class="pf-empty">Not added</span><?php endif; ?></dd>
+            </div>
+            <div class="pf-item">
+              <dt>Email address</dt>
+              <dd><?= $e($email) ?></dd>
+            </div>
+          </dl>
+        </section>
+
+        <section class="pf-card">
+          <header class="pf-card-head">
+            <h2 class="pf-card-title">Public profile</h2>
+            <a class="pf-btn pf-btn-ghost" href="<?= $e($publicPath) ?>"><i class="bi bi-box-arrow-up-right"></i> View</a>
+          </header>
+          <div class="pf-copy">
+            <span class="pf-copy-url" id="publicProfileUrl"><?= $e($publicUrl) ?></span>
+            <button type="button" class="pf-btn pf-btn-ghost" id="btnCopyProfile" onclick="copyProfileUrl()"><i class="bi bi-clipboard"></i> <span>Copy link</span></button>
+          </div>
+        </section>
+
+        <section class="pf-card" id="github">
+          <header class="pf-card-head">
+            <h2 class="pf-card-title"><i class="bi bi-github"></i> GitHub repository</h2>
+            <span class="pf-status <?= $githubRepo !== '' ? 'is-on' : '' ?>" id="githubStatus"><?= $githubRepo !== '' ? 'Connected' : 'Not connected' ?></span>
+          </header>
+          <form id="profileDetailsForm" class="pf-form" onsubmit="handleProfileUpdate(event)">
+            <label class="pf-label" for="profileGithubRepo">Repository link</label>
+            <div class="pf-field-row">
+              <input type="text" inputmode="url" id="profileGithubRepo" class="pf-input" value="<?= $e($githubRepo) ?>" placeholder="https://github.com/your-name/BugBountyReports" autocomplete="off" spellcheck="false">
+              <button type="submit" id="btnProfileUpdateSubmit" class="pf-btn pf-btn-primary">Save</button>
+            </div>
+            <div id="profileUpdateAlert" class="pf-msg" role="status" aria-live="polite"></div>
+          </form>
+        </section>
+
+        <section class="pf-card">
+          <header class="pf-card-head">
+            <div>
+              <h2 class="pf-card-title">Password</h2>
+              <p class="pf-card-desc">Change the password you use to sign in to KrazePlanet.</p>
+            </div>
+            <a class="pf-btn pf-btn-ghost" href="<?= $e($accountPageUrl) ?>" target="_blank" rel="noopener"><i class="bi bi-key"></i> Change password</a>
+          </header>
+        </section>
+<?php endif; ?>
+
+      </div>
+    </div>
+  </div>
+<?php endif; ?>
 </div>
 
+<?php if ($tab === 'settings' && $account): ?>
 <script>
-// Arriving from a lab's "Write Report" (profile.php?tab=profile#github): focus the GitHub field
+// Arriving from a lab's "Write Report" (profile.php?tab=settings#github): focus the GitHub field.
 // Runs after load so the browser's own jump to #github doesn't override it.
 window.addEventListener('load', () => setTimeout(() => {
   if (location.hash !== '#github') return;
@@ -680,17 +525,7 @@ function copyProfileUrl() {
   });
 }
 
-function showAlert(id, msg, isSuccess = false) {
-  const el = document.getElementById(id);
-  if (!el) return;
-  el.className = `alert py-2 px-3 small mb-3 border-0 ${isSuccess ? 'alert-success' : 'alert-danger'}`;
-  el.style.backgroundColor = isSuccess ? 'rgba(16, 185, 129, 0.2)' : 'rgba(244, 63, 94, 0.2)';
-  el.style.color = isSuccess ? '#34d399' : '#fb7185';
-  el.style.border = `1px solid ${isSuccess ? 'rgba(16, 185, 129, 0.4)' : 'rgba(244, 63, 94, 0.4)'}`;
-  el.innerText = msg;
-  el.style.display = 'block';
-}
-
+// Saves the GitHub repository (the only setting a student changes here)
 function handleProfileUpdate(e) {
   e.preventDefault();
   const btn = document.getElementById('btnProfileUpdateSubmit');
@@ -701,7 +536,6 @@ function handleProfileUpdate(e) {
   btn.disabled = true;
   btn.textContent = 'Saving...';
 
-  // The Profile tab only saves the GitHub repository; everything else on it is read-only.
   const formData = new FormData();
   formData.append('action', 'update_github_repo');
   formData.append('github_repo', ghInput.value.trim());
@@ -717,7 +551,6 @@ function handleProfileUpdate(e) {
         status.textContent = repo ? 'Connected' : 'Not connected';
         status.classList.toggle('is-on', !!repo);
         say(repo ? 'Saved. Write Report will now use this repository.' : 'Disconnected. Write Report is turned off until you add a repository.', true);
-        fetch('/navbar/portal.php?action=clear_profile_cache');
       } else {
         say(data.error || 'Could not save. Please try again.', false);
       }
@@ -728,111 +561,8 @@ function handleProfileUpdate(e) {
       say('Network error. Please try again.', false);
     });
 }
-
-// Bookmarks: remove one without leaving the page.
-document.addEventListener('click', (e) => {
-  const btn = e.target.closest('.bm-remove');
-  if (!btn) return;
-  const row = btn.closest('.bm-row');
-  row.classList.add('is-removing');
-  const fd = new FormData();
-  fd.append('lab_id', btn.dataset.labId);
-  fetch('/navbar/portal.php?action=toggle_bookmark', { method: 'POST', body: fd })
-    .then(r => r.json())
-    .then(res => {
-      if (!res.success || res.isBookmarked) {
-        // It was already removed elsewhere (toggle added it back): undo that, then drop the row.
-        if (res.success && res.isBookmarked) return fetch('/navbar/portal.php?action=toggle_bookmark', { method: 'POST', body: fd }).then(r => r.json());
-        throw new Error(res.message || 'failed');
-      }
-      return res;
-    })
-    .then(res => {
-      row.remove();
-      const n = (res.data && res.data.bookmarkedLabs) ? res.data.bookmarkedLabs.length : document.querySelectorAll('.bm-row').length;
-      document.getElementById('bmCount').textContent = n;
-      const tab = document.getElementById('tabBookmarkCount');
-      if (tab) { tab.textContent = n; tab.style.display = n ? '' : 'none'; }
-      const side = document.getElementById('sideBookmarkCount');
-      if (side) side.textContent = n;
-      if (!n) { document.getElementById('bmList').hidden = true; document.getElementById('bmEmpty').hidden = false; }
-      // Let an open labs page in another tab update too.
-      try {
-        const key = 'kp_lab_state_<?= (int)($_SESSION['user_id'] ?? 0) ?>';
-        const s = JSON.parse(localStorage.getItem(key) || '{}');
-        localStorage.setItem(key, JSON.stringify({ solvedLabs: res.data ? res.data.solvedLabs : (s.solvedLabs || []), bookmarkedLabs: res.data ? res.data.bookmarkedLabs : [] }));
-      } catch (_) {}
-    })
-    .catch(() => {
-      row.classList.remove('is-removing');
-      alert('Could not remove this bookmark. Please try again.');
-    });
-});
-
-// Backup file picker: show the chosen file's name, and accept drag & drop.
-(function () {
-  const drop = document.getElementById('importDrop');
-  const input = document.getElementById('importFileInput');
-  const nameEl = document.getElementById('importFileName');
-  if (!drop || !input) return;
-  const show = () => {
-    const f = input.files[0];
-    nameEl.textContent = f ? f.name : 'No file chosen';
-    drop.classList.toggle('has-file', !!f);
-  };
-  input.addEventListener('change', show);
-  ['dragenter', 'dragover'].forEach(t => drop.addEventListener(t, e => { e.preventDefault(); drop.classList.add('is-over'); }));
-  ['dragleave', 'drop'].forEach(t => drop.addEventListener(t, () => drop.classList.remove('is-over')));
-  drop.addEventListener('drop', e => {
-    e.preventDefault();
-    if (e.dataTransfer.files.length) { input.files = e.dataTransfer.files; show(); }
-  });
-})();
-
-function handleAccountImport(e) {
-  e.preventDefault();
-  const btn = document.getElementById('btnImportSubmit');
-  const msg = document.getElementById('importAlert');
-  const say = (text, ok) => { msg.className = 'pf-msg ' + (ok ? 'ok' : 'err'); msg.textContent = text; };
-  const idle = '<i class="bi bi-upload"></i> Import';
-
-  const fileInput = document.getElementById('importFileInput');
-  const importMode = document.getElementById('importReplace').checked ? 'replace' : 'merge';
-
-  if (!fileInput.files.length) {
-    say('Choose a JSON file to import.', false);
-    return;
-  }
-  if (importMode === 'replace' && !confirm('Delete your current solved labs and bookmarks and import this file instead? This can\'t be undone.')) {
-    return;
-  }
-
-  const formData = new FormData();
-  formData.append('action', 'import_account_data');
-  formData.append('import_mode', importMode);
-  formData.append('backup_file', fileInput.files[0]);
-
-  btn.disabled = true;
-  btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Importing...';
-  fetch('/api/auth_api.php', { method: 'POST', body: formData })
-    .then(r => r.json())
-    .then(data => {
-      btn.disabled = false;
-      btn.innerHTML = idle;
-      if (data.success) {
-        say(data.message + ' Refreshing...', true);
-        setTimeout(() => { location.reload(); }, 1500);
-      } else {
-        say(data.error || 'Could not import this file.', false);
-      }
-    })
-    .catch(() => {
-      btn.disabled = false;
-      btn.innerHTML = idle;
-      say('Network error. Please try again.', false);
-    });
-}
 </script>
+<?php endif; ?>
 
 <?php @include_once __DIR__ . '/../footer/footer.php'; ?>
 </body>
