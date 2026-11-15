@@ -1,4 +1,4 @@
-<?php if (session_status() === PHP_SESSION_NONE) { session_start(); } ?>
+<?php require_once __DIR__ . '/../config/sso.php'; krazeRequireLogin(); ?>
 <!doctype html>
 <html lang="en">
 
@@ -222,7 +222,7 @@
       <h3 class="fw-bold text-white mb-2">Ready to Start Hunting?</h3>
       <p class="text-secondary small mb-4">Choose from over 350 interactive vulnerability labs and elevate your testing methodology today.</p>
       <div class="d-flex justify-content-center gap-3">
-        <a href="index.php" class="btn-cta">
+        <a href="/index.php" class="btn-cta">
           <i class="bi bi-play-circle me-2"></i> Explore All Labs
         </a>
         <a href="https://discord.krazeplanet.com" target="_blank" rel="noopener noreferrer" class="btn btn-outline-light px-4 py-2" style="border-radius: 12px; font-weight: 600;">

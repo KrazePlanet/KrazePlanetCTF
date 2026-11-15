@@ -1,52 +1,42 @@
 <?php
-// profile.php - KrazePlanet User Dashboard with Profile, Continue, Bookmarks, Notifications, Settings & Import/Export
+// profile.php - KrazePlanet User Dashboard: Profile, Bookmarks and Import/Export
 require_once __DIR__ . '/../config/sso.php';
-startKrazeSession();
-
-// Redirect to login if user is not authenticated
-if (!krazeLoggedIn()) {
-    header('Location: ' . krazeLoginUrl($_SERVER['REQUEST_URI']));
-    exit;
-}
+require_once __DIR__ . '/../config/labs.php';
+krazeRequireLogin();
+$labCatalog = krazeLabCatalog();
 
 $userId = $_SESSION['user_id'];
 $activeTab = $_GET['tab'] ?? 'profile';
-$allowedTabs = ['profile', 'continue', 'bookmarks', 'notifications', 'import', 'settings'];
+$allowedTabs = ['profile', 'bookmarks', 'import'];
 if (!in_array($activeTab, $allowedTabs)) {
     $activeTab = 'profile';
 }
 
-// Profile, solved labs, bookmarks, in-progress labs and notifications all come
-// from the central login server in one call — cached in session for 90s so
-// switching between tabs doesn't repeat the SSO round-trip.
-$_pbCache = $_SESSION['profile_bundle_cache'] ?? null;
-if ($_pbCache && $_pbCache['at'] > time() - 90) {
-    $bundle = $_pbCache['data'];
-} else {
-    $bundle = krazeSsoCall('profile_bundle');
-    if (!krazeLoggedIn()) {
-        header('Location: ' . krazeLoginUrl($_SERVER['REQUEST_URI']));
-        exit;
-    }
-    $_SESSION['profile_bundle_cache'] = ['at' => time(), 'data' => $bundle];
+// Profile, solved labs and bookmarks all come
+// from the central login server in one call, fresh on every load, so a
+// bookmark or solve made anywhere shows up straight away. Browsers must not
+// keep a copy either (back button, tab restore).
+header('Cache-Control: no-store, must-revalidate');
+$bundle = krazeSsoCall('profile_bundle');
+if (!krazeLoggedIn()) {
+    header('Location: ' . krazeLoginUrl($_SERVER['REQUEST_URI']));
+    exit;
 }
 $user = $bundle['user'] ?? null;
 $solvedLabs = $bundle['solved'] ?? [];
 $bookmarkedLabs = $bundle['bookmarks'] ?? [];
-$continueLabs = $bundle['continue'] ?? [];
-$allNotifications = $bundle['notifications'] ?? [];
 $accountPageUrl = krazeSsoAccountUrl();
 
 $username = $user['username'] ?? $_SESSION['username'] ?? 'Trainee';
 $fullname = $user['fullname'] ?? '';
 $email = $user['email'] ?? $_SESSION['user_email'] ?? 'trainee@krazeplanet.com';
 $phone = $user['phone'] ?? '';
+$githubRepo = $user['github_repo'] ?? krazeGithubRepo();
 $created_at = isset($user['created_at']) ? date('M d, Y', strtotime($user['created_at'])) : 'May 23, 2026';
 $avatarUrl = !empty($user['avatar']) ? $user['avatar'] : (!empty($_SESSION['avatar']) ? $_SESSION['avatar'] : ('https://api.dicebear.com/7.x/adventurer/svg?seed=' . urlencode($username)));
 
 $solvedCount = count($solvedLabs);
 $bookmarkCount = count($bookmarkedLabs);
-$continueCount = count($continueLabs);
 $totalLabsAvailable = 350;
 
 // Stats calculation - Sum exact points from solved labs (Easy=20, Medium=50, Hard=100)
@@ -295,6 +285,101 @@ elseif ($solvedCount >= 5) $rankTitle = "Apprentice Hunter";
       box-shadow: 0 0 12px rgba(56, 189, 248, 0.25) !important;
     }
 
+    /* ---- Profile tab: settings cards ---- */
+    .pf { display: flex; flex-direction: column; gap: 16px; max-width: 760px; }
+    .pf-card { background: #0d1628; border: 1px solid rgba(255, 255, 255, 0.09); border-radius: 14px; padding: 20px 22px; }
+    .pf-card-head { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+    .pf-card-head .pf-card-title:only-child { margin-bottom: 0; }
+    .pf-card-title { font-family: 'Outfit', sans-serif; font-size: 17px; font-weight: 700; color: #f8fafc; margin: 0 0 4px; display: flex; align-items: center; gap: 8px; }
+    .pf-card-desc { font-size: 14px; color: #a3b1c6; margin: 0; line-height: 1.5; }
+    .pf-card-desc strong { color: #e2e8f0; font-weight: 600; }
+
+    .pf-list { margin: 16px 0 0; border-top: 1px solid rgba(255, 255, 255, 0.07); }
+    .pf-item { display: grid; grid-template-columns: 170px 1fr; gap: 16px; padding: 13px 0; border-bottom: 1px solid rgba(255, 255, 255, 0.07); }
+    .pf-item:last-child { border-bottom: 0; padding-bottom: 0; }
+    .pf-empty { font-weight: 500; color: #8b9ab1; }
+    .pf-empty a { color: #38bdf8; text-decoration: none; }
+    .pf-empty a:hover { text-decoration: underline; }
+    .pf-item dt { font-size: 14px; font-weight: 500; color: #a3b1c6; }
+    .pf-item dd { font-size: 15px; font-weight: 600; color: #f8fafc; margin: 0; overflow-wrap: anywhere; }
+
+    .pf-copy { display: flex; align-items: center; gap: 10px; margin-top: 14px; background: #070b14; border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 10px; padding: 6px 6px 6px 14px; }
+    .pf-copy-url { flex: 1; min-width: 0; font-family: 'JetBrains Mono', monospace; font-size: 13.5px; color: #e2e8f0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+    .pf-btn { display: inline-flex; align-items: center; justify-content: center; gap: 7px; white-space: nowrap; font-size: 14px; font-weight: 600; border-radius: 9px; padding: 8px 14px; text-decoration: none; border: 1px solid transparent; cursor: pointer; transition: all .15s ease; }
+    .pf-btn-ghost { background: rgba(255, 255, 255, 0.04); border-color: rgba(255, 255, 255, 0.14); color: #e2e8f0; }
+    .pf-btn-ghost:hover { border-color: #38bdf8; color: #fff; background: rgba(56, 189, 248, 0.08); }
+    .pf-btn-primary { background: #0284c7; color: #fff; padding: 9px 20px; }
+    .pf-btn-primary:hover { background: #0ea5e9; }
+    .pf-btn:disabled { opacity: .6; cursor: wait; }
+
+    .pf-status { flex-shrink: 0; font-size: 12.5px; font-weight: 700; border-radius: 999px; padding: 4px 11px; color: #fbbf24; background: rgba(251, 191, 36, 0.1); border: 1px solid rgba(251, 191, 36, 0.35); }
+    .pf-status::before { content: ''; display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: currentColor; margin-right: 7px; vertical-align: 1px; }
+    .pf-status.is-on { color: #34d399; background: rgba(52, 211, 153, 0.1); border-color: rgba(52, 211, 153, 0.35); }
+
+    .pf-form { margin-top: 16px; }
+    .pf-label { display: block; font-size: 14px; font-weight: 600; color: #e2e8f0; margin-bottom: 8px; }
+    .pf-field-row { display: flex; gap: 10px; }
+    .pf-input { flex: 1; min-width: 0; background: #070b14; border: 1px solid rgba(255, 255, 255, 0.16); color: #fff; border-radius: 10px; padding: 9px 14px; font-size: 14.5px; outline: none; transition: border-color .15s ease, box-shadow .15s ease; }
+    .pf-input::placeholder { color: #64748b; }
+    .pf-input:focus { border-color: #38bdf8; box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.18); }
+    .pf-hint { font-size: 13px; color: #8b9ab1; margin: 8px 0 0; line-height: 1.5; }
+    .pf-hint code { color: #cbd5e1; background: rgba(255, 255, 255, 0.06); padding: 1px 6px; border-radius: 5px; font-size: 12.5px; }
+    .pf-msg { display: none; margin-top: 12px; font-size: 14px; font-weight: 500; border-radius: 9px; padding: 9px 12px; }
+    .pf-msg.ok { display: block; color: #6ee7b7; background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.35); }
+    .pf-msg.err { display: block; color: #fda4af; background: rgba(244, 63, 94, 0.1); border: 1px solid rgba(244, 63, 94, 0.35); }
+
+    /* Bookmarks */
+    .bm-count { font-family: 'Inter', sans-serif; font-size: 12px; font-weight: 700; color: #cbd5e1; background: rgba(255, 255, 255, 0.08); border-radius: 999px; padding: 2px 9px; }
+    .bm-list { list-style: none; margin: 16px 0 0; padding: 0; border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 12px; overflow: hidden; }
+    .bm-row { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 14px 16px; background: #0a1222; transition: background .15s ease, opacity .2s ease; }
+    .bm-row + .bm-row { border-top: 1px solid rgba(255, 255, 255, 0.07); }
+    .bm-row:hover { background: #0f1a30; }
+    .bm-row.is-removing { opacity: .4; pointer-events: none; }
+    .bm-main { min-width: 0; }
+    .bm-title { display: block; font-size: 15px; font-weight: 600; color: #f8fafc; text-decoration: none; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .bm-title:hover { color: #38bdf8; }
+    .bm-meta { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; margin-top: 5px; font-size: 13px; color: #94a3b8; }
+    .bm-dot { color: #475569; }
+    .bm-diff { font-size: 11.5px; font-weight: 700; border-radius: 6px; padding: 1px 8px; border: 1px solid; }
+    .bm-diff.is-easy { color: #34d399; background: rgba(52, 211, 153, 0.1); border-color: rgba(52, 211, 153, 0.35); }
+    .bm-diff.is-medium { color: #fbbf24; background: rgba(251, 191, 36, 0.1); border-color: rgba(251, 191, 36, 0.35); }
+    .bm-diff.is-hard { color: #f87171; background: rgba(248, 113, 113, 0.1); border-color: rgba(248, 113, 113, 0.35); }
+    .bm-solved { font-size: 12.5px; font-weight: 600; color: #34d399; display: inline-flex; align-items: center; gap: 4px; }
+    .bm-actions { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
+    .bm-open { padding: 6px 12px; font-size: 13.5px; }
+    .bm-remove { width: 34px; height: 34px; border-radius: 9px; border: 1px solid transparent; background: transparent; color: #8b9ab1; display: inline-flex; align-items: center; justify-content: center; transition: all .15s ease; }
+    .bm-remove:hover { color: #f87171; background: rgba(248, 113, 113, 0.1); border-color: rgba(248, 113, 113, 0.3); }
+    .bm-empty { text-align: center; padding: 36px 16px 20px; color: #a3b1c6; }
+    .bm-empty > i { font-size: 30px; color: #64748b; }
+    .bm-empty-title { font-size: 16px; font-weight: 700; color: #f1f5f9; margin: 8px 0 4px; }
+    .bm-empty p { font-size: 14px; margin: 0; }
+    @media (max-width: 640px) {
+      .bm-row { flex-direction: column; align-items: stretch; gap: 10px; }
+      .bm-title { white-space: normal; }
+      .bm-actions .bm-open { flex: 1; }
+    }
+
+    /* Import / Export */
+    .ie-file { flex: 1; min-width: 0; display: flex; align-items: center; gap: 12px; cursor: pointer; background: #070b14; border: 1px solid rgba(255, 255, 255, 0.16);
+      border-radius: 10px; padding: 5px 12px 5px 5px; transition: border-color .15s ease; }
+    .ie-file:hover, .ie-file.is-over { border-color: #38bdf8; }
+    .ie-file-btn { flex-shrink: 0; font-size: 13.5px; font-weight: 600; color: #e2e8f0; background: rgba(255, 255, 255, 0.07); border: 1px solid rgba(255, 255, 255, 0.14); border-radius: 7px; padding: 5px 12px; }
+    .ie-file-name { font-size: 14px; color: #8b9ab1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .ie-file.has-file .ie-file-name { color: #f1f5f9; }
+    .ie-check { display: flex; align-items: flex-start; gap: 9px; margin-top: 14px; font-size: 14px; color: #e2e8f0; cursor: pointer; width: fit-content; }
+    .ie-check input { margin-top: 3px; width: 16px; height: 16px; accent-color: #f87171; flex-shrink: 0; }
+    .ie-check-hint { color: #8b9ab1; }
+
+    @media (max-width: 640px) {
+      .tab-pane-box.pf { padding: 1.25rem 1rem; }
+      .pf-card { padding: 16px; }
+      .pf-card-head { flex-direction: column; gap: 12px; }
+      .pf-item { grid-template-columns: 1fr; gap: 2px; }
+      .pf-field-row { flex-direction: column; }
+      .pf-field-row .pf-btn { width: 100%; }
+    }
+
     .btn-update-profile {
       background: #0284c7;
       border: none;
@@ -312,7 +397,7 @@ elseif ($solvedCount >= 5) $rankTitle = "Apprentice Hunter";
       transform: translateY(-1px);
     }
 
-    /* Continue / Bookmark Lab Item Cards */
+    /* Bookmark list items */
     .lab-progress-item {
       background: var(--card-inner);
       border: 1px solid var(--border-color);
@@ -328,17 +413,6 @@ elseif ($solvedCount >= 5) $rankTitle = "Apprentice Hunter";
 
     .lab-progress-item:hover {
       border-color: rgba(56, 189, 248, 0.3);
-    }
-
-    .lab-badge-pill {
-      background: rgba(56, 189, 248, 0.12);
-      border: 1px solid rgba(56, 189, 248, 0.25);
-      color: #38bdf8;
-      font-size: 11px;
-      font-family: 'JetBrains Mono', monospace;
-      font-weight: 700;
-      padding: 3px 8px;
-      border-radius: 6px;
     }
   </style>
 </head>
@@ -380,18 +454,10 @@ elseif ($solvedCount >= 5) $rankTitle = "Apprentice Hunter";
 
         <div class="profile-stat-row">
           <span class="profile-stat-label">Bookmarks</span>
-          <span class="profile-stat-val text-warning"><?= $bookmarkCount ?></span>
-        </div>
-
-        <div class="profile-stat-row">
-          <span class="profile-stat-label">In Progress</span>
-          <span class="profile-stat-val text-info"><?= $continueCount ?></span>
+          <span class="profile-stat-val text-warning" id="sideBookmarkCount"><?= $bookmarkCount ?></span>
         </div>
 
         <div class="profile-sidebar-actions">
-          <a href="contact.php" class="btn-profile-subtle flex-grow-1 justify-content-center">
-            <i class="bi bi-heart-fill text-danger"></i> Donate
-          </a>
           <a href="#" class="btn-profile-subtle flex-grow-1 justify-content-center text-danger" onclick="handleUserLogout(event)">
             <i class="bi bi-box-arrow-right"></i> Log out
           </a>
@@ -409,366 +475,177 @@ elseif ($solvedCount >= 5) $rankTitle = "Apprentice Hunter";
           <a href="profile.php?tab=profile" class="profile-tab-link <?= ($activeTab === 'profile') ? 'active' : '' ?>">
             <i class="bi bi-person-fill"></i> Profile
           </a>
-          <a href="profile.php?tab=continue" class="profile-tab-link <?= ($activeTab === 'continue') ? 'active' : '' ?>">
-            <i class="bi bi-clock-history"></i> Continue
-            <?php if ($continueCount > 0): ?>
-              <span class="badge rounded-pill bg-info text-dark ms-1" style="font-size: 10px;"><?= $continueCount ?></span>
-            <?php endif; ?>
-          </a>
           <a href="profile.php?tab=bookmarks" class="profile-tab-link <?= ($activeTab === 'bookmarks') ? 'active' : '' ?>">
-            <i class="bi bi-bookmark-fill"></i> Bookmark List
-            <?php if ($bookmarkCount > 0): ?>
-              <span class="badge rounded-pill bg-warning text-dark ms-1" style="font-size: 10px;"><?= $bookmarkCount ?></span>
-            <?php endif; ?>
-          </a>
-          <a href="profile.php?tab=notifications" class="profile-tab-link <?= ($activeTab === 'notifications') ? 'active' : '' ?>">
-            <i class="bi bi-bell-fill"></i> Notification
-          </a>
-          <a href="profile.php?tab=settings" class="profile-tab-link <?= ($activeTab === 'settings') ? 'active' : '' ?>">
-            <i class="bi bi-gear-fill"></i> Settings
+            <i class="bi bi-bookmark-fill"></i> Bookmarks
+            <span class="badge rounded-pill bg-warning text-dark ms-1" id="tabBookmarkCount" style="font-size: 10px;<?= $bookmarkCount > 0 ? '' : ' display:none;' ?>"><?= $bookmarkCount ?></span>
           </a>
           <a href="profile.php?tab=import" class="profile-tab-link <?= ($activeTab === 'import') ? 'active' : '' ?>">
-            <i class="bi bi-box-arrow-in-right"></i> Import / Export
+            <i class="bi bi-arrow-down-up"></i> Import / Export
           </a>
         </div>
 
         <!-- 1. PROFILE TAB (matching Screenshot 2) -->
         <?php if ($activeTab === 'profile'): ?>
-          <div class="tab-pane-box">
-            <div id="profileUpdateAlert" style="display:none;" class="alert py-2 px-3 small mb-3 border-0"></div>
+          <?php $playerPath = '/navbar/player.php?user=' . urlencode($username); $playerUrl = krazeSiteUrl($playerPath); ?>
+          <div class="tab-pane-box pf">
 
-            <form id="profileDetailsForm" onsubmit="handleProfileUpdate(event)">
-              <div class="profile-field-row">
-                <div class="profile-field-label">Join date</div>
-                <div class="profile-field-control">
-                  <input type="text" class="form-control custom-profile-input" value="<?= $created_at ?>" readonly>
+            <!-- Account details (read-only) -->
+            <section class="pf-card">
+              <header class="pf-card-head">
+                <div>
+                  <h2 class="pf-card-title">Account details</h2>
                 </div>
-              </div>
-
-              <div class="profile-field-row">
-                <div class="profile-field-label">Email address</div>
-                <div class="profile-field-control">
-                  <input type="email" id="profileEmailInput" class="form-control custom-profile-input" value="<?= htmlspecialchars($email) ?>" readonly title="Change your email on your KrazePlanet account page">
+              </header>
+              <dl class="pf-list">
+                <div class="pf-item">
+                  <dt>Full name</dt>
+                  <dd><?php if (trim((string)$fullname) !== ''): ?><?= htmlspecialchars($fullname) ?><?php else: ?><span class="pf-empty">Not added</span><?php endif; ?></dd>
                 </div>
-              </div>
-
-              <div class="profile-field-row">
-                <div class="profile-field-label">Username</div>
-                <div class="profile-field-control">
-                  <input type="text" class="form-control custom-profile-input" value="<?= htmlspecialchars($username) ?>" readonly>
+                <div class="pf-item">
+                  <dt>Email address</dt>
+                  <dd><?= htmlspecialchars($email) ?></dd>
                 </div>
-              </div>
-
-              <div class="profile-field-row">
-                <div class="profile-field-label">Public profile</div>
-                <div class="profile-field-control">
-                  <div class="input-group">
-                    <input type="text" id="publicProfileUrl" class="form-control custom-profile-input font-monospace small" value="<?= htmlspecialchars(krazeSiteUrl('/profile.php?user=' . urlencode($username))) ?>" readonly style="border-top-right-radius: 0 !important; border-bottom-right-radius: 0 !important;">
-                    <button type="button" class="btn btn-outline-info px-3" onclick="copyProfileUrl()" style="border-top-left-radius: 0; border-bottom-left-radius: 0; font-size: 13px;">
-                      <i class="bi bi-clipboard me-1"></i> Copy
-                    </button>
-                  </div>
-                  <div class="text-secondary small mt-1" style="font-size: 11px;">Share this link so instructors and peers can view your solved labs progress.</div>
+                <div class="pf-item">
+                  <dt>Member since</dt>
+                  <dd><?= $created_at ?></dd>
                 </div>
-              </div>
+              </dl>
+            </section>
 
-              <div class="profile-field-row">
-                <div class="profile-field-label">Reading list visibility</div>
-                <div class="profile-field-control">
-                  <div class="text-secondary small mb-2" style="font-size: 12px;">Controls whether your completed and in-progress laboratories appear on your public profile.</div>
-                  <div class="d-flex gap-4">
-                    <div class="form-check">
-                      <input class="form-check-input" type="radio" name="profileVisibility" id="visPrivate" value="private">
-                      <label class="form-check-label text-light small" for="visPrivate">Private</label>
-                    </div>
-                    <div class="form-check">
-                      <input class="form-check-input" type="radio" name="profileVisibility" id="visPublic" value="public" checked>
-                      <label class="form-check-label text-light small" for="visPublic">Public</label>
-                    </div>
-                  </div>
+            <!-- Public profile -->
+            <section class="pf-card">
+              <header class="pf-card-head">
+                <div>
+                  <h2 class="pf-card-title">Public profile</h2>
                 </div>
+                <a class="pf-btn pf-btn-ghost" href="<?= htmlspecialchars($playerPath) ?>"><i class="bi bi-box-arrow-up-right"></i> View</a>
+              </header>
+              <div class="pf-copy">
+                <span class="pf-copy-url" id="publicProfileUrl"><?= htmlspecialchars($playerUrl) ?></span>
+                <button type="button" class="pf-btn pf-btn-ghost" id="btnCopyProfile" onclick="copyProfileUrl()"><i class="bi bi-clipboard"></i> <span>Copy link</span></button>
               </div>
+            </section>
 
-              <div class="profile-field-row mb-4">
-                <div class="profile-field-label"></div>
-                <div class="profile-field-control">
-                  <a href="profile.php?tab=settings" class="small text-info text-decoration-none fw-semibold">
-                    <i class="bi bi-key-fill me-1"></i> Change password
-                  </a>
+            <!-- GitHub repository (the only thing students change here) -->
+            <section class="pf-card" id="github">
+              <header class="pf-card-head">
+                <div>
+                  <h2 class="pf-card-title"><i class="bi bi-github"></i> GitHub repository</h2>
                 </div>
-              </div>
-
-              <div class="profile-field-row">
-                <div class="profile-field-label"></div>
-                <div class="profile-field-control">
-                  <button type="submit" id="btnProfileUpdateSubmit" class="btn-update-profile">Update</button>
+                <span class="pf-status <?= $githubRepo !== '' ? 'is-on' : '' ?>" id="githubStatus"><?= $githubRepo !== '' ? 'Connected' : 'Not connected' ?></span>
+              </header>
+              <form id="profileDetailsForm" class="pf-form" onsubmit="handleProfileUpdate(event)">
+                <label class="pf-label" for="profileGithubRepo">Repository link</label>
+                <div class="pf-field-row">
+                  <input type="text" inputmode="url" id="profileGithubRepo" class="pf-input" value="<?= htmlspecialchars($githubRepo) ?>" placeholder="https://github.com/your-name/BugBountyReports" autocomplete="off" spellcheck="false">
+                  <button type="submit" id="btnProfileUpdateSubmit" class="pf-btn pf-btn-primary">Save</button>
                 </div>
-              </div>
-            </form>
-          </div>
-        <?php endif; ?>
+                <div id="profileUpdateAlert" class="pf-msg" role="status" aria-live="polite"></div>
+              </form>
+            </section>
 
-        <!-- 2. CONTINUE TAB (In-Progress Labs User Started but Not Yet Solved) -->
-        <?php if ($activeTab === 'continue'): ?>
-          <div class="tab-pane-box">
-            <div class="d-flex align-items-center justify-content-between mb-4">
-              <div>
-                <h5 class="fw-bold text-white mb-1"><i class="bi bi-clock-history text-info me-2"></i> Continue Learning</h5>
-                <p class="text-secondary small mb-0">Labs you have accessed and are currently solving. Pick up right where you left off!</p>
-              </div>
-              <span class="badge bg-info bg-opacity-10 text-info border border-info border-opacity-25 px-3 py-2">
-                <?= count($continueLabs) ?> In-Progress Labs
-              </span>
-            </div>
+            <!-- Password (changed on the central KrazePlanet account page) -->
+            <section class="pf-card">
+              <header class="pf-card-head">
+                <div>
+                  <h2 class="pf-card-title">Password</h2>
+                  <p class="pf-card-desc">Change the password you use to sign in to KrazePlanet.</p>
+                </div>
+                <a class="pf-btn pf-btn-ghost" href="<?= htmlspecialchars($accountPageUrl) ?>" target="_blank" rel="noopener"><i class="bi bi-key"></i> Change password</a>
+              </header>
+            </section>
 
-            <?php if (!empty($continueLabs)): ?>
-              <div class="continue-labs-list">
-                <?php foreach ($continueLabs as $cl): ?>
-                  <div class="lab-progress-item">
-                    <div class="d-flex align-items-center gap-3">
-                      <span class="lab-badge-pill"><?= htmlspecialchars($cl['lab_badge'] ?? 'LAB') ?></span>
-                      <div>
-                        <div class="fw-bold text-light small"><?= htmlspecialchars($cl['lab_title'] ?? 'Security Laboratory') ?></div>
-                        <div class="text-secondary small mt-1" style="font-size: 11px;">
-                          <span class="text-muted me-2"><i class="bi bi-folder2 me-1"></i> <?= htmlspecialchars($cl['lab_category'] ?? 'Web Security') ?></span>
-                          <span><i class="bi bi-clock me-1"></i> Last opened <?= date('M d, H:i', strtotime($cl['last_accessed_at'])) ?></span>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div class="d-flex align-items-center gap-2">
-                      <a href="<?= htmlspecialchars(krazeLabUrl($cl['lab_url'] ?? $cl['lab_id'])) ?>" target="_blank" class="btn btn-sm btn-primary py-1 px-3" style="font-size: 12.5px; border-radius: 8px;">
-                        <i class="bi bi-play-circle-fill me-1"></i> Resume Lab
-                      </a>
-                    </div>
-                  </div>
-                <?php endforeach; ?>
-              </div>
-            <?php else: ?>
-              <div class="text-center py-5">
-                <i class="bi bi-check2-circle text-success fs-1 mb-2 d-block"></i>
-                <div class="fw-bold text-light">All caught up!</div>
-                <p class="text-secondary small mt-1">You have no pending in-progress labs. Open any laboratory from the catalog to practice.</p>
-                <a href="index.php" class="btn btn-outline-info btn-sm mt-2 px-3 py-2" style="border-radius: 8px;">Explore Laboratories &rarr;</a>
-              </div>
-            <?php endif; ?>
           </div>
         <?php endif; ?>
 
         <!-- 3. BOOKMARK LIST TAB -->
         <?php if ($activeTab === 'bookmarks'): ?>
-          <div class="tab-pane-box">
-            <div class="d-flex align-items-center justify-content-between mb-4">
-              <div>
-                <h5 class="fw-bold text-white mb-1"><i class="bi bi-bookmark-fill text-warning me-2"></i> Bookmarked Laboratories</h5>
-                <p class="text-secondary small mb-0">Quick access to labs you have starred for future study or review.</p>
-              </div>
-              <span class="badge bg-warning bg-opacity-10 text-warning border border-warning border-opacity-25 px-3 py-2">
-                <?= count($bookmarkedLabs) ?> Bookmarks
-              </span>
-            </div>
+          <?php $solvedSet = array_flip(array_column($solvedLabs, 'lab_id')); ?>
+          <div class="tab-pane-box pf">
+            <section class="pf-card bm-card">
+              <header class="pf-card-head">
+                <div>
+                  <h2 class="pf-card-title">Bookmarks <span class="bm-count" id="bmCount"><?= count($bookmarkedLabs) ?></span></h2>
+                  <p class="pf-card-desc">Labs you saved to come back to.</p>
+                </div>
+                <a class="pf-btn pf-btn-ghost" href="/index.php"><i class="bi bi-grid"></i> Browse labs</a>
+              </header>
 
-            <?php if (!empty($bookmarkedLabs)): ?>
-              <div class="bookmarks-list">
-                <?php foreach ($bookmarkedLabs as $b): ?>
-                  <div class="lab-progress-item">
-                    <div class="d-flex align-items-center gap-3">
-                      <i class="bi bi-star-fill text-warning fs-5"></i>
-                      <div>
-                        <div class="fw-bold text-light small"><?= htmlspecialchars($b['lab_id']) ?></div>
-                        <div class="text-secondary small mt-1" style="font-size: 11px;">
-                          <i class="bi bi-calendar-event me-1"></i> Bookmarked on <?= date('M d, Y', strtotime($b['created_at'])) ?>
-                        </div>
+              <ul class="bm-list" id="bmList"<?= empty($bookmarkedLabs) ? ' hidden' : '' ?>>
+                <?php foreach ($bookmarkedLabs as $b):
+                  $bLab = $labCatalog['byId'][$b['lab_id']] ?? null;
+                  $diff = $bLab['difficulty'] ?? '';
+                  $diff = in_array($diff, ['easy', 'medium', 'hard'], true) ? $diff : '';
+                  $isSolved = isset($solvedSet[$b['lab_id']]); ?>
+                  <li class="bm-row">
+                    <div class="bm-main">
+                      <a class="bm-title" href="<?= htmlspecialchars(krazeLabUrl($b['lab_id'])) ?>" target="_blank" rel="noopener"><?= htmlspecialchars($bLab['title'] ?? ucfirst(basename(str_replace('\\', '/', $b['lab_id'])))) ?></a>
+                      <div class="bm-meta">
+                        <?php if ($diff): ?><span class="bm-diff is-<?= $diff ?>"><?= ucfirst($diff) ?></span><?php endif; ?>
+                        <?php if ($isSolved): ?><span class="bm-solved"><i class="bi bi-check-circle-fill"></i> Solved</span><?php endif; ?>
+                        <span><?= htmlspecialchars($bLab['category'] ?? 'Another KrazePlanet site') ?></span>
+                        <span class="bm-dot">·</span>
+                        <span title="<?= htmlspecialchars($b['created_at']) ?>">Saved <?= date('M j, Y', strtotime($b['created_at'])) ?></span>
                       </div>
                     </div>
-
-                    <a href="<?= htmlspecialchars(krazeLabUrl($b['lab_id'])) ?>" target="_blank" class="btn btn-sm btn-outline-info py-1 px-3" style="font-size: 12.5px; border-radius: 8px;">
-                      <i class="bi bi-box-arrow-up-right me-1"></i> Open Lab
-                    </a>
-                  </div>
-                <?php endforeach; ?>
-              </div>
-            <?php else: ?>
-              <div class="text-center py-5">
-                <i class="bi bi-bookmark-star text-secondary fs-1 mb-2 d-block"></i>
-                <div class="fw-bold text-light">No bookmarked labs yet</div>
-                <p class="text-secondary small mt-1">Click the star icon on any laboratory card to save it here for fast access.</p>
-                <a href="index.php" class="btn btn-outline-info btn-sm mt-2 px-3 py-2" style="border-radius: 8px;">Browse Labs &rarr;</a>
-              </div>
-            <?php endif; ?>
-          </div>
-        <?php endif; ?>
-
-        <!-- 4. NOTIFICATION TAB (All Notifications History) -->
-        <?php if ($activeTab === 'notifications'): ?>
-          <div class="tab-pane-box">
-            <div class="d-flex align-items-center justify-content-between mb-4">
-              <div>
-                <h5 class="fw-bold text-white mb-1"><i class="bi bi-bell-fill text-info me-2"></i> Notifications Center</h5>
-                <p class="text-secondary small mb-0">Full record of all your assignment notices, platform alerts, and lab updates.</p>
-              </div>
-              <span class="badge bg-primary bg-opacity-10 text-info border border-info border-opacity-25 px-3 py-2">
-                <?= count($allNotifications) ?> Total Notifications
-              </span>
-            </div>
-
-            <?php if (!empty($allNotifications)): ?>
-              <div class="notifications-history-list">
-                <?php foreach ($allNotifications as $n): ?>
-                  <div class="lab-progress-item">
-                    <div class="d-flex align-items-start gap-3">
-                      <div class="rounded-circle <?= htmlspecialchars($n['icon_bg'] ?? 'bg-info bg-opacity-10 text-info') ?> p-2 d-flex align-items-center justify-content-center flex-shrink-0 mt-1" style="width: 38px; height: 38px; font-size: 16px;">
-                        <i class="bi <?= htmlspecialchars($n['icon'] ?? 'bi-bell-fill') ?>"></i>
-                      </div>
-                      <div>
-                        <div class="fw-bold text-light small" style="font-size: 13.5px;"><?= htmlspecialchars($n['title']) ?></div>
-                        <div class="text-secondary small mt-1" style="line-height: 1.5; font-size: 12px;"><?= htmlspecialchars($n['message']) ?></div>
-                        <div class="text-muted small mt-1" style="font-size: 11px;"><i class="bi bi-clock me-1"></i> <?= date('d M Y, H:i', strtotime($n['created_at'])) ?></div>
-                      </div>
+                    <div class="bm-actions">
+                      <a class="pf-btn pf-btn-ghost bm-open" href="<?= htmlspecialchars(krazeLabUrl($b['lab_id'])) ?>" target="_blank" rel="noopener">Open lab <i class="bi bi-arrow-up-right"></i></a>
+                      <button type="button" class="bm-remove" title="Remove bookmark" aria-label="Remove bookmark" data-lab-id="<?= htmlspecialchars($b['lab_id']) ?>"><i class="bi bi-x-lg"></i></button>
                     </div>
-
-                    <?php if (!empty($n['link'])): ?>
-                      <a href="<?= htmlspecialchars($n['link']) ?>" class="btn btn-sm btn-outline-info py-1 px-3 flex-shrink-0" style="font-size: 12.5px; border-radius: 8px;">
-                        View <i class="bi bi-arrow-right ms-1"></i>
-                      </a>
-                    <?php endif; ?>
-                  </div>
+                  </li>
                 <?php endforeach; ?>
+              </ul>
+
+              <div class="bm-empty" id="bmEmpty"<?= empty($bookmarkedLabs) ? '' : ' hidden' ?>>
+                <i class="bi bi-bookmark"></i>
+                <div class="bm-empty-title">No bookmarks yet</div>
+                <p>On the labs page, open a lab's <strong>⋯</strong> menu and choose <strong>Bookmark</strong>.</p>
               </div>
-            <?php else: ?>
-              <div class="text-center py-5">
-                <i class="bi bi-bell-slash text-secondary fs-1 mb-2 d-block"></i>
-                <div class="fw-bold text-light">No notifications</div>
-                <p class="text-secondary small mt-1">You are all caught up on all platform alerts.</p>
-              </div>
-            <?php endif; ?>
+            </section>
           </div>
         <?php endif; ?>
 
-        <!-- 5. SETTINGS TAB -->
-        <?php if ($activeTab === 'settings'): ?>
-          <div class="tab-pane-box">
-            <h5 class="fw-bold text-white mb-1"><i class="bi bi-gear-fill text-secondary me-2"></i> Account Settings</h5>
-            <p class="text-secondary small mb-4">Manage your personal profile information, contact data, and security credentials.</p>
-
-            <div id="settingsAlert" style="display:none;" class="alert py-2 px-3 small mb-3 border-0"></div>
-
-            <form id="accountSettingsForm" onsubmit="handleSettingsUpdate(event)">
-              <div class="mb-3">
-                <label class="form-label small text-secondary fw-semibold">Full Name</label>
-                <input type="text" id="settingsFullname" class="form-control custom-profile-input" value="<?= htmlspecialchars($fullname) ?>" placeholder="John Doe">
-              </div>
-
-              <div class="mb-4">
-                <label class="form-label small text-secondary fw-semibold">Email Address</label>
-                <input type="email" id="settingsEmail" class="form-control custom-profile-input" value="<?= htmlspecialchars($email) ?>" readonly>
-              </div>
-
-              <hr class="border-secondary border-opacity-25 my-4">
-
-              <h6 class="fw-bold text-white small mb-2"><i class="bi bi-shield-lock-fill text-warning me-2"></i> Email &amp; Password</h6>
-              <p class="text-secondary small mb-4">
-                Your KrazePlanet account works on every KrazePlanet lab site. Change your email or password on your
-                <a href="<?= htmlspecialchars($accountPageUrl) ?>" target="_blank" rel="noopener" class="text-info fw-semibold">KrazePlanet account page &rarr;</a>
-              </p>
-
-              <button type="submit" id="btnSettingsSubmit" class="btn-update-profile">Save Settings</button>
-            </form>
-          </div>
-        <?php endif; ?>
 
         <!-- 6. IMPORT / EXPORT TAB (matching Screenshot 3) -->
         <?php if ($activeTab === 'import'): ?>
-          <div class="tab-pane-box">
-            
-            <ul class="nav nav-pills mb-4" id="importExportTabs" role="tablist">
-              <li class="nav-item">
-                <button class="nav-link active px-4 py-2 small fw-semibold" id="pills-import-tab" data-bs-toggle="pill" data-bs-target="#pills-import" type="button" role="tab">Import</button>
-              </li>
-              <li class="nav-item">
-                <button class="nav-link px-4 py-2 small fw-semibold" id="pills-export-tab" data-bs-toggle="pill" data-bs-target="#pills-export" type="button" role="tab">Export</button>
-              </li>
-            </ul>
+          <div class="tab-pane-box pf">
 
-            <div class="tab-content" id="pills-tabContent">
-              
-              <!-- IMPORT SUB-TAB (matching Screenshot 3) -->
-              <div class="tab-pane fade show active" id="pills-import" role="tabpanel">
-                <div class="text-secondary small mb-4" style="line-height: 1.7; font-size: 13px;">
-                  Import your complete account progress, bookmarks, and in-progress laboratories from a JSON backup.<br>
-                  • Your backup file will be validated securely.<br>
-                  • If an imported laboratory exists in the platform, it will be restored immediately.<br>
-                  • This process will take a moment, please be patient.
+            <!-- Export -->
+            <section class="pf-card">
+              <header class="pf-card-head">
+                <div>
+                  <h2 class="pf-card-title">Export</h2>
+                  <p class="pf-card-desc">Download your solved labs and bookmarks as a JSON file.</p>
                 </div>
+                <a class="pf-btn pf-btn-ghost" href="/api/auth_api.php?action=export_account_data"><i class="bi bi-download"></i> Export</a>
+              </header>
+            </section>
 
-                <div id="importAlert" style="display:none;" class="alert py-2 px-3 small mb-3 border-0"></div>
-
-                <form id="importAccountForm" onsubmit="handleAccountImport(event)">
-                  <div class="profile-field-row">
-                    <div class="profile-field-label">Backup File (.json)</div>
-                    <div class="profile-field-control">
-                      <input type="file" id="importFileInput" class="form-control custom-profile-input" accept=".json">
-                    </div>
-                  </div>
-
-                  <div class="profile-field-row">
-                    <div class="profile-field-label">Or Paste JSON Data</div>
-                    <div class="profile-field-control">
-                      <textarea id="importJsonTextarea" class="form-control custom-profile-input font-monospace small" rows="4" placeholder='{"platform":"KrazePlanet Security", ...}'></textarea>
-                    </div>
-                  </div>
-
-                  <div class="profile-field-row">
-                    <div class="profile-field-label">Import mode</div>
-                    <div class="profile-field-control">
-                      <div class="d-flex gap-4 mb-2">
-                        <div class="form-check">
-                          <input class="form-check-input" type="radio" name="importModeRadio" id="modeMerge" value="merge" checked>
-                          <label class="form-check-label text-light small" for="modeMerge">Merge</label>
-                        </div>
-                        <div class="form-check">
-                          <input class="form-check-input" type="radio" name="importModeRadio" id="modeReplace" value="replace">
-                          <label class="form-check-label text-light small" for="modeReplace">Replace</label>
-                        </div>
-                      </div>
-                      <div class="text-secondary small" style="font-size: 11.5px; line-height: 1.5;">
-                        <strong>Merge:</strong> Merge your existing solved/bookmarked labs with the importing list.<br>
-                        <strong>Replace:</strong> Delete your current list then use the importing list.
-                      </div>
-                    </div>
-                  </div>
-
-                  <div class="profile-field-row mt-4">
-                    <div class="profile-field-label"></div>
-                    <div class="profile-field-control">
-                      <button type="submit" id="btnImportSubmit" class="btn-update-profile px-4">
-                        <i class="bi bi-box-arrow-in-down me-1"></i> Import
-                      </button>
-                    </div>
-                  </div>
-                </form>
-              </div>
-
-              <!-- EXPORT SUB-TAB (matching user requirement) -->
-              <div class="tab-pane fade" id="pills-export" role="tabpanel">
-                <div class="text-secondary small mb-4" style="line-height: 1.7; font-size: 13px;">
-                  Export all your account information, profile settings, solved laboratory records, bookmarks, and in-progress tasks into a secure JSON backup.<br>
-                  • Keep this file safe as a personal backup.<br>
-                  • You can restore your entire progress onto another browser or computer at any time.
+            <!-- Import -->
+            <section class="pf-card">
+              <header class="pf-card-head">
+                <div>
+                  <h2 class="pf-card-title">Import</h2>
+                  <p class="pf-card-desc">Upload a JSON file you exported from KrazePlanet.</p>
                 </div>
+              </header>
 
-                <div class="p-4 rounded-3 text-center" style="background: var(--card-inner); border: 1px dashed rgba(56, 189, 248, 0.3);">
-                  <i class="bi bi-file-earmark-arrow-down-fill text-info fs-1 mb-2 d-block"></i>
-                  <div class="fw-bold text-white mb-1">Export KrazePlanet Account Data</div>
-                  <p class="text-secondary small mb-3">Backup contains <?= $solvedCount ?> solved labs, <?= $bookmarkCount ?> bookmarks, and your active avatar & profile settings.</p>
-                  
-                  <a href="/api/auth_api.php?action=export_account_data" class="btn btn-primary px-4 py-2 fw-semibold" style="border-radius: 9px; box-shadow: 0 4px 15px rgba(2, 132, 199, 0.4);">
-                    <i class="bi bi-download me-1"></i> Download Backup JSON
-                  </a>
+              <form id="importAccountForm" class="pf-form" onsubmit="handleAccountImport(event)">
+                <div class="pf-field-row">
+                  <label class="ie-file" for="importFileInput" id="importDrop">
+                    <span class="ie-file-btn">Choose file</span>
+                    <span class="ie-file-name" id="importFileName">No file chosen</span>
+                    <input type="file" id="importFileInput" accept=".json,application/json" hidden>
+                  </label>
+                  <button type="submit" id="btnImportSubmit" class="pf-btn pf-btn-primary"><i class="bi bi-upload"></i> Import</button>
                 </div>
-              </div>
-
-            </div>
+                <label class="ie-check">
+                  <input type="checkbox" id="importReplace">
+                  <span>Replace my current progress <span class="ie-check-hint">(deletes your solved labs and bookmarks first)</span></span>
+                </label>
+                <div id="importAlert" class="pf-msg" role="status" aria-live="polite"></div>
+              </form>
+            </section>
 
           </div>
         <?php endif; ?>
@@ -780,13 +657,27 @@ elseif ($solvedCount >= 5) $rankTitle = "Apprentice Hunter";
 </div>
 
 <script>
+// Arriving from a lab's "Write Report" (profile.php?tab=profile#github): focus the GitHub field
+// Runs after load so the browser's own jump to #github doesn't override it.
+window.addEventListener('load', () => setTimeout(() => {
+  if (location.hash !== '#github') return;
+  const gh = document.getElementById('profileGithubRepo');
+  if (!gh) return;
+  gh.scrollIntoView({ block: 'center' });
+  gh.focus({ preventScroll: true });
+  gh.style.boxShadow = '0 0 0 3px rgba(56, 189, 248, 0.45)';
+  gh.addEventListener('blur', () => { gh.style.boxShadow = ''; }, { once: true });
+}, 60));
+
 function copyProfileUrl() {
   const el = document.getElementById('publicProfileUrl');
-  if (el) {
-    el.select();
-    navigator.clipboard.writeText(el.value);
-    alert('Public profile link copied to clipboard!');
-  }
+  const label = document.querySelector('#btnCopyProfile span');
+  if (!el) return;
+  navigator.clipboard.writeText(el.textContent.trim()).then(() => {
+    if (!label) return;
+    label.textContent = 'Copied!';
+    setTimeout(() => { label.textContent = 'Copy link'; }, 1600);
+  });
 }
 
 function showAlert(id, msg, isSuccess = false) {
@@ -803,106 +694,142 @@ function showAlert(id, msg, isSuccess = false) {
 function handleProfileUpdate(e) {
   e.preventDefault();
   const btn = document.getElementById('btnProfileUpdateSubmit');
+  const msg = document.getElementById('profileUpdateAlert');
+  const status = document.getElementById('githubStatus');
+  const ghInput = document.getElementById('profileGithubRepo');
+  const say = (text, ok) => { msg.className = 'pf-msg ' + (ok ? 'ok' : 'err'); msg.textContent = text; };
   btn.disabled = true;
-  btn.innerText = 'Updating...';
+  btn.textContent = 'Saving...';
 
+  // The Profile tab only saves the GitHub repository; everything else on it is read-only.
   const formData = new FormData();
-  formData.append('action', 'update_profile');
-  formData.append('email', document.getElementById('profileEmailInput').value.trim());
+  formData.append('action', 'update_github_repo');
+  formData.append('github_repo', ghInput.value.trim());
 
   fetch('/api/auth_api.php', { method: 'POST', body: formData })
     .then(r => r.json())
     .then(data => {
       btn.disabled = false;
-      btn.innerText = 'Update';
+      btn.textContent = 'Save';
       if (data.success) {
-        showAlert('profileUpdateAlert', 'Profile updated successfully!', true);
+        const repo = data.github_repo || '';
+        ghInput.value = repo; // show the cleaned-up link
+        status.textContent = repo ? 'Connected' : 'Not connected';
+        status.classList.toggle('is-on', !!repo);
+        say(repo ? 'Saved. Write Report will now use this repository.' : 'Disconnected. Write Report is turned off until you add a repository.', true);
         fetch('/navbar/portal.php?action=clear_profile_cache');
       } else {
-        showAlert('profileUpdateAlert', data.error || 'Failed to update profile.', false);
+        say(data.error || 'Could not save. Please try again.', false);
       }
     })
     .catch(() => {
       btn.disabled = false;
-      btn.innerText = 'Update';
-      showAlert('profileUpdateAlert', 'Network error.', false);
+      btn.textContent = 'Save';
+      say('Network error. Please try again.', false);
     });
 }
 
-function handleSettingsUpdate(e) {
-  e.preventDefault();
-  const btn = document.getElementById('btnSettingsSubmit');
-  btn.disabled = true;
-  btn.innerText = 'Saving...';
-
-  const formData = new FormData();
-  formData.append('action', 'update_settings');
-  formData.append('fullname', document.getElementById('settingsFullname').value.trim());
-  formData.append('email', document.getElementById('settingsEmail').value.trim());
-
-  fetch('/api/auth_api.php', { method: 'POST', body: formData })
+// Bookmarks: remove one without leaving the page.
+document.addEventListener('click', (e) => {
+  const btn = e.target.closest('.bm-remove');
+  if (!btn) return;
+  const row = btn.closest('.bm-row');
+  row.classList.add('is-removing');
+  const fd = new FormData();
+  fd.append('lab_id', btn.dataset.labId);
+  fetch('/navbar/portal.php?action=toggle_bookmark', { method: 'POST', body: fd })
     .then(r => r.json())
-    .then(data => {
-      btn.disabled = false;
-      btn.innerText = 'Save Settings';
-      if (data.success) {
-        showAlert('settingsAlert', 'Account settings saved successfully!', true);
-        fetch('/navbar/portal.php?action=clear_profile_cache');
-      } else {
-        showAlert('settingsAlert', data.error || 'Failed to update settings.', false);
+    .then(res => {
+      if (!res.success || res.isBookmarked) {
+        // It was already removed elsewhere (toggle added it back): undo that, then drop the row.
+        if (res.success && res.isBookmarked) return fetch('/navbar/portal.php?action=toggle_bookmark', { method: 'POST', body: fd }).then(r => r.json());
+        throw new Error(res.message || 'failed');
       }
+      return res;
+    })
+    .then(res => {
+      row.remove();
+      const n = (res.data && res.data.bookmarkedLabs) ? res.data.bookmarkedLabs.length : document.querySelectorAll('.bm-row').length;
+      document.getElementById('bmCount').textContent = n;
+      const tab = document.getElementById('tabBookmarkCount');
+      if (tab) { tab.textContent = n; tab.style.display = n ? '' : 'none'; }
+      const side = document.getElementById('sideBookmarkCount');
+      if (side) side.textContent = n;
+      if (!n) { document.getElementById('bmList').hidden = true; document.getElementById('bmEmpty').hidden = false; }
+      // Let an open labs page in another tab update too.
+      try {
+        const key = 'kp_lab_state_<?= (int)($_SESSION['user_id'] ?? 0) ?>';
+        const s = JSON.parse(localStorage.getItem(key) || '{}');
+        localStorage.setItem(key, JSON.stringify({ solvedLabs: res.data ? res.data.solvedLabs : (s.solvedLabs || []), bookmarkedLabs: res.data ? res.data.bookmarkedLabs : [] }));
+      } catch (_) {}
     })
     .catch(() => {
-      btn.disabled = false;
-      btn.innerText = 'Save Settings';
-      showAlert('settingsAlert', 'Network error.', false);
+      row.classList.remove('is-removing');
+      alert('Could not remove this bookmark. Please try again.');
     });
-}
+});
+
+// Backup file picker: show the chosen file's name, and accept drag & drop.
+(function () {
+  const drop = document.getElementById('importDrop');
+  const input = document.getElementById('importFileInput');
+  const nameEl = document.getElementById('importFileName');
+  if (!drop || !input) return;
+  const show = () => {
+    const f = input.files[0];
+    nameEl.textContent = f ? f.name : 'No file chosen';
+    drop.classList.toggle('has-file', !!f);
+  };
+  input.addEventListener('change', show);
+  ['dragenter', 'dragover'].forEach(t => drop.addEventListener(t, e => { e.preventDefault(); drop.classList.add('is-over'); }));
+  ['dragleave', 'drop'].forEach(t => drop.addEventListener(t, () => drop.classList.remove('is-over')));
+  drop.addEventListener('drop', e => {
+    e.preventDefault();
+    if (e.dataTransfer.files.length) { input.files = e.dataTransfer.files; show(); }
+  });
+})();
 
 function handleAccountImport(e) {
   e.preventDefault();
   const btn = document.getElementById('btnImportSubmit');
-  btn.disabled = true;
-  btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Importing...';
+  const msg = document.getElementById('importAlert');
+  const say = (text, ok) => { msg.className = 'pf-msg ' + (ok ? 'ok' : 'err'); msg.textContent = text; };
+  const idle = '<i class="bi bi-upload"></i> Import';
 
   const fileInput = document.getElementById('importFileInput');
-  const jsonTextarea = document.getElementById('importJsonTextarea');
-  const importMode = document.querySelector('input[name="importModeRadio"]:checked')?.value || 'merge';
+  const importMode = document.getElementById('importReplace').checked ? 'replace' : 'merge';
+
+  if (!fileInput.files.length) {
+    say('Choose a JSON file to import.', false);
+    return;
+  }
+  if (importMode === 'replace' && !confirm('Delete your current solved labs and bookmarks and import this file instead? This can\'t be undone.')) {
+    return;
+  }
 
   const formData = new FormData();
   formData.append('action', 'import_account_data');
   formData.append('import_mode', importMode);
+  formData.append('backup_file', fileInput.files[0]);
 
-  if (fileInput.files.length > 0) {
-    formData.append('backup_file', fileInput.files[0]);
-  } else if (jsonTextarea.value.trim()) {
-    formData.append('json_data', jsonTextarea.value.trim());
-  } else {
-    btn.disabled = false;
-    btn.innerHTML = '<i class="bi bi-box-arrow-in-down me-1"></i> Import';
-    showAlert('importAlert', 'Please select a backup file or paste JSON data.', false);
-    return;
-  }
-
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Importing...';
   fetch('/api/auth_api.php', { method: 'POST', body: formData })
     .then(r => r.json())
     .then(data => {
       btn.disabled = false;
-      btn.innerHTML = '<i class="bi bi-box-arrow-in-down me-1"></i> Import';
+      btn.innerHTML = idle;
       if (data.success) {
-        showAlert('importAlert', data.message, true);
-        // Clear profile cache so the reload shows fresh imported data
-        fetch('/navbar/portal.php?action=clear_profile_cache').finally(() => {
-          setTimeout(() => { location.reload(); }, 1500);
-        });
+        say(data.message + ' Refreshing...', true);
+        setTimeout(() => { location.reload(); }, 1500);
       } else {
-        showAlert('importAlert', data.error || 'Import failed.', false);
+        say(data.error || 'Could not import this file.', false);
       }
     })
     .catch(() => {
       btn.disabled = false;
-      btn.innerHTML = '<i class="bi bi-box-arrow-in-down me-1"></i> Import';
-      showAlert('importAlert', 'Network error during import.', false);
+      btn.innerHTML = idle;
+      say('Network error. Please try again.', false);
     });
 }
 </script>

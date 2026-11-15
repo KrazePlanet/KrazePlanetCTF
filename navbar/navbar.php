@@ -1,19 +1,13 @@
 <?php
-// navbar.php - Unified KrazePlanet Header Navigation with 5 Recent Notifications & Complete Dropdown Actions
+// navbar.php - KrazePlanet header: brand, menu links and the account menu
 require_once __DIR__ . '/../config/sso.php';
 startKrazeSession();
 
 $current_page = basename($_SERVER['PHP_SELF']);
 
-// Account details come from the session (filled at sign-in from the central
-// login server); notifications come from the central server, cached briefly.
+// Account details come from the session (filled at sign-in from the central login server).
 $user_email_display = $_SESSION['user_email'] ?? 'trainee@krazeplanet.com';
 $user_avatar = !empty($_SESSION['avatar']) ? $_SESSION['avatar'] : ('https://api.dicebear.com/7.x/adventurer/svg?seed=' . urlencode($_SESSION['username'] ?? 'User'));
-$recent_notifications = [];
-$unread_count = 0;
-
-// Notifications are lazy-loaded via JS (get_notifications in portal.php)
-// so the page renders without waiting for the SSO round-trip.
 
 $baseDomain = getKrazeBaseDomain();
 ?>
@@ -174,48 +168,6 @@ $baseDomain = getKrazeBaseDomain();
     color: #ffffff !important;
   }
 
-  /* Notification Bell with Purple Dot */
-  .btn-nav-notification {
-    background: rgba(30, 41, 59, 0.5);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    color: #94a3b8;
-    width: 38px;
-    height: 38px;
-    border-radius: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    position: relative;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    font-size: 1.15rem;
-  }
-
-  .btn-nav-notification:hover, .btn-nav-notification[aria-expanded="true"] {
-    background: rgba(56, 189, 248, 0.15);
-    border-color: rgba(56, 189, 248, 0.4);
-    color: #38bdf8;
-    box-shadow: 0 0 14px rgba(56, 189, 248, 0.25);
-  }
-
-  .notif-badge-purple {
-    position: absolute;
-    top: 6px;
-    left: 8px;
-    width: 7px;
-    height: 7px;
-    background: #a855f7;
-    border: 1.5px solid #0f172a;
-    border-radius: 50%;
-    box-shadow: 0 0 8px #a855f7;
-    animation: pulseGlow 2s infinite ease-in-out;
-  }
-
-  @keyframes pulseGlow {
-    0%, 100% { opacity: 1; transform: scale(1); }
-    50% { opacity: 0.5; transform: scale(1.2); }
-  }
-
   /* Profile Avatar Trigger Button */
   .btn-avatar-nav-trigger {
     background: transparent;
@@ -254,18 +206,27 @@ $baseDomain = getKrazeBaseDomain();
   .custom-nav-dropdown {
     background: #0f172a !important;
     border: 1px solid rgba(255, 255, 255, 0.12) !important;
-    border-radius: 0 !important;
-    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.9), 0 0 25px rgba(56, 189, 248, 0.15) !important;
+    border-radius: 14px !important;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.75), 0 0 0 1px rgba(56, 189, 248, 0.06) !important;
     padding: 6px !important;
-    min-width: 210px !important;
+    min-width: 240px !important;
+    margin-top: 10px !important;
   }
+
+  /* Who is signed in, at the top of the avatar menu */
+  .nav-menu-user { display: flex; align-items: center; gap: 12px; padding: 10px 10px 12px; margin-bottom: 4px; border-bottom: 1px solid rgba(255, 255, 255, 0.08); }
+  .nav-menu-user img { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; background: #1e293b; border: 2px solid rgba(56, 189, 248, 0.5); flex-shrink: 0; }
+  .nav-menu-user .nm-name { color: #fff; font-weight: 700; font-size: 14.5px; line-height: 1.25; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .nav-menu-user .nm-sub { color: #64748b; font-size: 12px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 170px; }
+  .nav-menu-user > div { min-width: 0; }
+  .custom-nav-dropdown .dropdown-divider { border-color: rgba(255, 255, 255, 0.08) !important; opacity: 1; margin: 6px 4px !important; }
 
   .custom-nav-dropdown .dropdown-item {
     color: #cbd5e1 !important;
     font-size: 14px !important;
     font-weight: 500 !important;
-    padding: 9px 14px !important;
-    border-radius: 0 !important;
+    padding: 9px 12px !important;
+    border-radius: 9px !important;
     display: flex !important;
     align-items: center !important;
     gap: 12px !important;
@@ -298,29 +259,6 @@ $baseDomain = getKrazeBaseDomain();
     color: #f87171 !important;
   }
 
-  .notif-dropdown-menu-box {
-    width: 330px !important;
-    padding: 0 !important;
-    overflow: hidden !important;
-  }
-
-  .notif-item-row {
-    display: flex;
-    gap: 10px;
-    padding: 10px 14px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-    text-decoration: none;
-    transition: background 0.15s ease;
-  }
-
-  .notif-item-row:hover {
-    background: rgba(255, 255, 255, 0.04);
-  }
-
-  .notif-item-row.unread {
-    background: rgba(56, 189, 248, 0.06);
-  }
-
   /* Below 1200px the menu is a drawer that slides in from the right */
   .vexium-navbar .navbar-toggler {
     border-radius: 0;
@@ -336,8 +274,10 @@ $baseDomain = getKrazeBaseDomain();
   }
 
   @media (max-width: 1199.98px) {
-    /* backdrop-filter would trap the fixed drawer inside the navbar box */
-    .vexium-navbar {
+    /* backdrop-filter would trap the fixed drawer inside the navbar box.
+       Same selector as the desktop rule above so this one actually wins. */
+    .vexium-navbar,
+    .vexium-navbar.navbar {
       backdrop-filter: none !important;
       -webkit-backdrop-filter: none !important;
       background: rgba(15, 23, 42, 0.97) !important;
@@ -456,11 +396,6 @@ $baseDomain = getKrazeBaseDomain();
     }
   }
 
-  @media (max-width: 400px) {
-    .notif-dropdown-menu-box {
-      width: calc(100vw - 24px) !important;
-    }
-  }
 </style>
 
 <nav class="navbar navbar-expand-xl navbar-dark sticky-top vexium-navbar">
@@ -496,8 +431,6 @@ $baseDomain = getKrazeBaseDomain();
       <!-- Right: Menu links -->
       <div class="nav-links-area ms-xl-auto my-2 my-xl-0">
         <div class="nav-pill-wrapper">
-          <a class="nav-pill-link <?php echo ($current_page === 'index.php' || $current_page === '') ? 'active' : ''; ?>" href="/index.php">Home</a>
-          <a class="nav-pill-link <?php echo ($current_page === 'assignments.php') ? 'active' : ''; ?>" href="/navbar/assignments.php">Assignments</a>
           <a class="nav-pill-link <?php echo ($current_page === 'scoreboard.php') ? 'active' : ''; ?>" href="/navbar/scoreboard.php">Scoreboard</a>
           <a class="nav-pill-link <?php echo ($current_page === 'https://academy.krazeplanet.com') ? 'active' : ''; ?>" href="https://academy.krazeplanet.com" target="_blank" rel="noopener noreferrer">Courses</a>
           <a class="nav-pill-link" href="https://kzctf.com" target="_blank" rel="noopener">CTF</a>
@@ -506,38 +439,11 @@ $baseDomain = getKrazeBaseDomain();
         </div>
       </div>
 
-      <!-- Right: 5 Latest Notifications & Exact Avatar Dropdown -->
+      <!-- Right: account menu -->
       <div id="navAuthArea" class="d-flex align-items-center gap-3 ms-xl-1 mt-2 mt-xl-0">
         <?php if (krazeLoggedIn()): ?>
           
-          <!-- 1. NOTIFICATION BELL (Shows only latest 5 notifications in popup) -->
-          <div class="dropdown">
-            <button class="btn btn-nav-notification" type="button" data-bs-toggle="dropdown" aria-expanded="false" title="Notifications">
-              <i class="bi bi-bell-fill"></i>
-              <span class="notif-badge-purple" id="navNotifDot" style="display:none"></span>
-            </button>
-
-            <div class="dropdown-menu dropdown-menu-dark dropdown-menu-end custom-nav-dropdown notif-dropdown-menu-box">
-              <div class="p-3 border-bottom border-secondary border-opacity-25 d-flex align-items-center justify-content-between">
-                <div class="fw-bold text-white small d-flex align-items-center gap-2">
-                  <i class="bi bi-bell-fill text-info"></i> Latest Notifications
-                </div>
-                <button type="button" class="btn btn-link p-0 text-secondary text-decoration-none small" style="font-size: 11px;" onclick="dismissNavNotif(event)">Mark read</button>
-              </div>
-
-              <div class="py-1" id="kp-notif-list" style="max-height: 280px; overflow-y: auto;">
-                <div class="text-center py-3 text-secondary small"><i class="bi bi-hourglass-split me-1"></i>Loading…</div>
-              </div>
-
-              <div class="p-2 border-top border-secondary border-opacity-25 text-center bg-dark bg-opacity-50">
-                <a href="/navbar/profile.php?tab=notifications" class="small text-info text-decoration-none fw-semibold" style="font-size: 11.5px;">
-                  View All Notifications in Profile &rarr;
-                </a>
-              </div>
-            </div>
-          </div>
-
-          <!-- 2. USER PROFILE AVATAR DROPDOWN -->
+          <!-- User avatar dropdown -->
           <div class="dropdown">
             <button class="btn btn-avatar-nav-trigger" type="button" data-bs-toggle="dropdown" aria-expanded="false" title="<?php echo htmlspecialchars($_SESSION['username'] ?? 'User'); ?>">
               <img src="<?php echo htmlspecialchars($user_avatar); ?>" alt="<?php echo htmlspecialchars($_SESSION['username'] ?? 'User'); ?>" class="navbar-user-avatar">
@@ -545,6 +451,13 @@ $baseDomain = getKrazeBaseDomain();
 
             <ul class="dropdown-menu dropdown-menu-dark dropdown-menu-end custom-nav-dropdown">
 
+              <li class="nav-menu-user">
+                <img src="<?php echo htmlspecialchars($user_avatar); ?>" alt="">
+                <div>
+                  <div class="nm-name"><?php echo htmlspecialchars($_SESSION['username'] ?? 'Student'); ?></div>
+                  <div class="nm-sub"><?php echo htmlspecialchars($_SESSION['user_email'] ?? 'Signed in'); ?></div>
+                </div>
+              </li>
 
               <!-- 1. Profile -->
               <li>
@@ -553,42 +466,23 @@ $baseDomain = getKrazeBaseDomain();
                 </a>
               </li>
 
-              <!-- 2. Continue (In-progress labs) -->
-              <li>
-                <a class="dropdown-item" href="/navbar/profile.php?tab=continue">
-                  <i class="bi bi-clock-history"></i> Continue
-                </a>
-              </li>
 
               <!-- 3. Bookmark List -->
               <li>
                 <a class="dropdown-item" href="/navbar/profile.php?tab=bookmarks">
-                  <i class="bi bi-bookmark-fill"></i> Bookmark List
-                </a>
-              </li>
-
-              <!-- 4. Notification (All notifications) -->
-              <li>
-                <a class="dropdown-item" href="/navbar/profile.php?tab=notifications">
-                  <i class="bi bi-bell-fill"></i> Notification
+                  <i class="bi bi-bookmark-fill"></i> Bookmarks
                 </a>
               </li>
 
               <!-- 5. List Import (Import & Export data) -->
               <li>
                 <a class="dropdown-item" href="/navbar/profile.php?tab=import">
-                  <i class="bi bi-box-arrow-in-right"></i> List Import
+                  <i class="bi bi-arrow-down-up"></i> Import / Export
                 </a>
               </li>
 
-              <!-- 6. Settings -->
-              <li>
-                <a class="dropdown-item" href="/navbar/profile.php?tab=settings">
-                  <i class="bi bi-gear-fill"></i> Settings
-                </a>
-              </li>
 
-              <li><hr class="dropdown-divider border-secondary border-opacity-25 my-1"></li>
+              <li><hr class="dropdown-divider"></li>
 
               <!-- 7. Logout -->
               <li>
@@ -599,12 +493,7 @@ $baseDomain = getKrazeBaseDomain();
             </ul>
           </div>
 
-        <?php else: ?>
-          <!-- Sign in on the central KrazePlanet login server -->
-          <a class="btn btn-vexium-login" href="<?= htmlspecialchars(krazeLoginUrl()) ?>" onclick="openLoginModal(event)">
-            <span>Login</span>
-          </a>
-        <?php endif; ?>
+        <?php endif; /* Every page requires sign-in (krazeRequireLogin), so there is no Login button. */ ?>
       </div>
 
     </div>
@@ -659,63 +548,6 @@ $baseDomain = getKrazeBaseDomain();
 
   window.kpNavDrawer = { open: () => setOpen(true), close: () => setOpen(false), isOpen: () => drawer.classList.contains('show') };
 })();
-
-function dismissNavNotif(e) {
-  if (e) e.preventDefault();
-  const dot = document.getElementById('navNotifDot');
-  if (dot) dot.style.display = 'none';
-  document.querySelectorAll('.notif-item-row.unread').forEach(item => item.classList.remove('unread'));
-}
-
-<?php if (krazeLoggedIn()): ?>
-// Lazy-load notifications after page render — avoids blocking the page on the SSO round-trip
-(function () {
-  function kpEsc(str) {
-    const d = document.createElement('div');
-    d.appendChild(document.createTextNode(String(str || '')));
-    return d.innerHTML;
-  }
-  function kpFmtDate(iso) {
-    try {
-      const d = new Date(iso);
-      const mo = d.toLocaleString('en-US', { month: 'short' });
-      const dy = d.getDate();
-      const hh = String(d.getHours()).padStart(2, '0');
-      const mm = String(d.getMinutes()).padStart(2, '0');
-      return mo + ' ' + dy + ', ' + hh + ':' + mm;
-    } catch (_) { return iso || ''; }
-  }
-  fetch('/navbar/portal.php?action=get_notifications')
-    .then(r => r.json())
-    .then(res => {
-      const list = document.getElementById('kp-notif-list');
-      const dot  = document.getElementById('navNotifDot');
-      if (!list) return;
-      const notifs = res.notifications || [];
-      const unread = notifs.filter(n => !n.is_read).length;
-      if (dot) dot.style.display = unread > 0 ? '' : 'none';
-      if (!notifs.length) {
-        list.innerHTML = '<div class="text-center py-3 text-secondary small">No notifications</div>';
-        return;
-      }
-      list.innerHTML = notifs.map(n => `
-        <a href="${kpEsc(n.link || 'assignments.php')}" class="notif-item-row ${n.is_read ? '' : 'unread'}">
-          <div class="rounded-circle ${kpEsc(n.icon_bg || 'bg-info bg-opacity-10 text-info')} p-2 d-flex align-items-center justify-content-center flex-shrink-0" style="width:32px;height:32px;font-size:13px;">
-            <i class="bi ${kpEsc(n.icon || 'bi-bell-fill')}"></i>
-          </div>
-          <div class="flex-grow-1" style="overflow:hidden;">
-            <div class="text-light fw-semibold small text-truncate" style="font-size:12.5px;">${kpEsc(n.title)}</div>
-            <div class="text-secondary small text-truncate" style="font-size:11px;">${kpEsc(n.message)}</div>
-            <div class="text-muted small mt-1" style="font-size:10px;"><i class="bi bi-clock me-1"></i>${kpEsc(kpFmtDate(n.created_at))}</div>
-          </div>
-        </a>`).join('');
-    })
-    .catch(() => {
-      const list = document.getElementById('kp-notif-list');
-      if (list) list.innerHTML = '<div class="text-center py-3 text-secondary small">Could not load notifications</div>';
-    });
-})();
-<?php endif; ?>
 
 function handleUserLogout(e) {
   if (e && e.preventDefault) e.preventDefault();

@@ -120,30 +120,6 @@ if ($pdo) {
             FOREIGN KEY (`user_id`) REFERENCES `users`(`id`) ON DELETE CASCADE
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci",
 
-        "CREATE TABLE IF NOT EXISTS `user_lab_history` (
-            `id` INT AUTO_INCREMENT PRIMARY KEY,
-            `user_id` INT NOT NULL,
-            `lab_id` VARCHAR(255) NOT NULL,
-            `lab_title` VARCHAR(500) DEFAULT NULL,
-            `lab_badge` VARCHAR(20) DEFAULT 'LAB',
-            `lab_category` VARCHAR(100) DEFAULT 'Web Security',
-            `lab_url` TEXT DEFAULT NULL,
-            `last_accessed_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            UNIQUE KEY `unique_user_lab_history` (`user_id`, `lab_id`),
-            FOREIGN KEY (`user_id`) REFERENCES `users`(`id`) ON DELETE CASCADE
-        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci",
-
-        "CREATE TABLE IF NOT EXISTS `user_notifications` (
-            `id` INT AUTO_INCREMENT PRIMARY KEY,
-            `user_id` INT DEFAULT NULL,
-            `title` VARCHAR(255) DEFAULT NULL,
-            `message` TEXT DEFAULT NULL,
-            `type` VARCHAR(50) DEFAULT 'info',
-            `is_read` TINYINT(1) DEFAULT 0,
-            `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            FOREIGN KEY (`user_id`) REFERENCES `users`(`id`) ON DELETE CASCADE
-        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci",
-
         "CREATE TABLE IF NOT EXISTS `lab_instances` (
             `id` INT AUTO_INCREMENT PRIMARY KEY,
             `user_id` INT NOT NULL,
@@ -152,18 +128,6 @@ if ($pdo) {
             `db_name` VARCHAR(255) DEFAULT NULL,
             `status` VARCHAR(50) DEFAULT 'active',
             FOREIGN KEY (`user_id`) REFERENCES `users`(`id`) ON DELETE CASCADE
-        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci",
-
-        "CREATE TABLE IF NOT EXISTS `tasks` (
-            `id` INT AUTO_INCREMENT PRIMARY KEY,
-            `title` VARCHAR(500) NOT NULL,
-            `description` TEXT DEFAULT NULL,
-            `category_name` VARCHAR(100) DEFAULT 'General',
-            `assigned_users` TEXT DEFAULT NULL,
-            `submission_date` DATETIME DEFAULT NULL,
-            `labs_json` TEXT DEFAULT NULL,
-            `created_by` INT DEFAULT NULL,
-            FOREIGN KEY (`created_by`) REFERENCES `users`(`id`) ON DELETE SET NULL
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci"
     ];
 

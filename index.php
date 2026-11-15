@@ -1,7 +1,6 @@
 <?php
 require_once __DIR__ . '/config/sso.php';
-startKrazeSession();
-$isAdmin = krazeIsAdmin();
+krazeRequireLogin();
 
 // Shared data for the labs listing
 $categories = json_decode(file_get_contents(__DIR__ . '/data/labs.json'), true) ?: [];
@@ -12,6 +11,50 @@ $e = fn($s) => htmlspecialchars((string)$s, ENT_QUOTES, 'UTF-8');
 // "Username/Email Enumeration" -> "username-email-enumeration"
 $catSlug = fn($name) => trim(preg_replace('/[^a-z0-9]+/', '-', strtolower($name)), '-');
 $blogUrl = fn($name) => 'https://blog.krazeplanet.com/templates/blog-post.html?id=' . rawurlencode($catSlug($name));
+
+// Per-lab slug, used by the Solution and Report links in each lab's actions menu.
+// "/subdomains/tutorialrepublic" -> "tutorialrepublic"; a full URL -> its first host label.
+$labSlug = function ($access) {
+    if (preg_match('#^/subdomains/([A-Za-z0-9_-]+)#', $access, $m)) return strtolower($m[1]);
+    $host = parse_url($access, PHP_URL_HOST);
+    return $host ? strtolower(explode('.', $host)[0]) : 'lab';
+};
+
+// Solution:  blog.krazeplanet.com/templates/blog-post.html?id=<slug>
+// Report:    github.com/<repo>/new/<branch>?filename=<slug>.md&value=<template>
+// The repo is the student's own, set on their profile ("GitHub repository").
+// Without one, "Write Report" shows a toast pointing to the profile instead.
+$reportRepo = '';
+$reportBranch = 'main';
+if (preg_match('#^https://github\.com/([A-Za-z0-9-]+/[A-Za-z0-9._-]+)(?:/tree/([A-Za-z0-9._/-]+))?$#', krazeGithubRepo(), $gm)) {
+    $reportRepo = $gm[1];
+    if (!empty($gm[2])) $reportBranch = $gm[2];
+}
+$labLinks = [
+    'solutionBase'   => 'https://blog.krazeplanet.com/templates/blog-post.html?id=',
+    'reportRepo'     => $reportRepo,
+    'reportBranch'   => $reportBranch,
+    'connectUrl'     => '/navbar/profile.php?tab=profile#github',
+    'reportTemplate' => <<<'MD'
+## Title
+<!-- Write a short, clear title describing the vulnerability and where it was found. Example: Stored XSS in User Profile -->
+
+## Description
+<!-- Explain what the vulnerability is, where it exists, and why it is a security issue. Include the affected URL or endpoint. -->
+
+## Steps to Reproduce
+<!-- Provide clear, numbered steps so another person can reproduce the issue. Include required requests, parameters, and actions. -->
+
+## POC (Proof of Concept)
+<!-- Add screenshots, HTTP requests/responses, payloads, or videos that demonstrate the vulnerability. -->
+
+## Impact
+<!-- Explain what an attacker could achieve, who could be affected, and the realistic security consequences. -->
+
+## Remediation
+<!-- Suggest specific steps to fix the vulnerability. Include secure coding practices or configuration changes where appropriate. -->
+MD,
+];
 ?>
 <!doctype html>
 <html lang="en">
@@ -272,6 +315,159 @@ $blogUrl = fn($name) => 'https://blog.krazeplanet.com/templates/blog-post.html?i
       color: #fbbf24;
     }
 
+    /* Per-lab "more actions" button + shared menu */
+    .btn-lab-menu {
+      width: 38px;
+      height: 36px;
+      border-radius: 10px;
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      color: #cbd5e1;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.05rem;
+      cursor: pointer;
+      transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+      flex: 0 0 auto;
+    }
+    .btn-lab-menu:hover,
+    .btn-lab-menu[aria-expanded="true"] {
+      background: rgba(255, 255, 255, 0.16);
+      border-color: rgba(52, 211, 153, 0.55);
+      color: #ffffff;
+    }
+    .btn-lab-menu:focus-visible { outline: 2px solid #34d399; outline-offset: 2px; }
+    .lab-card.menu-open { transform: none; }
+
+    .lab-menu {
+      position: fixed;
+      z-index: 1080;
+      width: 228px;
+      padding: 8px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      background: rgba(20, 29, 47, 0.97);
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      border-radius: 14px;
+      box-shadow: 0 14px 34px rgba(0, 0, 0, 0.55), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+      backdrop-filter: blur(12px);
+      animation: labMenuIn 0.14s ease-out;
+    }
+    @keyframes labMenuIn { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: none; } }
+    .lab-menu[hidden] { display: none; }
+    /* Each item is a pill, same look as the old "Mark Solved" button */
+    .lab-menu-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      width: 100%;
+      padding: 7px 14px;
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      border-radius: 10px;
+      color: #cbd5e1;
+      font-family: inherit;
+      font-size: 0.8rem;
+      font-weight: 600;
+      text-align: left;
+      text-decoration: none;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .lab-menu-item:hover,
+    .lab-menu-item:focus-visible {
+      background: rgba(255, 255, 255, 0.16);
+      border-color: rgba(255, 255, 255, 0.3);
+      color: #ffffff;
+      outline: none;
+    }
+    .lab-menu-item > i { font-size: 0.95rem; width: 16px; text-align: center; color: var(--ic, currentColor); }
+    .lab-menu-item .ext { margin-left: auto; font-size: 0.7rem; opacity: 0.6; color: currentColor; }
+    /* One accent per action, so each is recognisable by colour */
+    .lab-menu-item[data-act="bookmark"] { --ic: #fbbf24; }
+    .lab-menu-item[data-act="solved"]   { --ic: #34d399; }
+    .lab-menu-item[data-act="solution"] { --ic: #38bdf8; }
+    .lab-menu-item[data-act="report"]   { --ic: #a78bfa; }
+    /* Bookmark + Solved are on/off toggles: two compact buttons on one row */
+    .lab-menu-row { display: flex; gap: 6px; }
+    .lab-menu-row .lab-menu-item { justify-content: center; padding: 7px 8px; gap: 6px; }
+    .lab-menu-item.is-on-solved { background: rgba(16, 185, 129, 0.2); border-color: #10b981; color: #34d399; }
+    .lab-menu-item.is-on-solved:hover { background: rgba(16, 185, 129, 0.3); color: #6ee7b7; }
+    .lab-menu-item.is-on-bm { background: rgba(251, 191, 36, 0.14); border-color: rgba(251, 191, 36, 0.55); color: #fbbf24; }
+    .lab-menu-item.is-on-bm:hover { background: rgba(251, 191, 36, 0.24); color: #fcd34d; }
+    .lab-menu-sep { height: 1px; margin: 2px 4px; background: rgba(255, 255, 255, 0.1); }
+
+    /* "Write it up" nudge shown after a lab is marked solved */
+    .solve-nudge {
+      position: fixed;
+      left: 50%;
+      bottom: 24px;
+      z-index: 1090;
+      transform: translateX(-50%);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      max-width: calc(100vw - 32px);
+      padding: 10px 10px 10px 16px;
+      background: rgba(20, 29, 47, 0.98);
+      border: 1px solid rgba(16, 185, 129, 0.5);
+      border-radius: 14px;
+      box-shadow: 0 14px 34px rgba(0, 0, 0, 0.55), 0 0 22px rgba(16, 185, 129, 0.18);
+      color: #e2e8f0;
+      font-size: 0.85rem;
+      animation: nudgeIn 0.22s ease-out;
+    }
+    @keyframes nudgeIn { from { opacity: 0; transform: translate(-50%, 10px); } to { opacity: 1; transform: translateX(-50%); } }
+    .solve-nudge > i { color: #34d399; font-size: 1.1rem; }
+    .solve-nudge.is-warn { border-color: rgba(251, 191, 36, 0.55); box-shadow: 0 14px 34px rgba(0, 0, 0, 0.55), 0 0 22px rgba(251, 191, 36, 0.15); }
+    .solve-nudge.is-warn > i { color: #fbbf24; }
+    .solve-nudge span { min-width: 0; }
+    .solve-nudge a {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      white-space: nowrap;
+      padding: 7px 12px;
+      border-radius: 10px;
+      background: rgba(167, 139, 250, 0.16);
+      border: 1px solid rgba(167, 139, 250, 0.5);
+      color: #c4b5fd;
+      font-weight: 600;
+      font-size: 0.8rem;
+      text-decoration: none;
+    }
+    .solve-nudge a:hover { background: rgba(167, 139, 250, 0.26); color: #ddd6fe; }
+    .solve-nudge button {
+      border: 0;
+      background: transparent;
+      color: #94a3b8;
+      font-size: 1rem;
+      padding: 4px 6px;
+      cursor: pointer;
+    }
+    .solve-nudge button:hover { color: #fff; }
+    @media (max-width: 480px) {
+      .solve-nudge { flex-wrap: wrap; bottom: 80px; width: calc(100vw - 32px); }
+    }
+
+    /* State chips beside the difficulty tags (shown by .is-solved / .is-bookmarked) */
+    .lab-state-chip {
+      display: none;
+      align-items: center;
+      gap: 4px;
+      font-size: 0.7rem;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 6px;
+      line-height: 1.4;
+    }
+    .lab-state-chip.chip-solved { background: rgba(16, 185, 129, 0.18); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.45); }
+    .lab-state-chip.chip-bm { background: rgba(251, 191, 36, 0.14); color: #fbbf24; border: 1px solid rgba(251, 191, 36, 0.4); padding: 3px 6px; }
+    .lab-card.is-solved .chip-solved,
+    .lab-card.is-bookmarked .chip-bm { display: inline-flex; }
+
     #backToTopBtn:hover {
       transform: translateY(-4px) scale(1.08);
       box-shadow: 0 6px 25px rgba(16, 185, 129, 0.6) !important;
@@ -519,51 +715,40 @@ $blogUrl = fn($name) => 'https://blog.krazeplanet.com/templates/blog-post.html?i
       letter-spacing: 0.01em;
     }
 
+    /* Link to the real HackerOne report. Styled as an outlined link (not a solid
+       tag) in sky blue, so it can't be mistaken for the difficulty tag next to it. */
     .report-badge {
-      color: #ffffff;
-      background: linear-gradient(135deg, #be185d, #9d174d);
-      padding: 3px 8px;
-      border-radius: 5px;
+      color: #7dd3fc;
+      background: rgba(56, 189, 248, 0.08);
+      border: 1px solid rgba(56, 189, 248, 0.55);
+      padding: 3px 9px;
+      border-radius: 6px;
       text-decoration: none;
       font-weight: 700;
       font-size: 0.74rem;
-      font-family: var(--font-mono);
-      letter-spacing: 0.02em;
+      letter-spacing: 0.01em;
       flex-shrink: 0;
       cursor: pointer;
       display: inline-flex;
       align-items: center;
-      gap: 4px;
-      position: relative;
-      box-shadow: 0 2px 8px rgba(190, 24, 93, 0.4);
-      transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
-      animation: reportPulse 2.2s ease-in-out infinite;
+      gap: 5px;
+      line-height: 1.35;
+      transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease, transform 0.15s ease;
     }
-    /* External-link arrow cue — signals this badge opens a real HackerOne report */
-    .report-badge::after {
-      content: "\2197"; /* ↗ */
-      font-size: 0.82em;
-      line-height: 1;
-      transition: transform 0.15s ease;
-    }
+    .report-badge .bi { font-size: 0.85em; }
+    .report-badge .rb-num { font-family: var(--font-mono); font-weight: 600; opacity: 0.85; }
+    .report-badge .rb-ext { transition: transform 0.15s ease; }
     .report-badge:hover {
-      background: linear-gradient(135deg, #ec4899, #be185d);
-      color: #ffffff;
-      transform: translateY(-1px) scale(1.04);
-      box-shadow: 0 4px 20px rgba(236, 72, 153, 0.95);
-      animation-play-state: paused;
+      background: rgba(56, 189, 248, 0.2);
+      border-color: #38bdf8;
+      color: #e0f2fe;
+      transform: translateY(-1px);
     }
-    .report-badge:hover::after { transform: translate(2px, -2px); }
+    .report-badge:hover .rb-label { text-decoration: underline; text-underline-offset: 2px; }
+    .report-badge:hover .rb-ext { transform: translate(2px, -2px); }
     .report-badge:focus-visible {
-      outline: 2px solid #f9a8d4;
+      outline: 2px solid #38bdf8;
       outline-offset: 2px;
-    }
-    @keyframes reportPulse {
-      0%, 100% { box-shadow: 0 2px 8px rgba(190, 24, 93, 0.40); }
-      50%      { box-shadow: 0 2px 18px rgba(236, 72, 153, 0.85); }
-    }
-    @media (prefers-reduced-motion: reduce) {
-      .report-badge { animation: none; }
     }
 
     .lab-action {
@@ -859,15 +1044,6 @@ $blogUrl = fn($name) => 'https://blog.krazeplanet.com/templates/blog-post.html?i
       .lab-title {
         font-size: 1rem;
       }
-      #adminTaskDock {
-        width: calc(100% - 24px);
-        bottom: 12px;
-        flex-wrap: wrap;
-        justify-content: center;
-        gap: 10px;
-        padding: 10px 14px;
-        border-radius: 18px;
-      }
     }
 
     @media (max-width: 480px) {
@@ -881,96 +1057,6 @@ $blogUrl = fn($name) => 'https://blog.krazeplanet.com/templates/blog-post.html?i
         flex: 1 1 auto;
         justify-content: center;
       }
-    }
-  
-    /* Admin Lab Selection & Task Conversion Dock */
-    .admin-lab-select-wrapper {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      margin-left: 8px;
-      position: relative;
-    }
-    .admin-lab-checkbox {
-      appearance: none !important;
-      -webkit-appearance: none !important;
-      -moz-appearance: none !important;
-      width: 22px !important;
-      height: 22px !important;
-      cursor: pointer !important;
-      background: rgba(11, 19, 36, 0.85) !important;
-      border: 1.5px solid rgba(56, 189, 248, 0.4) !important;
-      border-radius: 6px !important;
-      outline: none !important;
-      display: inline-flex !important;
-      align-items: center !important;
-      justify-content: center !important;
-      position: relative !important;
-      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
-      box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.5), 0 2px 5px rgba(0, 0, 0, 0.2) !important;
-      vertical-align: middle !important;
-      margin: 0 !important;
-    }
-    .admin-lab-checkbox:hover {
-      border-color: #38bdf8 !important;
-      background: rgba(56, 189, 248, 0.15) !important;
-      box-shadow: 0 0 10px rgba(56, 189, 248, 0.4) !important;
-      transform: scale(1.08) !important;
-    }
-    .admin-lab-checkbox:checked {
-      background: linear-gradient(135deg, #0284c7, #38bdf8) !important;
-      border-color: #38bdf8 !important;
-      box-shadow: 0 0 12px rgba(56, 189, 248, 0.6) !important;
-      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23ffffff' stroke-width='3.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='20 6 9 17 4 12'%3E%3C/polyline%3E%3C/svg%3E") !important;
-      background-size: 14px 14px !important;
-      background-position: center !important;
-      background-repeat: no-repeat !important;
-      transform: scale(1.05) !important;
-    }
-    .admin-lab-checkbox:focus-visible {
-      box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.4), 0 0 12px rgba(56, 189, 248, 0.5) !important;
-    }
-    .lab-card.is-selected-for-task {
-      border-color: rgba(56, 189, 248, 0.6) !important;
-      background: linear-gradient(90deg, rgba(56, 189, 248, 0.08), rgba(15, 23, 42, 0.95)) !important;
-      box-shadow: 0 0 15px rgba(56, 189, 248, 0.15) !important;
-    }
-    .select-all-cat-btn {
-      background: rgba(56, 189, 248, 0.12);
-      color: #38bdf8;
-      border: 1px solid rgba(56, 189, 248, 0.25);
-      border-radius: 6px;
-      font-size: 11.5px;
-      font-weight: 600;
-      padding: 3px 10px;
-      transition: all 0.2s;
-      cursor: pointer;
-    }
-    .select-all-cat-btn:hover {
-      background: rgba(56, 189, 248, 0.25);
-      color: #ffffff;
-      border-color: #38bdf8;
-    }
-    #adminTaskDock {
-      position: fixed;
-      bottom: 25px;
-      left: 50%;
-      transform: translateX(-50%);
-      z-index: 1060;
-      background: rgba(15, 23, 42, 0.95);
-      border: 1px solid rgba(56, 189, 248, 0.4);
-      border-radius: 30px;
-      padding: 10px 24px;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6), 0 0 20px rgba(56, 189, 248, 0.25);
-      backdrop-filter: blur(16px);
-      display: none;
-      align-items: center;
-      gap: 16px;
-      animation: slideUpDock 0.3s ease-out;
-    }
-    @keyframes slideUpDock {
-      from { transform: translate(-50%, 50px); opacity: 0; }
-      to { transform: translate(-50%, 0); opacity: 1; }
     }
 
   
@@ -1036,19 +1122,20 @@ $blogUrl = fn($name) => 'https://blog.krazeplanet.com/templates/blog-post.html?i
 <?php foreach ($catLabs as $lab):
         $report = trim($lab['report'] ?? '');
         $diffCls = $difficultyClass[strtolower($lab['difficulty'])] ?? '';
-        $reportLabel = preg_match('~hackerone\.com/reports/(\d+)~', $report, $m) ? 'HackerOne #' . $m[1] : 'BugBountyTip';
+        $isH1 = (bool)preg_match('~hackerone\.com/reports/(\d+)~', $report, $m);
+        $reportLabel = $isH1 ? 'HackerOne Report' : 'BugBountyTip';
+        $reportNum = $isH1 ? $m[1] : '';
 ?>
-      <div class="lab-card">
+      <div class="lab-card" data-lab-slug="<?= $e($labSlug($lab['access'])) ?>">
         <div class="lab-badge"><?= $icon ?> LAB</div>
         <div class="lab-content">
           <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
             <span class="difficulty-tag <?= $diffCls ?>"><?= $e($lab['difficulty']) ?></span>
 <?php if ($report !== ''): ?>
-            <span class="difficulty-tag" style="background:#6366f1;color:#fff;">Real World</span>
-            <a href="<?= $e($report) ?>" target="_blank" rel="noopener noreferrer" class="report-badge"><?= $e($reportLabel) ?></a>
-<?php else: ?>
-            <span class="difficulty-tag" style="background:#0D9488;color:#fff;">Training</span>
+            <a href="<?= $e($report) ?>" target="_blank" rel="noopener noreferrer" class="report-badge" title="Read the original bug report"><i class="bi bi-file-earmark-text"></i><span class="rb-label"><?= $e($reportLabel) ?></span><?php if ($reportNum !== ''): ?><span class="rb-num">#<?= $e($reportNum) ?></span><?php endif; ?><i class="bi bi-box-arrow-up-right rb-ext"></i></a>
 <?php endif; ?>
+            <span class="lab-state-chip chip-solved"><i class="bi bi-check-circle-fill"></i> Solved</span>
+            <span class="lab-state-chip chip-bm" title="Bookmarked"><i class="bi bi-star-fill"></i></span>
           </div>
           <div class="lab-title"><?= $e($lab['title']) ?></div>
         </div>
@@ -1061,85 +1148,6 @@ $blogUrl = fn($name) => 'https://blog.krazeplanet.com/templates/blog-post.html?i
 <?php endforeach; ?>
   </main>
 
-
-  
-  <?php if ($isAdmin): ?>
-    <!-- Floating Admin Task Action Dock -->
-    <div id="adminTaskDock">
-      <div class="d-flex align-items-center gap-2">
-        <span class="badge" style="background: rgba(56, 189, 248, 0.2); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.4); font-size: 13px; padding: 6px 12px; border-radius: 20px;">
-          🎯 <span id="selectedLabsCount">0</span> Labs Selected
-        </span>
-        <span id="selectedCategoryPreview" class="badge" style="background: rgba(16, 185, 129, 0.15); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.3); font-size: 12px;"></span>
-      </div>
-      <button type="button" id="openTaskModalFromSelectionBtn" class="btn btn-sm btn-primary px-3 py-2 fw-bold d-flex align-items-center gap-2" style="background: linear-gradient(135deg, #0284c7, #0369a1); border: none; border-radius: 20px; box-shadow: 0 4px 15px rgba(2, 132, 199, 0.4);">
-        <i class="bi bi-plus-circle-fill"></i>
-        <span>Create Assignment from Selection &rarr;</span>
-      </button>
-      <button type="button" id="clearLabSelectionBtn" class="btn btn-sm btn-outline-secondary px-3 py-1" style="border-radius: 20px; font-size: 12px;">
-        Clear
-      </button>
-    </div>
-
-    <!-- Admin Task Creation Modal from Selected Labs -->
-    <div class="modal fade" id="adminCreateTaskModal" tabindex="-1" aria-hidden="true">
-      <div class="modal-dialog modal-dialog-centered modal-lg">
-        <div class="modal-content" style="background: #0f172a; border: 1px solid rgba(56, 189, 248, 0.3); border-radius: 18px; color: #fff; box-shadow: 0 20px 50px rgba(0,0,0,0.8);">
-          <div class="modal-header border-bottom border-secondary border-opacity-25 pb-3">
-            <h5 class="modal-title fw-bold text-white d-flex align-items-center gap-2">
-              <i class="bi bi-clipboard-plus-fill text-info"></i> Create & Assign Assignment from Selected Labs
-            </h5>
-            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-          </div>
-
-          <form id="adminSelectionTaskForm">
-            <div class="modal-body p-4">
-              <div id="adminTaskAlert" class="alert alert-danger py-2 px-3 small" style="display: none; border-radius: 8px;"></div>
-
-              <div class="mb-3">
-                <label class="form-label small fw-semibold text-light mb-1">Assignment Title</label>
-                <input type="text" id="taskTitleAutoInput" class="form-control" placeholder="e.g. Create report for all of: HTML Injection (HTMLI)" required style="background:#070b14; border:1px solid rgba(255,255,255,0.14); color:#fff; font-weight:600;">
-              </div>
-
-              <div class="row g-3 mb-3">
-                <div class="col-md-6">
-                  <label class="form-label small fw-semibold text-light mb-1">Category Name</label>
-                  <input type="text" id="taskCategoryAutoInput" class="form-control" placeholder="e.g. HTML Injection (HTMLI)" required style="background:#070b14; border:1px solid rgba(255,255,255,0.14); color:#fff;">
-                </div>
-                <div class="col-md-6">
-                  <label class="form-label small fw-semibold text-light mb-1">Tag Users (with @)</label>
-                  <input type="text" id="taskUsersAutoInput" class="form-control" placeholder="e.g. @Tkamer @Anil" value="@Tkamer @Anil" required style="background:#070b14; border:1px solid rgba(255,255,255,0.14); color:#38bdf8; font-weight:600;">
-                </div>
-              </div>
-
-              <div class="mb-3">
-                <label class="form-label small fw-semibold text-light mb-1">Submission Deadline (Date & Time)</label>
-                <input type="datetime-local" id="taskDateAutoInput" class="form-control" required style="background:#070b14; border:1px solid rgba(255,255,255,0.14); color:#fff;">
-              </div>
-
-              <div class="mb-3">
-                <label class="form-label small fw-semibold text-light mb-1">Assignment Scope & Instructions</label>
-                <textarea id="taskDescAutoInput" class="form-control" rows="3" placeholder="Provide assignment instructions for trainees..." style="background:#070b14; border:1px solid rgba(255,255,255,0.14); color:#fff;">Complete penetration testing report for the selected laboratories. Document impact, payloads used, and remediation recommendations.</textarea>
-              </div>
-
-              <div class="mb-2">
-                <label class="form-label small fw-semibold text-light mb-1">Selected Labs Preview (<span id="modalSelectedLabsCount">0</span> labs)</label>
-                <div id="modalSelectedLabsPreview" class="p-3 rounded-3" style="background:#070b14; border:1px solid rgba(255,255,255,0.08); max-height:160px; overflow-y:auto; font-size:12.5px; display:flex; flex-direction:column; gap:6px;"></div>
-                <input type="hidden" id="taskLabsJsonAutoInput" value="[]">
-              </div>
-            </div>
-
-            <div class="modal-footer border-top border-secondary border-opacity-25 p-3">
-              <button type="button" class="btn btn-outline-secondary px-3" data-bs-dismiss="modal" style="border-radius: 8px;">Cancel</button>
-              <button type="submit" class="btn btn-primary px-4 fw-bold" style="background: linear-gradient(135deg, #0284c7, #0369a1); border:none; border-radius: 8px;">
-                Create & Assign Assignment &rarr;
-              </button>
-            </div>
-          </form>
-        </div>
-      </div>
-    </div>
-  <?php endif; ?>
 
   <?php include __DIR__ . '/footer/footer.php'; ?>
 
@@ -1253,32 +1261,7 @@ $blogUrl = fn($name) => 'https://blog.krazeplanet.com/templates/blog-post.html?i
 
           if (isBookmarked) card.classList.add('is-bookmarked');
           else card.classList.remove('is-bookmarked');
-
-          const starBtn = card.querySelector('.btn-star-toggle');
-          if (starBtn) {
-            if (isBookmarked) {
-              starBtn.classList.add('bookmarked');
-              starBtn.title = 'Remove bookmark';
-              starBtn.innerHTML = `<i class="bi bi-star-fill text-warning"></i>`;
-            } else {
-              starBtn.classList.remove('bookmarked');
-              starBtn.title = 'Bookmark lab';
-              starBtn.innerHTML = `<i class="bi bi-star"></i>`;
-            }
-          }
-
-          const solvedBtn = card.querySelector('.btn-solved-toggle');
-          if (solvedBtn) {
-            if (isSolved) {
-              solvedBtn.classList.add('solved');
-              solvedBtn.title = 'Click to mark as unsolved';
-              solvedBtn.innerHTML = `<i class="bi bi-check-circle-fill me-1"></i><span>Solved</span>`;
-            } else {
-              solvedBtn.classList.remove('solved');
-              solvedBtn.title = 'Click to mark as solved';
-              solvedBtn.innerHTML = `<i class="bi bi-circle me-1"></i><span>Mark Solved</span>`;
-            }
-          }
+          // The state chips next to the difficulty tags are shown by these two classes (CSS)
         });
       }
 
@@ -1286,41 +1269,21 @@ $blogUrl = fn($name) => 'https://blog.krazeplanet.com/templates/blog-post.html?i
       const solvedToggleControllers = {};
       const bookmarkToggleControllers = {};
 
-      // Inject Solved & Bookmark Toggle Buttons into every lab-card
-      allLabCards.forEach((card) => {
-        const labLink = card.querySelector('a.btn-ACCESS')?.getAttribute('data-lab-id') || '';
-        if (!labLink) return;
-
-        const labAction = card.querySelector('.lab-action');
-        if (!labAction) return;
-
-        // Star / Bookmark Button
-        const starBtn = document.createElement('button');
-        starBtn.type = 'button';
-        starBtn.className = 'btn-star-toggle';
-        starBtn.setAttribute('data-lab-id', labLink);
-        starBtn.title = 'Bookmark lab';
-        starBtn.innerHTML = `<i class="bi bi-star"></i>`;
-
-        starBtn.addEventListener('click', function(e) {
-          e.preventDefault();
-          e.stopPropagation();
-
-          if (typeof IS_USER_LOGGED_IN !== 'undefined' && !IS_USER_LOGGED_IN) {
-            if (typeof openLoginModal === 'function') {
-              openLoginModal();
-            } else {
-              const modalEl = document.getElementById('loginModal');
-              if (modalEl) {
-                const m = bootstrap.Modal.getOrCreateInstance(modalEl);
-                m.show();
-              }
-            }
-            return;
+      // Bookmark / Solved state changes, called from the per-lab actions menu
+      function promptLoginIfNeeded() {
+        if (typeof IS_USER_LOGGED_IN !== 'undefined' && !IS_USER_LOGGED_IN) {
+          if (typeof openLoginModal === 'function') {
+            openLoginModal();
+          } else {
+            const modalEl = document.getElementById('loginModal');
+            if (modalEl) bootstrap.Modal.getOrCreateInstance(modalEl).show();
           }
+          return true;
+        }
+        return false;
+      }
 
-          const targetLabId = this.getAttribute('data-lab-id');
-
+      function toggleBookmark(targetLabId) {
           // Abort any in-flight request for this lab
           if (bookmarkToggleControllers[targetLabId]) {
             bookmarkToggleControllers[targetLabId].abort();
@@ -1387,35 +1350,9 @@ $blogUrl = fn($name) => 'https://blog.krazeplanet.com/templates/blog-post.html?i
               updateBookmarkTabCount();
               updateSearch();
             });
-        });
+      }
 
-        // Solved Toggle Button
-        const solvedBtn = document.createElement('button');
-        solvedBtn.type = 'button';
-        solvedBtn.className = 'btn-solved-toggle';
-        solvedBtn.setAttribute('data-lab-id', labLink);
-        solvedBtn.title = 'Click to mark as solved';
-        solvedBtn.innerHTML = `<i class="bi bi-circle me-1"></i><span>Mark Solved</span>`;
-
-        solvedBtn.addEventListener('click', function(e) {
-          e.preventDefault();
-          e.stopPropagation();
-
-          if (typeof IS_USER_LOGGED_IN !== 'undefined' && !IS_USER_LOGGED_IN) {
-            if (typeof openLoginModal === 'function') {
-              openLoginModal();
-            } else {
-              const modalEl = document.getElementById('loginModal');
-              if (modalEl) {
-                const m = bootstrap.Modal.getOrCreateInstance(modalEl);
-                m.show();
-              }
-            }
-            return;
-          }
-
-          const targetLabId = this.getAttribute('data-lab-id');
-
+      function toggleSolved(targetLabId, card) {
           // Abort any in-flight request for this lab (rapid clicking sends stale toggles)
           if (solvedToggleControllers[targetLabId]) {
             solvedToggleControllers[targetLabId].abort();
@@ -1499,11 +1436,192 @@ $blogUrl = fn($name) => 'https://blog.krazeplanet.com/templates/blog-post.html?i
               updateProgressBar();
               updateSearch();
             });
+      }
+
+      // ---- Per-lab actions menu (Bookmark, Mark Solved, Solution, Report) ----
+      // One shared menu lives in <body>: lab cards use overflow:hidden and a hover
+      // transform, which would clip or mis-position a menu placed inside them.
+      const LAB_LINKS = <?= json_encode($labLinks, JSON_HEX_TAG | JSON_HEX_AMP | JSON_UNESCAPED_SLASHES) ?>;
+
+      function solutionUrl(slug) {
+        return LAB_LINKS.solutionBase + encodeURIComponent(slug);
+      }
+      // Template with the lab's title and URL already filled in, so students start from something
+      function reportBody(card) {
+        const title = card.querySelector('.lab-title')?.textContent.trim() || '';
+        const url = card.querySelector('a.btn-ACCESS')?.href || '';
+        return LAB_LINKS.reportTemplate
+          .replace(/^## Title\n/m, `## Title\n${title}\n`)
+          .replace(/^## Description\n/m, `## Description\n**Affected URL:** ${url}\n`);
+      }
+      function reportUrl(slug, card) {
+        const q = new URLSearchParams({ filename: slug + '.md', value: reportBody(card) });
+        return `https://github.com/${LAB_LINKS.reportRepo}/new/${LAB_LINKS.reportBranch}?${q}`;
+      }
+
+      const labMenu = document.createElement('div');
+      labMenu.id = 'labActionsMenu';
+      labMenu.className = 'lab-menu';
+      labMenu.setAttribute('role', 'menu');
+      labMenu.hidden = true;
+      document.body.appendChild(labMenu);
+      let labMenuTrigger = null;
+
+      function closeLabMenu(returnFocus) {
+        if (labMenu.hidden) return;
+        labMenu.hidden = true;
+        if (labMenuTrigger) {
+          labMenuTrigger.setAttribute('aria-expanded', 'false');
+          labMenuTrigger.closest('.lab-card')?.classList.remove('menu-open');
+          if (returnFocus) labMenuTrigger.focus();
+        }
+        labMenuTrigger = null;
+      }
+
+      function positionLabMenu(trigger) {
+        const r = trigger.getBoundingClientRect();
+        const mw = labMenu.offsetWidth, mh = labMenu.offsetHeight;
+        let left = Math.min(r.right - mw, window.innerWidth - mw - 8);
+        left = Math.max(8, left);
+        let top = r.bottom + 6;
+        if (top + mh > window.innerHeight - 8 && r.top - mh - 6 > 8) top = r.top - mh - 6;
+        labMenu.style.left = left + 'px';
+        labMenu.style.top = top + 'px';
+      }
+
+      function openLabMenu(trigger) {
+        const card = trigger.closest('.lab-card');
+        const labId = trigger.getAttribute('data-lab-id');
+        const slug = card.getAttribute('data-lab-slug');
+        const bm = bookmarkedLabs.includes(labId);
+        const solved = solvedLabs.includes(labId);
+
+        labMenu.innerHTML = `
+          <div class="lab-menu-row">
+            <button type="button" role="menuitemcheckbox" aria-checked="${bm}" class="lab-menu-item${bm ? ' is-on-bm' : ''}" data-act="bookmark" title="${bm ? 'Remove bookmark' : 'Save this lab for later'}">
+              <i class="bi ${bm ? 'bi-star-fill' : 'bi-star'}"></i><span>${bm ? 'Saved' : 'Bookmark'}</span>
+            </button>
+            <button type="button" role="menuitemcheckbox" aria-checked="${solved}" class="lab-menu-item${solved ? ' is-on-solved' : ''}" data-act="solved" title="${solved ? 'Click to mark as unsolved' : 'Click to mark as solved'}">
+              <i class="bi ${solved ? 'bi-check-circle-fill' : 'bi-circle'}"></i><span>Solved</span>
+            </button>
+          </div>
+          <div class="lab-menu-sep" role="separator"></div>
+          <a role="menuitem" class="lab-menu-item" data-act="solution" href="${solutionUrl(slug)}" target="_blank" rel="noopener noreferrer" title="Step-by-step walkthrough">
+            <i class="bi bi-lightbulb"></i><span>Solution</span><i class="bi bi-box-arrow-up-right ext"></i>
+          </a>
+          ${LAB_LINKS.reportRepo
+            ? `<a role="menuitem" class="lab-menu-item" data-act="report" href="${reportUrl(slug, card)}" target="_blank" rel="noopener noreferrer" title="New report file in ${LAB_LINKS.reportRepo}">
+                 <i class="bi bi-file-earmark-text"></i><span>Write Report</span><i class="bi bi-box-arrow-up-right ext"></i>
+               </a>`
+            : `<button type="button" role="menuitem" class="lab-menu-item" data-act="report" data-no-repo="1" title="Add your GitHub repository first">
+                 <i class="bi bi-file-earmark-text"></i><span>Write Report</span>
+               </button>`}`;
+
+        labMenu.querySelector('[data-act="bookmark"]').addEventListener('click', () => {
+          closeLabMenu(true);
+          if (!promptLoginIfNeeded()) toggleBookmark(labId);
+        });
+        labMenu.querySelector('[data-act="solved"]').addEventListener('click', () => {
+          closeLabMenu(true);
+          if (promptLoginIfNeeded()) return;
+          toggleSolved(labId, card);
+          if (!solved) showSolveNudge(slug, card);
+        });
+        labMenu.querySelectorAll('a.lab-menu-item').forEach(a => a.addEventListener('click', () => closeLabMenu(false)));
+        labMenu.querySelector('[data-no-repo]')?.addEventListener('click', () => {
+          closeLabMenu(true);
+          showConnectGithubToast();
         });
 
-        labAction.appendChild(starBtn);
-        labAction.appendChild(solvedBtn);
+        labMenuTrigger = trigger;
+        trigger.setAttribute('aria-expanded', 'true');
+        card.classList.add('menu-open');
+        labMenu.hidden = false;
+        positionLabMenu(trigger);
+      }
+
+      // Small toast at the bottom of the screen: message + one action link + close.
+      let solveNudgeTimer = null;
+      function showToast({ icon, tone, text, href, label, labelIcon, newTab }) {
+        document.getElementById('solveNudge')?.remove();
+        clearTimeout(solveNudgeTimer);
+        const n = document.createElement('div');
+        n.id = 'solveNudge';
+        n.className = 'solve-nudge' + (tone === 'warn' ? ' is-warn' : '');
+        n.setAttribute('role', 'status');
+        const target = newTab ? ' target="_blank" rel="noopener noreferrer"' : '';
+        n.innerHTML = `<i class="bi ${icon}"></i>
+          <span>${text}</span>
+          <a href="${href}"${target}><i class="bi ${labelIcon}"></i> ${label}</a>
+          <button type="button" aria-label="Dismiss"><i class="bi bi-x-lg"></i></button>`;
+        const close = () => { clearTimeout(solveNudgeTimer); n.remove(); };
+        n.querySelector('button').addEventListener('click', close);
+        n.querySelector('a').addEventListener('click', close);
+        n.addEventListener('mouseenter', () => clearTimeout(solveNudgeTimer));
+        n.addEventListener('mouseleave', () => { solveNudgeTimer = setTimeout(close, 4000); });
+        document.body.appendChild(n);
+        solveNudgeTimer = setTimeout(close, 9000);
+      }
+
+      // No GitHub repo on the profile yet: explain instead of opening GitHub
+      function showConnectGithubToast() {
+        showToast({ icon: 'bi-github', tone: 'warn',
+          text: 'Add your GitHub repository on your profile to write bug bounty reports.',
+          href: LAB_LINKS.connectUrl, label: 'Add GitHub repo', labelIcon: 'bi-person-gear' });
+      }
+
+      // After a lab is marked solved: suggest writing it up as a report
+      function showSolveNudge(slug, card) {
+        if (!LAB_LINKS.reportRepo) {
+          showToast({ icon: 'bi-check-circle-fill',
+            text: 'Nice work! Add your GitHub repository to write it up as a bug bounty report.',
+            href: LAB_LINKS.connectUrl, label: 'Add GitHub repo', labelIcon: 'bi-github' });
+          return;
+        }
+        showToast({ icon: 'bi-check-circle-fill',
+          text: 'Nice work! Write it up as a bug bounty report.',
+          href: reportUrl(slug, card), label: 'Write Report', labelIcon: 'bi-file-earmark-text', newTab: true });
+      }
+
+      allLabCards.forEach((card) => {
+        const labLink = card.querySelector('a.btn-ACCESS')?.getAttribute('data-lab-id') || '';
+        const labAction = card.querySelector('.lab-action');
+        if (!labLink || !labAction) return;
+
+        const trigger = document.createElement('button');
+        trigger.type = 'button';
+        trigger.className = 'btn-lab-menu';
+        trigger.setAttribute('data-lab-id', labLink);
+        trigger.setAttribute('aria-haspopup', 'menu');
+        trigger.setAttribute('aria-expanded', 'false');
+        trigger.setAttribute('aria-label', 'More actions');
+        trigger.title = 'Bookmark, mark solved, solution, report';
+        trigger.innerHTML = `<i class="bi bi-three-dots"></i>`;
+        trigger.addEventListener('click', (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          if (labMenuTrigger === trigger) { closeLabMenu(false); return; }
+          closeLabMenu(false);
+          openLabMenu(trigger);
+          if (e.detail === 0) labMenu.querySelector('.lab-menu-item')?.focus(); // opened by keyboard
+        });
+        labAction.appendChild(trigger);
       });
+
+      document.addEventListener('click', (e) => {
+        if (!labMenu.hidden && !labMenu.contains(e.target)) closeLabMenu(false);
+      });
+      window.addEventListener('resize', () => closeLabMenu(false));
+      window.addEventListener('scroll', () => { if (labMenuTrigger) positionLabMenu(labMenuTrigger); }, { passive: true });
+      labMenu.addEventListener('keydown', (e) => {
+        const items = Array.from(labMenu.querySelectorAll('.lab-menu-item'));
+        const i = items.indexOf(document.activeElement);
+        if (e.key === 'Escape') { e.preventDefault(); closeLabMenu(true); }
+        else if (e.key === 'ArrowDown') { e.preventDefault(); items[(i + 1) % items.length].focus(); }
+        else if (e.key === 'ArrowUp') { e.preventDefault(); items[(i - 1 + items.length) % items.length].focus(); }
+        else if (e.key === 'Tab') closeLabMenu(false);
+      });
+      document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeLabMenu(true); });
 
       // Apply cached state immediately after buttons are in the DOM
       if (solvedLabs.length || bookmarkedLabs.length) {
@@ -2021,232 +2139,28 @@ $blogUrl = fn($name) => 'https://blog.krazeplanet.com/templates/blog-post.html?i
       // Initial Fetch & Count Sync
       fetchUserState();
 
-      // --- Admin Selection & Task Auto-Generation Logic ---
-      const isAdminUser = <?php echo $isAdmin ? 'true' : 'false'; ?>;
-      
-      if (isAdminUser) {
-        // 1. Add "Select Category" buttons to all category titles
-        categoryTitles.forEach(catTitle => {
-          const catName = catTitle.getAttribute('data-category-name') || catTitle.childNodes[0]?.textContent?.trim() || catTitle.textContent.trim();
-          const selectCatBtn = document.createElement('button');
-          selectCatBtn.type = 'button';
-          selectCatBtn.className = 'select-all-cat-btn ms-3';
-          selectCatBtn.innerHTML = `<i class="bi bi-check2-square me-1"></i>Select Category`;
-          
-          selectCatBtn.addEventListener('click', function(e) {
-            e.preventDefault();
-            e.stopPropagation();
-            const labsList = catTitle.nextElementSibling;
-            if (!labsList) return;
-            const checkboxes = labsList.querySelectorAll('.admin-lab-checkbox');
-            const allChecked = Array.from(checkboxes).every(cb => cb.checked);
-            checkboxes.forEach(cb => {
-              cb.checked = !allChecked;
-              const card = cb.closest('.lab-card');
-              if (card) {
-                if (cb.checked) card.classList.add('is-selected-for-task');
-                else card.classList.remove('is-selected-for-task');
-              }
-            });
-            updateAdminTaskDock();
-          });
+      // Keep this page in sync with changes made elsewhere, with no reload:
+      //  - another tab on this site saved new progress (shared localStorage),
+      //  - the student came back with the Back button (page restored from memory),
+      //  - the student switched back to this tab (a change may have come from another site).
+      const kpTogglesPending = () => Object.keys(solvedToggleControllers).length + Object.keys(bookmarkToggleControllers).length > 0;
+      window.addEventListener('storage', (e) => {
+        if (e.key !== KP_STATE_KEY || !e.newValue) return;
+        try {
+          const s = JSON.parse(e.newValue);
+          solvedLabs = s.solvedLabs || [];
+          bookmarkedLabs = s.bookmarkedLabs || [];
+          updateAllLabCardsUI();
+          updateProgressBar();
+          updateBookmarkTabCount();
+          updateSearch();
+        } catch (_) {}
+      });
+      window.addEventListener('pageshow', (e) => { if (e.persisted) fetchUserState(); });
+      document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'visible' && !kpTogglesPending()) fetchUserState();
+      });
 
-          catTitle.appendChild(selectCatBtn);
-        });
-
-        // 2. Inject Checkbox into each lab card
-        allLabCards.forEach((card, idx) => {
-          const labAction = card.querySelector('.lab-action');
-          if (!labAction) return;
-
-          const checkWrapper = document.createElement('div');
-          checkWrapper.className = 'admin-lab-select-wrapper';
-          checkWrapper.title = 'Select lab for task assignment';
-          
-          const checkbox = document.createElement('input');
-          checkbox.type = 'checkbox';
-          checkbox.className = 'admin-lab-checkbox';
-          checkbox.setAttribute('data-card-index', idx);
-
-          checkbox.addEventListener('change', function() {
-            if (this.checked) card.classList.add('is-selected-for-task');
-            else card.classList.remove('is-selected-for-task');
-            updateAdminTaskDock();
-          });
-
-          checkWrapper.appendChild(checkbox);
-          labAction.appendChild(checkWrapper);
-        });
-
-        const adminTaskDock = document.getElementById('adminTaskDock');
-        const selectedLabsCountEl = document.getElementById('selectedLabsCount');
-        const selectedCategoryPreviewEl = document.getElementById('selectedCategoryPreview');
-        const openTaskModalBtn = document.getElementById('openTaskModalFromSelectionBtn');
-        const clearSelectionBtn = document.getElementById('clearLabSelectionBtn');
-
-        function getSelectedLabCards() {
-          const selectedCards = [];
-          document.querySelectorAll('.admin-lab-checkbox:checked').forEach(cb => {
-            const card = cb.closest('.lab-card');
-            if (card) selectedCards.push(card);
-          });
-          return selectedCards;
-        }
-
-        function updateAdminTaskDock() {
-          const selectedCards = getSelectedLabCards();
-          const count = selectedCards.length;
-
-          if (count > 0) {
-            adminTaskDock.style.display = 'flex';
-            selectedLabsCountEl.textContent = count;
-
-            // Detect primary category
-            const categories = new Set();
-            selectedCards.forEach(card => {
-              const labsList = card.closest('.labs-list');
-              if (labsList && labsList.previousElementSibling) {
-                const rawTitle = labsList.previousElementSibling.textContent.replace('Select Category', '').trim();
-                categories.add(rawTitle);
-              }
-            });
-
-            if (categories.size === 1) {
-              selectedCategoryPreviewEl.textContent = Array.from(categories)[0];
-              selectedCategoryPreviewEl.style.display = 'inline-block';
-            } else if (categories.size > 1) {
-              selectedCategoryPreviewEl.textContent = `${categories.size} Categories`;
-              selectedCategoryPreviewEl.style.display = 'inline-block';
-            } else {
-              selectedCategoryPreviewEl.style.display = 'none';
-            }
-          } else {
-            adminTaskDock.style.display = 'none';
-          }
-        }
-
-        if (clearSelectionBtn) {
-          clearSelectionBtn.addEventListener('click', function() {
-            document.querySelectorAll('.admin-lab-checkbox').forEach(cb => {
-              cb.checked = false;
-            });
-            document.querySelectorAll('.lab-card').forEach(c => c.classList.remove('is-selected-for-task'));
-            updateAdminTaskDock();
-          });
-        }
-
-        // Open Modal and prefill auto-extracted values
-        if (openTaskModalBtn) {
-          openTaskModalBtn.addEventListener('click', function() {
-            const selectedCards = getSelectedLabCards();
-            if (selectedCards.length === 0) return;
-
-            const labsData = [];
-            const categories = new Set();
-
-            selectedCards.forEach(card => {
-              const badgeText = card.querySelector('.lab-badge')?.textContent.trim() || 'LAB';
-              const diffTags = card.querySelectorAll('.difficulty-tag');
-              const diff = diffTags[0]?.textContent.trim() || 'Easy';
-              const type = diffTags[1]?.textContent.trim() || 'Training';
-              const titleEl = card.querySelector('.lab-title') || card.querySelector('.lab-content');
-              const fullTitle = titleEl ? titleEl.textContent.trim() : 'Lab';
-              
-              // Extract report link if any
-              const reportTag = card.querySelector('.report-tag') || card.querySelector('a[href*="hackerone.com"]');
-              const reportNum = reportTag ? reportTag.textContent.trim().replace('↗', '').trim() : '';
-              const reportUrl = reportTag ? reportTag.getAttribute('href') : '';
-              const labHref = card.querySelector('a.btn-ACCESS')?.getAttribute('data-lab-id') || '#';
-
-              // Clean title (remove report tag text and trailing arrows)
-              let cleanTitle = fullTitle.replace(reportNum, '').replace('→', '').replace('↗', '').trim();
-              if (diffTags.length > 0) {
-                diffTags.forEach(t => { cleanTitle = cleanTitle.replace(t.textContent.trim(), '').trim(); });
-              }
-
-              labsData.push({
-                badge: badgeText,
-                difficulty: diff,
-                type: type,
-                title: cleanTitle,
-                link: labHref,
-                report_num: reportNum,
-                report_url: reportUrl
-              });
-
-              const labsList = card.closest('.labs-list');
-              if (labsList && labsList.previousElementSibling) {
-                const rawTitle = labsList.previousElementSibling.textContent.replace('Select Category', '').trim();
-                categories.add(rawTitle);
-              }
-            });
-
-            const catName = categories.size === 1 ? Array.from(categories)[0] : (categories.size > 1 ? Array.from(categories).join(', ') : 'General');
-            const suggestedTitle = categories.size === 1 ? `Create report for all of: ${catName}` : `Security Report Assignment (${selectedCards.length} Labs)`;
-
-            document.getElementById('taskTitleAutoInput').value = suggestedTitle;
-            document.getElementById('taskCategoryAutoInput').value = catName;
-            document.getElementById('taskLabsJsonAutoInput').value = JSON.stringify(labsData);
-            document.getElementById('modalSelectedLabsCount').textContent = selectedCards.length;
-
-            // Automatically pick 48 hours / 2 days ahead at 23:59 (e.g. 18th -> 20th 23:59)
-            const deadline48h = new Date();
-            deadline48h.setDate(deadline48h.getDate() + 2);
-            deadline48h.setHours(23, 59, 0, 0);
-            const isoLocal = new Date(deadline48h.getTime() - deadline48h.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
-            document.getElementById('taskDateAutoInput').value = isoLocal;
-
-            // Render Preview Chips in Modal
-            const previewContainer = document.getElementById('modalSelectedLabsPreview');
-            previewContainer.innerHTML = '';
-            labsData.forEach(l => {
-              const item = document.createElement('div');
-              item.className = 'd-flex align-items-center justify-content-between text-white';
-              item.innerHTML = `<span><strong class="text-info">${l.badge}</strong>: ${l.title}</span><span class="badge bg-secondary">${l.difficulty}</span>`;
-              previewContainer.appendChild(item);
-            });
-
-            const modalEl = document.getElementById('adminCreateTaskModal');
-            if (modalEl) {
-              const modalInstance = bootstrap.Modal.getOrCreateInstance(modalEl);
-              modalInstance.show();
-            }
-          });
-        }
-
-        // Handle Admin Form Submission
-        const adminTaskForm = document.getElementById('adminSelectionTaskForm');
-        if (adminTaskForm) {
-          adminTaskForm.addEventListener('submit', function(e) {
-            e.preventDefault();
-            const alertEl = document.getElementById('adminTaskAlert');
-            alertEl.style.display = 'none';
-
-            const formData = new FormData();
-            formData.append('title', document.getElementById('taskTitleAutoInput').value.trim());
-            formData.append('category_name', document.getElementById('taskCategoryAutoInput').value.trim());
-            formData.append('assigned_users', document.getElementById('taskUsersAutoInput').value.trim());
-            formData.append('submission_date', document.getElementById('taskDateAutoInput').value);
-            formData.append('description', document.getElementById('taskDescAutoInput').value.trim());
-            formData.append('labs_json', document.getElementById('taskLabsJsonAutoInput').value.trim());
-
-            fetch('assignments.php?action=create_assignment', { method: 'POST', body: formData })
-              .then(res => res.json())
-              .then(res => {
-                if (res.success) {
-                  window.location.href = 'assignments.php';
-                } else {
-                  alertEl.textContent = res.message || 'Failed to create task.';
-                  alertEl.style.display = 'block';
-                }
-              })
-              .catch(err => {
-                alertEl.textContent = 'Server error occurred.';
-                alertEl.style.display = 'block';
-              });
-          });
-        }
-      }
 
       if (totalLabs > 0 && resultCount) {
         resultCount.textContent = `Showing all ${totalLabs} labs`;

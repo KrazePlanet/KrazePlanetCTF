@@ -10,6 +10,6 @@ setup.sh
 update.sh
 README.md
 config/mail.local.php
-# auth_api.php, contact.php and assignments.php load PHPMailer from here
+# auth_api.php and contact.php load PHPMailer from here
 subdomains/*
 !subdomains/PHPMailer

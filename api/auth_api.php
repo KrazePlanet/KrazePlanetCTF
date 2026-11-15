@@ -55,29 +55,15 @@ switch ($action) {
         }
         reply($res);
 
-    case 'update_settings':
-    case 'update_profile':
+    // Profile tab: the GitHub repository is the only thing a student can change there.
+    case 'update_github_repo':
         requireLogin();
-        if (trim($_POST['new_password'] ?? '') !== '' || (trim($_POST['email'] ?? '') !== '' && strcasecmp(trim($_POST['email']), $_SESSION['user_email'] ?? '') !== 0)) {
-            reply(['success' => false, 'error' => 'Email and password are changed on your KrazePlanet account page: ' . krazeSsoAccountUrl()]);
-        }
-        $res = krazeSsoCall('update_profile', ['fullname' => trim($_POST['fullname'] ?? ''), 'phone' => trim($_POST['phone'] ?? '')]);
+        $res = krazeSsoCall('update_profile', ['github_repo' => trim((string)($_POST['github_repo'] ?? ''))]);
         if (!empty($res['success'])) {
             krazeSetSessionUser($res['user']);
-            reply(['success' => true, 'message' => 'Settings updated successfully!']);
+            reply(['success' => true, 'github_repo' => $res['user']['github_repo'] ?? '']);
         }
         reply($res);
-
-    case 'record_lab_access':
-        requireLogin();
-        $labUrl = trim($_POST['lab_url'] ?? '');
-        reply(krazeSsoCall('record_access', [
-            'lab_id'       => trim($_POST['lab_id'] ?? '') ?: $labUrl,
-            'lab_title'    => trim($_POST['lab_title'] ?? ''),
-            'lab_badge'    => trim($_POST['lab_badge'] ?? 'LAB'),
-            'lab_category' => trim($_POST['lab_category'] ?? 'Web Security'),
-            'lab_url'      => $labUrl,
-        ]));
 
     case 'export_account_data':
         requireLogin();
@@ -98,9 +84,6 @@ switch ($action) {
             reply(['success' => false, 'error' => 'Invalid JSON backup format.']);
         }
         reply(krazeSsoCall('import', ['mode' => ($_POST['import_mode'] ?? 'merge') === 'replace' ? 'replace' : 'merge', 'data' => $data]));
-
-    case 'fetch_notifications':
-        reply(krazeSsoCall('notifications', ['limit' => intval($_GET['limit'] ?? 0)]));
 
     default:
         echo json_encode(['status' => 400, 'success' => false, 'error' => 'Invalid action.']);

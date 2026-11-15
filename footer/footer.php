@@ -140,8 +140,6 @@
       <div class="col-lg-2 col-md-3 col-6">
         <h6 class="footer-heading">COMPANY</h6>
         <ul class="footer-links">
-          <li><a href="index.php" class="footer-link">Home</a></li>
-          <li><a href="assignments.php" class="footer-link">Assignments</a></li>
           <li><a href="about.php" class="footer-link">About</a></li>
           <li><a href="https://academy.krazeplanet.com" target="_blank" rel="noopener noreferrer" class="footer-link">Courses</a></li>
         </ul>

@@ -35,10 +35,21 @@ function krazeSetSessionUser(array $user) {
     $_SESSION['user_email'] = $user['email'];
     $_SESSION['avatar']     = $user['avatar'];
     $_SESSION['role']       = $user['role'];
+    $_SESSION['github_repo'] = $user['github_repo'] ?? '';
+}
+
+// The student's GitHub repo for "Write Report". Sessions started before this
+// field existed don't have it yet, so fetch it once from the central server.
+function krazeGithubRepo() {
+    if (!array_key_exists('github_repo', $_SESSION) && krazeLoggedIn()) {
+        $me = krazeSsoCall('me');
+        $_SESSION['github_repo'] = !empty($me['success']) ? ($me['user']['github_repo'] ?? '') : '';
+    }
+    return (string)($_SESSION['github_repo'] ?? '');
 }
 
 function krazeLocalLogout() {
-    foreach (['sso_token', 'user_id', 'username', 'user_email', 'avatar', 'role', 'notif_cache'] as $k) {
+    foreach (['sso_token', 'user_id', 'username', 'user_email', 'avatar', 'role', 'github_repo'] as $k) {
         unset($_SESSION[$k]);
     }
 }
@@ -86,6 +97,17 @@ function krazeLoginUrl($return = '', $screen = '') {
     return '/sso/login.php?' . http_build_query($q);
 }
 
+// Every page needs a signed-in student: anyone else goes straight to the
+// central login and comes back to the page they asked for. Call it before any
+// output. The /sso/ pages (login, callback, logout) must not call it.
+function krazeRequireLogin() {
+    startKrazeSession();
+    if (krazeLoggedIn()) return;
+    header('Cache-Control: no-store');
+    header('Location: ' . krazeLoginUrl($_SERVER['REQUEST_URI'] ?? '/'));
+    exit;
+}
+
 // After login, only go back to a page on this site or one of its lab subdomains.
 function krazeSafeReturn($target) {
     $target = (string)$target;
@@ -97,15 +119,4 @@ function krazeSafeReturn($target) {
     $okHost = $host !== '' && ($host === $self || ($labBase !== '' && ($host === $labBase || substr($host, -strlen($labBase) - 1) === '.' . $labBase)));
     if ($okHost && in_array($p['scheme'] ?? '', ['http', 'https'], true)) return $target;
     return '/';
-}
-
-// Latest notifications for the navbar bell, cached for a minute so every page
-// view doesn't wait on the central server.
-function krazeRecentNotifications() {
-    $cache = $_SESSION['notif_cache'] ?? null;
-    if ($cache && $cache['at'] > time() - 60) return $cache['items'];
-    $res = krazeSsoCall('notifications', ['limit' => 5]);
-    $items = !empty($res['success']) ? $res['notifications'] : [];
-    if (krazeLoggedIn()) $_SESSION['notif_cache'] = ['at' => time(), 'items' => $items];
-    return $items;
 }

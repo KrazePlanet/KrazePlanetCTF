@@ -9,7 +9,7 @@ Cloudflare (proxied *.pwnedbox.site) ──TLS + origin-pull cert──> host ng
 
 - **Accounts live on the central login server**, shared by every KrazePlanet site.
   Login sends students to `login.krazeplanetsecurity.com` and back; solved labs,
-  bookmarks, scoreboard and assignments come from its API. This stack stores no
+  bookmarks and scoreboard come from its API. This stack stores no
   student data, so if this VPS goes down students carry on at any other site.
 
 - Each lab folder `subdomains/<lab>` is served at `https://<lab>.pwnedbox.site/`
@@ -29,7 +29,7 @@ On the VPS, as root:
 1. **Move this site's students to the central server.** Dump them here, then
    import on the central server (see its README, "Bringing in the existing sites"):
    ```bash
-   /opt/lampp/bin/mysqldump -uroot KrazePlanet users user_solved_labs user_bookmarks user_lab_history tasks > /root/pwnedbox.sql
+   /opt/lampp/bin/mysqldump -uroot KrazePlanet users user_solved_labs user_bookmarks > /root/pwnedbox.sql
    ```
 2. **Retire XAMPP** and close MySQL's port:
    ```bash
