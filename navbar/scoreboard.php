@@ -14,7 +14,9 @@ $current_page = 'scoreboard.php';
 $curYear  = (int)date('Y');
 $curMonth = (int)date('n');
 
-$isAllTime     = ($_GET['period'] ?? '') === 'all';
+// All time by default, so the board matches every profile's "All-time rank" and points.
+// A month is shown only when one is picked in "When" (?year=&month=).
+$isAllTime     = !isset($_GET['year']) && !isset($_GET['month']);
 $selectedYear  = isset($_GET['year'])  ? (int)$_GET['year']  : $curYear;
 $selectedMonth = isset($_GET['month']) ? (int)$_GET['month'] : $curMonth;
 if ($selectedMonth < 1 || $selectedMonth > 12) $selectedMonth = $curMonth;
