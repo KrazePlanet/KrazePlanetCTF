@@ -286,21 +286,17 @@ MD,
     .hp-diff.hard .hp-diff-bar span { background: #f87171; }
     .hp-diff.secure .hp-diff-top > span:first-child { color: #7dd3fc; }
     .hp-diff.secure .hp-diff-bar span { background: #38bdf8; }
-    @media (max-width: 400px) {
-      .hp-progress { gap: 16px; }
-      .hp-ring { width: 112px; height: 112px; }
-      .hp-ring-num { font-size: 1.7rem; }
-    }
-    .hp-split { display: flex; flex-wrap: wrap; gap: 6px 18px; font-size: 0.86rem; color: #a3b1c6; }
-    .hp-split strong { color: #f1f5f9; font-weight: 700; margin-left: 4px; }
+    /* Coloured dot in the Easy / Medium / Hard / Secure filter chips */
     .hp-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 6px; vertical-align: 1px; }
     .hp-dot.easy { background: #34d399; }
     .hp-dot.medium { background: #fbbf24; }
     .hp-dot.hard { background: #f87171; }
     .hp-dot.secure { background: #38bdf8; }
-    .hp-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
-    .hp-num { font-family: var(--font-heading); font-size: 1.85rem; font-weight: 800; color: #ffffff; line-height: 1.1; }
-    .hp-cap { font-size: 0.8rem; color: #94a3b8; line-height: 1.35; margin-top: 4px; }
+    @media (max-width: 400px) {
+      .hp-progress { gap: 16px; }
+      .hp-ring { width: 112px; height: 112px; }
+      .hp-ring-num { font-size: 1.7rem; }
+    }
 
     /* ---- Toolbar: search + difficulty ---- */
     .lab-toolbar {
@@ -361,7 +357,6 @@ MD,
       .hero-title { font-size: 1.7rem; }
       .hero-subtitle { font-size: 0.96rem; }
       .hero-btn { flex: 1 1 auto; justify-content: center; }
-      .hp-num { font-size: 1.45rem; }
       .lt-search { max-width: none; flex-basis: 100%; }
       .lab-toolbar { position: static; }
     }
@@ -1142,15 +1137,13 @@ MD,
   <main class="main-content-layout">
 
 <?php
-  // Numbers for the hero: labs per difficulty and how many recreate a public HackerOne report.
+  // Numbers for the hero's progress panel: labs per difficulty.
   $diffTotals = ['easy' => 0, 'medium' => 0, 'hard' => 0, 'secure' => 0];
-  $h1Count = 0;
   foreach ($categories as $catLabs) {
       foreach ((array)$catLabs as $lab) {
           $d = strtolower((string)($lab['difficulty'] ?? ''));
           $d = $d === 'high' ? 'hard' : $d;
           if (isset($diffTotals[$d])) $diffTotals[$d]++;
-          if (preg_match('~hackerone\.com/reports/\d+~', (string)($lab['report'] ?? ''))) $h1Count++;
       }
   }
   $signedIn = krazeLoggedIn();
@@ -1192,7 +1185,7 @@ MD,
       </div>
 
       <aside class="hero-panel">
-<?php if ($signedIn): ?>
+        <!-- Same for everyone: visitors see 0% (nothing solved yet) -->
         <div class="hp-label">Your progress</div>
         <div class="hp-progress">
           <!-- Ring: solved / all labs -->
@@ -1223,19 +1216,6 @@ MD,
 <?php endforeach; ?>
           </div>
         </div>
-<?php else: ?>
-        <div class="hp-stats">
-          <div><div class="hp-num"><?= (int)$labTotal ?></div><div class="hp-cap">hands-on labs</div></div>
-          <div><div class="hp-num"><?= count($categories) ?></div><div class="hp-cap">bug types</div></div>
-          <div><div class="hp-num"><?= (int)$h1Count ?></div><div class="hp-cap">from public HackerOne reports</div></div>
-        </div>
-        <div class="hp-split">
-          <div><span class="hp-dot easy"></span>Easy <strong><?= $diffTotals['easy'] ?></strong></div>
-          <div><span class="hp-dot medium"></span>Medium <strong><?= $diffTotals['medium'] ?></strong></div>
-          <div><span class="hp-dot hard"></span>Hard <strong><?= $diffTotals['hard'] ?></strong></div>
-          <div><span class="hp-dot secure"></span>Secure <strong><?= $diffTotals['secure'] ?></strong></div>
-        </div>
-<?php endif; ?>
       </aside>
     </section>
 
