@@ -143,12 +143,42 @@ function krazeReportPath($labId) {
 const KRAZE_REPORT_MIN_WORDS = 200;
 
 function krazeReportProblems($markdown, $labId) {
-    $text = preg_replace('/<!--.*?-->/s', '', str_replace("\r", '', (string)$markdown)); // template hints
-    // Split into sections by "## Heading"
+    // Split into sections by heading. A deeper heading belongs to the section above it:
+    // "## Proof of Concept" + "### Screenshot" + "### Payload" is all one POC section.
+    // Inside ``` code blocks nothing is special: a payload like  ...<!--  or a line
+    // starting with # is the student's content, not a comment or a heading.
+    // Only comments that start a line are removed (the template's grey hints).
     $sections = [];
     $current = null;
-    foreach (explode("\n", $text) as $line) {
-        if (preg_match('/^\s{0,3}#{1,6}\s*(.+?)\s*#*\s*$/', $line, $h)) { $current = strtolower($h[1]); $sections[$current] = ''; continue; }
+    $level = 0;
+    $fence = null;      // the ``` or ~~~ that opened the current code block
+    $inComment = false; // inside a multi-line <!-- hint -->
+    foreach (explode("\n", str_replace("\r", '', (string)$markdown)) as $line) {
+        if ($fence !== null) {
+            if (preg_match('/^\s{0,3}' . preg_quote($fence, '/') . '\s*$/', $line)) $fence = null;
+            if ($current !== null) $sections[$current] .= $line . "\n";
+            continue;
+        }
+        if ($inComment) {
+            if (strpos($line, '-->') !== false) $inComment = false;
+            continue;
+        }
+        if (preg_match('/^\s{0,3}(```+|~~~+)/', $line, $f)) {
+            $fence = $f[1];
+            if ($current !== null) $sections[$current] .= "\n";
+            continue;
+        }
+        if (preg_match('/^\s*<!--/', $line)) { // a hint line: <!-- ... --> (or the start of a longer one)
+            if (strpos($line, '-->') === false) $inComment = true;
+            continue;
+        }
+        if (preg_match('/^\s{0,3}(#{1,6})\s*(.+?)\s*#*\s*$/', $line, $h)) {
+            if ($current !== null && strlen($h[1]) > $level) { $sections[$current] .= $h[2] . "\n"; continue; }
+            $current = strtolower($h[2]);
+            $level = strlen($h[1]);
+            $sections[$current] = $sections[$current] ?? '';
+            continue;
+        }
         if ($current !== null) $sections[$current] .= $line . "\n";
     }
     $find = function (array $names) use ($sections) {
