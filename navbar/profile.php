@@ -294,6 +294,15 @@ $avatarUrl = $p['avatar'] ??('https://api.dicebear.com/7.x/adventurer/svg?seed='
     .gh-repo-actions { display: flex; gap: 8px; flex-shrink: 0; }
     .gh-flash { margin-top: 12px; }
     #ghEdit[hidden], #ghView[hidden] { display: none; }
+    /* Social links (settings) */
+    .soc-input { max-width: 520px; }
+    .soc-label { margin-top: 14px; }
+    .soc-actions { margin-top: 16px; }
+    /* Social icons (sidebar, public) */
+    .side-socials { display: flex; justify-content: center; gap: 10px; margin-top: 14px; }
+    .side-social { width: 38px; height: 38px; border-radius: 10px; display: inline-flex; align-items: center; justify-content: center; font-size: 17px;
+      color: #cbd5e1; background: rgba(255,255,255,.04); border: 1px solid var(--line); text-decoration: none; transition: color .15s ease, border-color .15s ease, background .15s ease; }
+    .side-social:hover { color: #fff; border-color: var(--accent); background: rgba(56,189,248,.08); }
     @media (max-width: 640px) {
       .gh-repo { flex-direction: column; align-items: stretch; padding: 12px; }
       .gh-repo-actions .pf-btn { flex: 1; }
@@ -363,6 +372,22 @@ $avatarUrl = $p['avatar'] ??('https://api.dicebear.com/7.x/adventurer/svg?seed='
         </div>
         <div class="side-name"><?= $e($p['username']) ?><?php if ($isOwn): ?><span class="you-tag">YOU</span><?php endif; ?></div>
         <div class="side-title"><?= $e($rankTitle) ?></div>
+<?php
+        // Social links the student chose to show (GitHub from their reports repo)
+        $socials = $p['socials'] ?? [];
+        $socialLinks = array_filter([
+            'github'   => !empty($socials['github'])   ? ['https://github.com/' . rawurlencode($socials['github']), 'bi-github', 'GitHub'] : null,
+            'x'        => !empty($socials['x'])        ? ['https://x.com/' . rawurlencode($socials['x']), 'bi-twitter-x', 'X (Twitter)'] : null,
+            'linkedin' => !empty($socials['linkedin']) ? ['https://www.linkedin.com/in/' . rawurlencode($socials['linkedin']), 'bi-linkedin', 'LinkedIn'] : null,
+        ]);
+?>
+<?php if ($socialLinks): ?>
+        <div class="side-socials">
+          <?php foreach ($socialLinks as [$href, $icon, $label]): ?>
+          <a class="side-social" href="<?= $e($href) ?>" target="_blank" rel="noopener me" title="<?= $e($p['username'] . ' on ' . $label) ?>" aria-label="<?= $e($label) ?>"><i class="bi <?= $icon ?>"></i></a>
+          <?php endforeach; ?>
+        </div>
+<?php endif; ?>
 
         <dl class="side-stats">
           <div class="side-row">
@@ -576,6 +601,30 @@ $avatarUrl = $p['avatar'] ??('https://api.dicebear.com/7.x/adventurer/svg?seed='
 <?php endif; ?>
         </section>
 
+        <!-- Social links: shown on the public profile (GitHub comes from the card above) -->
+        <section class="pf-card" id="socials">
+          <header class="pf-card-head">
+            <h2 class="pf-card-title"><i class="bi bi-share"></i> Social links</h2>
+          </header>
+          <p class="gh-lead">Shown on your public profile. Leave a box empty to hide it.</p>
+          <form id="socialsForm" onsubmit="saveSocials(event)">
+            <label class="pf-label" for="socialX">X (Twitter)</label>
+            <div class="gh-input soc-input">
+              <span class="gh-prefix">x.com/</span>
+              <input type="text" id="socialX" class="pf-input" value="<?= $e($account['x'] ?? '') ?>" placeholder="your-username" autocomplete="off" autocapitalize="off" spellcheck="false" maxlength="100">
+            </div>
+            <label class="pf-label soc-label" for="socialLinkedin">LinkedIn</label>
+            <div class="gh-input soc-input">
+              <span class="gh-prefix">linkedin.com/in/</span>
+              <input type="text" id="socialLinkedin" class="pf-input" value="<?= $e($account['linkedin'] ?? '') ?>" placeholder="your-name" autocomplete="off" autocapitalize="off" spellcheck="false" maxlength="200">
+            </div>
+            <div class="soc-actions">
+              <button type="submit" id="btnSaveSocials" class="pf-btn pf-btn-primary">Save</button>
+            </div>
+            <div id="socialsMsg" class="pf-msg" role="status" aria-live="polite"></div>
+          </form>
+        </section>
+
         <section class="pf-card">
           <header class="pf-card-head">
             <div>
@@ -639,6 +688,34 @@ document.getElementById('profileGithubRepo')?.addEventListener('paste', (e) => {
     setTimeout(() => flash.remove(), 400);
   }, 4000);
 })();
+
+// Social links: a pasted profile link works too, the login server keeps just the handle
+function saveSocials(e) {
+  e.preventDefault();
+  const btn = document.getElementById('btnSaveSocials');
+  const msg = document.getElementById('socialsMsg');
+  const x = document.getElementById('socialX');
+  const li = document.getElementById('socialLinkedin');
+  const say = (text, kind) => { msg.className = 'pf-msg ' + kind; msg.textContent = text; };
+  btn.disabled = true;
+  btn.textContent = 'Saving...';
+  const fd = new FormData();
+  fd.append('action', 'update_socials');
+  fd.append('x', x.value.trim());
+  fd.append('linkedin', li.value.trim());
+  fetch('/api/auth_api.php', { method: 'POST', body: fd })
+    .then(r => r.json())
+    .then(data => {
+      btn.disabled = false;
+      btn.textContent = 'Save';
+      if (!data.success) { say(data.error || 'Could not save. Please try again.', 'err'); return; }
+      x.value = data.x || '';           // show the cleaned-up handles
+      li.value = data.linkedin || '';
+      say('Saved. Your public profile shows these links now.', 'ok');
+      setTimeout(() => { msg.className = 'pf-msg'; msg.textContent = ''; }, 4000);
+    })
+    .catch(() => { btn.disabled = false; btn.textContent = 'Save'; say('Network error. Please try again.', 'err'); });
+}
 
 // "Change" swaps the repository view for the username box (and back on Cancel)
 function toggleGhEdit(editing) {

@@ -73,6 +73,19 @@ switch ($action) {
         }
         reply($res);
 
+    // Settings tab: X (Twitter) and LinkedIn, shown on the public profile.
+    // The login server cleans them up (a pasted link becomes just the handle).
+    case 'update_socials':
+        requireLogin();
+        $res = krazeSsoCall('update_profile', [
+            'x'        => trim((string)($_POST['x'] ?? '')),
+            'linkedin' => trim((string)($_POST['linkedin'] ?? '')),
+        ]);
+        if (!empty($res['success'])) {
+            reply(['success' => true, 'x' => $res['user']['x'] ?? '', 'linkedin' => $res['user']['linkedin'] ?? '']);
+        }
+        reply($res);
+
     default:
         echo json_encode(['status' => 400, 'success' => false, 'error' => 'Invalid action.']);
         exit;
