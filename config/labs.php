@@ -79,17 +79,23 @@ function krazeRepoHasReadme($username) {
     return null;
 }
 
-// The README text: a live progress card for the student (api/card.php: their ring,
-// % solved, points, rank and Easy/Medium/Hard/Secure bars, always current), and
-// links back to their profile and the scoreboard.
+// The README text. At the top: the student's live progress card (api/card.php: their
+// ring, % solved, points, rank and Easy/Medium/Hard/Secure bars, always current).
+// Then live badges (api/badge.php via shields.io) and links back to the site.
 function krazeReadmeText($kpUser) {
     $site = rtrim(krazeSiteUrl('/'), '/');
     $hub = 'https://labs.krazeplanet.com/';
     $profile = $site . '/navbar/profile.php?user=' . rawurlencode($kpUser);
     $board = $site . '/navbar/scoreboard.php?period=all';
     $card = $site . '/api/card.php?user=' . rawurlencode($kpUser);
+    $badge = fn($type, $alt) => '<img src="https://img.shields.io/endpoint?style=for-the-badge&url='
+        . rawurlencode($site . '/api/badge.php?user=' . rawurlencode($kpUser) . '&type=' . $type) . '" alt="' . $alt . '">';
 
     return <<<MD
+<p align="center">
+  <a href="{$site}/"><img src="{$card}" alt="KrazePlanet Labs: free, hands-on web security labs" width="100%"></a>
+</p>
+
 <h1 align="center">KrazePlanet Reports</h1>
 
 <p align="center">
@@ -98,7 +104,9 @@ function krazeReadmeText($kpUser) {
 </p>
 
 <p align="center">
-  <a href="{$profile}"><img src="{$card}" alt="My progress on KrazePlanet Labs" width="100%"></a>
+  <a href="{$profile}">{$badge('points', 'Points')}</a>
+  <a href="{$profile}">{$badge('solved', 'Labs solved')}</a>
+  <a href="{$board}">{$badge('rank', 'Rank')}</a>
 </p>
 
 <p align="center">
