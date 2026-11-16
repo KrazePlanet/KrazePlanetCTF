@@ -62,23 +62,6 @@ function krazeRepoExists($username) {
     return null;
 }
 
-// Does the student's KrazePlanet-Reports repository have a README yet?
-// true / false, or null if GitHub couldn't be reached. HEAD = the default branch;
-// an empty repository (no commits) has none, so that's false too.
-function krazeRepoHasReadme($username) {
-    $ch = curl_init('https://raw.githubusercontent.com/' . $username . '/' . KRAZE_REPORTS_REPO . '/HEAD/README.md?kp=' . bin2hex(random_bytes(4)));
-    curl_setopt_array($ch, [
-        CURLOPT_RETURNTRANSFER => true, CURLOPT_FOLLOWLOCATION => false, CURLOPT_RANGE => '0-63',
-        CURLOPT_CONNECTTIMEOUT => 4, CURLOPT_TIMEOUT => 6, CURLOPT_USERAGENT => 'KrazePlanet-readme-check',
-    ]);
-    curl_exec($ch);
-    $status = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-    curl_close($ch);
-    if ($status === 200 || $status === 206) return true;
-    if ($status === 404) return false;
-    return null;
-}
-
 // The README text. At the top: the student's live progress card (api/card.php: their
 // ring, % solved, points, rank and Easy/Medium/Hard/Secure bars, always current).
 // Then live badges (api/badge.php via shields.io) and links back to the site.
