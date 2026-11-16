@@ -11,6 +11,17 @@ function krazeLabSlug($access) {
     return $host ? strtolower(explode('.', $host)[0]) : 'lab';
 }
 
+// "Source code" in a lab's ⋯ menu: the lab's folder in the public KrazePlanetLabs repo,
+// built from its "access" in data/labs.json:
+//   "/subdomains/tutorialrepublic" -> github.com/KrazePlanet/KrazePlanetLabs/tree/main/subdomains/tutorialrepublic
+// Labs on their own domain ("https://...") have no folder there, so they get no link ('').
+const KRAZE_LAB_CODE_REPO = 'KrazePlanet/KrazePlanetLabs';
+
+function krazeLabCodeUrl($access) {
+    return preg_match('#^/subdomains/([A-Za-z0-9_-]+)#', (string)$access, $m)
+        ? 'https://github.com/' . KRAZE_LAB_CODE_REPO . '/tree/main/subdomains/' . $m[1] : '';
+}
+
 // Every student keeps their reports in a repository with this same name, so all we
 // ask for is their GitHub username: github.com/<username>/KrazePlanet-Reports
 const KRAZE_REPORTS_REPO = 'KrazePlanet-Reports';
@@ -68,24 +79,17 @@ function krazeRepoHasReadme($username) {
     return null;
 }
 
-// GitHub's "new file" page with README.md already named and written, so adding it
-// is one click on "Commit changes". Works on an empty repository too.
-// The README: a screenshot of the labs (hosted on this site), live badges for the
-// student's points / labs solved / rank (api/badge.php via shields.io), and links
-// back to their profile and the scoreboard.
-function krazeReadmeUrl($githubUser, $kpUser) {
+// The README text: a live progress card for the student (api/card.php: their ring,
+// % solved, points, rank and Easy/Medium/Hard/Secure bars, always current), and
+// links back to their profile and the scoreboard.
+function krazeReadmeText($kpUser) {
     $site = rtrim(krazeSiteUrl('/'), '/');
     $hub = 'https://labs.krazeplanet.com/';
     $profile = $site . '/navbar/profile.php?user=' . rawurlencode($kpUser);
     $board = $site . '/navbar/scoreboard.php?period=all';
-    $badge = fn($type, $alt) => '<img src="https://img.shields.io/endpoint?style=for-the-badge&url='
-        . rawurlencode($site . '/api/badge.php?user=' . rawurlencode($kpUser) . '&type=' . $type) . '" alt="' . $alt . '">';
+    $card = $site . '/api/card.php?user=' . rawurlencode($kpUser);
 
-    $text = <<<MD
-<p align="center">
-  <a href="{$site}/"><img src="{$site}/assets/github/krazeplanet-labs.png" alt="KrazePlanet Labs: free, hands-on web security labs" width="100%"></a>
-</p>
-
+    return <<<MD
 <h1 align="center">KrazePlanet Reports</h1>
 
 <p align="center">
@@ -94,9 +98,7 @@ function krazeReadmeUrl($githubUser, $kpUser) {
 </p>
 
 <p align="center">
-  <a href="{$profile}">{$badge('points', 'Points')}</a>
-  <a href="{$profile}">{$badge('solved', 'Labs solved')}</a>
-  <a href="{$board}">{$badge('rank', 'Rank')}</a>
+  <a href="{$profile}"><img src="{$card}" alt="My progress on KrazePlanet Labs" width="100%"></a>
 </p>
 
 <p align="center">
@@ -107,7 +109,7 @@ function krazeReadmeUrl($githubUser, $kpUser) {
 
 ## About
 
-Every `.md` file in this repository is one lab I solved. Each report covers:
+Every report is one lab I solved, in a folder for its bug type (for example `Cross-Site Scripting/`). Each report covers:
 
 - **The bug**: what the vulnerability is
 - **How I found it**: the steps to reproduce it
@@ -118,38 +120,129 @@ Every `.md` file in this repository is one lab I solved. Each report covers:
 KrazePlanet Labs are free and need nothing installed. [Start with an Easy lab]({$site}/) and see how many you can solve.
 
 MD;
-    return 'https://github.com/' . $githubUser . '/' . KRAZE_REPORTS_REPO . '/new/main?filename=README.md&value=' . rawurlencode($text);
 }
 
-// A lab only counts as solved once the student has written its report:
-// <their GitHub repo>/<branch>/<lab slug>.md must exist and not be empty
-// (the same file "Write Report" creates). $repo is the profile's GitHub link.
+// GitHub's "new file" page with README.md already named and written, so adding it
+// is one click on "Commit changes". Works on an empty repository too.
+function krazeReadmeUrl($githubUser, $kpUser) {
+    return 'https://github.com/' . $githubUser . '/' . KRAZE_REPORTS_REPO . '/new/main?filename=README.md&value=' . rawurlencode(krazeReadmeText($kpUser));
+}
+
+// Reports are grouped in one folder per bug type (the category in data/labs.json):
+//   "Cross-Site Scripting" + /subdomains/tutorialrepublic -> Cross-Site Scripting/tutorialrepublic.md
+// A "/" in a category would make a sub-folder, so it becomes "-":
+//   "Username/Email Enumeration" -> "Username-Email Enumeration"
+function krazeReportFolder($category) {
+    return trim(str_replace(['/', '\\'], '-', (string)$category));
+}
+
+// The report file for a lab, inside the student's KrazePlanet-Reports repository.
+function krazeReportPath($labId) {
+    $category = krazeLabCatalog()['byId'][$labId]['category'] ?? '';
+    $file = krazeLabSlug($labId) . '.md';
+    return $category !== '' ? krazeReportFolder($category) . '/' . $file : $file;
+}
+
+// A report must be the student's own work, not the empty template:
+//  - Description, Steps to Reproduce, POC and Impact each have the student's own text
+//    (the grey <!-- hints --> and the pre-filled "**Affected URL:**" line don't count);
+//  - Steps to Reproduce or POC mention the lab's address (e.g. "tutorialrepublic.");
+//  - at least KRAZE_REPORT_MIN_WORDS words, not counting the title (pre-filled with the lab's name).
+// Returns a list of problems in plain English; empty list = the report is fine.
+const KRAZE_REPORT_MIN_WORDS = 200;
+
+function krazeReportProblems($markdown, $labId) {
+    $text = preg_replace('/<!--.*?-->/s', '', str_replace("\r", '', (string)$markdown)); // template hints
+    // Split into sections by "## Heading"
+    $sections = [];
+    $current = null;
+    foreach (explode("\n", $text) as $line) {
+        if (preg_match('/^\s{0,3}#{1,6}\s*(.+?)\s*#*\s*$/', $line, $h)) { $current = strtolower($h[1]); $sections[$current] = ''; continue; }
+        if ($current !== null) $sections[$current] .= $line . "\n";
+    }
+    $find = function (array $names) use ($sections) {
+        foreach ($sections as $heading => $body) foreach ($names as $n) if (strpos($heading, $n) !== false) return $body;
+        return null;
+    };
+    $wordsIn = fn($s) => preg_match_all('/[\p{L}\p{N}][\p{L}\p{N}\'’._\/:@=?&%-]*/u', (string)$s);
+    // The pre-filled "**Affected URL:** https://..." line is not the student's writing
+    $own = fn($s) => trim(preg_replace('/^\s*\**\s*affected url:?\s*\**:?.*$/mi', '', (string)$s));
+
+    $required = [
+        'Description'        => ['description'],
+        'Steps to Reproduce' => ['steps', 'reproduce'],
+        'POC'                => ['poc', 'proof of concept'],
+        'Impact'             => ['impact'],
+    ];
+    $problems = [];
+    $empty = [];
+    foreach ($required as $label => $names) {
+        $body = $find($names);
+        if ($body === null || $wordsIn($own($body)) === 0) $empty[] = $label;
+    }
+    if ($empty) $problems[] = 'Write the ' . implode(', ', $empty) . (count($empty) > 1 ? ' sections.' : ' section.');
+
+    // Proof the student worked in this lab: its address in the steps or the proof of concept
+    $host = (string)parse_url(krazeLabUrl($labId), PHP_URL_HOST);
+    $needle = preg_match('#^/subdomains/#', (string)$labId) ? explode('.', $host)[0] . '.' : $host;
+    $evidence = $own($find(['steps', 'reproduce']) ?? '') . "\n" . ($find(['poc', 'proof of concept']) ?? '');
+    if ($host !== '' && stripos($evidence, $needle) === false) {
+        $problems[] = 'Include the lab\'s address (' . $host . ') in Steps to Reproduce or POC.';
+    }
+
+    $words = 0;
+    foreach ($sections as $heading => $body) if (strpos($heading, 'title') === false) $words += $wordsIn($own($body));
+    if ($words < KRAZE_REPORT_MIN_WORDS) {
+        $problems[] = 'Write at least ' . KRAZE_REPORT_MIN_WORDS . ' words of your own (you have ' . $words . ').';
+    }
+    return $problems;
+}
+
+// GitHub's editor for a report file, so a student can fix it in one click
+function krazeReportEditUrl($blobUrl) {
+    return preg_replace('#^(https://github\.com/[^/]+/[^/]+)/blob/#', '$1/edit/', (string)$blobUrl);
+}
+
+// A lab only counts as solved once the student has written its report: the file
+// "Write Report" creates (<Category>/<slug>.md) must exist and not be empty.
+// Reports saved before the folders existed (<slug>.md at the top) still count.
+// $repo is the profile's GitHub link.
 // Returns ['ok' => true, 'url' => ...] or
-//         ['ok' => false, 'reason' => 'no_repo'|'no_report'|'unreachable', 'url' => ...].
+//         ['ok' => false, 'reason' => 'no_repo'|'no_report'|'unreachable', 'url' => ...] or
+//         ['ok' => false, 'reason' => 'weak_report', 'url' => <edit link>, 'problems' => [...]].
 function krazeReportCheck($labId, $repo) {
     if (!preg_match('#^https://github\.com/([A-Za-z0-9-]+/[A-Za-z0-9._-]+)(?:/tree/([A-Za-z0-9._/-]+))?$#', (string)$repo, $m)) {
         return ['ok' => false, 'reason' => 'no_repo'];
     }
     $branch = !empty($m[2]) ? $m[2] : 'main';
-    $file = krazeLabSlug($labId) . '.md';
-    $pageUrl = "https://github.com/{$m[1]}/blob/{$branch}/{$file}";
-    // raw.githubusercontent.com returns the file itself; the unique query skips GitHub's
-    // cache so a report written a moment ago is found straight away.
-    $ch = curl_init("https://raw.githubusercontent.com/{$m[1]}/{$branch}/" . rawurlencode($file) . '?kp=' . bin2hex(random_bytes(4)));
-    curl_setopt_array($ch, [
-        CURLOPT_RETURNTRANSFER => true,
-        CURLOPT_FOLLOWLOCATION => false,
-        CURLOPT_CONNECTTIMEOUT => 4,
-        CURLOPT_TIMEOUT        => 8,
-        CURLOPT_RANGE          => '0-4095', // the first few KB is enough to know it isn't empty
-        CURLOPT_USERAGENT      => 'KrazePlanet-report-check',
-    ]);
-    $body = curl_exec($ch);
-    $status = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-    curl_close($ch);
-    if ($body === false || $status === 0 || $status >= 500) return ['ok' => false, 'reason' => 'unreachable', 'url' => $pageUrl];
-    if (($status === 200 || $status === 206) && trim((string)$body) !== '') return ['ok' => true, 'url' => $pageUrl];
-    return ['ok' => false, 'reason' => 'no_report', 'url' => $pageUrl];
+    $paths = array_unique([krazeReportPath($labId), krazeLabSlug($labId) . '.md']);
+    $encode = fn($path) => implode('/', array_map('rawurlencode', explode('/', $path)));
+    $pageUrl = fn($path) => "https://github.com/{$m[1]}/blob/{$branch}/" . $encode($path);
+
+    $unreachable = false;
+    foreach ($paths as $path) {
+        // raw.githubusercontent.com returns the file itself; the unique query skips GitHub's
+        // cache so a report written a moment ago is found straight away.
+        $ch = curl_init("https://raw.githubusercontent.com/{$m[1]}/{$branch}/" . $encode($path) . '?kp=' . bin2hex(random_bytes(4)));
+        curl_setopt_array($ch, [
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_FOLLOWLOCATION => false,
+            CURLOPT_CONNECTTIMEOUT => 4,
+            CURLOPT_TIMEOUT        => 8,
+            CURLOPT_RANGE          => '0-262143', // up to 256 KB: the whole report text
+            CURLOPT_USERAGENT      => 'KrazePlanet-report-check',
+        ]);
+        $body = curl_exec($ch);
+        $status = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        curl_close($ch);
+        if ($body === false || $status === 0 || $status >= 500) { $unreachable = true; continue; }
+        if (($status === 200 || $status === 206) && trim((string)$body) !== '') {
+            $problems = krazeReportProblems($body, $labId);
+            if ($problems) return ['ok' => false, 'reason' => 'weak_report', 'url' => krazeReportEditUrl($pageUrl($path)), 'problems' => $problems];
+            return ['ok' => true, 'url' => $pageUrl($path)];
+        }
+    }
+    return ['ok' => false, 'reason' => $unreachable ? 'unreachable' : 'no_report', 'url' => $pageUrl($paths[0])];
 }
 
 function krazeLabCatalog() {

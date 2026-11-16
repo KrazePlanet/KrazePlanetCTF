@@ -120,7 +120,9 @@ if ($isOwn && $account) {
     if ($legacyRepo !== '') $ghState = 'legacy';
     elseif ($ghUser !== '') $ghState = ($tab === 'settings' && krazeRepoExists($ghUser) === false) ? 'missing' : 'ok';
     // Repo is there but has no README yet: offer a ready-made one (only shown when we're sure)
-    $needsReadme = $ghState === 'ok' && $tab === 'settings' && krazeRepoHasReadme($ghUser) === false;
+    // README button is always shown: "Edit README" when the repo has one, else "Add README"
+    // (a ready-made one; GitHub can't add a second README.md, so it would fail if one exists)
+    $hasReadme = $ghState === 'ok' && $tab === 'settings' && krazeRepoHasReadme($ghUser) === true;
     $accountPageUrl = krazeSsoAccountUrl();
     $publicPath = '/navbar/profile.php?user=' . urlencode($myName);
     $publicUrl = krazeSiteUrl($publicPath);
@@ -294,15 +296,10 @@ $avatarUrl = $p['avatar'] ??('https://api.dicebear.com/7.x/adventurer/svg?seed='
     .gh-repo-link:hover { color: var(--accent) !important; }
     .gh-repo-actions { display: flex; gap: 8px; flex-shrink: 0; }
     .gh-flash { margin-top: 12px; }
-    .gh-readme { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-top: 12px; padding: 12px 12px 12px 16px; border-radius: 12px; background: rgba(56,189,248,.06); border: 1px solid rgba(56,189,248,.22); }
-    .gh-readme-text { font-size: 14px; color: #cbd5e1; display: flex; align-items: center; gap: 9px; }
-    .gh-readme-text i { color: var(--accent); }
     #ghEdit[hidden], #ghView[hidden] { display: none; }
     @media (max-width: 640px) {
       .gh-repo { flex-direction: column; align-items: stretch; padding: 12px; }
       .gh-repo-actions .pf-btn { flex: 1; }
-      .gh-readme { flex-direction: column; align-items: stretch; }
-      .gh-readme-text { align-items: flex-start; }
     }
     .pf-msg.warn { display: block; color: #fcd34d; background: rgba(251,191,36,.08); border: 1px solid rgba(251,191,36,.3); }
     .pf-msg.warn strong { color: #fde68a; font-weight: 600; }
@@ -552,15 +549,19 @@ $avatarUrl = $p['avatar'] ??('https://api.dicebear.com/7.x/adventurer/svg?seed='
                 <a class="pf-btn pf-btn-primary" href="<?= $e($newRepoUrl) ?>" target="_blank" rel="noopener"><i class="bi bi-plus-lg"></i> Create on GitHub</a>
                 <?php else: ?>
                 <a class="pf-btn pf-btn-ghost" href="<?= $e(krazeReportsRepoUrl($ghUser)) ?>" target="_blank" rel="noopener"><i class="bi bi-box-arrow-up-right"></i> Open</a>
+                <?php if ($hasReadme): ?>
+                <a class="pf-btn pf-btn-ghost" href="<?= $e('https://github.com/' . rawurlencode($ghUser) . '/' . KRAZE_REPORTS_REPO . '/edit/main/README.md') ?>" target="_blank" rel="noopener" onclick="copyNewReadme()" title="Copies the latest README for you, then opens yours on GitHub"><i class="bi bi-file-earmark-text"></i> Edit README</a>
+                <?php else: ?>
+                <a class="pf-btn pf-btn-ghost" href="<?= $e(krazeReadmeUrl($ghUser, $myName)) ?>" target="_blank" rel="noopener" title="Add a ready-made README to your repository"><i class="bi bi-file-earmark-plus"></i> Add README</a>
+                <?php endif; ?>
                 <?php endif; ?>
                 <button type="button" class="pf-btn pf-btn-ghost" onclick="toggleGhEdit(true)"><i class="bi bi-pencil"></i> Change</button>
               </div>
             </div>
-            <?php if ($needsReadme): ?>
-            <div class="gh-readme">
-              <div class="gh-readme-text"><i class="bi bi-file-earmark-text"></i> Your repository has no README yet. Add one so visitors know what it is.</div>
-              <a class="pf-btn pf-btn-primary" href="<?= $e(krazeReadmeUrl($ghUser, $myName)) ?>" target="_blank" rel="noopener"><i class="bi bi-plus-lg"></i> Add README</a>
-            </div>
+            <?php if ($hasReadme): ?>
+            <!-- The latest README (live progress card), copied by "Edit README" -->
+            <textarea id="ghReadmeText" hidden readonly><?= $e(krazeReadmeText($myName)) ?></textarea>
+            <div class="pf-msg ok" id="ghReadmeCopied" hidden>The latest README is copied. On GitHub, select everything (Ctrl+A), paste (Ctrl+V), then click <strong>Commit changes</strong>.</div>
             <?php endif; ?>
             <?php if ($ghState === 'ok' && ($_GET['gh'] ?? '') === 'saved'): ?>
             <div class="pf-msg ok gh-flash">Saved. Write Report now opens this repository.</div>
@@ -650,6 +651,20 @@ document.getElementById('profileGithubRepo')?.addEventListener('paste', (e) => {
     setTimeout(() => flash.remove(), 400);
   }, 4000);
 })();
+
+// "Edit README": GitHub's editor can't be pre-filled, so copy the latest README
+// (with the live progress card) and say how to paste it. The link still opens.
+function copyNewReadme() {
+  const text = document.getElementById('ghReadmeText')?.value;
+  const note = document.getElementById('ghReadmeCopied');
+  if (!text || !navigator.clipboard) return;
+  navigator.clipboard.writeText(text).then(() => {
+    if (!note) return;
+    note.hidden = false;
+    note.style.display = 'block';
+    note.style.marginTop = '12px';
+  }).catch(() => {});
+}
 
 // "Change" swaps the repository view for the username box (and back on Cancel)
 function toggleGhEdit(editing) {

@@ -77,9 +77,11 @@ switch ($action) {
                 $check = krazeReportCheck($labId, krazeGithubRepo());
                 if (!$check['ok']) {
                     echo json_encode(['success' => false, 'needsReport' => $check['reason'], 'reportUrl' => $check['url'] ?? '',
+                        'problems' => $check['problems'] ?? [],
                         'message' => [
                             'no_repo'     => 'Add your GitHub username in Settings, then write the report for this lab.',
                             'no_report'   => 'Write your report for this lab first. Then mark it solved.',
+                            'weak_report' => 'Your report needs more of your own work before this lab counts as solved.',
                             'unreachable' => "Couldn't reach GitHub to check your report. Please try again in a minute.",
                         ][$check['reason']]]);
                     exit;

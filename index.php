@@ -20,7 +20,7 @@ require_once __DIR__ . '/config/labs.php';
 $labSlug = fn($access) => krazeLabSlug($access); // same rule the Solved check uses (navbar/portal.php)
 
 // Solution:  blog.krazeplanet.com/templates/blog-post.html?id=<slug>
-// Report:    github.com/<repo>/new/<branch>?filename=<slug>.md&value=<template>
+// Report:    github.com/<repo>/new/<branch>?filename=<Category>/<slug>.md&value=<template>
 // The repo is the student's own, set on their profile ("GitHub repository").
 // Without one, "Write Report" shows a toast pointing to the profile instead.
 $reportRepo = '';
@@ -556,7 +556,6 @@ MD,
     .lab-menu-item:hover > i { color: #e2e8f0; }
     .lab-menu-item .ext { margin-left: auto; font-size: 0.7rem; opacity: 0.6; }
     /* Save + Solved are on/off toggles, shown as two plain rows */
-    .lab-menu-row { display: flex; flex-direction: column; gap: 2px; }
     .lab-menu-item.is-on-solved, .lab-menu-item.is-on-solved > i { color: #34d399; }
     .lab-menu-item.is-on-bm, .lab-menu-item.is-on-bm > i { color: #fbbf24; }
     .lab-menu-sep { height: 1px; margin: 4px 6px; background: rgba(255, 255, 255, 0.08); }
@@ -586,6 +585,8 @@ MD,
     .solve-nudge.is-warn { border-color: rgba(251, 191, 36, 0.4); }
     .solve-nudge.is-warn > i { color: #fbbf24; }
     .solve-nudge span { min-width: 0; }
+    .solve-nudge-list { margin: 6px 0 0; padding-left: 18px; font-size: 0.85rem; color: #cbd5e1; line-height: 1.5; }
+    .solve-nudge-list li + li { margin-top: 2px; }
     .solve-nudge a {
       display: inline-flex;
       align-items: center;
@@ -1262,8 +1263,10 @@ MD,
         $isH1 = (bool)preg_match('~hackerone\.com/reports/(\d+)~', $report, $m);
         $reportLabel = $isH1 ? 'HackerOne report' : 'Bug bounty tip';
         $reportTitle = $isH1 ? 'Read the original HackerOne report #' . $m[1] : 'Read the bug bounty tip this lab is based on';
+        // "Source code" in the ⋯ menu, from the lab's "access" in data/labs.json
+        $codeUrl = krazeLabCodeUrl($lab['access']);
 ?>
-      <div class="lab-card" data-lab-slug="<?= $e($labSlug($lab['access'])) ?>">
+      <div class="lab-card" data-lab-slug="<?= $e($labSlug($lab['access'])) ?>" data-report-path="<?= $e(krazeReportPath($lab['access'])) ?>"<?= $codeUrl !== '' ? ' data-code-url="' . $e($codeUrl) . '"' : '' ?>>
         <div class="lab-badge" title="Lab number"><span class="lab-num">LAB</span></div>
         <div class="lab-content">
           <div class="lab-title"><?= $e($lab['title']) ?></div>
@@ -1577,6 +1580,10 @@ MD,
                 if (res.needsReport === 'no_repo') {
                   showToast({ icon: 'bi-github', tone: 'warn', text: res.message,
                     href: LAB_LINKS.connectUrl, label: 'Add GitHub username', labelIcon: 'bi-person-gear' });
+                } else if (res.needsReport === 'weak_report') {
+                  // The report is there but is (mostly) the empty template: say exactly what's missing
+                  showToast({ icon: 'bi-pencil-square', tone: 'warn', text: res.message, list: res.problems,
+                    href: res.reportUrl, label: 'Edit report', labelIcon: 'bi-pencil', newTab: true, sticky: true });
                 } else if (res.needsReport === 'no_report') {
                   showToast({ icon: 'bi-file-earmark-x', tone: 'warn', text: res.message,
                     href: LAB_LINKS.reportRepo ? reportUrl(slug, card) : LAB_LINKS.connectUrl,
@@ -1616,8 +1623,11 @@ MD,
           .replace(/^## Description\n/m, `## Description\n**Affected URL:** ${url}\n`);
       }
       function reportUrl(slug, card) {
-        const q = new URLSearchParams({ filename: slug + '.md', value: reportBody(card) });
-        return `https://github.com/${LAB_LINKS.reportRepo}/new/${LAB_LINKS.reportBranch}?${q}`;
+        // One folder per bug type: "Cross-Site Scripting/tutorialrepublic.md" (see krazeReportPath)
+        const path = card.dataset.reportPath || slug + '.md';
+        const filename = encodeURIComponent(path).replace(/%2F/g, '/'); // spaces as %20, keep the folder "/"
+        const value = new URLSearchParams({ value: reportBody(card) });
+        return `https://github.com/${LAB_LINKS.reportRepo}/new/${LAB_LINKS.reportBranch}?filename=${filename}&${value}`;
       }
 
       const labMenu = document.createElement('div');
@@ -1661,26 +1671,32 @@ MD,
         const bm = bookmarkedLabs.includes(labId);
         const solved = solvedLabs.includes(labId);
 
+        // In the order a student works: found the bug -> Write Report -> Solved (needs the report).
+        // Then help (Solution, Source code), then Save for later.
         labMenu.innerHTML = `
-          <div class="lab-menu-row">
-            <button type="button" role="menuitemcheckbox" aria-checked="${bm}" class="lab-menu-item${bm ? ' is-on-bm' : ''}" data-act="bookmark" title="${bm ? 'Remove from saved labs' : 'Save this lab for later'}">
-              <i class="bi ${bm ? 'bi-bookmark-fill' : 'bi-bookmark'}"></i><span>${bm ? 'Saved' : 'Save'}</span>
-            </button>
-            <button type="button" role="menuitemcheckbox" aria-checked="${solved}" class="lab-menu-item${solved ? ' is-on-solved' : ''}" data-act="solved" title="${solved ? 'Click to mark as unsolved' : 'Mark as solved (your report for this lab must be in your KrazePlanet-Reports repository)'}">
-              <i class="bi ${solved ? 'bi-check-circle-fill' : 'bi-circle'}"></i><span>Solved</span>
-            </button>
-          </div>
-          <div class="lab-menu-sep" role="separator"></div>
-          <a role="menuitem" class="lab-menu-item" data-act="solution" href="${solutionUrl(slug)}" target="_blank" rel="noopener noreferrer" title="Step-by-step walkthrough">
-            <i class="bi bi-lightbulb"></i><span>Solution</span><i class="bi bi-box-arrow-up-right ext"></i>
-          </a>
           ${LAB_LINKS.reportRepo
             ? `<a role="menuitem" class="lab-menu-item" data-act="report" href="${reportUrl(slug, card)}" target="_blank" rel="noopener noreferrer" title="New report file in ${LAB_LINKS.reportRepo}">
                  <i class="bi bi-file-earmark-text"></i><span>Write Report</span><i class="bi bi-box-arrow-up-right ext"></i>
                </a>`
             : `<button type="button" role="menuitem" class="lab-menu-item" data-act="report" data-no-repo="1" title="Add your GitHub username first">
                  <i class="bi bi-file-earmark-text"></i><span>Write Report</span>
-               </button>`}`;
+               </button>`}
+          <button type="button" role="menuitemcheckbox" aria-checked="${solved}" class="lab-menu-item${solved ? ' is-on-solved' : ''}" data-act="solved" title="${solved ? 'Click to mark as unsolved' : 'Mark as solved (your report for this lab must be in your KrazePlanet-Reports repository)'}">
+            <i class="bi ${solved ? 'bi-check-circle-fill' : 'bi-circle'}"></i><span>Solved</span>
+          </button>
+          <div class="lab-menu-sep" role="separator"></div>
+          <a role="menuitem" class="lab-menu-item" data-act="solution" href="${solutionUrl(slug)}" target="_blank" rel="noopener noreferrer" title="Step-by-step walkthrough">
+            <i class="bi bi-lightbulb"></i><span>Solution</span><i class="bi bi-box-arrow-up-right ext"></i>
+          </a>
+          ${card.dataset.codeUrl
+            ? `<a role="menuitem" class="lab-menu-item" data-act="code" href="${card.dataset.codeUrl}" target="_blank" rel="noopener noreferrer" title="See how this lab is built, on GitHub">
+                 <i class="bi bi-code-slash"></i><span>Source code</span><i class="bi bi-box-arrow-up-right ext"></i>
+               </a>`
+            : ''}
+          <div class="lab-menu-sep" role="separator"></div>
+          <button type="button" role="menuitemcheckbox" aria-checked="${bm}" class="lab-menu-item${bm ? ' is-on-bm' : ''}" data-act="bookmark" title="${bm ? 'Remove from saved labs' : 'Save this lab for later'}">
+            <i class="bi ${bm ? 'bi-bookmark-fill' : 'bi-bookmark'}"></i><span>${bm ? 'Saved' : 'Save'}</span>
+          </button>`;
 
         labMenu.querySelector('[data-act="bookmark"]').addEventListener('click', () => {
           closeLabMenu(true);
@@ -1708,7 +1724,7 @@ MD,
       // Small toast at the bottom of the screen: message + one action link + close.
       let solveNudgeTimer = null;
       // The action link is optional; `sticky` keeps it up until replaced (e.g. "Checking…").
-      function showToast({ icon, tone, text, href, label, labelIcon, newTab, sticky }) {
+      function showToast({ icon, tone, text, list, href, label, labelIcon, newTab, sticky }) {
         document.getElementById('solveNudge')?.remove();
         clearTimeout(solveNudgeTimer);
         const n = document.createElement('div');
@@ -1718,7 +1734,7 @@ MD,
         const target = newTab ? ' target="_blank" rel="noopener noreferrer"' : '';
         const esc = (s) => String(s ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
         n.innerHTML = `<i class="bi ${icon}"></i>
-          <span>${esc(text)}</span>
+          <span>${esc(text)}${list && list.length ? `<ul class="solve-nudge-list">${list.map((li) => `<li>${esc(li)}</li>`).join('')}</ul>` : ''}</span>
           ${href ? `<a href="${esc(href)}"${target}><i class="bi ${labelIcon}"></i> ${esc(label)}</a>` : ''}
           <button type="button" aria-label="Dismiss"><i class="bi bi-x-lg"></i></button>`;
         const close = () => { clearTimeout(solveNudgeTimer); n.remove(); };
