@@ -64,12 +64,15 @@ switch ($action) {
         if ($user === null) {
             reply(['success' => false, 'error' => 'Enter your GitHub username, for example: octocat']);
         }
-        $repo = $user === '' ? '' : krazeReportsRepoUrl($user);
+        // The branch reports are committed to. A dropdown on the profile offers the
+        // two GitHub defaults; anything else falls back to main.
+        $branch = in_array(($_POST['github_branch'] ?? 'main'), ['main', 'master'], true) ? (string)$_POST['github_branch'] : 'main';
+        $repo = $user === '' ? '' : krazeReportsRepoUrl($user, $branch);
         $res = krazeSsoCall('update_profile', ['github_repo' => $repo]);
         if (!empty($res['success'])) {
             krazeSetSessionUser($res['user']);
             reply(['success' => true, 'github_repo' => $res['user']['github_repo'] ?? '', 'github_username' => $user,
-                   'repo_found' => $user === '' ? null : krazeRepoExists($user)]);
+                   'github_branch' => $branch, 'repo_found' => $user === '' ? null : krazeRepoExists($user)]);
         }
         reply($res);
 

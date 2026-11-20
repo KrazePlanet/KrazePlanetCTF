@@ -26,8 +26,18 @@ function krazeLabCodeUrl($access) {
 // ask for is their GitHub username: github.com/<username>/KrazePlanet-Reports
 const KRAZE_REPORTS_REPO = 'KrazePlanet-Reports';
 
-function krazeReportsRepoUrl($username) {
-    return 'https://github.com/' . $username . '/' . KRAZE_REPORTS_REPO;
+// The repository link. When reports live on a branch other than "main" (some
+// students' repos default to "master"), that branch is pinned as a /tree/<branch>
+// suffix, which index.php and krazeReportCheck() already read back.
+function krazeReportsRepoUrl($username, $branch = 'main') {
+    $url = 'https://github.com/' . $username . '/' . KRAZE_REPORTS_REPO;
+    if ($branch !== '' && $branch !== 'main') $url .= '/tree/' . $branch;
+    return $url;
+}
+
+// The branch pinned in a saved repository link ("main" when none is pinned).
+function krazeGithubBranchFromRepo($repo) {
+    return preg_match('#^https://github\.com/[^/]+/[^/]+/tree/(.+)$#', (string)$repo, $m) ? $m[1] : 'main';
 }
 
 // "octocat", "@octocat", "github.com/octocat" or a full repo link -> "octocat".
@@ -115,8 +125,9 @@ MD;
 
 // GitHub's "new file" page with README.md already named and written, so adding it
 // is one click on "Commit changes". Works on an empty repository too.
-function krazeReadmeUrl($githubUser, $kpUser) {
-    return 'https://github.com/' . $githubUser . '/' . KRAZE_REPORTS_REPO . '/new/main?filename=README.md&value=' . rawurlencode(krazeReadmeText($kpUser));
+function krazeReadmeUrl($githubUser, $kpUser, $branch = 'main') {
+    $branch = $branch !== '' ? $branch : 'main';
+    return 'https://github.com/' . $githubUser . '/' . KRAZE_REPORTS_REPO . '/new/' . rawurlencode($branch) . '?filename=README.md&value=' . rawurlencode(krazeReadmeText($kpUser));
 }
 
 // Reports are grouped in one folder per bug type (the category in data/labs.json):

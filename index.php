@@ -1583,7 +1583,7 @@ MD,
                 } else if (res.needsReport === 'weak_report') {
                   // The report is there but is (mostly) the empty template: say exactly what's missing
                   showToast({ icon: 'bi-pencil-square', tone: 'warn', text: res.message, list: res.problems,
-                    href: res.reportUrl, label: 'Edit report', labelIcon: 'bi-pencil', newTab: true, sticky: true });
+                    href: res.reportUrl, label: 'Edit report', labelIcon: 'bi-pencil', newTab: true, timeout: 4000 });
                 } else if (res.needsReport === 'no_report') {
                   showToast({ icon: 'bi-file-earmark-x', tone: 'warn', text: res.message,
                     href: LAB_LINKS.reportRepo ? reportUrl(slug, card) : LAB_LINKS.connectUrl,
@@ -1629,6 +1629,64 @@ MD,
         const value = new URLSearchParams({ value: reportBody(card) });
         return `https://github.com/${LAB_LINKS.reportRepo}/new/${LAB_LINKS.reportBranch}?filename=${filename}&${value}`;
       }
+      // GitHub's editor link for a report that already exists (same encoding as the new-file link).
+      function reportEditUrl(slug, card) {
+        const path = card.dataset.reportPath || slug + '.md';
+        const enc = path.split('/').map(encodeURIComponent).join('/'); // spaces -> %20, keep the folder "/"
+        return `https://github.com/${LAB_LINKS.reportRepo}/edit/${LAB_LINKS.reportBranch}/${enc}`;
+      }
+
+      // So "Write Report" can open instantly, we learn which report files already exist up
+      // front — one call to GitHub's git tree (the whole repo at once), cached in memory.
+      // Then the click just opens the edit or new-file URL, no per-click round-trip.
+      let reportIndex = null;        // Set of existing report paths (lowercased), or null until loaded
+      let reportIndexPromise = null; // in-flight fetch, so we never run two at once
+      let reportIndexAt = 0;         // when it was last loaded (for a light refresh on focus)
+      function loadReportIndex() {
+        if (!LAB_LINKS.reportRepo) return Promise.resolve(null);
+        if (reportIndexPromise) return reportIndexPromise;
+        if (reportIndex && Date.now() - reportIndexAt < 60000) return Promise.resolve(reportIndex);
+        const api = `https://api.github.com/repos/${LAB_LINKS.reportRepo}/git/trees/${encodeURIComponent(LAB_LINKS.reportBranch)}?recursive=1`;
+        reportIndexPromise = fetch(api, { headers: { Accept: 'application/vnd.github+json' } })
+          .then(r => r.ok ? r.json() : null)
+          .then(data => {
+            const set = new Set();
+            if (data && Array.isArray(data.tree)) {
+              for (const t of data.tree) if (t.type === 'blob') set.add(String(t.path).toLowerCase());
+            }
+            reportIndex = set; reportIndexAt = Date.now();
+            return set;
+          })
+          .catch(() => reportIndex) // keep whatever we had on a network/rate-limit error
+          .finally(() => { reportIndexPromise = null; });
+        return reportIndexPromise;
+      }
+
+      // "Write Report": open the editor if the report already exists, else the new-file page.
+      function openReport(slug, card, labId) {
+        const path = (card.dataset.reportPath || slug + '.md').toLowerCase();
+        const decide = () => (reportIndex && reportIndex.has(path)) ? reportEditUrl(slug, card) : reportUrl(slug, card);
+        // Common case: the index is already loaded -> open the final URL instantly, no blank tab.
+        if (reportIndex) { window.open(decide(), '_blank', 'noopener'); return; }
+        // Very first click before the prefetch finished: open a tab now, point it the moment it lands.
+        const w = window.open('about:blank', '_blank');
+        if (w) {
+          try {
+            w.document.write('<!doctype html><title>Opening your report…</title><body style="margin:0;height:100vh;display:grid;place-items:center;background:#0b1220;color:#cbd5e1;font-family:system-ui,sans-serif">Opening your report…</body>');
+            w.document.close();
+          } catch (e) {}
+        }
+        loadReportIndex().then(() => {
+          const u = decide();
+          if (w && !w.closed) { try { w.opener = null; } catch (e) {} w.location = u; }
+          else window.open(u, '_blank', 'noopener');
+        });
+      }
+
+      // Warm the cache now, and refresh it when the student comes back (e.g. after
+      // creating the report on GitHub), so the next click reflects what's really there.
+      loadReportIndex();
+      window.addEventListener('focus', () => { if (Date.now() - reportIndexAt > 15000) { reportIndexAt = 0; loadReportIndex(); } });
 
       const labMenu = document.createElement('div');
       labMenu.id = 'labActionsMenu';
@@ -1675,7 +1733,7 @@ MD,
         // Then help (Solution, Source code), then Save for later.
         labMenu.innerHTML = `
           ${LAB_LINKS.reportRepo
-            ? `<a role="menuitem" class="lab-menu-item" data-act="report" href="${reportUrl(slug, card)}" target="_blank" rel="noopener noreferrer" title="New report file in ${LAB_LINKS.reportRepo}">
+            ? `<a role="menuitem" class="lab-menu-item" data-act="report" href="${reportUrl(slug, card)}" target="_blank" rel="noopener noreferrer" title="Write or edit this lab's report in ${LAB_LINKS.reportRepo}">
                  <i class="bi bi-file-earmark-text"></i><span>Write Report</span><i class="bi bi-box-arrow-up-right ext"></i>
                </a>`
             : `<button type="button" role="menuitem" class="lab-menu-item" data-act="report" data-no-repo="1" title="Add your GitHub username first">
@@ -1708,6 +1766,13 @@ MD,
           toggleSolved(labId, card);
         });
         labMenu.querySelectorAll('a.lab-menu-item').forEach(a => a.addEventListener('click', () => closeLabMenu(false)));
+        labMenu.querySelector('a[data-act="report"]')?.addEventListener('click', (e) => {
+          // Let modified clicks (new tab/window, middle-click) just follow the href.
+          if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button === 1) return;
+          e.preventDefault();
+          closeLabMenu(false);
+          openReport(slug, card, labId);
+        });
         labMenu.querySelector('[data-no-repo]')?.addEventListener('click', () => {
           closeLabMenu(true);
           if (promptLoginIfNeeded()) return;
@@ -1724,7 +1789,8 @@ MD,
       // Small toast at the bottom of the screen: message + one action link + close.
       let solveNudgeTimer = null;
       // The action link is optional; `sticky` keeps it up until replaced (e.g. "Checking…").
-      function showToast({ icon, tone, text, list, href, label, labelIcon, newTab, sticky }) {
+      // `timeout` overrides how long a non-sticky toast stays before fading out (default 9s).
+      function showToast({ icon, tone, text, list, href, label, labelIcon, newTab, sticky, timeout }) {
         document.getElementById('solveNudge')?.remove();
         clearTimeout(solveNudgeTimer);
         const n = document.createElement('div');
@@ -1741,9 +1807,12 @@ MD,
         n.querySelector('button').addEventListener('click', close);
         n.querySelector('a')?.addEventListener('click', close);
         if (!sticky) {
+          const ms = timeout || 9000;
+          // Pause the countdown while the pointer is over the toast, so the action link
+          // (e.g. "Edit report") stays reachable; resume shortly after it leaves.
           n.addEventListener('mouseenter', () => clearTimeout(solveNudgeTimer));
-          n.addEventListener('mouseleave', () => { solveNudgeTimer = setTimeout(close, 4000); });
-          solveNudgeTimer = setTimeout(close, 9000);
+          n.addEventListener('mouseleave', () => { solveNudgeTimer = setTimeout(close, Math.min(ms, 4000)); });
+          solveNudgeTimer = setTimeout(close, ms);
         }
         document.body.appendChild(n);
       }

@@ -112,8 +112,9 @@ if ($isOwn && $account) {
     $email = (string)($account['email'] ?? ($_SESSION['user_email'] ?? ''));
     $githubRepo = (string)($account['github_repo'] ?? krazeGithubRepo());
     $ghUser = krazeGithubUserFromRepo($githubRepo);
+    $ghBranch = krazeGithubBranchFromRepo($githubRepo);
     // Saved before every repo was called KrazePlanet-Reports: still works, but we say so
-    $legacyRepo = ($githubRepo !== '' && $githubRepo !== krazeReportsRepoUrl($ghUser)) ? $githubRepo : '';
+    $legacyRepo = ($githubRepo !== '' && $githubRepo !== krazeReportsRepoUrl($ghUser, $ghBranch)) ? $githubRepo : '';
     $newRepoUrl = 'https://github.com/new?name=' . KRAZE_REPORTS_REPO . '&visibility=public&description=' . rawurlencode('My KrazePlanet lab reports');
     // What the GitHub card shows: setup steps, "repository not found", or just the repo
     $ghState = 'none';
@@ -315,6 +316,28 @@ $avatarUrl = $p['avatar'] ??('https://api.dicebear.com/7.x/adventurer/svg?seed='
     .pf-input { flex: 1; min-width: 0; background: #070b14; border: 1px solid rgba(255,255,255,.16); color: #fff; border-radius: 10px; padding: 9px 14px; font-size: 14.5px; outline: none; transition: border-color .15s ease, box-shadow .15s ease; }
     .pf-input::placeholder { color: var(--faint); }
     .pf-input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(56,189,248,.18); }
+    /* Branch picker: a custom dropdown so the open menu is rounded too (native <select> popups aren't) */
+    .kp-dd { position: relative; flex: 0 0 auto; min-width: 136px; }
+    .kp-dd-native { display: none; }
+    .kp-dd-btn { width: 100%; display: flex; align-items: center; justify-content: space-between; gap: 10px;
+      background: #070b14; border: 1px solid rgba(255,255,255,.16); color: #fff; border-radius: 10px;
+      padding: 9px 14px; font-size: 14.5px; line-height: 1.2; cursor: pointer; text-align: left;
+      transition: border-color .15s ease, box-shadow .15s ease; }
+    .kp-dd-btn:hover { border-color: rgba(255,255,255,.3); }
+    .kp-dd.is-open .kp-dd-btn, .kp-dd-btn:focus-visible { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(56,189,248,.18); outline: none; }
+    .kp-dd-caret { font-size: 12px; color: var(--muted); transition: transform .18s ease; }
+    .kp-dd.is-open .kp-dd-caret { transform: rotate(180deg); }
+    .kp-dd-menu { position: absolute; z-index: 40; top: calc(100% + 6px); left: 0; right: 0; margin: 0; padding: 6px;
+      list-style: none; background: #0b1220; border: 1px solid rgba(255,255,255,.14); border-radius: 12px;
+      box-shadow: 0 16px 34px rgba(0,0,0,.5); }
+    .kp-dd-menu[hidden] { display: none; }
+    .kp-dd-opt { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 9px 12px;
+      border-radius: 8px; font-size: 14.5px; color: #cbd5e1; cursor: pointer; transition: background .12s ease, color .12s ease; }
+    .kp-dd-opt:hover, .kp-dd-opt.is-active { background: rgba(56,189,248,.14); color: #fff; }
+    .kp-dd-opt .bi-check2 { font-size: 15px; color: var(--accent); opacity: 0; }
+    .kp-dd-opt[aria-selected="true"] { color: #fff; }
+    .kp-dd-opt[aria-selected="true"] .bi-check2 { opacity: 1; }
+    @media (max-width: 640px) { .kp-dd { width: 100%; } }
     .pf-msg { display: none; margin-top: 12px; font-size: 14px; font-weight: 500; border-radius: 9px; padding: 9px 12px; }
     .pf-msg.ok { display: block; color: #6ee7b7; background: rgba(16,185,129,.1); border: 1px solid rgba(16,185,129,.35); }
     .pf-msg.err { display: block; color: #fda4af; background: rgba(244,63,94,.1); border: 1px solid rgba(244,63,94,.35); }
@@ -373,10 +396,12 @@ $avatarUrl = $p['avatar'] ??('https://api.dicebear.com/7.x/adventurer/svg?seed='
         <div class="side-name"><?= $e($p['username']) ?><?php if ($isOwn): ?><span class="you-tag">YOU</span><?php endif; ?></div>
         <div class="side-title"><?= $e($rankTitle) ?></div>
 <?php
-        // Social links the student chose to show (GitHub from their reports repo)
+        // Social links the student chose to show. The GitHub icon opens the reports
+        // repository itself (github.com/<user>/KrazePlanet-Reports) rather than the
+        // profile page, since that's what visitors come here to read.
         $socials = $p['socials'] ?? [];
         $socialLinks = array_filter([
-            'github'   => !empty($socials['github'])   ? ['https://github.com/' . rawurlencode($socials['github']), 'bi-github', 'GitHub'] : null,
+            'github'   => !empty($socials['github'])   ? [krazeReportsRepoUrl($socials['github']), 'bi-github', 'GitHub'] : null,
             'x'        => !empty($socials['x'])        ? ['https://x.com/' . rawurlencode($socials['x']), 'bi-twitter-x', 'X (Twitter)'] : null,
             'linkedin' => !empty($socials['linkedin']) ? ['https://www.linkedin.com/in/' . rawurlencode($socials['linkedin']), 'bi-linkedin', 'LinkedIn'] : null,
         ]);
@@ -543,6 +568,20 @@ $avatarUrl = $p['avatar'] ??('https://api.dicebear.com/7.x/adventurer/svg?seed='
                     <span class="gh-prefix">github.com/</span>
                     <input type="text" id="profileGithubRepo" class="pf-input" value="<?= $e($ghUser) ?>" placeholder="your-username" autocomplete="off" autocapitalize="off" spellcheck="false" maxlength="60" aria-label="GitHub username">
                   </div>
+                  <div class="kp-dd" id="ghBranchDD" data-value="<?= $e($ghBranch) ?>">
+                    <select id="profileGithubBranch" class="kp-dd-native" aria-hidden="true" tabindex="-1">
+                      <option value="main"<?= $ghBranch !== 'master' ? ' selected' : '' ?>>main</option>
+                      <option value="master"<?= $ghBranch === 'master' ? ' selected' : '' ?>>master</option>
+                    </select>
+                    <button type="button" class="kp-dd-btn" id="ghBranchBtn" aria-haspopup="listbox" aria-expanded="false" aria-label="Default branch" title="The branch your reports are committed to">
+                      <span class="kp-dd-val"><?= $e($ghBranch) ?></span>
+                      <i class="bi bi-chevron-down kp-dd-caret"></i>
+                    </button>
+                    <ul class="kp-dd-menu" role="listbox" aria-label="Default branch" tabindex="-1" hidden>
+                      <li class="kp-dd-opt" role="option" data-value="main" aria-selected="<?= $ghBranch !== 'master' ? 'true' : 'false' ?>"><span>main</span><i class="bi bi-check2"></i></li>
+                      <li class="kp-dd-opt" role="option" data-value="master" aria-selected="<?= $ghBranch === 'master' ? 'true' : 'false' ?>"><span>master</span><i class="bi bi-check2"></i></li>
+                    </ul>
+                  </div>
                   <button type="submit" id="btnProfileUpdateSubmit" class="pf-btn pf-btn-primary">Save</button>
                   <?php if ($ghState === 'ok' || $ghState === 'missing'): ?><button type="button" class="pf-btn pf-btn-ghost" onclick="toggleGhEdit(false)">Cancel</button><?php endif; ?>
                 </div>
@@ -560,7 +599,7 @@ $avatarUrl = $p['avatar'] ??('https://api.dicebear.com/7.x/adventurer/svg?seed='
 <?php if ($ghState === 'ok' || $ghState === 'missing'): ?>
           <div id="ghView">
             <?php if ($ghState === 'ok'): ?>
-            <p class="gh-lead">Your reports are saved to this repository.</p>
+            <p class="gh-lead">Your reports are saved to the <code class="gh-name"><?= $e($ghBranch) ?></code> branch of this repository.</p>
             <?php else: ?>
             <p class="gh-lead">We couldn't find this repository on GitHub. Create it as a <strong>public</strong> repository named <code class="gh-name"><?= KRAZE_REPORTS_REPO ?></code>, then refresh this page.</p>
             <?php endif; ?>
@@ -571,7 +610,7 @@ $avatarUrl = $p['avatar'] ??('https://api.dicebear.com/7.x/adventurer/svg?seed='
                 <a class="pf-btn pf-btn-primary" href="<?= $e($newRepoUrl) ?>" target="_blank" rel="noopener"><i class="bi bi-plus-lg"></i> Create on GitHub</a>
                 <?php else: ?>
                 <a class="pf-btn pf-btn-ghost" href="<?= $e(krazeReportsRepoUrl($ghUser)) ?>" target="_blank" rel="noopener"><i class="bi bi-box-arrow-up-right"></i> Open</a>
-                <a class="pf-btn pf-btn-ghost" href="<?= $e(krazeReadmeUrl($ghUser, $myName)) ?>" target="_blank" rel="noopener" title="Create README.md with your live progress card, ready to commit"><i class="bi bi-file-earmark-plus"></i> Create README</a>
+                <a class="pf-btn pf-btn-ghost" href="<?= $e(krazeReadmeUrl($ghUser, $myName, $ghBranch)) ?>" target="_blank" rel="noopener" title="Create README.md with your live progress card, ready to commit"><i class="bi bi-file-earmark-plus"></i> Create README</a>
                 <?php endif; ?>
                 <button type="button" class="pf-btn pf-btn-ghost" onclick="toggleGhEdit(true)"><i class="bi bi-pencil"></i> Change</button>
               </div>
@@ -581,7 +620,7 @@ $avatarUrl = $p['avatar'] ??('https://api.dicebear.com/7.x/adventurer/svg?seed='
             <?php endif; ?>
           </div>
           <div id="ghEdit" hidden>
-            <p class="gh-lead">Enter your GitHub username.</p>
+            <p class="gh-lead">Enter your GitHub username and pick the branch your reports live on (<code class="gh-name">main</code> for most repositories, <code class="gh-name">master</code> for older ones).</p>
             <?= $ghForm ?>
           </div>
 <?php else: ?>
@@ -740,6 +779,7 @@ function handleProfileUpdate(e) {
   const formData = new FormData();
   formData.append('action', 'update_github_repo');
   formData.append('github_username', ghUsernameFrom(ghInput.value));
+  formData.append('github_branch', document.getElementById('profileGithubBranch')?.value || 'main');
 
   fetch('/api/auth_api.php', { method: 'POST', body: formData })
     .then(r => r.json())
@@ -759,6 +799,64 @@ function handleProfileUpdate(e) {
       say('Network error. Please try again.', 'err');
     });
 }
+
+// Custom branch dropdown: a styled menu so the open list is rounded (native <select>
+// popups can't be). The hidden <select> stays the source of truth for the form.
+(function () {
+  const dd = document.getElementById('ghBranchDD');
+  if (!dd) return;
+  const native = document.getElementById('profileGithubBranch');
+  const btn = document.getElementById('ghBranchBtn');
+  const menu = dd.querySelector('.kp-dd-menu');
+  const valEl = dd.querySelector('.kp-dd-val');
+  const opts = [...menu.querySelectorAll('.kp-dd-opt')];
+
+  const open = () => {
+    menu.hidden = false;
+    dd.classList.add('is-open');
+    btn.setAttribute('aria-expanded', 'true');
+    const sel = menu.querySelector('.kp-dd-opt[aria-selected="true"]') || opts[0];
+    setActive(sel);
+  };
+  const close = () => {
+    menu.hidden = true;
+    dd.classList.remove('is-open');
+    btn.setAttribute('aria-expanded', 'false');
+  };
+  const setActive = (el) => {
+    opts.forEach(o => o.classList.toggle('is-active', o === el));
+    if (el) el.scrollIntoView({ block: 'nearest' });
+  };
+  const choose = (el) => {
+    opts.forEach(o => o.setAttribute('aria-selected', String(o === el)));
+    valEl.textContent = el.dataset.value;
+    if (native.value !== el.dataset.value) {
+      native.value = el.dataset.value;
+      native.dispatchEvent(new Event('change', { bubbles: true }));
+    }
+    close();
+    btn.focus();
+  };
+
+  btn.addEventListener('click', () => { menu.hidden ? open() : close(); });
+  opts.forEach(o => {
+    o.addEventListener('mousemove', () => setActive(o));
+    o.addEventListener('click', () => choose(o));
+  });
+  btn.addEventListener('keydown', (e) => {
+    if (['ArrowDown', 'ArrowUp', 'Enter', ' '].includes(e.key)) { e.preventDefault(); open(); menu.focus(); }
+  });
+  menu.addEventListener('keydown', (e) => {
+    const active = menu.querySelector('.kp-dd-opt.is-active') || opts[0];
+    const i = opts.indexOf(active);
+    if (e.key === 'ArrowDown') { e.preventDefault(); setActive(opts[Math.min(i + 1, opts.length - 1)]); }
+    else if (e.key === 'ArrowUp') { e.preventDefault(); setActive(opts[Math.max(i - 1, 0)]); }
+    else if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); choose(active); }
+    else if (e.key === 'Escape') { e.preventDefault(); close(); btn.focus(); }
+    else if (e.key === 'Tab') { close(); }
+  });
+  document.addEventListener('click', (e) => { if (!dd.contains(e.target)) close(); });
+})();
 </script>
 <?php endif; ?>
 
